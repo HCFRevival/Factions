@@ -1,0 +1,7 @@
+name: Factions
+main: gg.hcfactions.factions.Factions
+version: 1.19.4
+author: John Rockwell <john@hcfactions.gg>
+description: Factions core
+prefix: HCFactions
+api-version: 1.19

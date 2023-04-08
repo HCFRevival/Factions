@@ -1,0 +1,5 @@
+databases:
+  mongodb:
+    uri: 'mongodb://mongodb:27017'
+  redis:
+    uri: 'redis://redis:6379'
