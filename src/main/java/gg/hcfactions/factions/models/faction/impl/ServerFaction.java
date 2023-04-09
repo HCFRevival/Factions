@@ -35,7 +35,7 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
         this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.name = document.getString("name");
         this.displayName = document.getString("display_name");
-        this.flag = document.get("flag", Flag.class);
+        this.flag = Flag.getFlagByName(document.getString("flag"));
 
         if (displayName != null) {
             displayName = ChatColor.translateAlternateColorCodes('&', displayName);
@@ -50,7 +50,7 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
                 .append("uuid", uniqueId.toString())
                 .append("name", name)
                 .append("display_name", displayName)
-                .append("flag", flag);
+                .append("flag", flag.name());
     }
 
     @AllArgsConstructor
