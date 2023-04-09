@@ -3,6 +3,7 @@ package gg.hcfactions.factions.faction;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.faction.impl.FactionExecutor;
+import gg.hcfactions.factions.faction.impl.FactionValidator;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 public final class FactionManager implements IManager {
     @Getter public Factions plugin;
+    @Getter public FactionValidator validator;
     @Getter public FactionExecutor executor;
     @Getter public Set<IFaction> factionRepository;
 
@@ -25,6 +27,7 @@ public final class FactionManager implements IManager {
     @Override
     public void onEnable() {
         this.executor = new FactionExecutor(this);
+        this.validator = new FactionValidator(this);
         this.factionRepository = Sets.newConcurrentHashSet();
     }
 
@@ -32,6 +35,7 @@ public final class FactionManager implements IManager {
     public void onDisable() {
         this.plugin = null;
         this.executor = null;
+        this.validator = null;
         this.factionRepository = null;
     }
 

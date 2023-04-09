@@ -5,6 +5,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.claim.EClaimBufferType;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.acf.BaseCommand;
 import gg.hcfactions.libs.acf.CommandHelp;
 import gg.hcfactions.libs.acf.annotation.*;
@@ -29,11 +30,12 @@ public final class FactionCommand extends BaseCommand {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Your faction has been created");
+                FMessage.broadcastFactionCreated(factionName, player.getName());
             }
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to create faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to create faction: " + s);
             }
         });
     }
@@ -51,7 +53,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to create faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to create faction: " + s);
             }
         });
     }
@@ -68,7 +70,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to send invitation: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to send invitation: " + s);
             }
         });
     }
@@ -85,7 +87,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to revoke invitation: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to revoke invitation: " + s);
             }
         });
     }
@@ -102,7 +104,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to join faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to join faction: " + s);
             }
         });
     }
@@ -118,7 +120,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to leave faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to leave faction: " + s);
             }
         });
     }
@@ -134,7 +136,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to disband faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to disband faction: " + s);
             }
         };
 
@@ -158,7 +160,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to rename faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to rename faction: " + s);
             }
         });
     }
@@ -176,7 +178,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to rename faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to rename faction: " + s);
             }
         });
     }
@@ -192,7 +194,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to update faction home: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to update faction home: " + s);
             }
         };
 
@@ -215,7 +217,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to unset faction home: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to unset faction home: " + s);
             }
         };
 
@@ -249,7 +251,7 @@ public final class FactionCommand extends BaseCommand {
             try {
                 pageNumber = Integer.parseInt(page);
             } catch (NumberFormatException e) {
-                player.sendMessage(ChatColor.RED + "Failed to query faction list: invalid page number");
+                player.sendMessage(FMessage.ERROR + "Failed to query faction list: invalid page number");
                 return;
             }
 
@@ -271,7 +273,7 @@ public final class FactionCommand extends BaseCommand {
         } else if (channelName.equalsIgnoreCase("faction") || channelName.equalsIgnoreCase("f") || channelName.equalsIgnoreCase("fac")) {
             channel = PlayerFaction.ChatChannel.FACTION;
         } else {
-            player.sendMessage(ChatColor.RED + "Failed to change chat channel: invalid channel name (valid channels: faction, public)");
+            player.sendMessage(FMessage.ERROR + "Failed to change chat channel: invalid channel name (valid channels: faction, public)");
             return;
         }
 
@@ -283,7 +285,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to change chat channel: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to change chat channel: " + s);
             }
         });
     }
@@ -297,7 +299,7 @@ public final class FactionCommand extends BaseCommand {
         try {
             parsed = Time.parseTime(freezeTime);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Failed to freeze faction power: invalid time format");
+            player.sendMessage(FMessage.ERROR + "Failed to freeze faction power: invalid time format");
             return;
         }
 
@@ -309,7 +311,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to freeze faction power: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to freeze faction power: " + s);
             }
         });
     }
@@ -327,7 +329,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to thaw faction power: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to thaw faction power: " + s);
             }
         });
     }
@@ -341,7 +343,7 @@ public final class FactionCommand extends BaseCommand {
         try {
             v = Double.parseDouble(dtr);
         } catch (NumberFormatException ex) {
-            player.sendMessage(ChatColor.RED + "Failed to set faction DTR: invalid DTR format");
+            player.sendMessage(FMessage.ERROR + "Failed to set faction DTR: invalid DTR format");
             return;
         }
 
@@ -353,7 +355,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to set faction DTR: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to set faction DTR: " + s);
             }
         });
     }
@@ -366,7 +368,7 @@ public final class FactionCommand extends BaseCommand {
         ServerFaction.Flag flag = ServerFaction.Flag.getFlagByName(flagName);
 
         if (flag == null) {
-            player.sendMessage(ChatColor.RED + "Failed to set faction flag: invalid flag name");
+            player.sendMessage(FMessage.ERROR + "Failed to set faction flag: invalid flag name");
             return;
         }
 
@@ -378,7 +380,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to set faction flag: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to set faction flag: " + s);
             }
         });
     }
@@ -397,7 +399,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to set faction display name: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to set faction display name: " + s);
             }
         });
     }
@@ -414,7 +416,7 @@ public final class FactionCommand extends BaseCommand {
     ) {
         EClaimBufferType bufferType = EClaimBufferType.getBufferTypeByName(bufferTypeName);
         if (bufferType == null) {
-            player.sendMessage(ChatColor.RED + "Failed to set faction buffer value: invalid buffer type (claim/build)");
+            player.sendMessage(FMessage.ERROR + "Failed to set faction buffer value: invalid buffer type (claim/build)");
             return;
         }
 
@@ -422,7 +424,7 @@ public final class FactionCommand extends BaseCommand {
         try {
             v = Integer.parseInt(size);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Failed to set faction buffer value: invalid buffer size");
+            player.sendMessage(FMessage.ERROR + "Failed to set faction buffer value: invalid buffer size");
             return;
         }
 
@@ -434,7 +436,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to set faction buffer value: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to set faction buffer value: " + s);
             }
         });
     }
@@ -448,7 +450,7 @@ public final class FactionCommand extends BaseCommand {
         try {
             v = Integer.parseInt(reinviteAmount);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Failed to set faction reinvites: invalid number");
+            player.sendMessage(FMessage.ERROR + "Failed to set faction reinvites: invalid number");
             return;
         }
 
@@ -460,7 +462,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to set faction reinvites: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to set faction reinvites: " + s);
             }
         });
     }
@@ -482,7 +484,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to start claiming: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to start claiming: " + s);
             }
         };
 
@@ -507,7 +509,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to start subclaiming: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to start subclaiming: " + s);
             }
         });
     }
@@ -529,7 +531,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to modify subclaim: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to modify subclaim: " + s);
             }
         });
     }
@@ -556,7 +558,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to unsubclaim: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to unsubclaim: " + s);
             }
         };
 
@@ -579,7 +581,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to start stuck timer: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to start stuck timer: " + s);
             }
         });
     }
@@ -595,7 +597,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to start home timer: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to start home timer: " + s);
             }
         });
     }
@@ -612,7 +614,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to kick player from faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to kick player from faction: " + s);
             }
         });
     }
@@ -630,7 +632,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to kick player from faction: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to kick player from faction: " + s);
             }
         });
     }
@@ -647,7 +649,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to update faction announcement: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to update faction announcement: " + s);
             }
         });
     }
@@ -664,7 +666,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to promote player: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to promote player: " + s);
             }
         });
     }
@@ -681,7 +683,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to demote player: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to demote player: " + s);
             }
         });
     }
@@ -694,7 +696,7 @@ public final class FactionCommand extends BaseCommand {
         try {
             v = Double.parseDouble(amount);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Failed to deposit in to faction balance: invalid amount");
+            player.sendMessage(FMessage.ERROR + "Failed to deposit in to faction balance: invalid amount");
             return;
         }
 
@@ -706,7 +708,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to deposit in to faction balance: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to deposit in to faction balance: " + s);
             }
         });
     }
@@ -719,7 +721,7 @@ public final class FactionCommand extends BaseCommand {
         try {
             v = Double.parseDouble(amount);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Failed to withdraw from faction balance: invalid amount");
+            player.sendMessage(FMessage.ERROR + "Failed to withdraw from faction balance: invalid amount");
             return;
         }
 
@@ -731,7 +733,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to withdraw from faction balance: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to withdraw from faction balance: " + s);
             }
         });
     }
@@ -747,7 +749,7 @@ public final class FactionCommand extends BaseCommand {
 
             @Override
             public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to update rallypoint: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to update rallypoint: " + s);
             }
         });
     }
