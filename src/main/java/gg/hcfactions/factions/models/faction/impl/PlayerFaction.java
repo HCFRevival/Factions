@@ -214,8 +214,8 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         this.dtr = document.getDouble("dtr");
         this.reinvites = document.getInteger("reinvites");
         this.lastRallyUpdate = document.getLong("last_rally_update");
-        this.memberHistory = (Set<UUID>) document.get("member_history", Set.class);
-        this.pendingInvites = (Set<UUID>) document.get("pending_invites", Set.class);
+        this.memberHistory.addAll((List<UUID>)document.get("member_history", List.class));
+        this.pendingInvites.addAll((List<UUID>)document.get("pending_invites", List.class));
 
         final List<Document> memberDocs = document.getList("members", Document.class);
         memberDocs.forEach(m -> members.add(new Member().fromDocument(m)));
@@ -276,8 +276,8 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         @Override
         public Member fromDocument(Document document) {
             this.uniqueId = UUID.fromString(document.getString("uuid"));
-            this.rank = document.get("rank", Rank.class);
-            this.channel = document.get("channel", ChatChannel.class);
+            this.rank = Rank.getRankByName(document.getString("rank"));
+            this.channel = ChatChannel.getChannelByName(document.getString("chat_channel"));
 
             return this;
         }
@@ -285,9 +285,9 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         @Override
         public Document toDocument() {
             return new Document()
-                    .append("uuid", uniqueId)
-                    .append("rank", rank)
-                    .append("channel", channel);
+                    .append("uuid", uniqueId.toString())
+                    .append("rank", rank.name())
+                    .append("chat_channel", channel.name());
         }
     }
 
@@ -329,10 +329,40 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
                 default: return null;
             }
         }
+
+        /**
+         * Returns a rank matching the provided name
+         * @param name Name to query
+         * @return Rank
+         */
+        public static Rank getRankByName(String name) {
+            for (Rank v : values()) {
+                if (v.name().equalsIgnoreCase(name)) {
+                    return v;
+                }
+            }
+
+            return null;
+        }
     }
 
     public enum ChatChannel {
         PUBLIC,
-        FACTION,
+        FACTION;
+
+        /**
+         * Returns a chat channel matching the provided name
+         * @param name Chat channel name
+         * @return ChatChannel
+         */
+        public static ChatChannel getChannelByName(String name) {
+            for (ChatChannel v : values()) {
+                if (v.name().equalsIgnoreCase(name)) {
+                    return v;
+                }
+            }
+
+            return null;
+        }
     }
 }

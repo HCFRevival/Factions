@@ -38,7 +38,6 @@ public final class Factions extends AresPlugin {
 
         // declare services
         final AccountService accountService = new AccountService(this);
-
         // register services
         registerService(accountService);
         startServices();

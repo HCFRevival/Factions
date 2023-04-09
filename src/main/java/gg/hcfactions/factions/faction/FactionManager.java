@@ -1,6 +1,11 @@
 package gg.hcfactions.factions.faction;
 
 import com.google.common.collect.Sets;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.faction.impl.FactionExecutor;
 import gg.hcfactions.factions.faction.impl.FactionValidator;
@@ -8,13 +13,20 @@ import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
+import gg.hcfactions.libs.base.util.Time;
 import lombok.Getter;
+import org.bson.Document;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
 import java.util.UUID;
 
 public final class FactionManager implements IManager {
+    public static final String FACTION_DB_NAME = "dev";
+    public static final String PLAYER_FACTION_DB_COLL_NAME = "player_factions";
+    public static final String SERVER_FACTION_DB_COLL_NAME = "server_factions";
+
     @Getter public Factions plugin;
     @Getter public FactionValidator validator;
     @Getter public FactionExecutor executor;
@@ -29,14 +41,109 @@ public final class FactionManager implements IManager {
         this.executor = new FactionExecutor(this);
         this.validator = new FactionValidator(this);
         this.factionRepository = Sets.newConcurrentHashSet();
+
+        // called on main thread to lock process
+        loadFactions();
     }
 
     @Override
     public void onDisable() {
+        // called on the main thread to lock process
+        saveFactions();
+
         this.plugin = null;
         this.executor = null;
         this.validator = null;
         this.factionRepository = null;
+    }
+
+    public void saveFactions() {
+        final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
+        if (mdb == null) {
+            plugin.getAresLogger().error("attempted to save factions with null mongo instance");
+            return;
+        }
+
+        final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
+        if (db == null) {
+            plugin.getAresLogger().error("attempted to save factions with null db instance");
+            return;
+        }
+
+        final MongoCollection<Document> playerFactionColl = db.getCollection(PLAYER_FACTION_DB_COLL_NAME);
+        final MongoCollection<Document> serverFactionColl = db.getCollection(SERVER_FACTION_DB_COLL_NAME);
+
+        factionRepository.forEach(f -> {
+            if (f instanceof PlayerFaction) {
+                final Document existing = playerFactionColl.find(Filters.eq("uuid", f.getUniqueId().toString())).first();
+
+                if (existing != null) {
+                    playerFactionColl.replaceOne(existing, ((PlayerFaction) f).toDocument());
+                } else {
+                    playerFactionColl.insertOne(((PlayerFaction) f).toDocument());
+                }
+            }
+
+            if (f instanceof ServerFaction) {
+                final Document existing = serverFactionColl.find(Filters.eq("uuid", f.getUniqueId().toString())).first();
+
+                if (existing != null) {
+                    serverFactionColl.replaceOne(existing, ((ServerFaction) f).toDocument());
+                } else {
+                    serverFactionColl.insertOne(((ServerFaction) f).toDocument());
+                }
+            }
+        });
+
+        plugin.getAresLogger().info("wrote " + factionRepository.size() + " factions to db");
+    }
+
+    public void loadFactions() {
+        final long pre = Time.now();
+        final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
+        if (mdb == null) {
+            plugin.getAresLogger().error("attempted to save factions with null mongo instance");
+            return;
+        }
+
+        final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
+        if (db == null) {
+            plugin.getAresLogger().error("attempted to save factions with null db instance");
+            return;
+        }
+
+        final MongoCollection<Document> playerFactionColl = db.getCollection(PLAYER_FACTION_DB_COLL_NAME);
+        final MongoCollection<Document> serverFactionColl = db.getCollection(SERVER_FACTION_DB_COLL_NAME);
+        final FindIterable<Document> playerFactionDocs = playerFactionColl.find();
+        final FindIterable<Document> serverFactionDocs = serverFactionColl.find();
+
+        try (MongoCursor<Document> pCursor = playerFactionDocs.cursor()) {
+            final Document doc = pCursor.tryNext();
+
+            if (doc == null) {
+                pCursor.close();
+                return;
+            }
+
+            final PlayerFaction faction = new PlayerFaction().fromDocument(doc);
+            factionRepository.add(faction);
+        }
+
+        try (MongoCursor<Document> sCursor = serverFactionDocs.cursor()) {
+            final Document doc = sCursor.tryNext();
+
+            if (doc == null) {
+                sCursor.close();
+                return;
+            }
+
+            final ServerFaction faction = new ServerFaction().fromDocument(doc);
+            factionRepository.add(faction);
+        }
+
+        final long post = Time.now();
+        final long diff = post - pre;
+        plugin.getAresLogger().info("loaded " + factionRepository.size() + " factions (took " + diff + "ms)");
     }
 
     public IFaction getFactionById(UUID uniqueId) {

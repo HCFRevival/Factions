@@ -1,22 +1,42 @@
 package gg.hcfactions.factions.models.faction.impl;
 
 import gg.hcfactions.factions.models.faction.IFaction;
+import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import org.bson.Document;
 import org.bukkit.ChatColor;
 
-import java.util.Locale;
 import java.util.UUID;
 
-public final class ServerFaction implements IFaction {
+public final class ServerFaction implements IFaction, MongoDocument<ServerFaction> {
+    @Getter public UUID uniqueId;
+    @Getter @Setter public String name;
+    @Getter @Setter public String displayName;
+    @Getter @Setter public Flag flag;
+
     @Override
-    public UUID getUniqueId() {
-        return null;
+    public ServerFaction fromDocument(Document document) {
+        this.uniqueId = UUID.fromString(document.getString("uuid"));
+        this.name = document.getString("name");
+        this.displayName = document.getString("display_name");
+        this.flag = document.get("flag", Flag.class);
+
+        if (displayName != null) {
+            displayName = ChatColor.translateAlternateColorCodes('&', displayName);
+        }
+
+        return this;
     }
 
     @Override
-    public String getName() {
-        return null;
+    public Document toDocument() {
+        return new Document()
+                .append("uuid", uniqueId.toString())
+                .append("name", name)
+                .append("display_name", displayName)
+                .append("flag", flag);
     }
 
     @AllArgsConstructor
