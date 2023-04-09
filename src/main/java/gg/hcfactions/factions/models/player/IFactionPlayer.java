@@ -14,4 +14,21 @@ public interface IFactionPlayer extends IBankable {
      * @return Bukkit Username
      */
     String getUsername();
+
+    /**
+     * @param name New username
+     */
+    void setUsername(String name);
+
+    /**
+     * If true the player will be reset with a free setup when they join
+     * @return If true player will be reset when they join
+     */
+    boolean isResetOnJoin();
+
+    /**
+     * Set the players reset flag to the provided state
+     * @param b If true the player will be reset when they log in the next time
+     */
+    void setResetOnJoin(boolean b);
 }
