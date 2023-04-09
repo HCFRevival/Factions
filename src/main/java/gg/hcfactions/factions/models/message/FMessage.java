@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.message;
 
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -26,5 +27,13 @@ public final class FMessage {
 
     public static void printWithdrawReceived(Player player, double amount) {
         player.sendMessage(ChatColor.DARK_GREEN + "$" + String.format("%.2f", amount) + LAYER_1 + " has been " + ERROR + "withdrawn" + LAYER_1 + " from your personal balance");
+    }
+
+    public static void printFactionMemberOnline(PlayerFaction faction, String username) {
+        faction.sendMessage(ChatColor.YELLOW + "Member " + SUCCESS + "Online" + LAYER_1 + ": " + P_NAME + username);
+    }
+
+    public static void printFactionMemberOffline(PlayerFaction faction, String username) {
+        faction.sendMessage(ChatColor.YELLOW + "Member " + ERROR + "Offline" + LAYER_1 + ": " + P_NAME + username);
     }
 }
