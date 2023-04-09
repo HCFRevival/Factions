@@ -1,12 +1,16 @@
 package gg.hcfactions.factions.faction.impl;
 
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.events.faction.FactionCreateEvent;
+import gg.hcfactions.factions.events.faction.FactionDisbandEvent;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.faction.IFactionExecutor;
 import gg.hcfactions.factions.models.claim.EClaimBufferType;
+import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.libs.base.consumer.Promise;
 import lombok.AllArgsConstructor;
@@ -55,15 +59,56 @@ public final class FactionExecutor implements IFactionExecutor {
     @Override
     public void createServerFaction(Player player, String factionName, Promise promise) {
         final FError nameError = manager.getValidator().isValidName(factionName);
-        if (nameError != null) {
+        if (nameError != null && !nameError.equals(FError.F_NAME_INVALID)) {
             promise.reject(nameError.getErrorDescription());
             return;
         }
+
+        final FactionCreateEvent event = new FactionCreateEvent(player, factionName);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            promise.reject(event.getCancelMessage() != null ? event.getCancelMessage() : FError.F_UNABLE_TO_CREATE.getErrorDescription());
+            return;
+        }
+
+        final ServerFaction faction = new ServerFaction(factionName);
+        manager.getFactionRepository().add(faction);
+        promise.resolve();
     }
 
     @Override
     public void disbandFaction(Player player, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
 
+        final PlayerFaction.Member member = faction.getMember(player.getUniqueId());
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (!member.getRank().equals(PlayerFaction.Rank.LEADER) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (faction.isRaidable() && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            promise.reject(FError.F_NOT_ALLOWED_RAIDABLE.getErrorDescription());
+            return;
+        }
+
+        final FactionDisbandEvent event = new FactionDisbandEvent(player, faction);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            promise.reject(event.getCancelMessage() != null ? event.getCancelMessage() : FError.F_UNABLE_TO_DISBAND.getErrorDescription());
+            return;
+        }
+
+        // TODO: Create disband confirmation menu
+        // https://github.com/ares-network/factions/blob/cfeaea32865456da4faac0d9fe4dd742f3d24e9e/src/main/java/com/playares/factions/faction/handler/FactionManagerHandler.java#L82
     }
 
     @Override
@@ -108,15 +153,72 @@ public final class FactionExecutor implements IFactionExecutor {
             promise.reject(nameError.getErrorDescription());
             return;
         }
+
+        if (manager.getFactionByName(newFactionName) != null) {
+            promise.reject(FError.F_NAME_IN_USE.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction pf = manager.getPlayerFactionByPlayer(player);
+        if (pf == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member member = pf.getMember(player.getUniqueId());
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        pf.setName(newFactionName);
+        pf.sendMessage(
+                FMessage.P_NAME + player.getName()
+                        + FMessage.LAYER_1 + " has "
+                        + FMessage.LAYER_2 + "renamed"
+                        + FMessage.LAYER_1 + " your faction to "
+                        + FMessage.INFO + newFactionName);
+
+        promise.resolve();
     }
 
     @Override
     public void renameFaction(Player player, String currentFactionName, String newFactionName, Promise promise) {
         final FError nameError = manager.getValidator().isValidName(newFactionName);
-        if (nameError != null) {
+        if (nameError != null && !nameError.equals(FError.F_NAME_INVALID)) {
             promise.reject(nameError.getErrorDescription());
             return;
         }
+
+        if (manager.getFactionByName(newFactionName) != null) {
+            promise.reject(FError.F_NAME_IN_USE.getErrorDescription());
+            return;
+        }
+
+        final IFaction faction = manager.getFactionByName(currentFactionName);
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.setName(newFactionName);
+
+        if (faction instanceof PlayerFaction) {
+            final PlayerFaction pf = (PlayerFaction) faction;
+            pf.sendMessage(
+                    FMessage.P_NAME + player.getName()
+                    + FMessage.LAYER_1 + " has "
+                    + FMessage.LAYER_2 + "renamed"
+                    + FMessage.LAYER_1 + " your faction to "
+                    + FMessage.INFO + newFactionName);
+        }
+
+        promise.resolve();
     }
 
     @Override
