@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.faction.impl.FactionExecutor;
 import gg.hcfactions.factions.faction.impl.FactionValidator;
@@ -144,6 +145,23 @@ public final class FactionManager implements IManager {
         final long post = Time.now();
         final long diff = post - pre;
         plugin.getAresLogger().info("loaded " + factionRepository.size() + " factions (took " + diff + "ms)");
+    }
+
+    public DeleteResult deleteFaction(IFaction faction) {
+        final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
+        if (mdb == null) {
+            plugin.getAresLogger().error("attempted to save factions with null mongo instance");
+            return null;
+        }
+
+        final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
+        if (db == null) {
+            plugin.getAresLogger().error("attempted to save factions with null db instance");
+            return null;
+        }
+
+        final MongoCollection<Document> coll = db.getCollection((faction instanceof PlayerFaction) ? PLAYER_FACTION_DB_COLL_NAME : SERVER_FACTION_DB_COLL_NAME);
+        return coll.deleteOne(Filters.eq("uuid", faction.getUniqueId().toString()));
     }
 
     public IFaction getFactionById(UUID uniqueId) {
