@@ -14,6 +14,10 @@ public final class FactionValidator {
 
     @Nullable
     public FError isValidName(String name) {
+        if (!name.matches("^[A-Za-z0-9_.]+$")) {
+            return FError.F_NAME_INVALID;
+        }
+
         if (name.length() < manager.getPlugin().getConfiguration().getMinFactionNameLength()) {
             return FError.F_NAME_TOO_SHORT;
         }
