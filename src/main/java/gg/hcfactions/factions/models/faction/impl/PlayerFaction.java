@@ -14,4 +14,9 @@ public final class PlayerFaction implements IFaction {
     public String getName() {
         return null;
     }
+
+    public enum ChatChannel {
+        PUBLIC,
+        FACTION,
+    }
 }

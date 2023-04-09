@@ -1,4 +1,6 @@
 package gg.hcfactions.factions.models.claim;
 
-public interface IClaim {
+import gg.hcfactions.libs.bukkit.location.IRegion;
+
+public interface IClaim extends IRegion {
 }
