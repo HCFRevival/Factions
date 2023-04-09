@@ -118,6 +118,14 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
     }
 
     /**
+     * Returns true if this faction is considered raidable
+     * @return True if faction is raidable
+     */
+    public boolean isRaidable() {
+        return dtr <= 0.0;
+    }
+
+    /**
      * Returns a member matching the provided UUID
      * @param uniqueId Bukkit UUID
      * @return Member
@@ -190,6 +198,19 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
 
         final Member factionMember = getMember(playerUid);
         members.remove(factionMember);
+    }
+
+    /**
+     * Send a message to online members in the faction
+     * @param message Message to display
+     */
+    public void sendMessage(String message) {
+        getOnlineMembers().forEach(m -> {
+            final Player player = m.getBukkit();
+            if (player != null) {
+                player.sendMessage(message);
+            }
+        });
     }
 
     @Override
@@ -271,6 +292,14 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
             this.uniqueId = uniqueId;
             this.rank = rank;
             this.channel = channel;
+        }
+
+        /**
+         * Returns bukkit player instance
+         * @return Bukkit Player
+         */
+        public Player getBukkit() {
+            return Bukkit.getPlayer(uniqueId);
         }
 
         @Override
