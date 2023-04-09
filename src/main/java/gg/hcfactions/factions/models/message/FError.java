@@ -17,6 +17,7 @@ public enum FError {
     P_ALREADY_IN_FAC("You are already in a faction"),
     P_NOT_IN_FAC("You are not in a faction"),
     P_COULD_NOT_LOAD_F("Could not load your faction information"),
+    P_COULD_NOT_LOAD_P("Could not load your player information"),
     P_NOT_ENOUGH_PERMS("You do not have permission to perform this action");
 
     @Getter public final String errorDescription;
