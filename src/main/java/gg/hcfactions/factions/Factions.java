@@ -3,6 +3,7 @@ package gg.hcfactions.factions;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.cmd.FactionCommand;
 import gg.hcfactions.factions.faction.FactionManager;
+import gg.hcfactions.factions.listeners.FactionPlayerListener;
 import gg.hcfactions.factions.player.PlayerManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
@@ -52,6 +53,9 @@ public final class Factions extends AresPlugin {
         factionManager.onEnable();
         playerManager.onEnable();
         claimManager.onEnable();
+
+        // register listeners
+        registerListener(new FactionPlayerListener(this));
     }
 
     @Override
