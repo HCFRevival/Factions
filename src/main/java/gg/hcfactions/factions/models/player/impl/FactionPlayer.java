@@ -1,17 +1,15 @@
 package gg.hcfactions.factions.models.player.impl;
 
+import gg.hcfactions.factions.models.econ.IBankable;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
-public final class FactionPlayer implements IFactionPlayer {
-    @Override
-    public UUID getUniqueId() {
-        return null;
-    }
+public final class FactionPlayer implements IFactionPlayer, IBankable {
 
-    @Override
-    public String getUsername() {
-        return null;
-    }
+    @Getter public UUID uniqueId;
+    @Getter public String username;
+    @Getter @Setter public double balance;
 }
