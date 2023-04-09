@@ -16,6 +16,20 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
     @Getter @Setter public String displayName;
     @Getter @Setter public Flag flag;
 
+    public ServerFaction() {
+        this.uniqueId = UUID.randomUUID();
+        this.name = null;
+        this.displayName = null;
+        this.flag = Flag.SAFEZONE;
+    }
+
+    public ServerFaction(String factionName) {
+        this.uniqueId = UUID.randomUUID();
+        this.name = factionName;
+        this.displayName = null;
+        this.flag = Flag.SAFEZONE;
+    }
+
     @Override
     public ServerFaction fromDocument(Document document) {
         this.uniqueId = UUID.fromString(document.getString("uuid"));
