@@ -5,7 +5,9 @@ import gg.hcfactions.factions.events.faction.FactionCreateEvent;
 import gg.hcfactions.factions.events.faction.FactionDisbandEvent;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.faction.IFactionExecutor;
+import gg.hcfactions.factions.menus.DisbandConfirmationMenu;
 import gg.hcfactions.factions.models.claim.EClaimBufferType;
+import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -13,10 +15,13 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 @AllArgsConstructor
 public final class FactionExecutor implements IFactionExecutor {
@@ -107,13 +112,85 @@ public final class FactionExecutor implements IFactionExecutor {
             return;
         }
 
-        // TODO: Create disband confirmation menu
-        // https://github.com/ares-network/factions/blob/cfeaea32865456da4faac0d9fe4dd742f3d24e9e/src/main/java/com/playares/factions/faction/handler/FactionManagerHandler.java#L82
+        final IFactionPlayer factionPlayer = manager.getPlugin().getPlayerManager().getPlayer(player);
+
+        final DisbandConfirmationMenu menu = new DisbandConfirmationMenu(manager.getPlugin(), player, faction, () -> {
+            final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
+
+            claims.forEach(c -> faction.addToBalance(c.getCost()));
+
+            manager.getFactionRepository().remove(faction);
+            claims.forEach(manager.getPlugin().getClaimManager().getClaimRepository()::remove);
+
+            new Scheduler(manager.getPlugin()).async(() -> {
+                manager.deleteFaction(faction);
+                claims.forEach(c -> manager.getPlugin().getClaimManager().deleteClaim(c));
+
+                if (factionPlayer != null) {
+                    new Scheduler(manager.getPlugin()).sync(() -> {
+                        factionPlayer.addToBalance(faction.getBalance());
+                        FMessage.printDepositReceived(player, faction.getBalance());
+                    }).run();
+                }
+
+                FMessage.broadcastFactionDisbanded(faction.getName(), player.getName());
+                new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
+            }).run();
+        });
+
+        menu.open();
     }
 
     @Override
     public void disbandFaction(Player player, String factionName, Promise promise) {
+        if (!player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+        }
 
+        final IFaction faction = manager.getFactionByName(factionName);
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        final IFactionPlayer factionPlayer = manager.getPlugin().getPlayerManager().getPlayer(player);
+
+        final DisbandConfirmationMenu menu = new DisbandConfirmationMenu(manager.getPlugin(), player, faction, () -> {
+            final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
+
+            // delete faction, claims and subclaims from repositories
+            manager.getFactionRepository().remove(faction);
+            claims.forEach(manager.getPlugin().getClaimManager().getClaimRepository()::remove);
+
+            new Scheduler(manager.getPlugin()).async(() -> {
+                // delete from db
+                manager.deleteFaction(faction);
+                claims.forEach(c -> manager.getPlugin().getClaimManager().deleteClaim(c));
+
+                // refund balance
+                if (faction instanceof PlayerFaction) {
+                    double claimValue = 0.0;
+
+                    for (Claim c : claims) {
+                        claimValue += c.getCost();
+                    }
+
+                    final double totalClaimValue = claimValue;
+
+                    if (factionPlayer != null) {
+                        new Scheduler(manager.getPlugin()).sync(() -> {
+                            factionPlayer.addToBalance(totalClaimValue);
+                            FMessage.printDepositReceived(player, totalClaimValue);
+                        }).run();
+                    }
+                }
+
+                FMessage.broadcastFactionDisbanded(faction.getName(), player.getName());
+                new Scheduler(manager.getPlugin()).sync(promise::resolve);
+            }).run();
+        });
+
+        menu.open();
     }
 
     @Override

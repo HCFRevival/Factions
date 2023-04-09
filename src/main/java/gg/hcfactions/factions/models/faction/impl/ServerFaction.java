@@ -14,6 +14,8 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
     @Getter public UUID uniqueId;
     @Getter @Setter public String name;
     @Getter @Setter public String displayName;
+    @Getter @Setter public int claimBuffer;
+    @Getter @Setter public int buildBuffer;
     @Getter @Setter public Flag flag;
 
     public ServerFaction() {
@@ -35,6 +37,8 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
         this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.name = document.getString("name");
         this.displayName = document.getString("display_name");
+        this.claimBuffer = document.getInteger("claim_buffer");
+        this.buildBuffer = document.getInteger("build_buffer");
         this.flag = Flag.getFlagByName(document.getString("flag"));
 
         if (displayName != null) {
@@ -50,6 +54,8 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
                 .append("uuid", uniqueId.toString())
                 .append("name", name)
                 .append("display_name", displayName)
+                .append("claim_buffer", claimBuffer)
+                .append("build_buffer", buildBuffer)
                 .append("flag", flag.name());
     }
 

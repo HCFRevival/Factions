@@ -150,13 +150,13 @@ public final class FactionManager implements IManager {
     public DeleteResult deleteFaction(IFaction faction) {
         final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
         if (mdb == null) {
-            plugin.getAresLogger().error("attempted to save factions with null mongo instance");
+            plugin.getAresLogger().error("attempted to delete faction with null mongo instance");
             return null;
         }
 
         final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
         if (db == null) {
-            plugin.getAresLogger().error("attempted to save factions with null db instance");
+            plugin.getAresLogger().error("attempted to delete faction with null db instance");
             return null;
         }
 

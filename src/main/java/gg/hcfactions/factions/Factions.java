@@ -1,5 +1,6 @@
 package gg.hcfactions.factions;
 
+import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.cmd.FactionCommand;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.player.PlayerManager;
@@ -13,6 +14,7 @@ public final class Factions extends AresPlugin {
     @Getter public FConfig configuration;
     @Getter public PlayerManager playerManager;
     @Getter public FactionManager factionManager;
+    @Getter public ClaimManager claimManager;
 
     @Override
     public void onEnable() {
@@ -45,9 +47,11 @@ public final class Factions extends AresPlugin {
         // declare managers
         playerManager = new PlayerManager(this);
         factionManager = new FactionManager(this);
+        claimManager = new ClaimManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
+        claimManager.onEnable();
     }
 
     @Override
@@ -58,10 +62,12 @@ public final class Factions extends AresPlugin {
         stopServices();
 
         // disable and unregister managers
+        claimManager.onDisable();
         playerManager.onDisable();
         factionManager.onDisable();
 
         playerManager = null;
         factionManager = null;
+        claimManager = null;
     }
 }

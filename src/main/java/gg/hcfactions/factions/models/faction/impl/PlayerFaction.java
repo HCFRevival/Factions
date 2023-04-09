@@ -35,7 +35,6 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
     @Getter @Setter public int reinvites;
     @Getter @Setter public long nextTick;
     @Getter @Setter public long lastRallyUpdate;
-
     @Getter public Set<Member> members;
     @Getter public Set<UUID> memberHistory;
     @Getter public Set<UUID> pendingInvites;

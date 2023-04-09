@@ -1,13 +1,123 @@
 package gg.hcfactions.factions.models.claim.impl;
 
 import gg.hcfactions.factions.models.claim.IClaim;
+import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
+import gg.hcfactions.libs.bukkit.location.ILocatable;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
+import lombok.Setter;
+import org.bson.Document;
 
 import java.util.UUID;
 
-public final class Claim implements IClaim {
+public final class Claim implements IClaim, MongoDocument<Claim> {
     @Getter public UUID uniqueId;
+    @Getter public UUID owner;
     @Getter public BLocatable cornerA;
     @Getter public BLocatable cornerB;
+    @Getter @Setter public double cost;
+
+    /**
+     * Returns true if the provided location is within the buffer radius for this claim
+     * @param location Location to compare against
+     * @param buffer Buffer radius to check
+     * @return True if location is within the provided buffer radius of this claim
+     */
+    public boolean isInsideBuffer(ILocatable location, double buffer) {
+        if (!location.getWorldName().equals(cornerA.getWorldName())) {
+            return false;
+        }
+
+        // Add X
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), location.getZ()), true)) {
+            return true;
+        }
+
+        // Add Z
+        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() + buffer)), true)) {
+            return true;
+        }
+
+        // Subtract X
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), location.getZ()), true)) {
+            return true;
+        }
+
+        // Subtract Z
+        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() - buffer)), true)) {
+            return true;
+        }
+
+        // Add X, Z
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() + buffer)), true)) {
+            return true;
+        }
+
+        // Subtract X, Z
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() - buffer)), true)) {
+            return true;
+        }
+
+        // Add X, Subtract Z
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() - buffer)), true)) {
+            return true;
+        }
+
+        // Subtract X, Add Z
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() + buffer)), true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the provided location is touching this claim
+     * @param location Location to compare
+     * @return True if location is touching this claim
+     */
+    public boolean isTouching(ILocatable location) {
+        if (!location.getWorldName().equals(cornerA.getWorldName())) {
+            return false;
+        }
+
+        if (isInside(new BLocatable(location.getWorldName(), location.getX() + 1.0, location.getY(), location.getZ()), true)) {
+            return true;
+        }
+
+        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), location.getZ() + 1.0), true)) {
+            return true;
+        }
+
+        if (isInside(new BLocatable(location.getWorldName(), location.getX() - 1.0, location.getY(), location.getZ()), true)) {
+            return true;
+        }
+
+        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), location.getZ() - 1.0), true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public Claim fromDocument(Document document) {
+        this.uniqueId = UUID.fromString(document.getString("uuid"));
+        this.owner = UUID.fromString(document.getString("owner"));
+        this.cornerA = new BLocatable().fromDocument(document.get("corner_a", Document.class));
+        this.cornerB = new BLocatable().fromDocument(document.get("corner_b", Document.class));
+        this.cost = document.getDouble("cost");
+
+        return this;
+    }
+
+    @Override
+    public Document toDocument() {
+        return new Document()
+                .append("uuid", uniqueId.toString())
+                .append("owner", owner.toString())
+                .append("corner_a", cornerA.toDocument())
+                .append("corner_b", cornerB.toDocument())
+                .append("cost", cost);
+    }
 }
