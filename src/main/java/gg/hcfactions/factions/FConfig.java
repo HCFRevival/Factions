@@ -18,10 +18,15 @@ public final class FConfig {
     @Getter public int maxFactionNameLength;
     @Getter public List<String> disallowedFactionNames;
 
+    // faction reinvites
+    @Getter public int defaultFactionReinvites;
+
     // faction power
     @Getter public double playerPowerValue;
     @Getter public int powerTickInterval;
     @Getter public int powerTickPlayerModifier;
+    @Getter public boolean reducePowerLossInNether;
+    @Getter public boolean reducePowerLossInEnd;
 
     // faction ratings
     @Getter public int challengerRating;
@@ -55,9 +60,13 @@ public final class FConfig {
         maxFactionNameLength = 16;
         disallowedFactionNames = Arrays.asList("test");
 
+        defaultFactionReinvites = 5;
+
         playerPowerValue = 0.4;
-        powerTickInterval = 180;
-        powerTickPlayerModifier = 2;
+        powerTickInterval = 60;
+        powerTickPlayerModifier = 1;
+        reducePowerLossInNether = true;
+        reducePowerLossInEnd = true;
 
         challengerRating = 10000;
         diamondRating = 8000;

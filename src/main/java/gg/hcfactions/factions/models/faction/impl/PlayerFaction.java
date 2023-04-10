@@ -61,9 +61,9 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.rallyLocation = null;
         this.rating = 0;
         this.balance = 0.0;
-        this.dtr = 0.0;
-        this.reinvites = 0;
-        this.nextTick = 0L;
+        this.dtr = 0.1;
+        this.reinvites = manager.getPlugin().getConfiguration().getDefaultFactionReinvites();;
+        this.nextTick = Time.now();
         this.lastRallyUpdate = 0L;
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
@@ -82,9 +82,9 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.rallyLocation = null;
         this.rating = 0;
         this.balance = 0.0;
-        this.dtr = 0.0;
-        this.reinvites = 0;
-        this.nextTick = 0L;
+        this.dtr = 0.1;
+        this.reinvites = manager.getPlugin().getConfiguration().getDefaultFactionReinvites();;
+        this.nextTick = Time.now();
         this.lastRallyUpdate = 0L;
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
