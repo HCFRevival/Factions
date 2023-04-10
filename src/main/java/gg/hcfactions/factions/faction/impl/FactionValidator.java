@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.faction.impl;
 
 import gg.hcfactions.factions.faction.FactionManager;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,19 @@ public final class FactionValidator {
 
         if (manager.getFactionByName(name) != null) {
             return FError.F_NAME_IN_USE;
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public FError isUnraidable(PlayerFaction faction, boolean considerFreeze) {
+        if (faction.getDtr() <= 0.0) {
+            return FError.F_NOT_ALLOWED_RAIDABLE;
+        }
+
+        if (considerFreeze && faction.isFrozen()) {
+            return FError.F_NOT_ALLOWED_WHILE_FROZEN;
         }
 
         return null;

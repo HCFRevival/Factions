@@ -273,7 +273,7 @@ public final class StatsManager implements IManager {
         new Scheduler(plugin).async(() -> {
             final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
             if (mdb == null) {
-                plugin.getAresLogger().error("failed to write death to database");
+                plugin.getAresLogger().error("failed to write event capture to database");
                 return;
             }
 

@@ -1,4 +1,4 @@
-package gg.hcfactions.factions.events.faction;
+package gg.hcfactions.factions.listeners.events.faction;
 
 import lombok.Getter;
 import lombok.Setter;

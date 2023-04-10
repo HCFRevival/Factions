@@ -51,7 +51,9 @@ public final class FactionManager implements IManager {
 
         // faction ticking task
         this.factionTickingTask = new Scheduler(plugin).async(() ->
-                factionRepository.stream().filter(f -> f instanceof PlayerFaction)
+                factionRepository
+                        .stream()
+                        .filter(f -> f instanceof PlayerFaction)
                         .filter(pf -> ((PlayerFaction)pf).canTick())
                         .forEach(playerFaction -> ((PlayerFaction) playerFaction).tick())).repeat(0L, 20L).run();
     }

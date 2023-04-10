@@ -1,4 +1,4 @@
-package gg.hcfactions.factions.events.faction;
+package gg.hcfactions.factions.listeners.events.faction;
 
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;

@@ -1,7 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
-import gg.hcfactions.factions.events.faction.FactionMemberDeathEvent;
+import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;

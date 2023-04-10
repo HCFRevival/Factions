@@ -1,5 +1,6 @@
-package gg.hcfactions.factions.models.state;
+package gg.hcfactions.factions.state;
 
+import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.libs.base.consumer.Promise;
 
 public interface IServerStateExecutor {

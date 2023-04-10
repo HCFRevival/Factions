@@ -1,8 +1,8 @@
-package gg.hcfactions.factions.models.state.impl;
+package gg.hcfactions.factions.state.impl;
 
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.state.EServerState;
-import gg.hcfactions.factions.models.state.IServerStateExecutor;
+import gg.hcfactions.factions.state.IServerStateExecutor;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.libs.base.consumer.Promise;
 import lombok.AllArgsConstructor;

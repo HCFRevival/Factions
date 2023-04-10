@@ -1,8 +1,8 @@
 package gg.hcfactions.factions.faction.impl;
 
 import gg.hcfactions.factions.FPermissions;
-import gg.hcfactions.factions.events.faction.FactionCreateEvent;
-import gg.hcfactions.factions.events.faction.FactionDisbandEvent;
+import gg.hcfactions.factions.listeners.events.faction.FactionCreateEvent;
+import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.faction.IFactionExecutor;
 import gg.hcfactions.factions.menus.DisbandConfirmationMenu;
