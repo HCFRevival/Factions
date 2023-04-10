@@ -65,7 +65,7 @@ public final class TimerManager implements IManager {
             plugin.getFactionManager().getFactionRepository()
                     .stream()
                     .filter(f -> f instanceof PlayerFaction)
-                    .filter(pf -> ((PlayerFaction)pf).getTimers().isEmpty())
+                    .filter(pf -> !((PlayerFaction)pf).getTimers().isEmpty())
                     .forEach(pf -> ((PlayerFaction) pf).getTimers().stream().filter(GenericTimer::isExpired).forEach(exp -> ((PlayerFaction)pf).finishTimer(exp.getType())));
         }).repeat(0L, 1L).run();
     }

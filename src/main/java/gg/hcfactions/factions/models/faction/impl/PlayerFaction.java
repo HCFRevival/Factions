@@ -248,7 +248,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
      */
     public boolean isFrozen() {
         final FTimer frozenTimer = getTimer(ETimerType.FREEZE);
-        return frozenTimer != null && frozenTimer.isExpired();
+        return frozenTimer != null && !frozenTimer.isExpired();
     }
 
     @Override
