@@ -457,9 +457,12 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         }
     }
 
+    @AllArgsConstructor
     public enum ChatChannel {
-        PUBLIC,
-        FACTION;
+        PUBLIC(ChatColor.AQUA + "Public Chat"),
+        FACTION(ChatColor.DARK_GREEN + "Faction Chat");
+
+        @Getter public final String displayName;
 
         /**
          * Returns a chat channel matching the provided name

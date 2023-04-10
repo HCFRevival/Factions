@@ -474,7 +474,42 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void setFactionChatChannel(Player player, PlayerFaction.ChatChannel channel, Promise promise) {
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
 
+        if (playerFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member member = playerFaction.getMember(player.getUniqueId());
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (channel == null) {
+            final PlayerFaction.ChatChannel toChannel = member.getChannel().equals(PlayerFaction.ChatChannel.FACTION)
+                    ? PlayerFaction.ChatChannel.PUBLIC
+                    : PlayerFaction.ChatChannel.FACTION;
+
+            member.setChannel(toChannel);
+            FMessage.printChatChannelChange(player, toChannel);
+            promise.resolve();
+            return;
+        }
+
+        if (member.getChannel().equals(PlayerFaction.ChatChannel.PUBLIC)) {
+            member.setChannel(PlayerFaction.ChatChannel.FACTION);
+            FMessage.printChatChannelChange(player, PlayerFaction.ChatChannel.FACTION);
+            promise.resolve();
+            return;
+        }
+
+        if (member.getChannel().equals(PlayerFaction.ChatChannel.FACTION)) {
+            member.setChannel(PlayerFaction.ChatChannel.PUBLIC);
+            FMessage.printChatChannelChange(player, PlayerFaction.ChatChannel.PUBLIC);
+            promise.resolve();
+        }
     }
 
     @Override

@@ -115,6 +115,10 @@ public final class FMessage {
         playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited" + P_NAME + username + LAYER_1 + " from the faction");
     }
 
+    public static void printChatChannelChange(Player player, PlayerFaction.ChatChannel channel) {
+        player.sendMessage(LAYER_1 + "You are now speaking in " + channel.getDisplayName());
+    }
+
     public static void printFactionInfo(Factions plugin, Player player, IFaction faction) {
         // ◼⚠⬛⬆⬇▴▶▾
         // ⬆⬇➡
