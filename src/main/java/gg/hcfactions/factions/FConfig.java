@@ -18,6 +18,11 @@ public final class FConfig {
     @Getter public int maxFactionNameLength;
     @Getter public List<String> disallowedFactionNames;
 
+    // faction power
+    @Getter public double playerPowerValue;
+    @Getter public int powerTickInterval;
+    @Getter public int powerTickPlayerModifier;
+
     // faction ratings
     @Getter public int challengerRating;
     @Getter public int diamondRating;
@@ -49,6 +54,10 @@ public final class FConfig {
         minFactionNameLength = 3;
         maxFactionNameLength = 16;
         disallowedFactionNames = Arrays.asList("test");
+
+        playerPowerValue = 0.4;
+        powerTickInterval = 180;
+        powerTickPlayerModifier = 2;
 
         challengerRating = 10000;
         diamondRating = 8000;

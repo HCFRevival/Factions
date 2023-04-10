@@ -57,7 +57,7 @@ public final class FactionExecutor implements IFactionExecutor {
             return;
         }
 
-        final PlayerFaction faction = new PlayerFaction(factionName);
+        final PlayerFaction faction = new PlayerFaction(manager, factionName);
         faction.addMember(player.getUniqueId(), PlayerFaction.Rank.LEADER);
         faction.setupScoreboard(player);
 

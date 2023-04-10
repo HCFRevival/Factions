@@ -86,6 +86,10 @@ public final class FMessage {
         playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "invited" + P_NAME + username + LAYER_1 + " to the faction");
     }
 
+    public static void printNowAtMaxDTR(PlayerFaction playerFaction) {
+        playerFaction.sendMessage(SUCCESS + "Your faction is now at max DTR");
+    }
+
     public static void printCanNotJoinWhileRaidable(PlayerFaction playerFaction, String username) {
         playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join until your faction is unraidable");
     }

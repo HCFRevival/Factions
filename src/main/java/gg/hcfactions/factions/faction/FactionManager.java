@@ -16,9 +16,11 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bson.Document;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +33,7 @@ public final class FactionManager implements IManager {
     @Getter public Factions plugin;
     @Getter public FactionValidator validator;
     @Getter public FactionExecutor executor;
+    @Getter public BukkitTask factionTickingTask;
     @Getter public Set<IFaction> factionRepository;
 
     public FactionManager(Factions plugin) {
@@ -43,18 +46,26 @@ public final class FactionManager implements IManager {
         this.validator = new FactionValidator(this);
         this.factionRepository = Sets.newConcurrentHashSet();
 
+        this.factionTickingTask = new Scheduler(plugin).async(() ->
+                factionRepository.stream().filter(f -> f instanceof PlayerFaction)
+                .filter(pf -> ((PlayerFaction)pf).canTick())
+                .forEach(playerFaction -> ((PlayerFaction) playerFaction).tick())).repeat(0L, 20L).run();
+
         // called on main thread to lock process
         loadFactions();
     }
 
     @Override
     public void onDisable() {
+        this.factionTickingTask.cancel();
+
         // called on the main thread to lock process
         saveFactions();
 
         this.plugin = null;
         this.executor = null;
         this.validator = null;
+        this.factionTickingTask = null;
         this.factionRepository = null;
     }
 
@@ -126,7 +137,7 @@ public final class FactionManager implements IManager {
                 return;
             }
 
-            final PlayerFaction faction = new PlayerFaction().fromDocument(doc);
+            final PlayerFaction faction = new PlayerFaction(this).fromDocument(doc);
             factionRepository.add(faction);
         }
 

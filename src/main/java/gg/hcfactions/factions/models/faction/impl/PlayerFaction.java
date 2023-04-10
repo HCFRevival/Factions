@@ -3,14 +3,18 @@ package gg.hcfactions.factions.models.faction.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.models.econ.IBankable;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.ticking.ITickable;
 import gg.hcfactions.factions.models.timer.ITimeable;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
+import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +31,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public final class PlayerFaction implements IFaction, IBankable, ITimeable, MongoDocument<PlayerFaction> {
+public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITickable, MongoDocument<PlayerFaction> {
+    @Getter public final FactionManager manager;
+
     @Getter public UUID uniqueId;
     @Getter @Setter public String name;
     @Getter @Setter public String announcement;
@@ -46,7 +52,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, Mong
 
     @Getter public transient Scoreboard scoreboard;
 
-    public PlayerFaction() {
+    public PlayerFaction(FactionManager manager) {
+        this.manager = manager;
         this.uniqueId = null;
         this.name = null;
         this.announcement = null;
@@ -66,7 +73,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, Mong
         setupScoreboard();
     }
 
-    public PlayerFaction(String name) {
+    public PlayerFaction(FactionManager manager, String name) {
+        this.manager = manager;
         this.uniqueId = UUID.randomUUID();
         this.name = name;
         this.announcement = null;
@@ -241,6 +249,30 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, Mong
     public boolean isFrozen() {
         final FTimer frozenTimer = getTimer(ETimerType.FREEZE);
         return frozenTimer != null && frozenTimer.isExpired();
+    }
+
+    @Override
+    public void tick() {
+        final long next = Time.now()
+                + ((manager.getPlugin().getConfiguration().getPowerTickInterval()*1000L)
+                - (long)getOnlineMembers().size()*manager.getPlugin().getConfiguration().getPowerTickPlayerModifier());
+
+        if (((Time.now() - lastRallyUpdate) / 1000L) >= 300) {
+            setRallyLocation(null);
+        }
+
+        setNextTick(next);
+
+        if (getOnlineMembers().isEmpty() || isFrozen() || getDtr() == getMaxDtr()) {
+            return;
+        }
+
+        double newDtr = getDtr() + 0.01;
+        setDtr(Math.min(newDtr, getMaxDtr()));
+
+        if (newDtr >= getMaxDtr()) {
+            new Scheduler(manager.getPlugin()).sync(() -> FMessage.printNowAtMaxDTR(this)).run();
+        }
     }
 
     @Override
