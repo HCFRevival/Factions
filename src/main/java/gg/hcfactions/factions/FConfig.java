@@ -37,6 +37,8 @@ public final class FConfig {
     @Getter public int crappleDuration;
     @Getter public int gappleDuration;
     @Getter public int totemDuration;
+    @Getter public int stuckDuration;
+    @Getter public int rallyDuration;
 
     // TODO: load values from config
     public void loadConfig() {
@@ -64,5 +66,7 @@ public final class FConfig {
         crappleDuration = 10;
         gappleDuration = 3600;
         totemDuration = 3600;
+        stuckDuration = 60;
+        rallyDuration = 10;
     }
 }

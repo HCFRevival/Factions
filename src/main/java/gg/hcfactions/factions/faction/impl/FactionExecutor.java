@@ -14,8 +14,15 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.timer.ETimerType;
+import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
+import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
+import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -370,7 +377,33 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void setFactionRally(Player player, Promise promise) {
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
+        if (playerFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
 
+        final PlayerFaction.Member member = playerFaction.getMember(player.getUniqueId());
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (playerFaction.hasTimer(ETimerType.RALLY)) {
+            promise.reject(FError.F_NOT_ALLOWED_COOLDOWN.getErrorDescription());
+            return;
+        }
+
+        playerFaction.setRallyLocation(new PLocatable(player));
+        playerFaction.addTimer(new FTimer(ETimerType.RALLY, manager.getPlugin().getConfiguration().getRallyDuration()));
+        playerFaction.setLastRallyUpdate(Time.now());
+        FMessage.printRallyUpdate(player, playerFaction);
+        promise.resolve();
     }
 
     @Override
@@ -397,12 +430,45 @@ public final class FactionExecutor implements IFactionExecutor {
     public void showFactionInfo(Player player) {
         // TODO: Remove debug and add error checking
         final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
+
+        if (playerFaction == null) {
+            player.sendMessage(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
         FMessage.printFactionInfo(manager.getPlugin(), player, playerFaction);
     }
 
     @Override
     public void showFactionInfo(Player player, String name) {
+        // TODO: Validate name is alphanumeric and less than 16 characters
 
+        IFaction faction = manager.getFactionByName(name);
+
+        if (faction == null) {
+            final AccountService acs = (AccountService) manager.getPlugin().getService(AccountService.class);
+            if (acs == null) {
+                player.sendMessage(FError.G_GENERIC_ERROR.getErrorDescription());
+                return;
+            }
+
+            new Scheduler(manager.getPlugin()).async(() -> {
+                final AresAccount accountByName = acs.getAccount(name);
+
+                new Scheduler(manager.getPlugin()).sync(() -> {
+                    if (accountByName == null) {
+                        player.sendMessage(FError.F_NOT_FOUND.getErrorDescription());
+                        return;
+                    }
+
+                    final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(accountByName.getUniqueId());
+
+                    if (playerFaction == null) {
+                        player.sendMessage(FError.F_NOT_FOUND.getErrorDescription());
+                    }
+                }).run();
+            }).run();
+        }
     }
 
     @Override
@@ -457,6 +523,25 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void startStuckTimer(Player player, Promise promise) {
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
+        final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
 
+        if (factionPlayer == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        if (inside == null) {
+            promise.reject(FError.P_NOT_INSIDE_CLAIM.getErrorDescription());
+            return;
+        }
+
+        if (factionPlayer.hasTimer(ETimerType.STUCK)) {
+            promise.reject(FError.P_TIMER_ALREADY_STARTED.getErrorDescription());
+            return;
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.STUCK, manager.getPlugin().getConfiguration().getStuckDuration()));
+        promise.resolve();
     }
 }

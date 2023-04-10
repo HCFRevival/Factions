@@ -12,6 +12,8 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
@@ -75,6 +77,11 @@ public final class FMessage {
     public static void printLockedTimer(Player player, String itemName, long duration) {
         final String asDecimal = Time.convertToDecimal(duration);
         player.sendMessage(ERROR + "Your " + itemName + " are locked for " + ERROR + "" + ChatColor.BOLD + asDecimal + ERROR + "s");
+    }
+
+    public static void printRallyUpdate(Player player, PlayerFaction playerFaction) {
+        final BLocatable location = new BLocatable(player.getLocation().getBlock());
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + location);
     }
 
     public static void printFactionInfo(Factions plugin, Player player, IFaction faction) {

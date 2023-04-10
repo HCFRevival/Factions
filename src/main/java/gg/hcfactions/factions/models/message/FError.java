@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 public enum FError {
+    G_GENERIC_ERROR("An error has occurred"),
     F_NAME_TOO_SHORT("Faction name is too short"),
     F_NAME_TOO_LONG("Faction name is too long"),
     F_NAME_INVALID("Faction name is invalid"),
@@ -14,12 +15,15 @@ public enum FError {
     F_NOT_FOUND("Faction not found"),
     F_NOT_ALLOWED_RAIDABLE("You are not able to perform this action while your faction is raid-able"),
     F_NOT_ALLOWED_WHILE_FROZEN("You are not able to perform this action while your faction power is frozen"),
+    F_NOT_ALLOWED_COOLDOWN("Please wait a moment before performing this action again"),
     F_HOME_UNSET("Your faction home is not set"),
     P_ALREADY_IN_FAC("You are already in a faction"),
     P_NOT_IN_FAC("You are not in a faction"),
     P_COULD_NOT_LOAD_F("Could not load your faction information"),
     P_COULD_NOT_LOAD_P("Could not load your player information"),
-    P_NOT_ENOUGH_PERMS("You do not have permission to perform this action");
+    P_NOT_INSIDE_CLAIM("You are not standing inside claimed land"),
+    P_NOT_ENOUGH_PERMS("You do not have permission to perform this action"),
+    P_TIMER_ALREADY_STARTED("This timer is already running");
 
     @Getter public final String errorDescription;
 }
