@@ -14,11 +14,11 @@ import java.util.UUID;
 public final class ServerFaction implements IFaction, MongoDocument<ServerFaction> {
     @Getter public UUID uniqueId;
     @Getter @Setter public String name;
-    @Getter @Setter public String displayName;
     @Getter @Setter public PLocatable homeLocation;
     @Getter @Setter public int claimBuffer;
     @Getter @Setter public int buildBuffer;
     @Getter @Setter public Flag flag;
+    @Setter public String displayName;
 
     public ServerFaction() {
         this.uniqueId = UUID.randomUUID();
@@ -32,6 +32,13 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
         this.name = factionName;
         this.displayName = null;
         this.flag = Flag.SAFEZONE;
+    }
+
+    /**
+     * @return Display name for this faction
+     */
+    public String getDisplayName() {
+        return displayName != null ? displayName : name;
     }
 
     @Override
