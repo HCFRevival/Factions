@@ -5,6 +5,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.models.econ.IBankable;
 import gg.hcfactions.factions.models.faction.IFaction;
+import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.timer.ITimeable;
+import gg.hcfactions.factions.models.timer.ETimerType;
+import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.AllArgsConstructor;
@@ -23,7 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public final class PlayerFaction implements IFaction, IBankable, MongoDocument<PlayerFaction> {
+public final class PlayerFaction implements IFaction, IBankable, ITimeable, MongoDocument<PlayerFaction> {
     @Getter public UUID uniqueId;
     @Getter @Setter public String name;
     @Getter @Setter public String announcement;
@@ -38,6 +42,7 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
     @Getter public Set<Member> members;
     @Getter public Set<UUID> memberHistory;
     @Getter public Set<UUID> pendingInvites;
+    @Getter public Set<FTimer> timers;
 
     @Getter public transient Scoreboard scoreboard;
 
@@ -56,6 +61,7 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
+        this.timers = Sets.newConcurrentHashSet();
 
         setupScoreboard();
     }
@@ -75,6 +81,7 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
+        this.timers = Sets.newConcurrentHashSet();
 
         setupScoreboard();
     }
@@ -213,6 +220,15 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
     }
 
     @Override
+    public void finishTimer(ETimerType type) {
+        if (type.equals(ETimerType.FREEZE)) {
+            sendMessage(FMessage.T_FREEZE_EXPIRE);
+        }
+
+        removeTimer(type);
+    }
+
+    @Override
     public PlayerFaction fromDocument(Document document) {
         this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.name = document.getString("name");
@@ -229,6 +245,16 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
             this.rallyLocation = new PLocatable().fromDocument(document.get("rally", Document.class));
         }
 
+        if (document.containsKey("members")) {
+            final List<Document> memberDocs = document.getList("members", Document.class);
+            memberDocs.forEach(m -> members.add(new Member().fromDocument(m)));
+        }
+
+        if (document.containsKey("timers")) {
+            final List<Document> timerDocs = document.getList("timers", Document.class);
+            timerDocs.forEach(td -> timers.add(new FTimer().fromDocument(td)));
+        }
+
         this.rating = document.getInteger("rating");
         this.balance = document.getDouble("balance");
         this.dtr = document.getDouble("dtr");
@@ -237,17 +263,17 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         this.memberHistory.addAll((List<UUID>)document.get("member_history", List.class));
         this.pendingInvites.addAll((List<UUID>)document.get("pending_invites", List.class));
 
-        final List<Document> memberDocs = document.getList("members", Document.class);
-        memberDocs.forEach(m -> members.add(new Member().fromDocument(m)));
-
         return this;
     }
 
     @Override
     public Document toDocument() {
         final Document doc = new Document();
+        final List<Document> timerDocs = Lists.newArrayList();
         final List<Document> memberDocs = Lists.newArrayList();
+
         members.forEach(m -> memberDocs.add(m.toDocument()));
+        timers.forEach(t -> timerDocs.add(t.toDocument()));
 
         doc.append("uuid", uniqueId.toString());
         doc.append("name", name);
@@ -272,6 +298,7 @@ public final class PlayerFaction implements IFaction, IBankable, MongoDocument<P
         doc.append("members", memberDocs);
         doc.append("member_history", memberHistory);
         doc.append("pending_invites", pendingInvites);
+        doc.append("timers", timerDocs);
 
         return doc;
     }

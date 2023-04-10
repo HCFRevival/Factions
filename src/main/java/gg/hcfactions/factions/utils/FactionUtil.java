@@ -9,4 +9,8 @@ public final class FactionUtil {
         Players.resetHealth(player);
         player.teleport(plugin.getConfiguration().getOverworldSpawn());
     }
+
+    public static void teleportToSafety(Factions plugin, Player player) {
+
+    }
 }

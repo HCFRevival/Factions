@@ -1,10 +1,11 @@
 package gg.hcfactions.factions.models.player;
 
 import gg.hcfactions.factions.models.econ.IBankable;
+import gg.hcfactions.factions.models.timer.ITimeable;
 
 import java.util.UUID;
 
-public interface IFactionPlayer extends IBankable {
+public interface IFactionPlayer extends IBankable, ITimeable {
     /**
      * @return Bukkit UUID
      */

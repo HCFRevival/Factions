@@ -23,6 +23,14 @@ public final class FConfig {
     @Getter public int defaultServerFactionClaimBuffer;
     @Getter public int defaultPlayerFactionClaimBuffer;
 
+    // timers
+    @Getter public int attackerCombatTagDuration;
+    @Getter public int attackedCombatTagDuration;
+    @Getter public int enderpearlDuration;
+    @Getter public int crappleDuration;
+    @Getter public int gappleDuration;
+    @Getter public int totemDuration;
+
     // TODO: load values from config
     public void loadConfig() {
         overworldSpawn = new Location(Bukkit.getWorld("world"), 0.0, 64.0, 0.0);
@@ -36,5 +44,12 @@ public final class FConfig {
         defaultServerFactionBuildBuffer = 16;
         defaultServerFactionClaimBuffer = 32;
         defaultPlayerFactionClaimBuffer = 1;
+
+        attackerCombatTagDuration = 30;
+        attackedCombatTagDuration = 10;
+        enderpearlDuration = 16;
+        crappleDuration = 10;
+        gappleDuration = 3600;
+        totemDuration = 3600;
     }
 }

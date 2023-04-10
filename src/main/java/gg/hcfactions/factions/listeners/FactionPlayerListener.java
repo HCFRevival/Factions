@@ -46,18 +46,8 @@ public final class FactionPlayerListener implements Listener {
         }
 
         // loadPlayer didn't find the account, create a new one and write to repo
-        loaded = new FactionPlayer(uniqueId, username);
+        loaded = new FactionPlayer(plugin.getPlayerManager(), uniqueId, username);
         plugin.getPlayerManager().getPlayerRepository().add(loaded);
-    }
-
-    @EventHandler /* Handles unloading FactionPlayer from memory */
-    public void onPlayerUnload(PlayerQuitEvent event) {
-        final Player player = event.getPlayer();
-        final IFactionPlayer factionPlayer = plugin.getPlayerManager().getPlayer(player);
-
-        if (factionPlayer != null) {
-            plugin.getPlayerManager().getPlayerRepository().remove(factionPlayer);
-        }
     }
 
     @EventHandler /* Handles printing join message for faction members */

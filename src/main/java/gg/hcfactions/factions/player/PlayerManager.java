@@ -60,7 +60,7 @@ public final class PlayerManager implements IManager {
             return null;
         }
 
-        final FactionPlayer factionPlayer = new FactionPlayer().fromDocument(doc);
+        final FactionPlayer factionPlayer = new FactionPlayer(plugin.getPlayerManager()).fromDocument(doc);
         if (cache) {
             playerRepository.add(factionPlayer);
         }

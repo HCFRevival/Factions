@@ -4,7 +4,9 @@ import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.cmd.FactionCommand;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.FactionPlayerListener;
+import gg.hcfactions.factions.listeners.TimerListener;
 import gg.hcfactions.factions.player.PlayerManager;
+import gg.hcfactions.factions.timers.TimerManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.bukkit.AresPlugin;
@@ -16,6 +18,7 @@ public final class Factions extends AresPlugin {
     @Getter public PlayerManager playerManager;
     @Getter public FactionManager factionManager;
     @Getter public ClaimManager claimManager;
+    @Getter public TimerManager timerManager;
 
     @Override
     public void onEnable() {
@@ -49,13 +52,16 @@ public final class Factions extends AresPlugin {
         playerManager = new PlayerManager(this);
         factionManager = new FactionManager(this);
         claimManager = new ClaimManager(this);
+        timerManager = new TimerManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
         claimManager.onEnable();
+        timerManager.onEnable();
 
         // register listeners
         registerListener(new FactionPlayerListener(this));
+        registerListener(new TimerListener(this));
     }
 
     @Override
@@ -69,9 +75,11 @@ public final class Factions extends AresPlugin {
         claimManager.onDisable();
         playerManager.onDisable();
         factionManager.onDisable();
+        timerManager.onDisable();
 
         playerManager = null;
         factionManager = null;
         claimManager = null;
+        timerManager = null;
     }
 }
