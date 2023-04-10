@@ -219,6 +219,15 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, Mong
         });
     }
 
+    /**
+     * Returns true if this factions power is frozen
+     * @return True if faction power frozen
+     */
+    public boolean isFrozen() {
+        final FTimer frozenTimer = getTimer(ETimerType.FREEZE);
+        return frozenTimer != null && frozenTimer.isExpired();
+    }
+
     @Override
     public void finishTimer(ETimerType type) {
         if (type.equals(ETimerType.FREEZE)) {
