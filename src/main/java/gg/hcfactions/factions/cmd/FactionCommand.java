@@ -232,9 +232,9 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("show|who")
     @Description("Fetch details about a faction")
     @Syntax("[name]")
-    public void onFactionShow(Player player, @Optional String factionName) {
-        if (factionName != null) {
-            plugin.getFactionManager().getExecutor().showFactionInfo(player, factionName);
+    public void onFactionShow(Player player, @Optional String name) {
+        if (name != null) {
+            plugin.getFactionManager().getExecutor().showFactionInfo(player, name);
             return;
         }
 
@@ -266,15 +266,17 @@ public final class FactionCommand extends BaseCommand {
     @Description("Update your faction chat channel")
     @Syntax("[public|faction]")
     public void onFactionChat(Player player, @Optional String channelName) {
-        PlayerFaction.ChatChannel channel;
+        PlayerFaction.ChatChannel channel = null;
 
-        if (channelName.equalsIgnoreCase("public") || channelName.equalsIgnoreCase("p") || channelName.equalsIgnoreCase("pub")) {
-            channel = PlayerFaction.ChatChannel.PUBLIC;
-        } else if (channelName.equalsIgnoreCase("faction") || channelName.equalsIgnoreCase("f") || channelName.equalsIgnoreCase("fac")) {
-            channel = PlayerFaction.ChatChannel.FACTION;
-        } else {
-            player.sendMessage(FMessage.ERROR + "Failed to change chat channel: invalid channel name (valid channels: faction, public)");
-            return;
+        if (channelName != null) {
+            if (channelName.equalsIgnoreCase("public") || channelName.equalsIgnoreCase("p") || channelName.equalsIgnoreCase("pub")) {
+                channel = PlayerFaction.ChatChannel.PUBLIC;
+            } else if (channelName.equalsIgnoreCase("faction") || channelName.equalsIgnoreCase("f") || channelName.equalsIgnoreCase("fac")) {
+                channel = PlayerFaction.ChatChannel.FACTION;
+            } else {
+                player.sendMessage(FMessage.ERROR + "Failed to change chat channel: invalid channel name (valid channels: faction, public)");
+                return;
+            }
         }
 
         plugin.getFactionManager().getExecutor().setFactionChatChannel(player, channel, new Promise() {
