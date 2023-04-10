@@ -609,7 +609,7 @@ public final class FactionExecutor implements IFactionExecutor {
         final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
 
         if (playerFaction == null) {
-            player.sendMessage(FError.P_NOT_IN_FAC.getErrorDescription());
+            player.sendMessage(FMessage.ERROR + FError.P_NOT_IN_FAC.getErrorDescription());
             return;
         }
 
@@ -619,7 +619,6 @@ public final class FactionExecutor implements IFactionExecutor {
     @Override
     public void showFactionInfo(Player player, String name) {
         // TODO: Validate name is alphanumeric and less than 16 characters
-
         IFaction faction = manager.getFactionByName(name);
 
         if (faction != null) {
@@ -629,26 +628,32 @@ public final class FactionExecutor implements IFactionExecutor {
 
         final AccountService acs = (AccountService) manager.getPlugin().getService(AccountService.class);
         if (acs == null) {
-            player.sendMessage(FError.G_GENERIC_ERROR.getErrorDescription());
+            player.sendMessage(FMessage.ERROR + FError.G_GENERIC_ERROR.getErrorDescription());
             return;
         }
 
-        new Scheduler(manager.getPlugin()).async(() -> {
-            final AresAccount accountByName = acs.getAccount(name);
-
-            new Scheduler(manager.getPlugin()).sync(() -> {
-                if (accountByName == null) {
-                    player.sendMessage(FError.F_NOT_FOUND.getErrorDescription());
+        acs.getAccount(name, new FailablePromise<>() {
+            @Override
+            public void resolve(AresAccount aresAccount) {
+                if (aresAccount == null) {
+                    player.sendMessage(FMessage.ERROR + FError.F_NOT_FOUND.getErrorDescription());
                     return;
                 }
 
-                final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(accountByName.getUniqueId());
+                final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(aresAccount.getUniqueId());
 
                 if (playerFaction == null) {
-                    player.sendMessage(FError.F_NOT_FOUND.getErrorDescription());
+                    player.sendMessage(FMessage.ERROR + FError.F_NOT_FOUND.getErrorDescription());
                 }
-            }).run();
-        }).run();
+
+                FMessage.printFactionInfo(manager.getPlugin(), player, playerFaction);
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + FError.F_NOT_FOUND.getErrorDescription());
+            }
+        });
     }
 
     @Override
