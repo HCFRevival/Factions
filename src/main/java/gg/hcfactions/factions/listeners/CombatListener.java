@@ -22,7 +22,9 @@ import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -483,6 +485,30 @@ public final class CombatListener implements Listener {
         final double subtracted = event.getSubtractedDTR();
 
         FMessage.printMemberDeath(faction, username, subtracted);
+    }
+
+    /**
+     * Handles reducing faction power loss in nether/end if it's enabled in the Factions config
+     * @param event FactionMemberDeathEvent
+     */
+    @EventHandler
+    public void onFactionMemberDeath(FactionMemberDeathEvent event) {
+        final PLocatable locatable = event.getLocatable();
+        final Location asBukkit = locatable.getBukkitLocation();
+        final World world = asBukkit.getWorld();
+
+        if (world == null) {
+            plugin.getAresLogger().error("attempted to parse for world in FactionMemberDeathEvent but received null");
+            return;
+        }
+
+        if (world.getEnvironment().equals(World.Environment.NETHER) && plugin.getConfiguration().isReducePowerLossInNether()) {
+            event.setSubtractedDTR(event.getSubtractedDTR() / 2.0);
+        }
+
+        if (world.getEnvironment().equals(World.Environment.THE_END) && plugin.getConfiguration().isReducePowerLossInEnd()) {
+            event.setSubtractedDTR(event.getSubtractedDTR() / 2.0);
+        }
     }
 
     /**
