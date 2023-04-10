@@ -18,6 +18,13 @@ public final class FConfig {
     @Getter public int maxFactionNameLength;
     @Getter public List<String> disallowedFactionNames;
 
+    // faction ratings
+    @Getter public int challengerRating;
+    @Getter public int diamondRating;
+    @Getter public int platinumRating;
+    @Getter public int goldRating;
+    @Getter public int silverRating;
+
     // claiming
     @Getter public int defaultServerFactionBuildBuffer;
     @Getter public int defaultServerFactionClaimBuffer;
@@ -40,6 +47,12 @@ public final class FConfig {
         minFactionNameLength = 3;
         maxFactionNameLength = 16;
         disallowedFactionNames = Arrays.asList("test");
+
+        challengerRating = 10000;
+        diamondRating = 8000;
+        platinumRating = 6500;
+        goldRating = 5000;
+        silverRating = 3500;
 
         defaultServerFactionBuildBuffer = 16;
         defaultServerFactionClaimBuffer = 32;

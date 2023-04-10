@@ -2,6 +2,7 @@ package gg.hcfactions.factions.models.faction.impl;
 
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
     @Getter public UUID uniqueId;
     @Getter @Setter public String name;
     @Getter @Setter public String displayName;
+    @Getter @Setter public PLocatable homeLocation;
     @Getter @Setter public int claimBuffer;
     @Getter @Setter public int buildBuffer;
     @Getter @Setter public Flag flag;

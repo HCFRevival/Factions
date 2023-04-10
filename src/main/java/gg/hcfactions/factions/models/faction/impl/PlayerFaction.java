@@ -220,6 +220,21 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, Mong
     }
 
     /**
+     * Returns the DTR cap for this faction
+     * @return DTR cap (double)
+     */
+    public double getMaxDtr() {
+        return 10.0; // TODO: Implement max dtr
+    }
+
+    /**
+     * @return True if the faction home is set
+     */
+    public boolean hasHome() {
+        return homeLocation != null;
+    }
+
+    /**
      * Returns true if this factions power is frozen
      * @return True if faction power frozen
      */

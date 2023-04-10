@@ -395,7 +395,9 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void showFactionInfo(Player player) {
-
+        // TODO: Remove debug and add error checking
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
+        FMessage.printFactionInfo(manager.getPlugin(), player, playerFaction);
     }
 
     @Override
