@@ -119,6 +119,35 @@ public final class FMessage {
         player.sendMessage(LAYER_1 + "You are now speaking in " + channel.getDisplayName());
     }
 
+    public static void printCanNotFightInClaim(Player player, String claimName) {
+        player.sendMessage(ERROR + "You can not attack players in " + claimName + ERROR + "'s claims");
+    }
+
+    public static void printCanNotAttackFactionMembers(Player player) {
+        player.sendMessage(ERROR + "PvP is disabled between " + P_NAME + "Faction Members");
+    }
+
+    public static void printMemberDeath(PlayerFaction faction, String memberName, double deducted) {
+        faction.sendMessage(ChatColor.DARK_RED + "Member Death" + P_NAME + ": " + memberName);
+        faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + Math.round(deducted));
+    }
+
+    public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {
+        if (faction == null) {
+            return displayName + ChatColor.RESET + ": " + message;
+        }
+
+        if (faction.getMember(receiver.getUniqueId()) != null) {
+            return ChatColor.DARK_GREEN + "[" + faction.getName() + "]" + ChatColor.RESET + " " + displayName + ChatColor.RESET + ": " + message;
+        }
+
+        return ChatColor.GOLD + "[" + ChatColor.YELLOW + faction.getName() + ChatColor.GOLD + "]" + ChatColor.RESET + " " + displayName + ChatColor.RESET + ": " + message;
+    }
+
+    public static String getFactionFormat(String displayName, String message) {
+        return ChatColor.DARK_GREEN + "(" + ChatColor.GOLD + "FC" + ChatColor.DARK_GREEN + ") " + ChatColor.RESET + displayName + ChatColor.DARK_GREEN + ": " + message;
+    }
+
     public static void printFactionInfo(Factions plugin, Player player, IFaction faction) {
         // ◼⚠⬛⬆⬇▴▶▾
         // ⬆⬇➡

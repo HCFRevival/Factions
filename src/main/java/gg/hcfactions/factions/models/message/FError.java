@@ -5,7 +5,12 @@ import lombok.Getter;
 
 @AllArgsConstructor
 public enum FError {
+    A_SERVER_STATE_SAME("Server state is already set to this value"),
     G_GENERIC_ERROR("An error has occurred"),
+    P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"),
+    P_CAN_NOT_CHANGE_WORLDS_PVP_PROT("You can not change worlds while you have PvP protection"),
+    P_CAN_NOT_ATTACK_PVP_PROT("You can not attack others while you have PvP protection"),
+    P_CAN_NOT_ATTACK_PVP_PROT_OTHER("This player has PvP protection"),
     F_NAME_TOO_SHORT("Faction name is too short"),
     F_NAME_TOO_LONG("Faction name is too long"),
     F_NAME_INVALID("Faction name is invalid"),

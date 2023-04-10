@@ -49,6 +49,7 @@ public final class FConfig {
     @Getter public int totemDuration;
     @Getter public int stuckDuration;
     @Getter public int rallyDuration;
+    @Getter public int freezeDuration;
 
     // TODO: load values from config
     public void loadConfig() {
@@ -86,5 +87,6 @@ public final class FConfig {
         totemDuration = 3600;
         stuckDuration = 60;
         rallyDuration = 10;
+        freezeDuration = 1800;
     }
 }
