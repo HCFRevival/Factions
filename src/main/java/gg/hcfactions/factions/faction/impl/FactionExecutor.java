@@ -17,6 +17,7 @@ import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
@@ -25,6 +26,8 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -202,12 +205,151 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void createInvite(Player player, String playerName, Promise promise) {
+        final AccountService acs = (AccountService) manager.getPlugin().getService(AccountService.class);
 
+        if (acs == null) {
+            promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+
+        if (playerFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member member = playerFaction.getMember(player.getUniqueId());
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        acs.getAccount(playerName, new FailablePromise<>() {
+            @Override
+            public void resolve(AresAccount aresAccount) {
+                if (aresAccount == null) {
+                    promise.reject(FError.P_NOT_FOUND.getErrorDescription());
+                    return;
+                }
+
+                if (playerFaction.getMember(aresAccount.getUniqueId()) != null) {
+                    promise.reject(FError.P_ALREADY_IN_OWN_F.getErrorDescription());
+                    return;
+                }
+
+                if (playerFaction.getPendingInvites().contains(aresAccount.getUniqueId())) {
+                    promise.reject(FError.P_ALREADY_HAS_INV_F.getErrorDescription());
+                    return;
+                }
+
+                playerFaction.getPendingInvites().add(aresAccount.getUniqueId());
+                FMessage.printPlayerInvite(player, playerFaction, aresAccount.getUsername());
+
+                if (playerFaction.isRaidable()) {
+                    FMessage.printCanNotJoinWhileRaidable(playerFaction, aresAccount.getUsername());
+                } else if (playerFaction.isFrozen()) {
+                    FMessage.printCanNotJoinWhileFrozen(playerFaction, aresAccount.getUsername());
+                }
+
+                if (playerFaction.getMemberHistory().contains(aresAccount.getUniqueId())) {
+                    FMessage.printReinviteWillBeConsumed(playerFaction, aresAccount.getUsername());
+                }
+
+                final Player invited = Bukkit.getPlayer(aresAccount.getUniqueId());
+                if (invited != null && invited.isOnline()) {
+                    invited.spigot().sendMessage(new ComponentBuilder
+                            (player.getName())
+                            .color(net.md_5.bungee.api.ChatColor.GOLD)
+                            .append(" has invited you to join ")
+                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append(playerFaction.getName())
+                            .color(net.md_5.bungee.api.ChatColor.AQUA)
+                            .append(".")
+                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append(" Type ")
+                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append("/f accept " + playerFaction.getName())
+                            .color(net.md_5.bungee.api.ChatColor.GOLD)
+                            .append(" or ")
+                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append("click here")
+                            .underlined(true)
+                            .color(net.md_5.bungee.api.ChatColor.GOLD)
+                            .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f accept " + playerFaction.getName()))
+                            .append(" to join")
+                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .underlined(false)
+                            .create());
+                }
+
+                promise.resolve();
+            }
+
+            @Override
+            public void reject(String s) {
+                promise.reject(s);
+            }
+        });
     }
 
     @Override
     public void revokeInvite(Player player, String playerName, Promise promise) {
+        final AccountService acs = (AccountService) manager.getPlugin().getService(AccountService.class);
 
+        if (acs == null) {
+            promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player.getUniqueId());
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+
+        if (playerFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member member = playerFaction.getMember(player.getUniqueId());
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        acs.getAccount(playerName, new FailablePromise<>() {
+            @Override
+            public void resolve(AresAccount aresAccount) {
+                if (aresAccount == null) {
+                    promise.reject(FError.P_NOT_FOUND.getErrorDescription());
+                    return;
+                }
+
+                if (!playerFaction.getPendingInvites().contains(aresAccount.getUniqueId())) {
+                    promise.reject(aresAccount.getUsername() + " does not have a pending invitation");
+                    return;
+                }
+
+                playerFaction.getPendingInvites().remove(aresAccount.getUniqueId());
+                FMessage.printPlayerUninvite(player, playerFaction, aresAccount.getUsername());
+                promise.resolve();
+            }
+
+            @Override
+            public void reject(String s) {
+                promise.reject(s);
+            }
+        });
     }
 
     @Override

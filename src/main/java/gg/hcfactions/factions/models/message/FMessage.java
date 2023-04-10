@@ -3,7 +3,6 @@ package gg.hcfactions.factions.models.message;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mongodb.client.model.Filters;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.faction.IFaction;
@@ -13,7 +12,6 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
-import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
@@ -82,6 +80,35 @@ public final class FMessage {
     public static void printRallyUpdate(Player player, PlayerFaction playerFaction) {
         final BLocatable location = new BLocatable(player.getLocation().getBlock());
         playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + location);
+    }
+
+    public static void printPlayerInvite(Player player, PlayerFaction playerFaction, String username) {
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "invited" + P_NAME + username + LAYER_1 + " to the faction");
+    }
+
+    public static void printCanNotJoinWhileRaidable(PlayerFaction playerFaction, String username) {
+        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join until your faction is unraidable");
+    }
+
+    public static void printCanNotJoinWhileFrozen(PlayerFaction playerFaction, String username) {
+        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join until your faction power is thawed");
+    }
+
+    public static void printCanNotJoinFulLFaction(PlayerFaction playerFaction, String username) {
+        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join unless a member leaves or is kicked");
+    }
+
+    public static void printReinviteWillBeConsumed(PlayerFaction playerFaction, String username) {
+        if (playerFaction.getReinvites() > 0) {
+            playerFaction.sendMessage(P_NAME + username + ERROR + " has left the faction recently and will consume a re-invite upon joining again");
+            return;
+        }
+
+        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join the faction until you obtain more re-invites");
+    }
+
+    public static void printPlayerUninvite(Player player, PlayerFaction playerFaction, String username) {
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited" + P_NAME + username + LAYER_1 + " from the faction");
     }
 
     public static void printFactionInfo(Factions plugin, Player player, IFaction faction) {
