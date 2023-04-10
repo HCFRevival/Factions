@@ -1,5 +1,7 @@
 package gg.hcfactions.factions;
 
+import gg.hcfactions.factions.stats.StatsConfig;
+import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -51,6 +53,41 @@ public final class FConfig {
     @Getter public int rallyDuration;
     @Getter public int freezeDuration;
 
+    // deathbans
+    @Getter public boolean deathbansEnabled;
+    @Getter public boolean deathbansStandalone;
+    @Getter public int sotwMaxDeathbanDuration;
+    @Getter public int normalMaxDeathbanDuration;
+    @Getter public int minDeathbanDuration;
+    @Getter public int lifeUseDelay;
+
+    // stats
+    @Getter public int mapNumber;
+
+    /**
+     * Parses deathban fields in to a DeathbanConfig object
+     * @return DeathbanConfig
+     */
+    public DeathbanConfig getDeathbanConfig() {
+        return new DeathbanConfig(
+                deathbansEnabled,
+                deathbansStandalone,
+                sotwMaxDeathbanDuration,
+                normalMaxDeathbanDuration,
+                minDeathbanDuration,
+                lifeUseDelay,
+                "https://hcfactions.gg/shop"
+        );
+    }
+
+    /**
+     * Parses stats fields in to a StatsConfig object
+     * @return StatsConfig
+     */
+    public StatsConfig getStatsConfig() {
+        return new StatsConfig(mapNumber);
+    }
+
     // TODO: load values from config
     public void loadConfig() {
         overworldSpawn = new Location(Bukkit.getWorld("world"), 0.0, 64.0, 0.0);
@@ -88,5 +125,12 @@ public final class FConfig {
         stuckDuration = 60;
         rallyDuration = 10;
         freezeDuration = 1800;
+
+        deathbansEnabled = true;
+        deathbansStandalone = true;
+        sotwMaxDeathbanDuration = 10;
+        normalMaxDeathbanDuration = 30;
+        minDeathbanDuration = 5;
+        lifeUseDelay = 5;
     }
 }

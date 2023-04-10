@@ -22,7 +22,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import java.util.UUID;
 
 @AllArgsConstructor
-public final class FactionPlayerListener implements Listener {
+public final class PlayerListener implements Listener {
     @Getter public final Factions plugin;
 
     @EventHandler /* Handles loading FactionPlayer in to memory */
