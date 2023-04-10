@@ -81,27 +81,27 @@ public final class FMessage {
         // ◼⚠⬛⬆⬇▴▶▾
         // ⬆⬇➡
         final AccountService acs = (AccountService) plugin.getService(AccountService.class);
-        final String spacer = ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.YELLOW + " - " + ChatColor.RESET;
+        final String spacer = ChatColor.RESET + " " + LAYER_1 + " - " + ChatColor.RESET;
         final boolean access = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
         if (faction instanceof ServerFaction) {
             final ServerFaction serverFaction = (ServerFaction)faction;
 
-            player.sendMessage(ChatColor.YELLOW + "------------" + ChatColor.GOLD + "[ " + ChatColor.WHITE + serverFaction.getDisplayName() + ChatColor.GOLD + " ]" + ChatColor.YELLOW + "------------");
+            player.sendMessage(LAYER_1 + "------------" + LAYER_2 + "[ " + INFO + serverFaction.getDisplayName() + LAYER_2 + " ]" + LAYER_1 + "------------");
             player.sendMessage(spacer + ChatColor.DARK_PURPLE + StringUtils.capitalize(serverFaction.getFlag().name().toLowerCase().replace("_", " ")));
 
             if (serverFaction.getHomeLocation() != null) {
-                player.sendMessage(spacer + ChatColor.GOLD + "Located At" + ChatColor.YELLOW + ": " +
-                        ChatColor.BLUE + (int)(Math.round(serverFaction.getHomeLocation().getX())) + ChatColor.YELLOW + ", " +
-                        ChatColor.BLUE + (int)(Math.round(serverFaction.getHomeLocation().getY())) + ChatColor.YELLOW + ", " +
-                        ChatColor.BLUE + (int)(Math.round(serverFaction.getHomeLocation().getZ())) + ChatColor.YELLOW + ", " +
-                        ChatColor.BLUE + StringUtils.capitalize(Objects.requireNonNull(serverFaction
+                player.sendMessage(spacer + LAYER_2 + "Located At" + LAYER_1 + ": " +
+                        INFO + (int)(Math.round(serverFaction.getHomeLocation().getX())) + LAYER_1 + ", " +
+                        INFO + (int)(Math.round(serverFaction.getHomeLocation().getY())) + LAYER_1 + ", " +
+                        INFO + (int)(Math.round(serverFaction.getHomeLocation().getZ())) + LAYER_1 + ", " +
+                        INFO + StringUtils.capitalize(Objects.requireNonNull(serverFaction
                         .getHomeLocation()
                         .getBukkitLocation()
                         .getWorld()).getEnvironment().name().toLowerCase().replace("_", " ")));
             }
 
-            player.sendMessage(ChatColor.YELLOW + "--------------------------------");
+            player.sendMessage(LAYER_1 + "--------------------------------");
 
             return;
         }
@@ -124,40 +124,40 @@ public final class FMessage {
             DTR = ChatColor.YELLOW + unformattedDTR;
         }
 
-        player.sendMessage(ChatColor.YELLOW + "--------------------" + ChatColor.GOLD + "[ " + ChatColor.WHITE + faction.getName() + ChatColor.GOLD + " ]" + ChatColor.YELLOW + "--------------------");
+        player.sendMessage(LAYER_1 + "--------------------" + LAYER_2 + "[ " + INFO + faction.getName() + LAYER_2 + " ]" + LAYER_1 + "--------------------");
 
         if (playerFaction.getAnnouncement() != null && (playerFaction.isMember(player.getUniqueId()) || access)) {
-            player.sendMessage(spacer + ChatColor.GOLD + "Announcement" + ChatColor.YELLOW + ": " + ChatColor.LIGHT_PURPLE + playerFaction.getAnnouncement());
+            player.sendMessage(spacer + LAYER_2 + "Announcement" + LAYER_1 + ": " + INFO + playerFaction.getAnnouncement());
         }
 
         if (playerFaction.getRallyLocation() != null && (playerFaction.isMember(player.getUniqueId()) || access)) {
-            player.sendMessage(spacer + ChatColor.GOLD + "Rally" + ChatColor.YELLOW + ": " +
-                    ChatColor.BLUE + (int)(Math.round(playerFaction.getRallyLocation().getX())) + ChatColor.YELLOW + ", " +
-                    ChatColor.BLUE + (int)(Math.round(playerFaction.getRallyLocation().getY())) + ChatColor.YELLOW + ", " +
-                    ChatColor.BLUE + (int)(Math.round(playerFaction.getRallyLocation().getZ())) + ChatColor.YELLOW + ", " +
-                    ChatColor.BLUE + StringUtils.capitalize(Objects.requireNonNull(playerFaction
+            player.sendMessage(spacer + LAYER_2 + "Rally" + LAYER_1 + ": " +
+                    INFO + (int)(Math.round(playerFaction.getRallyLocation().getX())) + LAYER_1 + ", " +
+                    INFO + (int)(Math.round(playerFaction.getRallyLocation().getY())) + LAYER_1 + ", " +
+                    INFO + (int)(Math.round(playerFaction.getRallyLocation().getZ())) + LAYER_1 + ", " +
+                    INFO + StringUtils.capitalize(Objects.requireNonNull(playerFaction
                     .getRallyLocation()
                     .getBukkitLocation()
                     .getWorld()).getEnvironment().name().toLowerCase().replace("_", " ")));
         }
 
         if (playerFaction.getHomeLocation() != null) {
-            player.sendMessage(spacer + ChatColor.GOLD + "Home" + ChatColor.YELLOW + ": " +
-                    ChatColor.BLUE + (int)(Math.round(playerFaction.getHomeLocation().getX())) + ChatColor.YELLOW + ", " +
-                    ChatColor.BLUE + (int)(Math.round(playerFaction.getHomeLocation().getY())) + ChatColor.YELLOW + ", " +
-                    ChatColor.BLUE + (int)(Math.round(playerFaction.getHomeLocation().getZ())));
+            player.sendMessage(spacer + LAYER_2 + "Home" + LAYER_1 + ": " +
+                    INFO + (int)(Math.round(playerFaction.getHomeLocation().getX())) + LAYER_1 + ", " +
+                    INFO + (int)(Math.round(playerFaction.getHomeLocation().getY())) + LAYER_1 + ", " +
+                    INFO + (int)(Math.round(playerFaction.getHomeLocation().getZ())));
         }
 
-        player.sendMessage(spacer + ChatColor.GOLD + "Balance" + ChatColor.YELLOW + ": " + ChatColor.BLUE + "$" + String.format("%.2f", playerFaction.getBalance()));
-        player.sendMessage(spacer + ChatColor.GOLD + "Deaths Until Raid-able" + ChatColor.YELLOW + ": " + DTR);
+        player.sendMessage(spacer + LAYER_2 + "Balance" + LAYER_1 + ": " + INFO + "$" + String.format("%.2f", playerFaction.getBalance()));
+        player.sendMessage(spacer + LAYER_2 + "Deaths Until Raid-able" + LAYER_1 + ": " + DTR);
 
         if (playerFaction.isFrozen()) {
             final FTimer timer = playerFaction.getTimer(ETimerType.FREEZE);
-            player.sendMessage(spacer + ChatColor.GOLD + "Frozen" + ChatColor.YELLOW + ": " + ChatColor.BLUE + Time.convertToRemaining(timer.getRemaining()));
+            player.sendMessage(spacer + LAYER_2 + "Frozen" + LAYER_1 + ": " + INFO + Time.convertToRemaining(timer.getRemaining()));
         }
 
-        player.sendMessage(spacer + ChatColor.GOLD + "Re-invites" + ChatColor.YELLOW + ": " + ChatColor.BLUE + playerFaction.getReinvites());
-        player.sendMessage(spacer + ChatColor.GOLD + "Online" + ChatColor.YELLOW + ": " + ChatColor.BLUE + playerFaction.getOnlineMembers().size() + ChatColor.YELLOW + " / " + ChatColor.BLUE + playerFaction.getMembers().size());
+        player.sendMessage(spacer + LAYER_2 + "Re-invites" + LAYER_1 + ": " + INFO + playerFaction.getReinvites());
+        player.sendMessage(spacer + LAYER_2 + "Online" + LAYER_1 + ": " + INFO + playerFaction.getOnlineMembers().size() + LAYER_1 + " / " + INFO + playerFaction.getMembers().size());
 
         new Scheduler(plugin).async(() -> {
             final Map<PlayerFaction.Rank, List<String>> namesByRank = Maps.newHashMap();
@@ -202,18 +202,18 @@ public final class FMessage {
                 final List<String> members = formattedNames.get(PlayerFaction.Rank.MEMBER);
 
                 if (!leaders.isEmpty()) {
-                    player.sendMessage(spacer + ChatColor.GOLD + "Leader" + ChatColor.YELLOW + ": " + Joiner.on(ChatColor.YELLOW + ", ").join(leaders));
+                    player.sendMessage(spacer + LAYER_2 + "Leader" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(leaders));
                 }
 
                 if (!officers.isEmpty()) {
-                    player.sendMessage(spacer + ChatColor.GOLD + "Officers" + ChatColor.YELLOW + ": " + Joiner.on(ChatColor.YELLOW + ", ").join(officers));
+                    player.sendMessage(spacer + LAYER_2 + "Officers" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(officers));
                 }
 
                 if (!members.isEmpty()) {
-                    player.sendMessage(spacer + ChatColor.GOLD + "Members" + ChatColor.YELLOW + ": " + Joiner.on(ChatColor.YELLOW + ", ").join(members));
+                    player.sendMessage(spacer + LAYER_2 + "Members" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(members));
                 }
 
-                player.sendMessage(ChatColor.YELLOW + "------------------------------------------------");
+                player.sendMessage(LAYER_1 + "------------------------------------------------");
             }).run();
         }).run();
     }
