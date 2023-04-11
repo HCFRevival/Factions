@@ -101,9 +101,9 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             final PlayerFaction faction = playerManager.getPlugin().getFactionManager().getPlayerFactionByPlayer(uniqueId);
 
             if (faction == null) {
-                sendMessage(FError.P_NOT_IN_FAC.getErrorDescription());
+                sendMessage(FMessage.ERROR + FError.P_NOT_IN_FAC.getErrorDescription());
             } else if (faction.getHomeLocation() == null) {
-                sendMessage(FError.F_HOME_UNSET.getErrorDescription());
+                sendMessage(FMessage.ERROR + FError.F_HOME_UNSET.getErrorDescription());
             } else {
                 getBukkit().teleport(faction.getHomeLocation().getBukkitLocation());
                 sendMessage(FMessage.T_HOME_EXPIRE);

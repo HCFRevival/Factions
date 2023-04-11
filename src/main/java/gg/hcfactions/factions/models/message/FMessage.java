@@ -12,6 +12,7 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
@@ -39,6 +40,7 @@ public final class FMessage {
     public static final String T_LOGOUT_EXPIRE = SUCCESS + "You have been disconnected safely";
     public static final String T_PROTECTION_EXPIRE = SUCCESS + "Your combat protection has expired";
     public static final String T_FREEZE_EXPIRE = SUCCESS + "Your faction will now begin regenerating power";
+    public static final String T_HOME_COMPLETE = SUCCESS + "You have been returned to your faction home";
 
     public static void broadcastFactionCreated(String factionName, String playerName) {
         Bukkit.broadcastMessage(LAYER_1 + "Faction " + INFO + factionName + LAYER_1 + " has been " + SUCCESS + "created" + LAYER_1 + " by " + P_NAME + playerName);
@@ -130,6 +132,35 @@ public final class FMessage {
     public static void printMemberDeath(PlayerFaction faction, String memberName, double deducted) {
         faction.sendMessage(ChatColor.DARK_RED + "Member Death" + P_NAME + ": " + memberName);
         faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + Math.round(deducted));
+    }
+
+    public static void printFrozenPower(PlayerFaction faction, long duration) {
+        final String remaining = Time.convertToRemaining(duration);
+        faction.sendMessage(ERROR + "Your faction power has been frozen for " + INFO + remaining);
+    }
+
+    public static void printDTRUpdate(PlayerFaction faction, double newDtr) {
+        faction.sendMessage(LAYER_1 + "Your faction DTR has been " + LAYER_2 + "updated" + LAYER_1 + " to " + INFO + String.format("%.2f", newDtr));
+    }
+
+    public static void printReinviteUpdate(PlayerFaction faction, int amount) {
+        faction.sendMessage(LAYER_1 + "Your faction reinvites has been " + LAYER_2 + "updated" + LAYER_1 + " to " + INFO + amount);
+    }
+
+    public static void printAnnouncement(PlayerFaction faction, String announcement) {
+        faction.sendMessage(LAYER_2 + "Faction Announcement" + P_NAME + ": " + announcement);
+    }
+
+    public static void printPromotion(Player initiater, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
+        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + SUCCESS + "promoted" + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
+    }
+
+    public static void printDemotion(Player initiater, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
+        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + ERROR + "demoted" + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
+    }
+
+    public static void printHomeUpdate(PlayerFaction faction, Player player, PLocatable location) {
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "updated" + LAYER_1 + " your faction home to " + INFO + Math.round(location.getX()) + ", " + Math.round(location.getY()) + ", " + Math.round(location.getZ()));
     }
 
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {

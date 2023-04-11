@@ -24,11 +24,13 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
+import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -449,12 +451,62 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void setFactionHome(Player player, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member account = faction.getMember(player.getUniqueId());
+
+        if (account == null && !bypass) {
+            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        if (account != null && account.getRank().equals(PlayerFaction.Rank.MEMBER) && !bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (insideClaim == null || !insideClaim.getOwner().equals(faction.getUniqueId())) {
+            promise.reject(FError.F_NOT_STANDING_IN_CLAIM.getErrorDescription());
+            return;
+        }
+
+        faction.setHomeLocation(new PLocatable(player));
+        FMessage.printHomeUpdate(faction, player, faction.getHomeLocation());
+        promise.resolve();
     }
 
     @Override
     public void setFactionHome(Player player, String factionName, Promise promise) {
+        final IFaction faction = manager.getFactionByName(factionName);
+        final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        if (insideClaim == null || !insideClaim.getOwner().equals(faction.getUniqueId())) {
+            promise.reject(FError.F_NOT_STANDING_IN_CLAIM.getErrorDescription());
+            return;
+        }
+
+        if (faction instanceof PlayerFaction) {
+            final PlayerFaction playerFaction = (PlayerFaction)faction;
+            playerFaction.setHomeLocation(new PLocatable(player));
+            FMessage.printHomeUpdate(playerFaction, player, playerFaction.getHomeLocation());
+        } else {
+            final ServerFaction serverFaction = (ServerFaction)faction;
+            serverFaction.setHomeLocation(new PLocatable(player));
+        }
+
+        promise.resolve();
     }
 
     @Override
@@ -514,42 +566,137 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void freezeFactionPower(Player player, String factionName, long duration, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.addTimer(new FTimer(ETimerType.FREEZE, duration));
+        FMessage.printFrozenPower(faction, duration);
+        promise.resolve();
     }
 
     @Override
     public void thawFactionPower(Player player, String factionName, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        if (!faction.isFrozen()) {
+            promise.reject(FError.F_NOT_FROZEN.getErrorDescription());
+            return;
+        }
+
+        faction.finishTimer(ETimerType.FREEZE);
+        promise.resolve();
     }
 
     @Override
     public void setFactionDTR(Player player, String factionName, double dtr, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        final double setDtr = Math.min(dtr, faction.getMaxDtr());
+
+        faction.setDtr(setDtr);
+        FMessage.printDTRUpdate(faction, setDtr);
+        promise.resolve();
     }
 
     @Override
     public void setFactionFlag(Player player, String factionName, ServerFaction.Flag flag, Promise promise) {
+        final ServerFaction faction = manager.getServerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.setFlag(flag);
+        promise.resolve();
     }
 
     @Override
     public void setFactionDisplayName(Player player, String factionName, String displayName, Promise promise) {
+        final ServerFaction faction = manager.getServerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
+        promise.resolve();
     }
 
     @Override
     public void setFactionBuffer(Player player, String factionName, EClaimBufferType bufferType, int size, Promise promise) {
+        final ServerFaction faction = manager.getServerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        if (bufferType.equals(EClaimBufferType.BUILD)) {
+            faction.setBuildBuffer(size);
+        }
+
+        if (bufferType.equals(EClaimBufferType.CLAIM)) {
+            faction.setClaimBuffer(size);
+        }
+
+        promise.resolve();
     }
 
     @Override
     public void setFactionReinvites(Player player, String factionName, int reinvites, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
 
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.setReinvites(reinvites);
+        FMessage.printReinviteUpdate(faction, faction.getReinvites());
+        promise.resolve();
     }
 
     @Override
     public void setFactionAnnouncement(Player player, String announcement, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member account = faction.getMember(player.getUniqueId());
+
+        if (account == null && !bypass) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (account != null && account.getRank().equals(PlayerFaction.Rank.MEMBER) && !bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        faction.setAnnouncement(announcement);
+        FMessage.printAnnouncement(faction, announcement);
+        promise.resolve();
     }
 
     @Override
@@ -585,12 +732,121 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void promotePlayer(Player player, String username, Promise promise) {
+        final AccountService acs = (AccountService)manager.getPlugin().getService(AccountService.class);
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (acs == null) {
+            promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
+            return;
+        }
+
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member account = faction.getMember(player.getUniqueId());
+        final boolean leader = account.getRank().equals(PlayerFaction.Rank.LEADER);
+
+        if (account.getRank().equals(PlayerFaction.Rank.MEMBER) && !bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        acs.getAccount(username, new FailablePromise<>() {
+            @Override
+            public void resolve(AresAccount promotedAccount) {
+                if (promotedAccount == null) {
+                    promise.reject(FError.P_NOT_FOUND.getErrorDescription());
+                    return;
+                }
+
+                final PlayerFaction.Member otherAccount = faction.getMember(promotedAccount.getUniqueId());
+                if (otherAccount == null) {
+                    promise.reject(FError.P_NOT_IN_OWN_F.getErrorDescription());
+                    return;
+                }
+
+                if (otherAccount.getRank().isHigherOrEqual(account.getRank()) && !bypass && !leader) {
+                    promise.reject(FError.F_HIGHER_RANK.getErrorDescription());
+                    return;
+                }
+
+                final PlayerFaction.Rank newRank = otherAccount.getRank().getNext();
+                if (newRank == null) {
+                    promise.reject(FError.F_RANK_NOT_FOUND.getErrorDescription());
+                    return;
+                }
+
+                otherAccount.setRank(newRank);
+                FMessage.printPromotion(player, promotedAccount.getUsername(), faction, newRank);
+                promise.resolve();
+            }
+
+            @Override
+            public void reject(String error) {
+                promise.reject(error);
+            }
+        });
     }
 
     @Override
     public void demotePlayer(Player player, String username, Promise promise) {
+        final AccountService acs = (AccountService)manager.getPlugin().getService(AccountService.class);
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (acs == null) {
+            promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
+            return;
+        }
+
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member member = faction.getMember(player.getUniqueId());
+        final boolean leader = member.getRank().equals(PlayerFaction.Rank.LEADER);
+
+        if (member.getRank().equals(PlayerFaction.Rank.MEMBER) && !bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        acs.getAccount(username, new FailablePromise<>() {
+            @Override
+            public void resolve(AresAccount demotedAccount) {
+                if (demotedAccount == null) {
+                    promise.reject(FError.P_NOT_FOUND.getErrorDescription());
+                    return;
+                }
+
+                final PlayerFaction.Member otherMember = faction.getMember(demotedAccount.getUniqueId());
+
+                if (otherMember == null) {
+                    promise.reject(FError.P_NOT_IN_OWN_F.getErrorDescription());
+                    return;
+                }
+
+                if (otherMember.getRank().isHigher(member.getRank()) && !bypass && !leader) {
+                    promise.reject(FError.F_HIGHER_RANK.getErrorDescription());
+                    return;
+                }
+
+                final PlayerFaction.Rank newRank = PlayerFaction.Rank.OFFICER;
+
+                otherMember.setRank(newRank);
+                FMessage.printDemotion(player, demotedAccount.getUsername(), faction, PlayerFaction.Rank.MEMBER);
+                promise.resolve();
+            }
+
+            @Override
+            public void reject(String error) {
+                promise.reject(error);
+            }
+        });
     }
 
     @Override
@@ -605,7 +861,6 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void showFactionInfo(Player player) {
-        // TODO: Remove debug and add error checking
         final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
 
         if (playerFaction == null) {
@@ -682,6 +937,16 @@ public final class FactionExecutor implements IFactionExecutor {
     }
 
     @Override
+    public void unclaim(Player player, Promise promise) {
+
+    }
+
+    @Override
+    public void unclaim(Player player, String factionName, Promise promise) {
+
+    }
+
+    @Override
     public void unsubclaim(Player player, Promise promise) {
 
     }
@@ -703,7 +968,53 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void startHomeTimer(Player player, Promise promise) {
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
+        if (factionPlayer == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (faction.getHomeLocation() == null) {
+            promise.reject(FError.F_HOME_UNSET.getErrorDescription());
+            return;
+        }
+
+        final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
+        if (insideClaim != null) {
+            final IFaction insideFaction = manager.getFactionById(insideClaim.getUniqueId());
+
+            if (insideFaction != null) {
+                if (insideFaction instanceof ServerFaction) {
+                    final ServerFaction sf = (ServerFaction) insideFaction;
+
+                    if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                        Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
+                        player.sendMessage(FMessage.T_HOME_COMPLETE);
+                    } else if (!bypass) {
+                        promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                        return;
+                    }
+                } else {
+                    final PlayerFaction playerFaction = (PlayerFaction) insideFaction;
+
+                    if (!playerFaction.getUniqueId().equals(faction.getUniqueId()) && !bypass) {
+                        promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                        return;
+                    }
+                }
+            }
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.HOME, manager.getPlugin().getConfiguration().getHomeDuration()));
+        promise.resolve();
     }
 
     @Override

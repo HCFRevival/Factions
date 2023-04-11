@@ -45,6 +45,8 @@ public interface IFactionExecutor {
     void startClaiming(Player player, String factionName, Promise promise);
     void startSubclaiming(Player player, String subclaimName, Promise promise);
     void modifySubclaim(Player player, String subclaimName, String modifier, String username, Promise promise);
+    void unclaim(Player player, Promise promise);
+    void unclaim(Player player, String factionName, Promise promise);
     void unsubclaim(Player player, Promise promise);
     void unsubclaim(Player player, String subclaimName, Promise promise);
     void showSubclaimList(Player player);

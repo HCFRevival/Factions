@@ -52,6 +52,7 @@ public final class FConfig {
     @Getter public int stuckDuration;
     @Getter public int rallyDuration;
     @Getter public int freezeDuration;
+    @Getter public int homeDuration;
 
     // deathbans
     @Getter public boolean deathbansEnabled;
@@ -125,6 +126,7 @@ public final class FConfig {
         stuckDuration = 60;
         rallyDuration = 10;
         freezeDuration = 1800;
+        homeDuration = 10;
 
         deathbansEnabled = true;
         deathbansStandalone = true;
