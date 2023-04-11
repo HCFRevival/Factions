@@ -137,27 +137,19 @@ public final class FactionManager implements IManager {
         final FindIterable<Document> serverFactionDocs = serverFactionColl.find();
 
         try (MongoCursor<Document> pCursor = playerFactionDocs.cursor()) {
-            final Document doc = pCursor.tryNext();
-
-            if (doc == null) {
-                pCursor.close();
-                return;
+            while (pCursor.hasNext()) {
+                final Document doc = pCursor.next();
+                final PlayerFaction faction = new PlayerFaction(this).fromDocument(doc);
+                factionRepository.add(faction);
             }
-
-            final PlayerFaction faction = new PlayerFaction(this).fromDocument(doc);
-            factionRepository.add(faction);
         }
 
         try (MongoCursor<Document> sCursor = serverFactionDocs.cursor()) {
-            final Document doc = sCursor.tryNext();
-
-            if (doc == null) {
-                sCursor.close();
-                return;
+            while (sCursor.hasNext()) {
+                final Document doc = sCursor.next();
+                final ServerFaction faction = new ServerFaction().fromDocument(doc);
+                factionRepository.add(faction);
             }
-
-            final ServerFaction faction = new ServerFaction().fromDocument(doc);
-            factionRepository.add(faction);
         }
 
         final long post = Time.now();

@@ -303,6 +303,25 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     }
 
     @Override
+    public String toString() {
+        return "{" +
+                "\nuuid: " + getUniqueId().toString() +
+                "\nname: " + getName() +
+                "\nannouncement: " + getAnnouncement() +
+                "\nhomeLocation: " + (getHomeLocation() != null ? getHomeLocation().toString() : null) +
+                "\nrallyLocation: " + (getRallyLocation() != null ? getRallyLocation().toString() : null) +
+                "\nrating: " + rating +
+                "\nreinvites: " + reinvites +
+                "\nnextTick: " + nextTick +
+                "\nlastRallyUpdate: " + lastRallyUpdate +
+                "\nmembers: " + members.toString() +
+                "\npendingInvites: " + pendingInvites.toString() +
+                "\nmemberHistory: " + memberHistory.toString() +
+                "\ntimers: " + timers.toString() +
+                "\n}";
+    }
+
+    @Override
     public PlayerFaction fromDocument(Document document) {
         this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.name = document.getString("name");
@@ -377,7 +396,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         return doc;
     }
 
-    public class Member implements MongoDocument<Member> {
+    public static class Member implements MongoDocument<Member> {
         @Getter public UUID uniqueId;
         @Getter @Setter public Rank rank;
         @Getter @Setter public ChatChannel channel;
