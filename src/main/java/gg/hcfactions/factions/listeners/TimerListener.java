@@ -28,7 +28,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 
-@AllArgsConstructor
 public record TimerListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles applying combat tag to a PvP event

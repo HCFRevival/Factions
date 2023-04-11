@@ -3,12 +3,10 @@ package gg.hcfactions.factions.listeners;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.event.PlayerDeathbanEvent;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-@AllArgsConstructor
 public record StateListener(@Getter Factions plugin) implements Listener {
     @EventHandler /* Adjusts deathbans to SOTW/Normal caps */
     public void onPlayerDeathban(PlayerDeathbanEvent event) {

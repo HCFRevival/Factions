@@ -16,7 +16,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-@AllArgsConstructor
 public record StatsListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles caching a player's statistic holder upon login

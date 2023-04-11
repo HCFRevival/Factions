@@ -4,14 +4,12 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.bukkit.events.impl.ProcessedChatEvent;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-@AllArgsConstructor
 public record ChatListener(@Getter Factions plugin) implements Listener {
     @EventHandler(priority = EventPriority.MONITOR) /* Adds factions chat formatting and implements chat macros */
     public void onProcessedChat(ProcessedChatEvent event) {
@@ -55,6 +53,4 @@ public record ChatListener(@Getter Factions plugin) implements Listener {
 
         event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, message, p)));
     }
-
-
 }

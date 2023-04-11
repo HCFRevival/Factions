@@ -39,7 +39,6 @@ import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.Objects;
 
-@AllArgsConstructor
 public record CombatListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles enforcing physical combat restrictions

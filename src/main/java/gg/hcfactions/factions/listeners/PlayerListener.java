@@ -21,7 +21,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.UUID;
 
-@AllArgsConstructor
 public record PlayerListener(@Getter Factions plugin) implements Listener {
     @EventHandler /* Handles loading FactionPlayer in to memory */
     public void onPlayerLoad(AsyncPlayerPreLoginEvent event) {

@@ -17,10 +17,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.UUID;
 
-@AllArgsConstructor
-public final class DeathbanListener implements Listener {
-    @Getter public final Factions plugin;
-
+public record DeathbanListener(@Getter Factions plugin) implements Listener {
     // TODO: Reimpl Combat Logger death here
 
     @EventHandler (priority = EventPriority.MONITOR)
