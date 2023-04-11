@@ -1047,12 +1047,60 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void depositMoney(Player player, double amount, Promise promise) {
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
+        final double roundedAmount = Math.round(amount);
 
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (factionPlayer.getBalance() < roundedAmount) {
+            promise.reject(FError.P_CAN_NOT_AFFORD.getErrorDescription());
+            return;
+        }
+
+        factionPlayer.subtractFromBalance(roundedAmount);
+        FMessage.printFactionDeposit(faction, player, roundedAmount);
+        FMessage.printBalance(player, roundedAmount);
+        faction.setBalance(faction.getBalance() + roundedAmount);
+        promise.resolve();
     }
 
     @Override
     public void withdrawMoney(Player player, double amount, Promise promise) {
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
+        final double roundedAmount = Math.round(amount);
 
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction.Member factionMember = faction.getMember(player.getUniqueId());
+
+        if (factionMember == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (factionMember.getRank().equals(PlayerFaction.Rank.MEMBER)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (faction.getBalance() < roundedAmount) {
+            promise.reject(FError.P_CAN_NOT_AFFORD.getErrorDescription());
+            return;
+        }
+
+        faction.subtractFromBalance(roundedAmount);
+        FMessage.printFactionWithdrawn(faction, player, roundedAmount);
+        FMessage.printBalance(player, factionPlayer.getBalance());
+        factionPlayer.addToBalance(roundedAmount);
+        promise.resolve();
     }
 
     @Override

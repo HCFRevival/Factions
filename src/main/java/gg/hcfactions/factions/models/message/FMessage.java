@@ -175,6 +175,21 @@ public final class FMessage {
         faction.sendMessage(LAYER_1 + "Remaining Faction Re-invites: " + (newReinvites <= 2 ? ERROR : INFO) + newReinvites);
     }
 
+    public static void printBalance(Player player, double amount) {
+        final String formatted = String.format("%.2f", amount);
+        player.sendMessage(LAYER_2 + "Your balance" + LAYER_1 + ": " + INFO + "$" + formatted);
+    }
+
+    public static void printFactionWithdrawn(PlayerFaction faction, Player player, double amount) {
+        final String formatted = String.format("%.2f", amount);
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "withdrawn" + INFO + "$" + formatted + LAYER_1 + " from the faction balance");
+    }
+
+    public static void printFactionDeposit(PlayerFaction faction, Player player, double amount) {
+        final String formatted = String.format("%.2f", amount);
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "deposited" + INFO + "$" + formatted + LAYER_1 + " in to the faction balance");
+    }
+
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {
         if (faction == null) {
             return displayName + ChatColor.RESET + ": " + message;

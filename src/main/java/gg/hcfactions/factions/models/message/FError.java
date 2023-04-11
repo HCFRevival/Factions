@@ -46,7 +46,8 @@ public enum FError {
     P_COULD_NOT_LOAD_P("Could not load your player information"),
     P_NOT_INSIDE_CLAIM("You are not standing inside claimed land"),
     P_NOT_ENOUGH_PERMS("You do not have permission to perform this action"),
-    P_TIMER_ALREADY_STARTED("This timer is already running");
+    P_TIMER_ALREADY_STARTED("This timer is already running"),
+    P_CAN_NOT_AFFORD("You can not afford to perform this action");
 
     @Getter public final String errorDescription;
 }
