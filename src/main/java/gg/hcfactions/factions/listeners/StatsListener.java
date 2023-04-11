@@ -108,8 +108,11 @@ public record StatsListener(@Getter Factions plugin) implements Listener {
             final Player killer = slain.getKiller();
             final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killer.getUniqueId());
 
+            if (killerStats != null) {
+                killerStats.addToStatistic(EStatisticType.KILL, 1);
+            }
+
             plugin.getStatsManager().createKill(killer.getUniqueId(), killer.getName(), slain.getUniqueId(), slain.getName(), event.getDeathMessage());
-            killerStats.addToStatistic(EStatisticType.KILL, 1);
         }
 
         plugin.getStatsManager().createDeath(slain.getUniqueId(), slain.getName(), event.getDeathMessage());

@@ -2,6 +2,7 @@ package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.cmd.FactionCommand;
+import gg.hcfactions.factions.cmd.StatsCommand;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.player.PlayerManager;
@@ -40,6 +41,7 @@ public final class Factions extends AresPlugin {
         cmdMng.enableUnstableAPI("help");
         registerCommandManager(cmdMng);
         registerCommand(new FactionCommand(this));
+        registerCommand(new StatsCommand(this));
 
         // db init
         final Mongo mdb = new Mongo(configuration.getMongoUri(), getAresLogger());

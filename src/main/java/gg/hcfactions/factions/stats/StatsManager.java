@@ -15,6 +15,7 @@ import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.factions.models.stats.impl.stat.DeathStat;
 import gg.hcfactions.factions.models.stats.impl.stat.EventCaptureStat;
 import gg.hcfactions.factions.models.stats.impl.stat.KillStat;
+import gg.hcfactions.factions.stats.impl.StatsExecutor;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -35,6 +36,7 @@ public final class StatsManager implements IManager {
     public static final String STATS_DB_EVENT_COLL_NAME = "stats_events";
 
     @Getter public final Factions plugin;
+    @Getter public StatsExecutor executor;
     @Getter public StatsConfig config;
     @Getter public Set<IStatHolder> trackerRepository;
 
@@ -45,12 +47,48 @@ public final class StatsManager implements IManager {
 
     @Override
     public void onEnable() {
+        this.executor = new StatsExecutor(this);
         this.trackerRepository = Sets.newConcurrentHashSet();
     }
 
     @Override
     public void onDisable() {
+        saveStatistics();
+
+        this.executor = null;
         this.trackerRepository.clear();
+    }
+
+    public void saveStatistics() {
+        final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
+        if (mdb == null) {
+            plugin.getAresLogger().error("attempted to save player statistics data but mongo instance was null");
+            return;
+        }
+
+        final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+        if (db == null) {
+            plugin.getAresLogger().error("attempted to save player statistics data but mongo db was null");
+            return;
+        }
+
+        final MongoCollection<Document> pColl = db.getCollection(STATS_DB_PLAYER_COLL_NAME);
+        // TODO: Faction stats here
+
+        trackerRepository.stream().filter(h -> h instanceof PlayerStatHolder).forEach(ph -> {
+            final Document existing = pColl.find(Filters.and(
+                    Filters.eq("uuid", ph.getUniqueId().toString()),
+                    Filters.eq("map", config.getMapNumber())
+            )).first();
+
+            if (existing != null) {
+                pColl.replaceOne(existing, ((PlayerStatHolder) ph).toDocument());
+            } else {
+                pColl.insertOne(((PlayerStatHolder) ph).toDocument());
+            }
+        });
+
+        plugin.getAresLogger().info("finished writing player statistics to db");
     }
 
     /**

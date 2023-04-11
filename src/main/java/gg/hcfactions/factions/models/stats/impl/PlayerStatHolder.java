@@ -57,7 +57,7 @@ public final class PlayerStatHolder implements IStatHolder, MongoDocument<Player
         this.mapNumber = document.getDouble("map");
 
         for (EStatisticType type : EStatisticType.values()) {
-            if (!document.containsKey(type.name()) || document.get(type.name()) == null) {
+            if (!document.containsKey(type.name())) {
                 continue;
             }
 
