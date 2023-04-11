@@ -15,6 +15,13 @@ factions:
       - palace
       - spawn
   reinvites: 5
+  limits:
+    max_faction_size: 30
+    classes:
+      archer: 2
+      bard: 1
+      rouge: 2,
+      miner: 30
   power:
     player_power_value: 0.4
     power_tick_interval: 60

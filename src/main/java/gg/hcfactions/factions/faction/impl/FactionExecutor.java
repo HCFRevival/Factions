@@ -35,10 +35,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-@AllArgsConstructor
-public final class FactionExecutor implements IFactionExecutor {
-    @Getter public final FactionManager manager;
-
+public record FactionExecutor(@Getter FactionManager manager) implements IFactionExecutor {
     @Override
     public void createPlayerFaction(Player player, String factionName, Promise promise) {
         final FError nameError = manager.getValidator().isValidName(factionName);
@@ -356,12 +353,132 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void joinFaction(Player player, String factionName, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (manager.getPlayerFactionByPlayer(player) != null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        if (!faction.isInvited(player.getUniqueId()) && !bypass) {
+            promise.reject(FError.P_NO_INV_TO_F.getErrorDescription());
+            return;
+        }
+
+        if (faction.isFrozen() && !bypass) {
+            promise.reject(FError.P_CAN_NOT_JOIN_FROZEN.getErrorDescription());
+            return;
+        }
+
+        if (faction.isRaidable() && !bypass) {
+            promise.reject(FError.P_CAN_NOT_JOIN_RAIDABLE.getErrorDescription());
+            return;
+        }
+
+        if (faction.getMembers().size() >= manager.getPlugin().getConfiguration().getMaxFactionSize() && !bypass) {
+            promise.reject(FError.P_CAN_NOT_JOIN_FULL.getErrorDescription());
+            return;
+        }
+
+        if (faction.isReinvited(player.getUniqueId()) && faction.getReinvites() <= 0 && !bypass) {
+            promise.reject(FError.P_CAN_NOT_JOIN_NO_REINV.getErrorDescription());
+            return;
+        }
+
+        /* final ClassAddon classAddon = (ClassAddon)manager.getPlugin().getAddonManager().get(ClassAddon.class);
+
+        if (classAddon != null) {
+            final AresClass playerClass = classAddon.getManager().getCurrentClass(player);
+
+            if (playerClass != null) {
+                final int count = classAddon.getManager().getFactionClassCount(faction, playerClass);
+
+                if (playerClass instanceof Archer) {
+                    if (count > manager.getConfig().getArcherLimit()) {
+                        playerClass.deactivate(player, false);
+                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Archers");
+                    }
+                }
+
+                if (playerClass instanceof Rogue) {
+                    if (count > manager.getConfig().getRogueLimit()) {
+                        playerClass.deactivate(player, false);
+                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Rogues");
+                    }
+                }
+
+                if (playerClass instanceof Bard) {
+                    if (count > manager.getConfig().getBardLimit()) {
+                        playerClass.deactivate(player, false);
+                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Bards");
+                    }
+                }
+
+                if (playerClass instanceof Miner) {
+                    if (count > manager.getConfig().getArcherLimit()) {
+                        playerClass.deactivate(player, false);
+                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Miners");
+                    }
+                }
+            }
+        } */
+
+        faction.getPendingInvites().remove(player.getUniqueId());
+
+        if (faction.isReinvited(player.getUniqueId())) {
+            faction.setReinvites(faction.getReinvites() - 1);
+            FMessage.printReinviteConsumed(faction, faction.getReinvites());
+        } else {
+            faction.getMemberHistory().add(player.getUniqueId());
+        }
+
+        faction.addMember(player.getUniqueId());
+        faction.setupScoreboard(player);
+        FMessage.printPlayerJoinedFaction(faction, player);
+        promise.resolve();
     }
 
     @Override
     public void leaveFaction(Player player, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (faction.isRaidable() && !bypass) {
+            promise.reject(FError.F_NOT_ALLOWED_RAIDABLE.getErrorDescription());
+            return;
+        }
+
+        if (faction.isFrozen() && !bypass) {
+            promise.reject(FError.F_NOT_ALLOWED_WHILE_FROZEN.getErrorDescription());
+            return;
+        }
+
+        if (faction.getMember(player.getUniqueId()).getRank().equals(PlayerFaction.Rank.LEADER)) {
+            promise.reject(FError.F_REASSIGN_LEADER.getErrorDescription());
+            return;
+        }
+
+        if (insideClaim != null && insideClaim.getOwner().equals(faction.getUniqueId()) && !bypass) {
+            promise.reject(FError.F_EXIT_CLAIM_BEFORE_LEAVE.getErrorDescription());
+            return;
+        }
+
+        faction.getMembers().remove(faction.getMember(player.getUniqueId()));
+        faction.destroyScoreboard(player);
+        FMessage.printPlayerLeftFaction(faction, player);
+        promise.resolve();
     }
 
     @Override
@@ -440,10 +557,10 @@ public final class FactionExecutor implements IFactionExecutor {
             final PlayerFaction pf = (PlayerFaction) faction;
             pf.sendMessage(
                     FMessage.P_NAME + player.getName()
-                    + FMessage.LAYER_1 + " has "
-                    + FMessage.LAYER_2 + "renamed"
-                    + FMessage.LAYER_1 + " your faction to "
-                    + FMessage.INFO + newFactionName);
+                            + FMessage.LAYER_1 + " has "
+                            + FMessage.LAYER_2 + "renamed"
+                            + FMessage.LAYER_1 + " your faction to "
+                            + FMessage.INFO + newFactionName);
         }
 
         promise.resolve();
@@ -498,11 +615,11 @@ public final class FactionExecutor implements IFactionExecutor {
         }
 
         if (faction instanceof PlayerFaction) {
-            final PlayerFaction playerFaction = (PlayerFaction)faction;
+            final PlayerFaction playerFaction = (PlayerFaction) faction;
             playerFaction.setHomeLocation(new PLocatable(player));
             FMessage.printHomeUpdate(playerFaction, player, playerFaction.getHomeLocation());
         } else {
-            final ServerFaction serverFaction = (ServerFaction)faction;
+            final ServerFaction serverFaction = (ServerFaction) faction;
             serverFaction.setHomeLocation(new PLocatable(player));
         }
 
@@ -732,7 +849,7 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void promotePlayer(Player player, String username, Promise promise) {
-        final AccountService acs = (AccountService)manager.getPlugin().getService(AccountService.class);
+        final AccountService acs = (AccountService) manager.getPlugin().getService(AccountService.class);
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
@@ -793,7 +910,7 @@ public final class FactionExecutor implements IFactionExecutor {
 
     @Override
     public void demotePlayer(Player player, String username, Promise promise) {
-        final AccountService acs = (AccountService)manager.getPlugin().getService(AccountService.class);
+        final AccountService acs = (AccountService) manager.getPlugin().getService(AccountService.class);
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 

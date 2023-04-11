@@ -43,6 +43,9 @@ public final class FConfig {
     @Getter public int goldRating;
     @Getter public int silverRating;
 
+    // faction limits
+    @Getter public int maxFactionSize;
+
     // claiming
     @Getter public int defaultServerFactionBuildBuffer;
     @Getter public int defaultServerFactionClaimBuffer;
@@ -118,6 +121,8 @@ public final class FConfig {
         disallowedFactionNames = conf.getStringList("factions.naming.disallowed_names");
 
         defaultFactionReinvites = conf.getInt("factions.reinvites");
+
+        maxFactionSize = conf.getInt("factions.limits.max_faction_size");
 
         playerPowerValue = conf.getDouble("factions.power.player_power_value");
         powerTickInterval = conf.getInt("factions.power.power_tick_interval");

@@ -50,6 +50,14 @@ public final class FMessage {
         Bukkit.broadcastMessage(LAYER_1 + "Faction " + INFO + factionName + LAYER_1 + " has been " + ERROR + "disbanded" + LAYER_1 + " by " + P_NAME + playerName);
     }
 
+    public static void printPlayerJoinedFaction(PlayerFaction faction, Player player) {
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "joined" + LAYER_1 + " the faction");
+    }
+
+    public static void printPlayerLeftFaction(PlayerFaction faction, Player player) {
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "left" + LAYER_1 + " the faction");
+    }
+
     public static void printDepositReceived(Player player, double amount) {
         player.sendMessage(ChatColor.DARK_GREEN + "$" + String.format("%.2f", amount) + LAYER_1 + " has been " + SUCCESS + "deposited" + LAYER_1 + " to your personal balance");
     }
@@ -85,7 +93,7 @@ public final class FMessage {
     }
 
     public static void printPlayerInvite(Player player, PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "invited" + P_NAME + username + LAYER_1 + " to the faction");
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "invited " + P_NAME + username + LAYER_1 + " to the faction");
     }
 
     public static void printNowAtMaxDTR(PlayerFaction playerFaction) {
@@ -152,15 +160,19 @@ public final class FMessage {
     }
 
     public static void printPromotion(Player initiater, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
-        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + SUCCESS + "promoted" + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
+        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + SUCCESS + "promoted " + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
     }
 
     public static void printDemotion(Player initiater, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
-        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + ERROR + "demoted" + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
+        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + ERROR + "demoted " + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
     }
 
     public static void printHomeUpdate(PlayerFaction faction, Player player, PLocatable location) {
         faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "updated" + LAYER_1 + " your faction home to " + INFO + Math.round(location.getX()) + ", " + Math.round(location.getY()) + ", " + Math.round(location.getZ()));
+    }
+
+    public static void printReinviteConsumed(PlayerFaction faction, int newReinvites) {
+        faction.sendMessage(LAYER_1 + "Remaining Faction Re-invites: " + (newReinvites <= 2 ? ERROR : INFO) + newReinvites);
     }
 
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {

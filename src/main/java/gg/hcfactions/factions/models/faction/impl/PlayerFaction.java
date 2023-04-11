@@ -162,6 +162,24 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     }
 
     /**
+     * Returns true if the provided Player UUID has a pending invite
+     * @param uniqueId Bukkit UUID
+     * @return True if invited
+     */
+    public boolean isInvited(UUID uniqueId) {
+        return pendingInvites.contains(uniqueId);
+    }
+
+    /**
+     * Returns true if the provided Player UUID has been a member of this faction recently
+     * @param uniqueId Bukkit UUID
+     * @return True if reinvited
+     */
+    public boolean isReinvited(UUID uniqueId) {
+        return memberHistory.contains(uniqueId);
+    }
+
+    /**
      * Returns an immutable list of members that are currently online
      * @return List<Member>
      */
@@ -232,7 +250,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
      * @return DTR cap (double)
      */
     public double getMaxDtr() {
-        return 10.0; // TODO: Implement max dtr
+        return manager.getPlugin().getConfiguration().getPlayerPowerValue() * members.size();
     }
 
     /**
