@@ -13,6 +13,9 @@ import java.util.List;
 public final class FConfig {
     @Getter public Factions plugin;
 
+    @Getter public String mongoUri;
+    @Getter public String redisUri;
+
     // world
     @Getter public Location overworldSpawn;
     @Getter public Location netherSpawn;
@@ -102,6 +105,9 @@ public final class FConfig {
         final PLocatable overworldLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
         final PLocatable netherLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
         final PLocatable endLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
+
+        mongoUri = conf.getString("databases.mongodb.uri");
+        redisUri = conf.getString("databases.redis.uri");
 
         overworldSpawn = overworldLoc.getBukkitLocation();
         netherSpawn = netherLoc.getBukkitLocation();

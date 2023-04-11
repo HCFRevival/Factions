@@ -42,7 +42,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new FactionCommand(this));
 
         // db init
-        final Mongo mdb = new Mongo("mongodb://0.0.0.0:27017/", getAresLogger());
+        final Mongo mdb = new Mongo(configuration.getMongoUri(), getAresLogger());
         mdb.openConnection();
         registerConnectable(mdb);
 
