@@ -40,11 +40,10 @@ import org.bukkit.projectiles.ProjectileSource;
 import java.util.Objects;
 
 @AllArgsConstructor
-public final class CombatListener implements Listener {
-    @Getter public final Factions plugin;
-
+public record CombatListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles enforcing physical combat restrictions
+     *
      * @param event PlayerDamagePlayerEvent
      */
     @EventHandler(priority = EventPriority.HIGH)
@@ -80,7 +79,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     FMessage.printCanNotFightInClaim(attacker, sf.getDisplayName());
@@ -95,7 +94,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     FMessage.printCanNotFightInClaim(attacker, sf.getDisplayName());
@@ -115,6 +114,7 @@ public final class CombatListener implements Listener {
 
     /**
      * Handles enforcing fire aspect and flame enchantments
+     *
      * @param event EntityCombustByEntityEvent
      */
     @EventHandler
@@ -123,15 +123,15 @@ public final class CombatListener implements Listener {
             return;
         }
 
-        final Player attacked = (Player)event.getEntity();
-        final Projectile projectile = (Projectile)event.getCombuster();
+        final Player attacked = (Player) event.getEntity();
+        final Projectile projectile = (Projectile) event.getCombuster();
         final ProjectileSource source = projectile.getShooter();
 
         if (!(source instanceof Player)) {
             return;
         }
 
-        final Player attacker = (Player)source;
+        final Player attacker = (Player) source;
 
         if (attacker.getUniqueId().equals(attacked.getUniqueId())) {
             return;
@@ -159,7 +159,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
@@ -173,7 +173,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
@@ -227,7 +227,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
@@ -241,7 +241,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
@@ -252,9 +252,10 @@ public final class CombatListener implements Listener {
 
     /**
      * Handles enforcing splash potions with timers and claims
+     *
      * @param event PlayerSplashPlayerEvent
      */
-    @EventHandler (priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerSplashPlayer(PlayerSplashPlayerEvent event) {
         final Player attacker = event.getDamager();
         final Player attacked = event.getDamaged();
@@ -299,7 +300,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
@@ -313,7 +314,7 @@ public final class CombatListener implements Listener {
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
             if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
+                final ServerFaction sf = (ServerFaction) owner;
 
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
@@ -476,9 +477,10 @@ public final class CombatListener implements Listener {
 
     /**
      * Handles rendering display for Faction member deaths
+     *
      * @param event FactionMemberDeathEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onMemberDeath(FactionMemberDeathEvent event) {
         final String username = event.getUsername();
         final PlayerFaction faction = event.getFaction();
@@ -489,6 +491,7 @@ public final class CombatListener implements Listener {
 
     /**
      * Handles reducing faction power loss in nether/end if it's enabled in the Factions config
+     *
      * @param event FactionMemberDeathEvent
      */
     @EventHandler
@@ -513,9 +516,10 @@ public final class CombatListener implements Listener {
 
     /**
      * Handles player deaths
+     *
      * @param event PlayerDeathEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
         final Player slain = event.getEntity();
         final Player killer = slain.getKiller();
@@ -579,11 +583,11 @@ public final class CombatListener implements Listener {
             }
 
             if (reason.equals(EntityDamageEvent.DamageCause.PROJECTILE) && slain.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-                final EntityDamageByEntityEvent pveEvent = (EntityDamageByEntityEvent)slain.getLastDamageCause();
-                final Projectile projectile = (Projectile)pveEvent.getDamager();
+                final EntityDamageByEntityEvent pveEvent = (EntityDamageByEntityEvent) slain.getLastDamageCause();
+                final Projectile projectile = (Projectile) pveEvent.getDamager();
 
                 if (projectile.getShooter() instanceof LivingEntity) {
-                    final LivingEntity shooter = (LivingEntity)projectile.getShooter();
+                    final LivingEntity shooter = (LivingEntity) projectile.getShooter();
                     final String distance = String.format("%.2f", shooter.getLocation().distance(slain.getLocation()));
 
                     event.setDeathMessage(prefix + " " + slainUsername + cA + " was shot and killed by " + killerUsername + cA + " from a distance of " + cB + distance + " blocks");
@@ -618,10 +622,18 @@ public final class CombatListener implements Listener {
                 case SONIC_BOOM:
                     event.setDeathMessage(prefix + " " + slainUsername + cA + " blew up while fighting " + killerUsername + cA + " while using " + hand);
                     break;
-                case VOID: event.setDeathMessage(prefix + " " + slainUsername + cA + " fell in to the void while fighting " + killerUsername + cA + " while using " + hand); break;
-                case WITHER: event.setDeathMessage(prefix + " " + slainUsername + cA + " withered away while fighting " + killerUsername + cA + " while using " + hand); break;
-                case STARVATION: event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death while fighting " + killerUsername + cA + " while using " + hand); break;
-                default: event.setDeathMessage(defaultDeathMessage); break;
+                case VOID:
+                    event.setDeathMessage(prefix + " " + slainUsername + cA + " fell in to the void while fighting " + killerUsername + cA + " while using " + hand);
+                    break;
+                case WITHER:
+                    event.setDeathMessage(prefix + " " + slainUsername + cA + " withered away while fighting " + killerUsername + cA + " while using " + hand);
+                    break;
+                case STARVATION:
+                    event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death while fighting " + killerUsername + cA + " while using " + hand);
+                    break;
+                default:
+                    event.setDeathMessage(defaultDeathMessage);
+                    break;
             }
 
             return;
@@ -667,10 +679,18 @@ public final class CombatListener implements Listener {
             case SONIC_BOOM:
                 event.setDeathMessage(prefix + " " + slainUsername + cA + " blew up");
                 break;
-            case VOID: event.setDeathMessage(prefix + " " + slainUsername + cA + " fell in to the void"); break;
-            case WITHER: event.setDeathMessage(prefix + " " + slainUsername + cA + " withered away"); break;
-            case STARVATION: event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death"); break;
-            default: event.setDeathMessage(prefix + " " + slainUsername + cA + " died"); break;
+            case VOID:
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " fell in to the void");
+                break;
+            case WITHER:
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " withered away");
+                break;
+            case STARVATION:
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death");
+                break;
+            default:
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " died");
+                break;
         }
     }
 }

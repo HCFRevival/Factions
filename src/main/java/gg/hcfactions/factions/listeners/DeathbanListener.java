@@ -2,6 +2,8 @@ package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.state.EServerState;
+import gg.hcfactions.factions.models.stats.EStatisticType;
+import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.event.PlayerDeathbanEvent;
 import lombok.AllArgsConstructor;
@@ -26,11 +28,12 @@ public final class DeathbanListener implements Listener {
         final Player player = event.getEntity();
         final UUID uniqueId = player.getUniqueId();
         final ServerStateManager stateManager = plugin.getServerStateManager();
+        final PlayerStatHolder statHolder = plugin.getStatsManager().getPlayerStatistics(uniqueId);
 
         final PlayerDeathbanEvent de = new PlayerDeathbanEvent(
                 uniqueId,
                 event.getDeathMessage(),
-                30,
+                (int)(statHolder.getStatistic(EStatisticType.PLAYTIME) / 1000L),
                 stateManager.getCurrentState().equals(EServerState.SOTW),
                 (stateManager.getCurrentState().equals(EServerState.EOTW_PHASE_1) || stateManager.getCurrentState().equals(EServerState.EOTW_PHASE_2))
         );

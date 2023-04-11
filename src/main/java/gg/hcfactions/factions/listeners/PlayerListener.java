@@ -22,9 +22,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import java.util.UUID;
 
 @AllArgsConstructor
-public final class PlayerListener implements Listener {
-    @Getter public final Factions plugin;
-
+public record PlayerListener(@Getter Factions plugin) implements Listener {
     @EventHandler /* Handles loading FactionPlayer in to memory */
     public void onPlayerLoad(AsyncPlayerPreLoginEvent event) {
         final UUID uniqueId = event.getUniqueId();

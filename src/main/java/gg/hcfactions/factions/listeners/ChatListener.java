@@ -12,10 +12,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 @AllArgsConstructor
-public final class ChatListener implements Listener {
-    @Getter public final Factions plugin;
-
-    @EventHandler (priority = EventPriority.MONITOR) /* Adds factions chat formatting and implements chat macros */
+public record ChatListener(@Getter Factions plugin) implements Listener {
+    @EventHandler(priority = EventPriority.MONITOR) /* Adds factions chat formatting and implements chat macros */
     public void onProcessedChat(ProcessedChatEvent event) {
         final Player player = event.getPlayer();
         final String displayName = event.getDisplayName();

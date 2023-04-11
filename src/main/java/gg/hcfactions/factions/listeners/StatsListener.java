@@ -17,11 +17,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 @AllArgsConstructor
-public final class StatsListener implements Listener {
-    @Getter public final Factions plugin;
-
+public record StatsListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles caching a player's statistic holder upon login
+     *
      * @param event PlayerJoinEvent
      */
     @EventHandler
@@ -37,9 +36,10 @@ public final class StatsListener implements Listener {
 
     /**
      * Handles saving and decaching a player's statistics upon logout
+     *
      * @param event PlayerQuitEvent
      */
-    @EventHandler (priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
         final PlayerStatHolder stats = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
@@ -90,9 +90,10 @@ public final class StatsListener implements Listener {
 
     /**
      * Handles creating kill and death entries for players
+     *
      * @param event PlayerDeathEvent
      */
-    @EventHandler (priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
         final Player slain = event.getEntity();
         final PlayerStatHolder slainStats = plugin.getStatsManager().getPlayerStatistics(slain.getUniqueId());

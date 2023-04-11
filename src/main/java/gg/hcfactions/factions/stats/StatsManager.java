@@ -62,7 +62,7 @@ public final class StatsManager implements IManager {
         return (PlayerStatHolder) trackerRepository
                 .stream()
                 .filter(stats -> stats instanceof PlayerStatHolder)
-                .filter(ps -> ((PlayerStatHolder)ps).getUniqueId().equals(uniqueId))
+                .filter(ps -> ps.getUniqueId().equals(uniqueId))
                 .findAny()
                 .orElse(null);
     }

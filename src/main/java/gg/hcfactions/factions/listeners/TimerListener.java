@@ -29,11 +29,10 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 
 @AllArgsConstructor
-public final class TimerListener implements Listener {
-    @Getter public final Factions plugin;
-
+public record TimerListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles applying combat tag to a PvP event
+     *
      * @param damager Damaging Player
      * @param damaged Damaged Player
      */
@@ -57,18 +56,16 @@ public final class TimerListener implements Listener {
 
         if (damagedTimer == null) {
             damagedProfile.addTimer(new FTimer(ETimerType.COMBAT, attackedDuration));
-            FMessage.printCombatTag(damaged, (attackedDuration*1000L));
+            FMessage.printCombatTag(damaged, (attackedDuration * 1000L));
         } else if (damagedTimer.getRemainingSeconds() < attackedDuration) {
-            damagedTimer.setExpire(Time.now() + (attackedDuration*1000L));
+            damagedTimer.setExpire(Time.now() + (attackedDuration * 1000L));
         }
 
         if (damagerTimer == null) {
             damagerProfile.addTimer(new FTimer(ETimerType.COMBAT, attackerDuration));
-            FMessage.printCombatTag(damager, (attackerDuration*1000L));
-        }
-
-        else if (damagerTimer.getRemainingSeconds() < attackerDuration) {
-            damagerTimer.setExpire(Time.now() + (attackerDuration*1000L));
+            FMessage.printCombatTag(damager, (attackerDuration * 1000L));
+        } else if (damagerTimer.getRemainingSeconds() < attackerDuration) {
+            damagerTimer.setExpire(Time.now() + (attackerDuration * 1000L));
         }
     }
 
@@ -137,9 +134,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles Combat Tag
+     *
      * @param event PlayerDamagePlayerEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onCombatTagPhysical(PlayerDamagePlayerEvent event) {
         if (event.isCancelled()) {
             return;
@@ -150,9 +148,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles Combat Tag
+     *
      * @param event PlayerSplashPlayerEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onCombatTagSplash(PlayerSplashPlayerEvent event) {
         if (event.isCancelled()) {
             return;
@@ -163,9 +162,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles Combat Tag
+     *
      * @param event PlayerSplashPlayerEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onCombatTagSplash(PlayerLingeringSplashEvent event) {
         if (event.isCancelled()) {
             return;
@@ -200,9 +200,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles cancelling timers which require the player to not move
+     *
      * @param event PlayerBigMoveEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onMove(PlayerBigMoveEvent event) {
         if (event.isCancelled()) {
             return;
@@ -217,8 +218,8 @@ public final class TimerListener implements Listener {
 
         if (
                 !factionPlayer.hasTimer(ETimerType.HOME)
-                && !factionPlayer.hasTimer(ETimerType.LOGOUT)
-                && !factionPlayer.hasTimer(ETimerType.STUCK)
+                        && !factionPlayer.hasTimer(ETimerType.LOGOUT)
+                        && !factionPlayer.hasTimer(ETimerType.STUCK)
         ) {
             return;
         }
@@ -226,8 +227,8 @@ public final class TimerListener implements Listener {
         for (FTimer timer : factionPlayer.getTimers()) {
             if (
                     !timer.getType().equals(ETimerType.HOME)
-                    && !timer.getType().equals(ETimerType.LOGOUT)
-                    && !timer.getType().equals(ETimerType.STUCK)
+                            && !timer.getType().equals(ETimerType.LOGOUT)
+                            && !timer.getType().equals(ETimerType.STUCK)
             ) {
                 continue;
             }
@@ -239,6 +240,7 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles cancelling timers which require the player to not take damage
+     *
      * @param event EntityDamageEvent
      */
     @EventHandler
@@ -251,7 +253,7 @@ public final class TimerListener implements Listener {
             return;
         }
 
-        final Player player = (Player)event.getEntity();
+        final Player player = (Player) event.getEntity();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
@@ -260,8 +262,8 @@ public final class TimerListener implements Listener {
 
         if (
                 !factionPlayer.hasTimer(ETimerType.HOME)
-                && !factionPlayer.hasTimer(ETimerType.LOGOUT)
-                && !factionPlayer.hasTimer(ETimerType.STUCK)
+                        && !factionPlayer.hasTimer(ETimerType.LOGOUT)
+                        && !factionPlayer.hasTimer(ETimerType.STUCK)
         ) {
             return;
         }
@@ -278,9 +280,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles applying the enderpearl cooldown
+     *
      * @param event PlayerInteractEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onEnderpearl(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
 
@@ -310,9 +313,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles preventing enderpearls from being thrown while on cooldown
+     *
      * @param event ProjectileLaunchEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         if (event.isCancelled()) {
             return;
@@ -328,7 +332,7 @@ public final class TimerListener implements Listener {
             return;
         }
 
-        final Player player = (Player)projectile.getShooter();
+        final Player player = (Player) projectile.getShooter();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
@@ -348,9 +352,10 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles applying consumable item cooldowns
+     *
      * @param event PlayerItemConsumeEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerConsume(PlayerItemConsumeEvent event) {
         if (event.isCancelled()) {
             return;
@@ -374,9 +379,7 @@ public final class TimerListener implements Listener {
             }
 
             factionPlayer.addTimer(new FTimer(ETimerType.CRAPPLE, plugin.getConfiguration().getCrappleDuration()));
-        }
-
-        else if (item.getType().equals(Material.ENCHANTED_GOLDEN_APPLE)) {
+        } else if (item.getType().equals(Material.ENCHANTED_GOLDEN_APPLE)) {
             final FTimer existing = factionPlayer.getTimer(ETimerType.GAPPLE);
 
             if (existing != null && !existing.isExpired()) {
@@ -391,6 +394,7 @@ public final class TimerListener implements Listener {
 
     /**
      * Handles applying totem cooldown
+     *
      * @param event EntityResurrectEvent
      */
     @EventHandler
@@ -399,7 +403,7 @@ public final class TimerListener implements Listener {
             return;
         }
 
-        final Player player = (Player)event.getEntity();
+        final Player player = (Player) event.getEntity();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
