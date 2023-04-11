@@ -1,5 +1,7 @@
 package gg.hcfactions.factions.faction;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -22,8 +24,10 @@ import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class FactionManager implements IManager {
     public static final String FACTION_DB_NAME = "dev";
@@ -217,5 +221,17 @@ public final class FactionManager implements IManager {
         return (ServerFaction) factionRepository.stream().filter(f -> f instanceof ServerFaction && f.getName().equalsIgnoreCase(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public ImmutableList<PlayerFaction> getPlayerFactions() {
+        final List<PlayerFaction> res = Lists.newArrayList();
+        factionRepository.stream().filter(f -> f instanceof PlayerFaction).forEach(f -> res.add((PlayerFaction)f));
+        return ImmutableList.copyOf(res);
+    }
+
+    public ImmutableList<ServerFaction> getServerFactions() {
+        final List<ServerFaction> res = Lists.newArrayList();
+        factionRepository.stream().filter(f -> f instanceof ServerFaction).forEach(f -> res.add((ServerFaction)f));
+        return ImmutableList.copyOf(res);
     }
 }

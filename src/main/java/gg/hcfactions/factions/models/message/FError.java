@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum FError {
     A_SERVER_STATE_SAME("Server state is already set to this value"),
     G_GENERIC_ERROR("An error has occurred"),
+    G_PAGE_NOT_FOUND("Page not found"),
     P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"),
     P_CAN_NOT_CHANGE_WORLDS_PVP_PROT("You can not change worlds while you have PvP protection"),
     P_CAN_NOT_ATTACK_PVP_PROT("You can not attack others while you have PvP protection"),

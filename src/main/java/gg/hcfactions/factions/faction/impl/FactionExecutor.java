@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.faction.impl;
 
+import com.google.common.collect.Lists;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.listeners.events.faction.FactionCreateEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
@@ -29,10 +30,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public record FactionExecutor(@Getter FactionManager manager) implements IFactionExecutor {
@@ -638,7 +642,82 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void showFactionList(Player player, int page) {
+        // create copy because we're modifying it
+        final List<PlayerFaction> factions = Lists.newArrayList(getManager().getPlayerFactions());
 
+        factions.sort(Comparator.comparingInt(f -> f.getOnlineMembers().size()));
+        Collections.reverse(factions);
+
+        // Fixes page 0 or negative pages
+        page = Math.max(page, 1);
+
+        int finishPos = page * 10;
+        int startPos = (page - 1) * 10;
+
+        if (startPos > factions.size()) {
+            player.sendMessage(FError.G_PAGE_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        final boolean hasNextPage = finishPos < factions.size();
+        final boolean hasPrevPage = page > 1;
+
+        player.sendMessage(FMessage.LAYER_2 + "Faction List (" + FMessage.LAYER_1 + "Page " + page + FMessage.LAYER_2 + ")");
+
+        for (int i = startPos; i < finishPos; i++) {
+            if (i >= factions.size()) {
+                break;
+            }
+
+            final PlayerFaction faction = factions.get(i);
+
+            // Faction List
+            //  1. RankXI [6/8 Online] [4.8/5.5DTR]
+
+            net.md_5.bungee.api.ChatColor dtrColor;
+
+            if (faction.getDtr() >= 1.0) {
+                dtrColor = net.md_5.bungee.api.ChatColor.GREEN;
+            } else if (faction.getDtr() >= 0.0) {
+                dtrColor = net.md_5.bungee.api.ChatColor.YELLOW;
+            } else {
+                dtrColor = net.md_5.bungee.api.ChatColor.RED;
+            }
+
+            player.spigot().sendMessage(
+                    new ComponentBuilder
+                            (" ").color(net.md_5.bungee.api.ChatColor.RESET)
+                            .append(" ").color(net.md_5.bungee.api.ChatColor.RESET)
+                            .append((i + 1) + "." + " ").color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append(faction.getName() + " ").color(net.md_5.bungee.api.ChatColor.GOLD)
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to view more information about " + faction.getName()).color(net.md_5.bungee.api.ChatColor.DARK_PURPLE).create()))
+                            .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f who " + faction.getName()))
+                            .append("[").color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append(faction.getOnlineMembers().size() + "").color(net.md_5.bungee.api.ChatColor.GREEN)
+                            .append(" / " + faction.getMembers().size() + " online").color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append("] [").color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .append(String.format("%.2f", faction.getDtr())).color(dtrColor)
+                            .append(" / " + String.format("%.2f", faction.getMaxDtr()) + "DTR]").color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .create());
+        }
+
+        final ComponentBuilder pagination = new ComponentBuilder(" ").color(net.md_5.bungee.api.ChatColor.RESET);
+
+        if (hasPrevPage) {
+            pagination.append("[Previous Page]")
+                    .color(net.md_5.bungee.api.ChatColor.RED)
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f list " + (page - 1)))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Visit the previous page").color(net.md_5.bungee.api.ChatColor.GRAY).create()));
+        }
+
+        if (hasNextPage) {
+            pagination.append("[Next Page]")
+                    .color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f list " + (page + 1)))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Visit the next page").color(net.md_5.bungee.api.ChatColor.GRAY).create()));
+        }
+
+        player.spigot().sendMessage(pagination.create());
     }
 
     @Override
