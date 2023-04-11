@@ -3,3 +3,80 @@ databases:
     uri: 'mongodb://mongodb:27017'
   redis:
     uri: 'redis://redis:6379'
+
+factions:
+  naming:
+    min_faction_name: 2
+    max_faction_name: 24
+    disallowed_names:
+      - nigger
+      - nigga
+      - nigs
+      - palace
+      - spawn
+  reinvites: 5
+  power:
+    player_power_value: 0.4
+    power_tick_interval: 60
+    power_tick_player_modifier: 1
+    power_loss_reductions:
+      nether: true
+      end: true
+  ratings:
+    challenger: 10000
+    diamond: 8000
+    platinum: 6000
+    gold: 4000
+    silver: 2000
+    bronze: 1000
+  claiming:
+    default_buffers:
+      server_faction_build: 16
+      server_faction_claim: 32
+      player_faction_claim: 1
+  timers:
+    attacker_tag_duration: 30
+    attacked_tag_duration: 10
+    enderpearl_duration: 16
+    crapple_duration: 5
+    gapple_duration: 3600
+    totem_duration: 3600
+    stuck_duration: 60
+    rally_duration: 5
+    freeze_duration: 1800
+    home_duration: 10
+  spawns:
+    overworld:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+      yaw: 0.0
+      pitch: 0.0
+      world: 'world'
+    nether:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+      yaw: 0.0
+      pitch: 0.0
+      world: 'world_nether'
+    end:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+      yaw: 0.0
+      pitch: 0.0
+      world: 'world_the_end'
+
+deathbans:
+  enabled: true
+  standalone: true
+  max_durations:
+    sotw: 300
+    normal: 86400
+  min_duration: 30
+  life_use_delay: 60
+  shop_url: "https://hcfactions.gg/shop"
+
+stats:
+  map_number: 0.5

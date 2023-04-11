@@ -29,7 +29,7 @@ public final class Factions extends AresPlugin {
         super.onEnable();
 
         // config init
-        configuration = new FConfig();
+        configuration = new FConfig(this);
         configuration.loadConfig();
 
         // logger init

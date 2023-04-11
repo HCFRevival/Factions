@@ -1,15 +1,18 @@
 package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.stats.StatsConfig;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
+import gg.hcfactions.libs.bukkit.utils.Configs;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.util.Arrays;
 import java.util.List;
 
 public final class FConfig {
+    @Getter public Factions plugin;
+
     // world
     @Getter public Location overworldSpawn;
     @Getter public Location netherSpawn;
@@ -61,9 +64,14 @@ public final class FConfig {
     @Getter public int normalMaxDeathbanDuration;
     @Getter public int minDeathbanDuration;
     @Getter public int lifeUseDelay;
+    @Getter public String shopUrl;
 
     // stats
     @Getter public int mapNumber;
+
+    public FConfig(Factions plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Parses deathban fields in to a DeathbanConfig object
@@ -77,7 +85,7 @@ public final class FConfig {
                 normalMaxDeathbanDuration,
                 minDeathbanDuration,
                 lifeUseDelay,
-                "https://hcfactions.gg/shop"
+                shopUrl
         );
     }
 
@@ -89,50 +97,55 @@ public final class FConfig {
         return new StatsConfig(mapNumber);
     }
 
-    // TODO: load values from config
     public void loadConfig() {
-        overworldSpawn = new Location(Bukkit.getWorld("world"), 0.0, 64.0, 0.0);
-        netherSpawn = new Location(Bukkit.getWorld("world_nether"), 0.0, 64.0, 0.0);
-        endSpawn = new Location(Bukkit.getWorld("world_the_end"), 0.0, 64.0, 0.0);
+        final YamlConfiguration conf = plugin.loadConfiguration("config");
+        final PLocatable overworldLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
+        final PLocatable netherLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
+        final PLocatable endLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
 
-        minFactionNameLength = 3;
-        maxFactionNameLength = 16;
-        disallowedFactionNames = Arrays.asList("test");
+        overworldSpawn = overworldLoc.getBukkitLocation();
+        netherSpawn = netherLoc.getBukkitLocation();
+        endSpawn = endLoc.getBukkitLocation();
 
-        defaultFactionReinvites = 5;
+        minFactionNameLength = conf.getInt("factions.naming.min_faction_name");
+        maxFactionNameLength = conf.getInt("factions.naming.max_faction_name");
+        disallowedFactionNames = conf.getStringList("factions.naming.disallowed_names");
 
-        playerPowerValue = 0.4;
-        powerTickInterval = 60;
-        powerTickPlayerModifier = 1;
-        reducePowerLossInNether = true;
-        reducePowerLossInEnd = true;
+        defaultFactionReinvites = conf.getInt("factions.reinvites");
 
-        challengerRating = 10000;
-        diamondRating = 8000;
-        platinumRating = 6500;
-        goldRating = 5000;
-        silverRating = 3500;
+        playerPowerValue = conf.getDouble("factions.power.player_power_value");
+        powerTickInterval = conf.getInt("factions.power.power_tick_interval");
+        powerTickPlayerModifier = conf.getInt("factions.power_tick_player_modifier");
+        reducePowerLossInNether = conf.getBoolean("factions.power.power_loss_reductions.nether");
+        reducePowerLossInEnd = conf.getBoolean("factions.power.power_loss_reduction.end");
 
-        defaultServerFactionBuildBuffer = 16;
-        defaultServerFactionClaimBuffer = 32;
-        defaultPlayerFactionClaimBuffer = 1;
+        challengerRating = conf.getInt("factions.ratings.challenger");
+        diamondRating = conf.getInt("factions.ratings.diamond");
+        platinumRating = conf.getInt("factions.ratings.platinum");
+        goldRating = conf.getInt("factions.ratings.gold");
+        silverRating = conf.getInt("factions.ratings.silver");
 
-        attackerCombatTagDuration = 30;
-        attackedCombatTagDuration = 10;
-        enderpearlDuration = 16;
-        crappleDuration = 10;
-        gappleDuration = 3600;
-        totemDuration = 3600;
-        stuckDuration = 60;
-        rallyDuration = 10;
-        freezeDuration = 1800;
-        homeDuration = 10;
+        defaultServerFactionBuildBuffer = conf.getInt("factions.claiming.default_buffers.server_faction_build");
+        defaultServerFactionClaimBuffer = conf.getInt("factions.claiming.default_buffers.server_faction_claim");
+        defaultPlayerFactionClaimBuffer = conf.getInt("factions.claiming.default_buffers.player_faction_claim");
 
-        deathbansEnabled = true;
-        deathbansStandalone = true;
-        sotwMaxDeathbanDuration = 10;
-        normalMaxDeathbanDuration = 30;
-        minDeathbanDuration = 5;
-        lifeUseDelay = 5;
+        attackerCombatTagDuration = conf.getInt("factions.timers.attacker_tag_duration");
+        attackedCombatTagDuration = conf.getInt("factions.timers.attacked_tag_duration");
+        enderpearlDuration = conf.getInt("factions.timers.enderpearl_duration");
+        crappleDuration = conf.getInt("factions.timers.crapple_duration");
+        gappleDuration = conf.getInt("factions.timers.gapple_duration");
+        totemDuration = conf.getInt("factions.timers.totem_duration");
+        stuckDuration = conf.getInt("factions.timers.stuck_duration");
+        rallyDuration = conf.getInt("factions.timers.rally_duration");
+        freezeDuration = conf.getInt("factions.timers.freeze_duration");
+        homeDuration = conf.getInt("factions.timers.home_duration");
+
+        deathbansEnabled = conf.getBoolean("deathbans.enabled");
+        deathbansStandalone = conf.getBoolean("deathbans.standalone");
+        sotwMaxDeathbanDuration = conf.getInt("deathbans.max_durations.sotw");
+        normalMaxDeathbanDuration = conf.getInt("deathbans.max_durations.normal");
+        minDeathbanDuration = conf.getInt("deathbans.min_duration");
+        lifeUseDelay = conf.getInt("deathbans.life_use_delay");
+        shopUrl = conf.getString("deathbans.shop_url");
     }
 }
