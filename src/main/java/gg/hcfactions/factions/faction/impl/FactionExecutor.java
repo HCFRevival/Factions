@@ -492,19 +492,19 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
         if (acs == null) {
-            promise.reject("Failed to obtain the account service");
+            promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
             return;
         }
 
         if (faction == null) {
-            promise.reject("You are not in a faction");
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
             return;
         }
 
         final PlayerFaction.Member kickingMember = faction.getMember(player.getUniqueId());
 
         if (kickingMember == null) {
-            promise.reject("You are not in a faction");
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
             return;
         }
 
