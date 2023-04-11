@@ -487,7 +487,85 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void kickFromFaction(Player player, String username, Promise promise) {
+        final AccountService acs = (AccountService)manager.getPlugin().getService(AccountService.class);
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (acs == null) {
+            promise.reject("Failed to obtain the account service");
+            return;
+        }
+
+        if (faction == null) {
+            promise.reject("You are not in a faction");
+            return;
+        }
+
+        final PlayerFaction.Member kickingMember = faction.getMember(player.getUniqueId());
+
+        if (kickingMember == null) {
+            promise.reject("You are not in a faction");
+            return;
+        }
+
+        acs.getAccount(username, new FailablePromise<>() {
+            @Override
+            public void resolve(AresAccount kickedProfile) {
+                if (kickedProfile == null) {
+                    promise.reject(FError.P_NOT_FOUND.getErrorDescription());
+                    return;
+                }
+
+                if (kickedProfile.getUniqueId().equals(player.getUniqueId())) {
+                    promise.reject(FError.P_CANT_PERFORM_SELF.getErrorDescription());
+                    return;
+                }
+
+                final PlayerFaction.Member kickedMember = faction.getMember(kickedProfile.getUniqueId());
+
+                if (kickedMember == null) {
+                    promise.reject(FError.P_NOT_IN_OWN_F.getErrorDescription());
+                    return;
+                }
+
+                if (!kickingMember.getRank().isHigher(kickedMember.getRank()) && !bypass) {
+                    promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+                    return;
+                }
+
+                if (faction.isRaidable() && !bypass) {
+                    promise.reject(FError.F_NOT_ALLOWED_RAIDABLE.getErrorDescription());
+                    return;
+                }
+
+                if (faction.isFrozen() && !bypass) {
+                    promise.reject(FError.F_NOT_ALLOWED_WHILE_FROZEN.getErrorDescription());
+                    return;
+                }
+
+                if (Bukkit.getPlayer(kickedProfile.getUniqueId()) != null) {
+                    final Player kicked = Bukkit.getPlayer(kickedProfile.getUniqueId());
+                    final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(kicked));
+
+                    if (inside != null && inside.getOwner().equals(faction.getUniqueId())) {
+                        promise.reject(FError.F_CANT_KICK_IN_CLAIMS.getErrorDescription());
+                        return;
+                    }
+
+                    faction.destroyScoreboard(kicked);
+                    kicked.sendMessage(FMessage.F_KICKED_FROM_FAC);
+                }
+
+                FMessage.printPlayerKickedFromFaction(faction, player, kickedProfile.getUsername());
+                faction.removeMember(kickedProfile.getUniqueId());
+                promise.resolve();
+            }
+
+            @Override
+            public void reject(String s) {
+                promise.reject(s);
+            }
+        });
     }
 
     @Override

@@ -41,6 +41,7 @@ public final class FMessage {
     public static final String T_PROTECTION_EXPIRE = SUCCESS + "Your combat protection has expired";
     public static final String T_FREEZE_EXPIRE = SUCCESS + "Your faction will now begin regenerating power";
     public static final String T_HOME_COMPLETE = SUCCESS + "You have been returned to your faction home";
+    public static final String F_KICKED_FROM_FAC = ERROR + "You have been kicked from the faction";
 
     public static void broadcastFactionCreated(String factionName, String playerName) {
         Bukkit.broadcastMessage(LAYER_1 + "Faction " + INFO + factionName + LAYER_1 + " has been " + SUCCESS + "created" + LAYER_1 + " by " + P_NAME + playerName);
@@ -135,6 +136,10 @@ public final class FMessage {
 
     public static void printCanNotAttackFactionMembers(Player player) {
         player.sendMessage(ERROR + "PvP is disabled between " + P_NAME + "Faction Members");
+    }
+
+    public static void printPlayerKickedFromFaction(PlayerFaction faction, Player player, String username) {
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "kicked " + P_NAME + username + LAYER_1 + " from the faction");
     }
 
     public static void printMemberDeath(PlayerFaction faction, String memberName, double deducted) {
