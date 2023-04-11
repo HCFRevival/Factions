@@ -39,7 +39,7 @@ public final class EventCaptureStat implements ITrackable, MongoDocument<EventCa
 
     @Override
     public EventCaptureStat fromDocument(Document document) {
-        this.factionUniqueId = (UUID)document.get("faction_id");
+        this.factionUniqueId = UUID.fromString(document.getString("faction_id"));
         this.factionName = document.getString("faction_name");
         this.eventName = document.getString("event_name");
         this.factionMemberNames = document.getList("faction_members", String.class);
@@ -52,7 +52,7 @@ public final class EventCaptureStat implements ITrackable, MongoDocument<EventCa
     @Override
     public Document toDocument() {
         return new Document()
-                .append("faction_id", factionUniqueId)
+                .append("faction_id", factionUniqueId.toString())
                 .append("faction_name", factionName)
                 .append("event_name", eventName)
                 .append("faction_members", factionMemberNames)

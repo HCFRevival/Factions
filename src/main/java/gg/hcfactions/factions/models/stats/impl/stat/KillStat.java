@@ -40,9 +40,9 @@ public final class KillStat implements ITrackable, MongoDocument<KillStat> {
 
     @Override
     public KillStat fromDocument(Document document) {
-        this.killerUniqueId = (UUID)document.get("killer_id");
+        this.killerUniqueId = UUID.fromString(document.getString("killer_id"));
+        this.slainUniqueId = UUID.fromString(document.getString("slain_id"));
         this.killerUsername = document.getString("killer_username");
-        this.slainUniqueId = (UUID)document.get("slain_id");
         this.slainUsername = document.getString("slain_username");
         this.deathMessage = document.getString("death_message");
         this.mapNumber = document.getDouble("map");
@@ -54,9 +54,9 @@ public final class KillStat implements ITrackable, MongoDocument<KillStat> {
     @Override
     public Document toDocument() {
         return new Document()
-                .append("killer_id", killerUniqueId)
+                .append("killer_id", killerUniqueId.toString())
                 .append("killer_username", killerUsername)
-                .append("slain_id", slainUniqueId)
+                .append("slain_id", slainUniqueId.toString())
                 .append("slain_username", slainUsername)
                 .append("death_message", deathMessage)
                 .append("map", mapNumber)

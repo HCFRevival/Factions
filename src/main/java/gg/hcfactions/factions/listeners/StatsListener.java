@@ -30,7 +30,8 @@ public final class StatsListener implements Listener {
 
         plugin.getStatsManager().getPlayerStatistics(player.getUniqueId(), stats -> {
             stats.setJoinTime(Time.now());
-            plugin.getStatsManager().savePlayer(stats);
+            stats.setName(player.getName());
+            plugin.getStatsManager().getTrackerRepository().add(stats);
         });
     }
 
@@ -96,6 +97,11 @@ public final class StatsListener implements Listener {
         final Player slain = event.getEntity();
         final PlayerStatHolder slainStats = plugin.getStatsManager().getPlayerStatistics(slain.getUniqueId());
 
+        if (slainStats == null) {
+            plugin.getAresLogger().error("attempted to process player death statistics but player stat holder is null");
+            return;
+        }
+
         slainStats.addToStatistic(EStatisticType.DEATH, 1);
 
         if (slain.getKiller() != null) {
@@ -104,8 +110,6 @@ public final class StatsListener implements Listener {
 
             plugin.getStatsManager().createKill(killer.getUniqueId(), killer.getName(), slain.getUniqueId(), slain.getName(), event.getDeathMessage());
             killerStats.addToStatistic(EStatisticType.KILL, 1);
-
-            return;
         }
 
         plugin.getStatsManager().createDeath(slain.getUniqueId(), slain.getName(), event.getDeathMessage());

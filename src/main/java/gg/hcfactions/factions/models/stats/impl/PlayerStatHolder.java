@@ -53,8 +53,7 @@ public final class PlayerStatHolder implements IStatHolder, MongoDocument<Player
 
     @Override
     public PlayerStatHolder fromDocument(Document document) {
-        this.uniqueId = UUID.fromString(document.getString("id"));
-        this.name = document.getString("name");
+        this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.mapNumber = document.getDouble("map");
 
         for (EStatisticType type : EStatisticType.values()) {
@@ -73,8 +72,7 @@ public final class PlayerStatHolder implements IStatHolder, MongoDocument<Player
     public Document toDocument() {
         final Document document = new Document();
 
-        document.append("id", uniqueId.toString())
-                .append("username", name)
+        document.append("uuid", uniqueId.toString())
                 .append("map", mapNumber);
 
         for (EStatisticType type : values.keySet()) {
