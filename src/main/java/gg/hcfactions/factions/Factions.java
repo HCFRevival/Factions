@@ -77,6 +77,7 @@ public final class Factions extends AresPlugin {
         registerListener(new DeathbanListener(this));
         registerListener(new StatsListener(this));
         registerListener(new StateListener(this));
+        registerListener(new TrackedItemListener(this));
     }
 
     @Override
