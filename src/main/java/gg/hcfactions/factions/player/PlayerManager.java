@@ -36,9 +36,6 @@ public final class PlayerManager implements IManager {
     @Override
     public void onDisable() {
         savePlayers();
-
-        this.plugin = null;
-        this.playerRepository = null;
     }
 
     public IFactionPlayer loadPlayer(Bson filter, boolean cache) {
