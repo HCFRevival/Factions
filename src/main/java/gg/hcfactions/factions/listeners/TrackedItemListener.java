@@ -3,6 +3,7 @@ package gg.hcfactions.factions.listeners;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.stats.impl.item.TrackedBow;
 import gg.hcfactions.factions.models.stats.impl.item.TrackedPickaxe;
 import gg.hcfactions.factions.models.stats.impl.item.TrackedWeapon;
@@ -57,6 +58,31 @@ public record TrackedItemListener(@Getter Factions plugin) implements Listener {
             if (TrackedBow.VALID_ITEMS.contains(hand.getType())) {
                 final TrackedBow trackedBow = new TrackedBow().fromItem(hand);
                 trackedBow.addEntry(killer.getName(), slain.getName());
+                trackedBow.updateItem();
+            }
+        }
+    }
+
+    /**
+     * Handles adding kills to bows and swords with combat loggers
+     * @param event CombatLoggerDeathEvent
+     */
+    @EventHandler
+    public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
+        if (event.getKiller() != null) {
+            final Player killer = event.getKiller();
+            final ItemStack hand = killer.getInventory().getItemInMainHand();
+
+            if (TrackedWeapon.VALID_ITEMS.contains(hand.getType())) {
+                final TrackedWeapon trackedSword = new TrackedWeapon().fromItem(hand);
+                trackedSword.addEntry(killer.getName(), event.getLogger().getOwnerUsername());
+                trackedSword.updateItem();
+                return;
+            }
+
+            if (TrackedBow.VALID_ITEMS.contains(hand.getType())) {
+                final TrackedBow trackedBow = new TrackedBow().fromItem(hand);
+                trackedBow.addEntry(killer.getName(), event.getLogger().getOwnerUsername());
                 trackedBow.updateItem();
             }
         }

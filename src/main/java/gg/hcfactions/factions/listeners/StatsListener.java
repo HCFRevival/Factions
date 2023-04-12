@@ -2,10 +2,12 @@ package gg.hcfactions.factions.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.stats.EStatisticType;
 import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -116,6 +118,41 @@ public record StatsListener(@Getter Factions plugin) implements Listener {
         }
 
         plugin.getStatsManager().createDeath(slain.getUniqueId(), slain.getName(), event.getDeathMessage());
+    }
+
+    /**
+     * Handles creating kill and death entries for players
+     *
+     * @param event CombatLoggerDeathEvent
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
+        plugin.getStatsManager().getPlayerStatistics(event.getLogger().getOwnerId(), slainHolder -> {
+            if (slainHolder == null) {
+                plugin.getAresLogger().error("attempted to retrieve player stat holder but returned null");
+                return;
+            }
+
+            slainHolder.addToStatistic(EStatisticType.DEATH, 1);
+            new Scheduler(plugin).async(() -> plugin.getStatsManager().savePlayer(slainHolder)).run();
+        });
+
+        if (event.getKiller() != null) {
+            final Player killer = event.getKiller();
+            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killer.getUniqueId());
+
+            if (killerStats != null) {
+                killerStats.addToStatistic(EStatisticType.KILL, 1);
+            }
+
+            plugin.getStatsManager().createKill(
+                    killer.getUniqueId(),
+                    killer.getName(),
+                    event.getLogger().getOwnerId(),
+                    event.getLogger().getOwnerUsername(),
+                    event.getLogger().getOwnerUsername() + "'s combat-logger was slain by " + killer.getName()
+            );
+        }
     }
 
     /* @EventHandler (priority = EventPriority.MONITOR)
