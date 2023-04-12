@@ -71,22 +71,6 @@ public final class CombatLogger extends Villager implements ICombatLogger {
 
             loggerInventory.add(i);
         }
-
-        for (ItemStack a : player.getInventory().getArmorContents()) {
-            if (a == null) {
-                continue;
-            }
-
-            loggerInventory.add(a);
-        }
-
-        for (ItemStack ex : player.getInventory().getExtraContents()) {
-            if (ex == null) {
-                continue;
-            }
-
-            loggerInventory.add(ex);
-        }
     }
 
     @Override
