@@ -51,6 +51,10 @@ public final class FMessage {
         Bukkit.broadcastMessage(LAYER_1 + "Faction " + INFO + factionName + LAYER_1 + " has been " + ERROR + "disbanded" + LAYER_1 + " by " + P_NAME + playerName);
     }
 
+    public static void broadcastCombatLogger(Player player) {
+        Bukkit.broadcastMessage(ERROR + "Combat-Logger" + ChatColor.RESET + ": " + player.getName());
+    }
+
     public static void printPlayerJoinedFaction(PlayerFaction faction, Player player) {
         faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "joined" + LAYER_1 + " the faction");
     }

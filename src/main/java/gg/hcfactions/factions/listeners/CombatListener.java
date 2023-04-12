@@ -1,11 +1,15 @@
 package gg.hcfactions.factions.listeners;
 
+import com.mongodb.client.model.Filters;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
+import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
+import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.logger.impl.CombatLogger;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
@@ -17,14 +21,10 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerLingeringSplashEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
-import lombok.AllArgsConstructor;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
-import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -371,7 +371,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             final List<Player> enemies = FactionUtil.getNearbyEnemies(plugin, player, bard.getRange());
             enemies.forEach(enemy -> event.getAffectedPlayers().put(enemy.getUniqueId(), false));
         }
-    }
+    } */
 
     @EventHandler (priority = EventPriority.HIGH)
     public void onPlayerDamageLogger(PlayerDamageCombatLoggerEvent event) {
@@ -381,31 +381,31 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
 
         final Player player = event.getPlayer();
         final CombatLogger combatLogger = event.getLogger();
-        final FactionPlayer factionPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
-        final PlayerFaction playerFaction = plugin.getFactionManager().getFactionByPlayer(player.getUniqueId());
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
+        final PlayerFaction playerFaction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 
         if (factionPlayer == null) {
             return;
         }
 
-        if (factionPlayer.hasTimer(PlayerTimer.PlayerTimerType.PROTECTION)) {
-            player.sendMessage(ChatColor.RED + "You can not attack players while you have PvP Protection");
+        if (factionPlayer.hasTimer(ETimerType.PROTECTION)) {
+            player.sendMessage(ChatColor.RED + FError.P_CAN_NOT_ATTACK_PVP_PROT.getErrorDescription());
             event.setCancelled(true);
             return;
         }
 
         if (factionPlayer.getCurrentClaim() != null) {
-            final ServerFaction serverFaction = plugin.getFactionManager().getServerFactionById(factionPlayer.getCurrentClaim().getOwnerId());
+            final IFaction faction = plugin.getFactionManager().getFactionById(factionPlayer.getCurrentClaim().getOwner());
 
-            if (serverFaction != null && serverFaction.getFlag().equals(ServerFaction.FactionFlag.SAFEZONE)) {
-                player.sendMessage(ChatColor.RED + "PvP is disabled in " + ChatColor.RESET + serverFaction.getDisplayName());
+            if (faction instanceof ServerFaction && ((ServerFaction)faction).getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                player.sendMessage(ChatColor.RED + FError.P_CAN_NOT_ATTACK_IN_SAFEZONE.getErrorDescription());
                 event.setCancelled(true);
                 return;
             }
         }
 
         if (playerFaction != null && playerFaction.isMember(combatLogger.getOwnerId())) {
-            player.sendMessage(ChatColor.RED + "PvP is disabled between " + ChatColor.RESET + "Faction Members");
+            FMessage.printCanNotAttackFactionMembers(player);
             event.setCancelled(true);
         }
     }
@@ -418,7 +418,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
 
         final CombatLogger logger = event.getLogger();
         final Player killer = event.getKiller();
-        final PlayerFaction faction = plugin.getFactionManager().getFactionByPlayer(logger.getOwnerId());
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(logger.getOwnerId());
         final String prefix = ChatColor.RED + "RIP:" + ChatColor.RESET;
         final String slainUsername = ChatColor.DARK_RED + "(Combat-Logger) " + ChatColor.GOLD + logger.getOwnerUsername() + ChatColor.RESET;
         final ChatColor cA = ChatColor.RED;
@@ -428,11 +428,11 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         if (event.getKiller() != null) {
             String hand = ChatColor.RESET + "their fists";
 
-            if (killer.getItemInHand() != null && !killer.getItemInHand().getType().equals(Material.AIR)) {
-                if (killer.getItemInHand().hasItemMeta() && killer.getItemInHand().getItemMeta().hasDisplayName()) {
-                    hand = ChatColor.GRAY + "[" + killer.getItemInHand().getItemMeta().getDisplayName() + ChatColor.GRAY + "]";
+            if (!killer.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                if (killer.getInventory().getItemInMainHand().getItemMeta() != null && killer.getInventory().getItemInMainHand().getItemMeta().hasDisplayName()) {
+                    hand = ChatColor.GRAY + "[" + killer.getInventory().getItemInMainHand().getItemMeta().getDisplayName() + ChatColor.GRAY + "]";
                 } else {
-                    hand = ChatColor.RESET + StringUtils.capitaliseAllWords(killer.getItemInHand().getType().name().replace("_", " ").toLowerCase());
+                    hand = ChatColor.RESET + StringUtils.capitalize(killer.getItemInHand().getType().name().replace("_", " ").toLowerCase());
                 }
             }
 
@@ -443,7 +443,6 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         logger.getBukkitEntity().getWorld().strikeLightningEffect(logger.getBukkitEntity().getLocation());
 
         if (faction != null) {
-            final ServerStateAddon serverStateAddon = (ServerStateAddon)plugin.getAddonManager().get(ServerStateAddon.class);
             final FactionMemberDeathEvent memberDeathEvent = new FactionMemberDeathEvent(logger.getOwnerId(), logger.getOwnerUsername(), faction,
                     new PLocatable(
                             logger.getBukkitEntity().getLocation().getWorld().getName(),
@@ -452,27 +451,25 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                             logger.getBukkitEntity().getLocation().getZ(),
                             logger.getBukkitEntity().getLocation().getYaw(),
                             logger.getBukkitEntity().getLocation().getPitch()),
-                    1.0, plugin.getTimerManager().getConfig().getFactionFreezeDuration());
+                    1.0, plugin.getConfiguration().getFreezeDuration());
 
             Bukkit.getPluginManager().callEvent(memberDeathEvent);
 
-            if (serverStateAddon != null && !(serverStateAddon.getConfig().getCurrentState().equals(ServerStateAddon.State.EOTW_PHASE_1) || serverStateAddon.getConfig().getCurrentState().equals(ServerStateAddon.State.EOTW_PHASE_2))) {
-                faction.updateDTR(faction.getDTR() - memberDeathEvent.getSubtractedDTR());
-                faction.addTimer(new FactionTimer(FactionTimer.FactionTimerType.FREEZE, memberDeathEvent.getFreezeDuration()));
+            if (!(plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1) || plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2))) {
+                faction.setDtr(faction.getDtr() - memberDeathEvent.getSubtractedDTR());
+                faction.addTimer(new FTimer(ETimerType.FREEZE, memberDeathEvent.getFreezeDuration()));
             }
         }
 
         new Scheduler(plugin).async(() -> {
-
-            final FactionPlayer factionPlayer = plugin.getPlayerManager().load(logger.getUniqueID());
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().loadPlayer(Filters.eq("uuid", logger.getOwnerId().toString()), false);
 
             if (factionPlayer != null) {
                 factionPlayer.setResetOnJoin(true);
-                factionPlayer.save();
+                plugin.getPlayerManager().savePlayer(factionPlayer);
             }
-
         }).run();
-    } */
+    }
 
     /**
      * Handles rendering display for Faction member deaths

@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
@@ -173,29 +174,29 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         handleAttack(event.getDamager(), event.getDamaged());
     }
 
-    /* @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerDamageLogger(PlayerDamageCombatLoggerEvent event) {
         if (event.isCancelled()) {
             return;
         }
 
         final Player player = event.getPlayer();
-        final FactionPlayer damagerProfile = plugin.getPlayerManager().getPlayer(player.getUniqueId());
+        final FactionPlayer damagerProfile = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (damagerProfile == null) {
             return;
         }
 
-        final PlayerTimer timer = damagerProfile.getTimer(PlayerTimer.PlayerTimerType.COMBAT);
-        final int attackerDuration = plugin.getTimerManager().getConfig().getCombatAttackerDuration();
+        final FTimer timer = damagerProfile.getTimer(ETimerType.COMBAT);
+        final int attackerDuration = plugin.getConfiguration().getAttackerCombatTagDuration();
 
         if (timer == null) {
-            damagerProfile.addTimer(new PlayerTimer(PlayerTimer.PlayerTimerType.COMBAT, attackerDuration));
-            damagerProfile.sendMessage(ChatColor.RED + "Combat Tag: " + ChatColor.BLUE + Time.convertToHHMMSS((attackerDuration * 1000L)));
+            damagerProfile.addTimer(new FTimer(ETimerType.COMBAT, attackerDuration));
+            FMessage.printCombatTag(player, attackerDuration);
         } else if (timer.getRemainingSeconds() < attackerDuration) {
             timer.setExpire(Time.now() + (attackerDuration * 1000L));
         }
-    } */
+    }
 
     /**
      * Handles cancelling timers which require the player to not move

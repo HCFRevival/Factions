@@ -1,11 +1,21 @@
 package gg.hcfactions.factions.utils;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.faction.IFaction;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class FactionUtil {
@@ -28,5 +38,83 @@ public final class FactionUtil {
                 Players.teleportWithVehicle(plugin, player, location.getBukkitLocation());
             }).run();
         }).run();
+    }
+
+    public static ImmutableList<Player> getNearbyFriendlies(Factions plugin, Player player, double distance) {
+        final List<Player> result = Lists.newArrayList();
+
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player.getUniqueId());
+        if (faction == null || faction.getMembers().size() <= 1) {
+            return ImmutableList.copyOf(result);
+        }
+
+        for (Entity entity : player.getNearbyEntities(distance, distance, distance)) {
+            if (!(entity instanceof final Player otherPlayer)) {
+                continue;
+            }
+
+            if (otherPlayer.getUniqueId().equals(player.getUniqueId())) {
+                continue;
+            }
+
+            if (faction.getMember(otherPlayer.getUniqueId()) != null) {
+                result.add(otherPlayer);
+            }
+        }
+
+        return ImmutableList.copyOf(result);
+    }
+
+    public static ImmutableList<Player> getNearbyEnemies(Factions plugin, Player player, double radius) {
+        final List<Player> result = Lists.newArrayList();
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
+            if (!(entity instanceof final Player otherPlayer)) {
+                continue;
+            }
+
+            final FactionPlayer otherAccount = (FactionPlayer) plugin.getPlayerManager().getPlayer(otherPlayer.getUniqueId());
+
+            if (otherAccount == null) {
+                continue;
+            }
+
+            if (otherPlayer.getUniqueId().equals(player.getUniqueId())) {
+                continue;
+            }
+
+            if (!player.canSee(otherPlayer)) {
+                continue;
+            }
+
+            if (otherPlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                continue;
+            }
+
+            if (otherPlayer.isDead()) {
+                continue;
+            }
+
+            if (faction != null && faction.isMember(otherPlayer.getUniqueId())) {
+                continue;
+            }
+
+            final Claim insideClaim = plugin.getClaimManager().getClaimAt(new PLocatable(otherPlayer));
+
+            if (insideClaim != null) {
+                final IFaction insideOwner = plugin.getFactionManager().getFactionById(insideClaim.getOwner());
+
+                if (insideOwner instanceof final ServerFaction serverFaction) {
+                    if (serverFaction.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                        continue;
+                    }
+                }
+            }
+
+            result.add(otherPlayer);
+        }
+
+        return ImmutableList.copyOf(result);
     }
 }

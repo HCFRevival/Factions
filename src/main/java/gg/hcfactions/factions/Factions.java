@@ -1,10 +1,12 @@
 package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.claims.ClaimManager;
+import gg.hcfactions.factions.cmd.DebugCommand;
 import gg.hcfactions.factions.cmd.FactionCommand;
 import gg.hcfactions.factions.cmd.StatsCommand;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
+import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.player.PlayerManager;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.factions.stats.StatsManager;
@@ -24,6 +26,7 @@ public final class Factions extends AresPlugin {
     @Getter public TimerManager timerManager;
     @Getter public ServerStateManager serverStateManager;
     @Getter public StatsManager statsManager;
+    @Getter public CombatLoggerManager loggerManager;
 
     @Override
     public void onEnable() {
@@ -42,6 +45,7 @@ public final class Factions extends AresPlugin {
         registerCommandManager(cmdMng);
         registerCommand(new FactionCommand(this));
         registerCommand(new StatsCommand(this));
+        registerCommand(new DebugCommand());
 
         // db init
         final Mongo mdb = new Mongo(configuration.getMongoUri(), getAresLogger());
@@ -63,6 +67,7 @@ public final class Factions extends AresPlugin {
         timerManager = new TimerManager(this);
         serverStateManager = new ServerStateManager(this);
         statsManager = new StatsManager(this, configuration.getStatsConfig());
+        loggerManager = new CombatLoggerManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -70,6 +75,7 @@ public final class Factions extends AresPlugin {
         timerManager.onEnable();
         serverStateManager.onEnable();
         statsManager.onEnable();
+        loggerManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -80,6 +86,7 @@ public final class Factions extends AresPlugin {
         registerListener(new StatsListener(this));
         registerListener(new StateListener(this));
         registerListener(new TrackedItemListener(this));
+        registerListener(new CombatLoggerListener(this));
     }
 
     @Override
@@ -96,11 +103,14 @@ public final class Factions extends AresPlugin {
         timerManager.onDisable();
         serverStateManager.onDisable();
         statsManager.onDisable();
+        loggerManager.onDisable();
 
         playerManager = null;
         factionManager = null;
         claimManager = null;
         timerManager = null;
         statsManager = null;
+        loggerManager = null;
+        serverStateManager = null;
     }
 }

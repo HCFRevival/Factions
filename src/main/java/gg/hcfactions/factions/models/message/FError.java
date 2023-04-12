@@ -13,6 +13,7 @@ public enum FError {
     P_CAN_NOT_CHANGE_WORLDS_PVP_PROT("You can not change worlds while you have PvP protection"),
     P_CAN_NOT_ATTACK_PVP_PROT("You can not attack others while you have PvP protection"),
     P_CAN_NOT_ATTACK_PVP_PROT_OTHER("This player has PvP protection"),
+    P_CAN_NOT_ATTACK_IN_SAFEZONE("Combat is disabled in safezones"),
     P_NO_INV_TO_F("You do not have an invitation to join this faction"),
     P_CAN_NOT_JOIN_RAIDABLE("You can not join this faction because they are raid-able"),
     P_CAN_NOT_JOIN_FROZEN("You can not join this faction because their power is frozen"),
