@@ -1,5 +1,6 @@
 package gg.hcfactions.factions;
 
+import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.stats.StatsConfig;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
@@ -71,6 +72,11 @@ public final class FConfig {
     @Getter public int minDeathbanDuration;
     @Getter public int lifeUseDelay;
     @Getter public String shopUrl;
+
+    // server states
+    @Getter public EServerState initialServerState;
+    @Getter public double eotwBorderShrinkRadius;
+    @Getter public int eotwBorderShrinkRate;
 
     // stats
     @Getter public int mapNumber;
@@ -158,5 +164,9 @@ public final class FConfig {
         minDeathbanDuration = conf.getInt("deathbans.min_duration");
         lifeUseDelay = conf.getInt("deathbans.life_use_delay");
         shopUrl = conf.getString("deathbans.shop_url");
+
+        initialServerState = EServerState.fromString(conf.getString("server_state.current_state"));
+        eotwBorderShrinkRadius = conf.getDouble("server_state.eotw.border_shrink_radius");
+        eotwBorderShrinkRate = conf.getInt("server_state.eotw.border_shrink_rate");
     }
 }

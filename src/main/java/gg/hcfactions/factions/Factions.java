@@ -3,6 +3,7 @@ package gg.hcfactions.factions;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.cmd.DebugCommand;
 import gg.hcfactions.factions.cmd.FactionCommand;
+import gg.hcfactions.factions.cmd.StateCommand;
 import gg.hcfactions.factions.cmd.StatsCommand;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
@@ -45,6 +46,7 @@ public final class Factions extends AresPlugin {
         registerCommandManager(cmdMng);
         registerCommand(new FactionCommand(this));
         registerCommand(new StatsCommand(this));
+        registerCommand(new StateCommand(this));
         registerCommand(new DebugCommand());
 
         // db init

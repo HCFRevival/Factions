@@ -13,10 +13,20 @@ public enum EServerState {
     @Getter public final String displayName;
 
     public static EServerState fromString(String name) {
-        for (EServerState state : values()) {
-            if (state.name().equalsIgnoreCase(name)) {
-                return state;
-            }
+        if (name.equalsIgnoreCase("sotw")) {
+            return SOTW;
+        }
+
+        else if (name.equalsIgnoreCase("normal")) {
+            return NORMAL;
+        }
+
+        else if (name.equalsIgnoreCase("eotw1")) {
+            return EOTW_PHASE_1;
+        }
+
+        else if (name.equalsIgnoreCase("eotw2")) {
+            return EOTW_PHASE_2;
         }
 
         return null;

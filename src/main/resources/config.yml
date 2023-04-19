@@ -87,3 +87,9 @@ deathbans:
 
 stats:
   map_number: 0.5
+
+server_state:
+  current_state: 'NORMAL'
+  eotw:
+    border_shrink_radius: 100.0
+    border_shrink_rate: 14400

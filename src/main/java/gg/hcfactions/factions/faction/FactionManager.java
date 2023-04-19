@@ -27,7 +27,6 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class FactionManager implements IManager {
     public static final String FACTION_DB_NAME = "dev";

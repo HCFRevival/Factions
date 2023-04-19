@@ -16,6 +16,7 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
+import gg.hcfactions.libs.bukkit.utils.Colors;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -197,6 +198,10 @@ public final class FMessage {
     public static void printFactionDeposit(PlayerFaction faction, Player player, double amount) {
         final String formatted = String.format("%.2f", amount);
         faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "deposited" + INFO + "$" + formatted + LAYER_1 + " in to the faction balance");
+    }
+
+    public static void printEotwMessage(String message) {
+        Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + Colors.DARK_AQUA + message);
     }
 
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {
