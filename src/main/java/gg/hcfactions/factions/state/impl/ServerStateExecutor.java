@@ -28,6 +28,7 @@ public final class ServerStateExecutor implements IServerStateExecutor {
         }
 
         if (state.equals(EServerState.NORMAL) || state.equals(EServerState.SOTW)) {
+            manager.setCurrentState(state);
             return;
         }
 

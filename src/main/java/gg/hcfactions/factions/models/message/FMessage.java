@@ -201,7 +201,7 @@ public final class FMessage {
     }
 
     public static void printEotwMessage(String message) {
-        Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + Colors.DARK_AQUA + message);
+        Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + Colors.DARK_AQUA.toBukkit() + message);
     }
 
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {
