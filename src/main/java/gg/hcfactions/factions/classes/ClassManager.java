@@ -142,18 +142,35 @@ public final class ClassManager implements IManager {
         }
     }
 
+    /**
+     * @param player Bukkit Player
+     * @return Currently active class
+     */
     public IClass getCurrentClass(Player player) {
         return classes.stream().filter(c -> c.getActivePlayers().contains(player.getUniqueId())).findFirst().orElse(null);
     }
 
+    /**
+     * @param player Bukkit Player
+     * @return Returns a class the provided player meets armor requirements for
+     */
     public IClass getClassByArmor(Player player) {
         return classes.stream().filter(c -> c.hasArmorRequirements(player)).findFirst().orElse(null);
     }
 
+    /**
+     * @param className Name of the class
+     * @return Class matching the provided name
+     */
     public IClass getClassByName(String className) {
         return classes.stream().filter(c -> c.getName().equalsIgnoreCase(className)).findFirst().orElse(null);
     }
 
+    /**
+     * @param faction Player Faction
+     * @param playerClass Class to perform count on
+     * @return Returns the amount of online members in the provided faction with the current class active
+     */
     public int getFactionClassCount(PlayerFaction faction, IClass playerClass) {
         int count = 0;
 
