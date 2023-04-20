@@ -29,6 +29,7 @@ public final class ServerStateExecutor implements IServerStateExecutor {
 
         if (state.equals(EServerState.NORMAL) || state.equals(EServerState.SOTW)) {
             manager.setCurrentState(state);
+            promise.resolve();
             return;
         }
 
@@ -67,7 +68,7 @@ public final class ServerStateExecutor implements IServerStateExecutor {
                     + ". Good luck!");
 
             final YamlConfiguration conf = manager.getPlugin().loadConfiguration("config");
-            conf.set("server_state.current_state", state.name());
+            conf.set("server_state.current_state", state.getSimpleName());
             manager.getPlugin().saveConfiguration("config", conf);
 
             new Scheduler(manager.getPlugin()).async(() -> {
