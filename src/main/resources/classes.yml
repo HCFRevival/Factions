@@ -1,0 +1,131 @@
+data:
+  miner:
+    warmup: 5
+    passive:
+      SPEED: 1
+      FIRE_RESISTANCE: 1
+      FAST_DIGGING: 2
+      NIGHT_VISION: 1
+    consumables:
+      FAST_DIGGING:
+        material: 'DIAMOND'
+        duration: 30
+        amplifier: 5
+        cooldown: 60
+        application: 'INDIVIDUAL'
+  rogue:
+    warmup: 30
+    backstab:
+      cooldown: 3
+      damage: 1.0
+      tickrate: 10
+    passive:
+      SPEED: 3
+      JUMP: 2
+    consumables:
+      SPEED:
+        material: 'SUGAR'
+        duration: 5
+        amplifier: 5
+        cooldown: 180
+        application: 'INDIVIDUAL'
+      JUMP:
+        material: 'RABBIT_FOOT'
+        duration: 5
+        amplifier: 5
+        cooldown: 60
+        application: 'INDIVIDUAL'
+      INVISIBILITY:
+        material: 'ENDER_EYE'
+        duration: 60
+        amplifier: 1
+        cooldown: 300
+        application: 'INDIVIDUAL'
+  archer:
+    damage_values:
+      # Max damage that can be dealt in a single shot
+      max_damage: 75.0
+      # Damage increment per block
+      per_block: 0.1
+      # Damage multiplier per consecutive shot
+      consecutive_multiplier: 1.25
+      # Base damage value for a consecutive shot
+      consecutive_base: 5.0
+    warmup: 30
+    passive:
+      SPEED: 2
+    consumables:
+      SPEED:
+        material: 'SUGAR'
+        duration: 5
+        amplifier: 4
+        cooldown: 60
+        application: 'INDIVIDUAL'
+      JUMP:
+        material: 'RABBIT_FOOT'
+        duration: 5
+        amplifier: 3
+        cooldown: 45
+        application: 'INDIVIDUAL'
+  diver:
+    warmup: 30
+    passive:
+      WATER_BREATHING: 1
+    consumables:
+      DOLPHINS_GRACE:
+        material: 'PRISMARINE_CRYSTALS'
+        duration: 5
+        amplifier: 2
+        cooldown: 60
+        application: 'INDIVIDUAL'
+  bard:
+    range: 16.0
+    warmup: 30
+    passive:
+      SPEED: 2
+      DAMAGE_RESISTANCE: 4
+      FIRE_RESISTANCE: 1
+      WEAKNESS: 2
+    consumables:
+      SPEED:
+        material: 'SUGAR'
+        duration: 5
+        amplifier: 3
+        cooldown: 60
+        application: 'FRIEND_ONLY'
+      JUMP:
+        material: 'RABBIT_FOOT'
+        duration: 5
+        amplifier: 3
+        cooldown: 45
+        application: 'FRIEND_ONLY'
+      INCREASE_DAMAGE:
+        material: 'BLAZE_POWDER'
+        duration: 3
+        amplifier: 2
+        cooldown: 180
+        application: 'FRIEND_ONLY'
+      WEAKNESS:
+        material: 'FERMENTED_SPIDER_EYE'
+        duration: 10
+        amplifier: 2
+        cooldown: 300
+        application: 'ENEMY_ONLY'
+      POISON:
+        material: 'SPIDER_EYE'
+        duration: 5
+        amplifier: 1
+        cooldown: 300
+        application: 'ENEMY_ONLY'
+      INVISIBILITY:
+        material: 'ENDER_EYE'
+        duration: 60
+        cooldown: 300
+        amplifier: 1
+        application: 'FRIEND_ONLY'
+      REGENERATION:
+        material: 'GHAST_TEAR'
+        duration: 5
+        amplifier: 4
+        cooldown: 120
+        application: 'FRIEND_ONLY'

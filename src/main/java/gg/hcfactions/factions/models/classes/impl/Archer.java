@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.classes.impl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.classes.ClassManager;
@@ -65,6 +66,7 @@ public final class Archer implements IClass {
         this.damagePerBlock = damagePerBlock;
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
+        this.consumables = Lists.newArrayList();
         this.archerTags = Sets.newConcurrentHashSet();
     }
 

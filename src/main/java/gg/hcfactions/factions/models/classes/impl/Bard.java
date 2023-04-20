@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.classes.impl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.classes.ClassManager;
@@ -35,6 +36,7 @@ public final class Bard implements IClass {
         this.bardRange = 16.0;
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
+        this.consumables = Lists.newArrayList();
     }
 
     public Bard(ClassManager manager, int warmup, double bardRange) {
@@ -43,5 +45,6 @@ public final class Bard implements IClass {
         this.bardRange = bardRange;
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
+        this.consumables = Lists.newArrayList();
     }
 }

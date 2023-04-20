@@ -1,7 +1,7 @@
 package gg.hcfactions.factions.models.classes;
 
 import com.google.common.collect.Sets;
-import gg.hcfactions.factions.classes.ClassManager;
+import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface IConsumeable {
-    ClassManager getManager();
+    Factions getPlugin();
     Material getMaterial();
     EConsumableApplicationType getApplicationType();
     PotionEffectType getEffectType();
@@ -43,7 +43,7 @@ public interface IConsumeable {
 
     default void consume(Player player, ItemStack item, EPlayerHand hand) {
         final UUID uniqueId = player.getUniqueId();
-        final IClass playerClass = getManager().getCurrentClass(player);
+        final IClass playerClass = getPlugin().getClassManager().getCurrentClass(player);
         final ConsumeClassItemEvent consumeEvent = new ConsumeClassItemEvent(player, playerClass, this);
 
         Bukkit.getPluginManager().callEvent(consumeEvent);
@@ -75,7 +75,7 @@ public interface IConsumeable {
                     (getAmplifier() + 1) + ChatColor.LIGHT_PURPLE + " for " + ChatColor.AQUA + getDuration() + " seconds");
 
             if (existing != null) {
-                new Scheduler(getManager().getPlugin()).sync(() -> {
+                new Scheduler(getPlugin()).sync(() -> {
                     if (wasExistingClassPassive && !playerClass.getActivePlayers().contains(uniqueId)) {
                         return;
                     }
@@ -85,12 +85,15 @@ public interface IConsumeable {
             }
         }
 
-        getCooldowns().put(player.getUniqueId(), (Time.now() + (getCooldown() * 1000L)));
+        getCooldowns().put(uniqueId, (Time.now() + (getCooldown() * 1000L)));
 
-        new Scheduler(getManager().getPlugin()).sync(() -> {
+        new Scheduler(getPlugin()).sync(() -> {
+            Bukkit.broadcastMessage("removed from cooldowns attempt: " + getCooldowns().size());
             if (getCooldowns().containsKey(uniqueId) && Bukkit.getPlayer(uniqueId) != null) {
                 Bukkit.getPlayer(uniqueId).sendMessage(ChatColor.GREEN + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " has been unlocked");
                 getCooldowns().remove(uniqueId);
+            } else {
+                Bukkit.broadcastMessage("not in cooldowns map");
             }
         }).delay(getCooldown() * 20L).run();
 
@@ -122,7 +125,7 @@ public interface IConsumeable {
             final Player affectedPlayer = Bukkit.getPlayer(affectedId);
 
             if (affectedPlayer != null) {
-                final IClass affectedPlayerClass = getManager().getCurrentClass(affectedPlayer);
+                final IClass affectedPlayerClass = getPlugin().getClassManager().getCurrentClass(affectedPlayer);
                 final PotionEffect existingPotionEffect = (affectedPlayer.hasPotionEffect(getEffectType()) ? Players.getPotionEffect(affectedPlayer, getEffectType()) : null);
                 final boolean hasExistingClassPassive = (affectedPlayerClass != null && affectedPlayerClass.getPassiveEffects().containsKey(getEffectType()));
 
@@ -145,7 +148,7 @@ public interface IConsumeable {
                 }
 
                 if (existingPotionEffect != null) {
-                    new Scheduler(getManager().getPlugin()).sync(() -> {
+                    new Scheduler(getPlugin()).sync(() -> {
                         if (hasExistingClassPassive && !affectedPlayerClass.getActivePlayers().contains(affectedId)) {
                             return;
                         }
