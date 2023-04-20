@@ -121,13 +121,25 @@ public interface IClass {
     }
 
     /**
-     * Deactive player class, removing all passive effects and removing the player from the class
+     * Deactivate player class, removing all passive effects and removing the player from the class
+     * @param player Bukkit Player
+     * @param printMessage If true a deactivate message will display
+     */
+    default void deactivate(Player player, boolean printMessage) {
+        getPassiveEffects().keySet().forEach(player::removePotionEffect);
+        getActivePlayers().remove(player.getUniqueId());
+
+        if (printMessage) {
+            FMessage.printClassDeactivated(player, this);
+        }
+    }
+
+    /**
+     * Deactivate player class, removing all passive effects and removing the player from the class
      * @param player Bukkit Player
      */
     default void deactivate(Player player) {
-        FMessage.printClassDeactivated(player, this);
-        getPassiveEffects().keySet().forEach(player::removePotionEffect);
-        getActivePlayers().remove(player.getUniqueId());
+        deactivate(player, true);
     }
 
     /**

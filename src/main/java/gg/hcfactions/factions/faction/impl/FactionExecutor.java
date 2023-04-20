@@ -9,6 +9,8 @@ import gg.hcfactions.factions.faction.IFactionExecutor;
 import gg.hcfactions.factions.menus.DisbandConfirmationMenu;
 import gg.hcfactions.factions.models.claim.EClaimBufferType;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -395,43 +397,45 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        /* final ClassAddon classAddon = (ClassAddon)manager.getPlugin().getAddonManager().get(ClassAddon.class);
+        final IClass playerClass = manager.getPlugin().getClassManager().getCurrentClass(player);
+        if (playerClass != null) {
+            final int count = manager.getPlugin().getClassManager().getFactionClassCount(faction, playerClass);
 
-        if (classAddon != null) {
-            final AresClass playerClass = classAddon.getManager().getCurrentClass(player);
-
-            if (playerClass != null) {
-                final int count = classAddon.getManager().getFactionClassCount(faction, playerClass);
-
-                if (playerClass instanceof Archer) {
-                    if (count > manager.getConfig().getArcherLimit()) {
-                        playerClass.deactivate(player, false);
-                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Archers");
-                    }
-                }
-
-                if (playerClass instanceof Rogue) {
-                    if (count > manager.getConfig().getRogueLimit()) {
-                        playerClass.deactivate(player, false);
-                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Rogues");
-                    }
-                }
-
-                if (playerClass instanceof Bard) {
-                    if (count > manager.getConfig().getBardLimit()) {
-                        playerClass.deactivate(player, false);
-                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Bards");
-                    }
-                }
-
-                if (playerClass instanceof Miner) {
-                    if (count > manager.getConfig().getArcherLimit()) {
-                        playerClass.deactivate(player, false);
-                        player.sendMessage(ChatColor.RED + "Your class has been disabled because the faction you joined reached the limit of allowed Miners");
-                    }
+            if (playerClass instanceof Archer) {
+                if (count > manager.getPlugin().getConfiguration().getArcherClassLimit()) {
+                    playerClass.deactivate(player, false);
+                    player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
             }
-        } */
+
+            if (playerClass instanceof Rogue) {
+                if (count > manager.getPlugin().getConfiguration().getRogueClassLimit()) {
+                    playerClass.deactivate(player, false);
+                    player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
+                }
+            }
+
+            if (playerClass instanceof Bard) {
+                if (count > manager.getPlugin().getConfiguration().getBardClassLimit()) {
+                    playerClass.deactivate(player, false);
+                    player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
+                }
+            }
+
+            if (playerClass instanceof Miner) {
+                if (count > manager.getPlugin().getConfiguration().getMinerClassLimit()) {
+                    playerClass.deactivate(player, false);
+                    player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
+                }
+            }
+
+            if (playerClass instanceof Diver) {
+                if (count > manager.getPlugin().getConfiguration().getDiverClassLimit()) {
+                    playerClass.deactivate(player, false);
+                    player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
+                }
+            }
+        }
 
         faction.getPendingInvites().remove(player.getUniqueId());
 

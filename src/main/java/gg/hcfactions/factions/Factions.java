@@ -94,6 +94,7 @@ public final class Factions extends AresPlugin {
         registerListener(new TrackedItemListener(this));
         registerListener(new CombatLoggerListener(this));
         registerListener(new ClassListener(this));
+        registerListener(new FactionListener(this));
     }
 
     @Override

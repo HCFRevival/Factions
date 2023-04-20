@@ -6,6 +6,7 @@ import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IConsumeable;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.potion.PotionEffectType;
 
@@ -26,17 +27,20 @@ public final class Bard implements IClass {
     @Getter public Set<UUID> activePlayers;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;
     @Getter public List<IConsumeable> consumables;
+    @Getter @Setter public double bardRange;
 
     public Bard(ClassManager manager) {
         this.manager = manager;
         this.warmup = 30;
+        this.bardRange = 16.0;
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
     }
 
-    public Bard(ClassManager manager, int warmup) {
+    public Bard(ClassManager manager, int warmup, double bardRange) {
         this.manager = manager;
         this.warmup = warmup;
+        this.bardRange = bardRange;
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
     }

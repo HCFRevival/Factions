@@ -64,6 +64,13 @@ public final class FConfig {
     @Getter public int freezeDuration;
     @Getter public int homeDuration;
 
+    // classes
+    @Getter public int minerClassLimit;
+    @Getter public int archerClassLimit;
+    @Getter public int diverClassLimit;
+    @Getter public int rogueClassLimit;
+    @Getter public int bardClassLimit;
+
     // deathbans
     @Getter public boolean deathbansEnabled;
     @Getter public boolean deathbansStandalone;
@@ -156,6 +163,12 @@ public final class FConfig {
         rallyDuration = conf.getInt("factions.timers.rally_duration");
         freezeDuration = conf.getInt("factions.timers.freeze_duration");
         homeDuration = conf.getInt("factions.timers.home_duration");
+
+        minerClassLimit = conf.getInt("classes.limits.miner");
+        archerClassLimit = conf.getInt("classes.limits.archer");
+        bardClassLimit = conf.getInt("classes.limits.bard");
+        rogueClassLimit = conf.getInt("classes.limits.rogue");
+        diverClassLimit = conf.getInt("classes.limits.diver");
 
         deathbansEnabled = conf.getBoolean("deathbans.enabled");
         deathbansStandalone = conf.getBoolean("deathbans.standalone");
