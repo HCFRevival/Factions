@@ -8,6 +8,7 @@ public enum FError {
     A_SERVER_STATE_SAME("Server state is already set to this value"),
     G_GENERIC_ERROR("An error has occurred"),
     G_PAGE_NOT_FOUND("Page not found"),
+    C_DOES_NOT_MEET_ARMOR_REQ("You do not meet the armor requirements for this class"),
     P_CANT_PERFORM_SELF("You can not perform this action to yourself"),
     P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"),
     P_CAN_NOT_CHANGE_WORLDS_PVP_PROT("You can not change worlds while you have PvP protection"),

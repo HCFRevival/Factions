@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -202,6 +203,15 @@ public final class FMessage {
 
     public static void printEotwMessage(String message) {
         Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + Colors.DARK_AQUA.toBukkit() + message);
+    }
+
+    public static void printClassActivated(Player player, IClass playerClass) {
+        player.sendMessage(LAYER_2 + "Class Activated" + LAYER_1 + ": " + INFO + playerClass.getName());
+        player.sendMessage(LAYER_1 + playerClass.getDescription());
+    }
+
+    public static void printClassDeactivated(Player player, IClass playerClass) {
+        player.sendMessage(LAYER_2 + "Class Deactivated" + LAYER_1 + ": " + INFO + playerClass.getName());
     }
 
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {

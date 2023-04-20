@@ -1,6 +1,7 @@
 package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.claims.ClaimManager;
+import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.cmd.DebugCommand;
 import gg.hcfactions.factions.cmd.FactionCommand;
 import gg.hcfactions.factions.cmd.StateCommand;
@@ -28,6 +29,7 @@ public final class Factions extends AresPlugin {
     @Getter public ServerStateManager serverStateManager;
     @Getter public StatsManager statsManager;
     @Getter public CombatLoggerManager loggerManager;
+    @Getter public ClassManager classManager;
 
     @Override
     public void onEnable() {
@@ -70,6 +72,7 @@ public final class Factions extends AresPlugin {
         serverStateManager = new ServerStateManager(this);
         statsManager = new StatsManager(this, configuration.getStatsConfig());
         loggerManager = new CombatLoggerManager(this);
+        classManager = new ClassManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -78,6 +81,7 @@ public final class Factions extends AresPlugin {
         serverStateManager.onEnable();
         statsManager.onEnable();
         loggerManager.onEnable();
+        classManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -89,6 +93,7 @@ public final class Factions extends AresPlugin {
         registerListener(new StateListener(this));
         registerListener(new TrackedItemListener(this));
         registerListener(new CombatLoggerListener(this));
+        registerListener(new ClassListener(this));
     }
 
     @Override
@@ -106,6 +111,7 @@ public final class Factions extends AresPlugin {
         serverStateManager.onDisable();
         statsManager.onDisable();
         loggerManager.onDisable();
+        classManager.onDisable();
 
         playerManager = null;
         factionManager = null;
@@ -114,5 +120,6 @@ public final class Factions extends AresPlugin {
         statsManager = null;
         loggerManager = null;
         serverStateManager = null;
+        classManager = null;
     }
 }

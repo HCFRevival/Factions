@@ -1,7 +1,10 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
+import gg.hcfactions.factions.listeners.events.player.ClassUnreadyEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
+import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
@@ -73,64 +76,60 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      * Handles issuing class warmpup for players
      * @param event ClassReadyEvent
      */
-    /* @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onClassReadyEvent(ClassReadyEvent event) {
         if (event.isCancelled()) {
             return;
         }
 
         final Player player = event.getPlayer();
-        final FactionPlayer factionPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
             player.sendMessage(ChatColor.RED + "Failed to obtain your player data");
             return;
         }
 
-        final AresClass playerClass = event.getPlayerClass();
+        final IClass playerClass = event.getPlayerClass();
 
         if (playerClass == null) {
             player.sendMessage(ChatColor.RED + "Failed to obtain your class");
             return;
         }
 
-        if (factionPlayer.hasTimer(PlayerTimer.PlayerTimerType.CLASS)) {
-            factionPlayer.removeTimer(factionPlayer.getTimer(PlayerTimer.PlayerTimerType.CLASS));
+        if (factionPlayer.hasTimer(ETimerType.CLASS)) {
+            factionPlayer.removeTimer(ETimerType.CLASS);
         }
 
         final int warmup = playerClass.getWarmup();
-        final PlayerTimer warmupTimer = new PlayerTimer(PlayerTimer.PlayerTimerType.CLASS, warmup);
 
         player.sendMessage(ChatColor.GOLD + "Preparing Class" + ChatColor.YELLOW + ": " + ChatColor.GREEN + playerClass.getName());
-        factionPlayer.addTimer(warmupTimer);
-    }*/
+        factionPlayer.addTimer(new FTimer(ETimerType.CLASS, warmup));
+    }
 
     /**
      * Handles unreadying class if player armor state changes
      * @param event ClassUnreadyEvent
      */
-    /*@EventHandler
+    @EventHandler
     public void onClassUnreadyEvent(ClassUnreadyEvent event) {
-        final ClassAddon addon = (ClassAddon)plugin.getAddonManager().get(ClassAddon.class);
         final Player player = event.getPlayer();
-        final FactionPlayer factionPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
             return;
         }
 
-        if (addon != null) {
-            final AresClass currentClass = addon.getManager().getCurrentClass(player);
+        final IClass currentClass = plugin.getClassManager().getCurrentClass(player);
 
-            if (currentClass != null) {
-                player.sendMessage(ChatColor.GOLD + "Class Canceled" + ChatColor.YELLOW + ": " + ChatColor.RED + currentClass.getName());
-            }
+        if (currentClass != null) {
+            player.sendMessage(ChatColor.GOLD + "Class Canceled" + ChatColor.YELLOW + ": " + ChatColor.RED + currentClass.getName());
         }
 
-        if (factionPlayer.hasTimer(PlayerTimer.PlayerTimerType.CLASS)) {
-            factionPlayer.removeTimer(factionPlayer.getTimer(PlayerTimer.PlayerTimerType.CLASS));
+        if (factionPlayer.hasTimer(ETimerType.CLASS)) {
+            factionPlayer.removeTimer(ETimerType.CLASS);
         }
-    }*/
+    }
 
     /**
      * Handles Combat Tag
