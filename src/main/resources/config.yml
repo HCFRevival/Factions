@@ -37,6 +37,10 @@ factions:
     silver: 2000
     bronze: 1000
   claiming:
+    min_claim_size: 8
+    max_claims: 3
+    block_value: 10.0
+    refunded_percent: 0.75
     default_buffers:
       server_faction_build: 16
       server_faction_claim: 32

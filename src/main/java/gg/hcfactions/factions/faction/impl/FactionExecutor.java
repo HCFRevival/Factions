@@ -1244,12 +1244,24 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void startClaiming(Player player, Promise promise) {
-
+        manager.getPlugin().getClaimManager().getClaimBuilderManager().getExecutor().startClaiming(player, promise);
     }
 
     @Override
     public void startClaiming(Player player, String factionName, Promise promise) {
+        if (!player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
 
+        final IFaction faction = manager.getFactionByName(factionName);
+
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        manager.getPlugin().getClaimManager().getClaimBuilderManager().getExecutor().startClaiming(player, faction, promise);
     }
 
     @Override

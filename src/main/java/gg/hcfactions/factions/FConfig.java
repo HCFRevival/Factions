@@ -51,6 +51,10 @@ public final class FConfig {
     @Getter public int defaultServerFactionBuildBuffer;
     @Getter public int defaultServerFactionClaimBuffer;
     @Getter public int defaultPlayerFactionClaimBuffer;
+    @Getter public double claimBlockValue;
+    @Getter public int claimMinSize;
+    @Getter public int claimMaxAmount;
+    @Getter public double claimRefundPercent;
 
     // timers
     @Getter public int attackerCombatTagDuration;
@@ -152,6 +156,10 @@ public final class FConfig {
         defaultServerFactionBuildBuffer = conf.getInt("factions.claiming.default_buffers.server_faction_build");
         defaultServerFactionClaimBuffer = conf.getInt("factions.claiming.default_buffers.server_faction_claim");
         defaultPlayerFactionClaimBuffer = conf.getInt("factions.claiming.default_buffers.player_faction_claim");
+        claimBlockValue = conf.getDouble("factions.claiming.block_value");
+        claimMinSize = conf.getInt("factions.claiming.min_claim_size");
+        claimMaxAmount = conf.getInt("factions.claiming.max_claims");
+        claimRefundPercent = conf.getDouble("factions.claiming.refunded_percent");
 
         attackerCombatTagDuration = conf.getInt("factions.timers.attacker_tag_duration");
         attackedCombatTagDuration = conf.getInt("factions.timers.attacked_tag_duration");

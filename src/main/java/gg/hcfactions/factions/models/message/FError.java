@@ -24,6 +24,8 @@ public enum FError {
     P_CAN_NOT_JOIN_FROZEN("You can not join this faction because their power is frozen"),
     P_CAN_NOT_JOIN_FULL("You can not join this faction because it is full"),
     P_CAN_NOT_JOIN_NO_REINV("You can not join this faction because you left recently and they are out of re-invites"),
+    P_ALREADY_CLAIMING("You are already claiming"),
+    P_INV_FULL("Your inventory is full"),
     F_NAME_TOO_SHORT("Faction name is too short"),
     F_NAME_TOO_LONG("Faction name is too long"),
     F_NAME_INVALID("Faction name is invalid"),

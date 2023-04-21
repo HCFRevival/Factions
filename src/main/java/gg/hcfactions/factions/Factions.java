@@ -18,6 +18,7 @@ import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.bukkit.AresPlugin;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
+import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
 
 public final class Factions extends AresPlugin {
@@ -59,9 +60,12 @@ public final class Factions extends AresPlugin {
         // declare services
         final AccountService accountService = new AccountService(this);
         final DeathbanService deathbanService = new DeathbanService(this, configuration.getDeathbanConfig());
+        final CustomItemService customItemService = new CustomItemService(this);
+
         // register services
         registerService(accountService);
         registerService(deathbanService);
+        registerService(customItemService);
         startServices();
 
         // declare managers
@@ -95,6 +99,8 @@ public final class Factions extends AresPlugin {
         registerListener(new CombatLoggerListener(this));
         registerListener(new ClassListener(this));
         registerListener(new FactionListener(this));
+        registerListener(new PillarListener(this));
+        registerListener(new ClaimBuilderListener(this));
     }
 
     @Override

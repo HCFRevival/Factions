@@ -13,7 +13,6 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.IFaction;
-import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.util.Time;
@@ -40,14 +39,18 @@ public final class ClaimManager implements IManager {
 
     @Override
     public void onEnable() {
-        this.claimBuilderManager = new ClaimBuilderManager();
+        this.claimBuilderManager = new ClaimBuilderManager(this);
         this.claimRepository = Sets.newConcurrentHashSet();
+
+        claimBuilderManager.onEnable();
 
         loadClaims();
     }
 
     @Override
     public void onDisable() {
+        claimBuilderManager.onDisable();
+
         saveClaims();
 
         this.claimBuilderManager = null;
@@ -107,7 +110,7 @@ public final class ClaimManager implements IManager {
                 return;
             }
 
-            final Claim claim = new Claim().fromDocument(doc);
+            final Claim claim = new Claim(this).fromDocument(doc);
             claimRepository.add(claim);
         }
 

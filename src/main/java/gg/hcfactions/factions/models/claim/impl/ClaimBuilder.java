@@ -1,0 +1,182 @@
+package gg.hcfactions.factions.models.claim.impl;
+
+import gg.hcfactions.factions.FPermissions;
+import gg.hcfactions.factions.claims.ClaimManager;
+import gg.hcfactions.factions.models.claim.EClaimPillarType;
+import gg.hcfactions.factions.models.claim.IClaimBuilder;
+import gg.hcfactions.factions.models.faction.IFaction;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.libs.base.consumer.FailablePromise;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
+import lombok.Getter;
+import org.bukkit.ChatColor;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
+import java.util.List;
+
+public final class ClaimBuilder implements IClaimBuilder {
+    @Getter public final ClaimManager manager;
+    @Getter public final IFaction faction;
+    @Getter public final Player player;
+    @Getter public BLocatable cornerA;
+    @Getter public BLocatable cornerB;
+
+    public ClaimBuilder(ClaimManager manager, IFaction faction, Player player) {
+        this.manager = manager;
+        this.faction = faction;
+        this.player = player;
+        this.cornerA = null;
+        this.cornerB = null;
+    }
+
+    @Override
+    public void setCorner(BLocatable location, EClaimPillarType pillarType) {
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (pillarType.equals(EClaimPillarType.A)) {
+            this.cornerA = location;
+        } else if (pillarType.equals(EClaimPillarType.B)) {
+            this.cornerB = location;
+        }
+
+        if (factionPlayer != null) {
+            final ClaimPillar pillar = new ClaimPillar(player, location, pillarType);
+            final ClaimPillar previous = factionPlayer.getExistingClaimPillar(pillarType);
+
+            if (previous != null) {
+                previous.hide();
+                factionPlayer.getPillars().remove(previous);
+            }
+
+            factionPlayer.getPillars().add(pillar);
+
+            new Scheduler(manager.getPlugin()).sync(pillar::draw).delay(5L).run();
+        }
+
+        player.sendMessage(FMessage.LAYER_2 + "Claim point " + FMessage.LAYER_1 + pillarType.name() + FMessage.LAYER_2 + " set at " + FMessage.LAYER_1 + location.toString());
+
+        if (cornerA != null && cornerB != null) {
+            player.sendMessage(ChatColor.AQUA + "Claim value" + ChatColor.YELLOW + ": $" + String.format("%.2f", calculateCost()));
+        }
+    }
+
+    @Override
+    public void reset() {
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
+
+        this.cornerA = null;
+        this.cornerB = null;
+
+        if (factionPlayer != null) {
+            factionPlayer.hideClaimPillars();
+        }
+
+        player.sendMessage(FMessage.LAYER_1 + "Claim reset");
+    }
+
+    @Override
+    public double calculateCost() {
+        final double xMin = Math.min(cornerA.getX(), cornerB.getX());
+        final double zMin = Math.min(cornerA.getZ(), cornerB.getZ());
+        final double xMax = Math.max(cornerA.getX(), cornerB.getX());
+        final double zMax = Math.max(cornerA.getZ(), cornerB.getZ());
+
+        final double a = (int)Math.round(Math.abs(xMax - xMin));
+        final double b = (int)Math.round(Math.abs(zMax - zMin));
+
+        return a * b * manager.getPlugin().getConfiguration().getClaimBlockValue();
+    }
+
+    @Override
+    public void build(FailablePromise<Claim> promise) {
+        final boolean hasBypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+
+        if (cornerA == null) {
+            promise.reject("Corner A is not set");
+            return;
+        }
+
+        if (cornerB == null) {
+            promise.reject("Corner B is not set");
+            return;
+        }
+
+        if (!cornerA.getWorldName().equals(cornerB.getWorldName())) {
+            promise.reject("Claim corners are not in the same world");
+            return;
+        }
+
+        final double cost = calculateCost();
+        final Claim claim = new Claim(manager, faction.getUniqueId(), cornerA, cornerB, cost);
+
+        if (faction instanceof PlayerFaction) {
+            if (!cornerA.getBukkitBlock().getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
+                promise.reject("Player factions can only claim in the Overworld");
+                return;
+            }
+
+            claim.getCornerA().setY(-64);
+            claim.getCornerB().setY(256);
+        }
+
+        new Scheduler(manager.getPlugin()).async(() -> {
+            final List<Claim> existingClaims = manager.getClaimsByOwner(faction);
+            boolean isTouching = existingClaims.isEmpty() || faction instanceof ServerFaction;
+            final int[] lxw = claim.getSize();
+            final int minClaimSize = manager.getPlugin().getConfiguration().getClaimMinSize();
+
+            if (lxw[0] < minClaimSize || lxw[1] < minClaimSize) {
+                new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Minimum claim size is " + minClaimSize + "x" + minClaimSize)).run();
+                return;
+            }
+
+            if (!hasBypass) {
+                for (Claim existing : manager.getClaimRepository()) {
+                    if (existing.isOverlapping(claim)) {
+                        new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Claim is overlapping an existing claim")).run();
+                        return;
+                    }
+                }
+
+                for (BLocatable perimeter : claim.getPerimeter(64)) {
+                    for (Claim nearby : manager.getClaimsNearby(perimeter, false)) {
+                        if (!nearby.getOwner().equals(faction.getUniqueId())) {
+                            new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Claim is too close to an existing claim")).run();
+                            return;
+                        }
+                    }
+
+                    if (!isTouching) {
+                        for (Claim existing : existingClaims) {
+                            if (existing.isTouching(perimeter)) {
+                                isTouching = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!isTouching) {
+                    new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Claim is not touching existing claims")).run();
+                    return;
+                }
+
+                if (faction instanceof final PlayerFaction playerFaction) {
+                    if (playerFaction.getBalance() < cost) {
+                        new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Your faction can not afford this claim")).run();
+                        return;
+                    }
+
+                    playerFaction.setBalance(playerFaction.getBalance() - cost);
+                }
+            }
+
+            new Scheduler(manager.getPlugin()).sync(() -> promise.resolve(claim)).run();
+        }).run();
+    }
+}

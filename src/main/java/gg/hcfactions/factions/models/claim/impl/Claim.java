@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.claim.impl;
 
+import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.models.claim.IClaim;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
 import gg.hcfactions.libs.bukkit.location.ILocatable;
@@ -11,11 +12,30 @@ import org.bson.Document;
 import java.util.UUID;
 
 public final class Claim implements IClaim, MongoDocument<Claim> {
+    @Getter public ClaimManager manager;
     @Getter public UUID uniqueId;
     @Getter public UUID owner;
     @Getter public BLocatable cornerA;
     @Getter public BLocatable cornerB;
     @Getter @Setter public double cost;
+
+    public Claim(ClaimManager manager) {
+        this.manager = manager;
+        this.uniqueId = null;
+        this.owner = null;
+        this.cornerA = null;
+        this.cornerB = null;
+        this.cost = 0.0D;
+    }
+
+    public Claim(ClaimManager manager, UUID owner, BLocatable cornerA, BLocatable cornerB, double cost) {
+        this.manager = manager;
+        this.uniqueId = UUID.randomUUID();
+        this.owner = owner;
+        this.cornerA = cornerA;
+        this.cornerB = cornerB;
+        this.cost = cost;
+    }
 
     /**
      * Returns true if the provided location is within the buffer radius for this claim

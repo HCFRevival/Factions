@@ -2,7 +2,11 @@ package gg.hcfactions.factions.models.player.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gg.hcfactions.factions.models.claim.EClaimPillarType;
+import gg.hcfactions.factions.models.claim.IPillar;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.claim.impl.ClaimPillar;
+import gg.hcfactions.factions.models.claim.impl.MapPillar;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
@@ -28,6 +32,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     @Getter @Setter public transient String username;
     @Getter @Setter public transient boolean safeDisconnecting;
     @Getter @Setter public transient Claim currentClaim;
+    @Getter public final Set<IPillar> pillars;
 
     @Getter public UUID uniqueId;
     @Getter @Setter public double balance;
@@ -43,6 +48,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.balance = 0.0;
         this.resetOnJoin = false;
         this.timers = Sets.newConcurrentHashSet();
+        this.pillars = Sets.newHashSet();
     }
 
     public FactionPlayer(PlayerManager playerManager, UUID uniqueId, String username) {
@@ -54,6 +60,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.balance = 0.0;
         this.resetOnJoin = false;
         this.timers = Sets.newConcurrentHashSet();
+        this.pillars = Sets.newHashSet();
     }
 
     public Player getBukkit() {
@@ -67,6 +74,58 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         player.sendMessage(message);
+    }
+
+    public ClaimPillar getExistingClaimPillar(EClaimPillarType pillarType) {
+        return (ClaimPillar) pillars
+                .stream()
+                .filter(p -> p instanceof ClaimPillar)
+                .filter(cp -> ((ClaimPillar)cp).getType().equals(pillarType))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void hideAllPillars() {
+        pillars.forEach(IPillar::hide);
+        pillars.clear();
+    }
+
+    public boolean hasClaimPillars() {
+        return pillars.stream().anyMatch(p -> p instanceof ClaimPillar);
+    }
+
+    public boolean hasMapPillars() {
+        return pillars.stream().anyMatch(p -> p instanceof MapPillar);
+    }
+
+    public void hideClaimPillars() {
+        if (pillars.isEmpty() || !hasClaimPillars()) {
+            return;
+        }
+
+        final List<IPillar> toRemove = Lists.newArrayList();
+
+        pillars.stream().filter(p -> p instanceof ClaimPillar).forEach(cp -> {
+            cp.hide();
+            toRemove.add(cp);
+        });
+
+        toRemove.forEach(pillars::remove);
+    }
+
+    public void hideMapPillars() {
+        if (pillars.isEmpty() || !hasMapPillars()) {
+            return;
+        }
+
+        final List<IPillar> toRemove = Lists.newArrayList();
+
+        pillars.stream().filter(p -> p instanceof MapPillar).forEach(cp -> {
+            cp.hide();
+            toRemove.add(cp);
+        });
+
+        toRemove.forEach(pillars::remove);
     }
 
     @Override
