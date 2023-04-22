@@ -124,9 +124,7 @@ public final class ClaimListener implements Listener {
             player.sendMessage(ChatColor.RED + "This land is owned by " + serverFaction.getDisplayName());
             cancellable.setCancelled(true);
             return false;
-        } else if (faction instanceof PlayerFaction) {
-            final PlayerFaction playerFaction = (PlayerFaction)faction;
-
+        } else if (faction instanceof final PlayerFaction playerFaction) {
             if (!playerFaction.isRaidable() && !playerFaction.isMember(player.getUniqueId()) && !bypass) {
                 player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.YELLOW + playerFaction.getName());
                 cancellable.setCancelled(true);
@@ -364,12 +362,11 @@ public final class ClaimListener implements Listener {
                 }
 
                 event.setUseInteractedBlock(Event.Result.DENY);
-
             }
         } else if (owner instanceof final PlayerFaction pf) {
             if (!pf.isRaidable() && pf.getMember(player.getUniqueId()) == null && !admin) {
                 if (!action.equals(Action.PHYSICAL)) {
-                    player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.RED + pf.getName());
+                    player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.YELLOW + pf.getName());
                 }
 
                 event.setUseInteractedBlock(Event.Result.DENY);
@@ -411,11 +408,10 @@ public final class ClaimListener implements Listener {
      */
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof LivingEntity)) {
+        if (!(event.getEntity() instanceof final LivingEntity entity)) {
             return;
         }
 
-        final LivingEntity entity = (LivingEntity)event.getEntity();
         final Claim inside = plugin.getClaimManager().getClaimAt(new PLocatable(entity));
 
         if (entity instanceof Monster) {
@@ -454,11 +450,10 @@ public final class ClaimListener implements Listener {
      */
     @EventHandler
     public void onEntityTarget(EntityTargetEvent event) {
-        if (!(event.getTarget() instanceof Player)) {
+        if (!(event.getTarget() instanceof final Player player)) {
             return;
         }
 
-        final Player player = (Player)event.getTarget();
         final Claim inside = plugin.getClaimManager().getClaimAt(new PLocatable(player));
 
         if (inside != null) {
