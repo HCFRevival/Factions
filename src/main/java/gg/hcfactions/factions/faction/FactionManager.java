@@ -214,6 +214,14 @@ public final class FactionManager implements IManager {
                 .orElse(null);
     }
 
+    public ServerFaction getServerFactionById(UUID uniqueId) {
+        return (ServerFaction) factionRepository
+                .stream()
+                .filter(f -> f instanceof ServerFaction && f.getUniqueId().equals(uniqueId))
+                .findFirst()
+                .orElse(null);
+    }
+
     public ImmutableList<PlayerFaction> getPlayerFactions() {
         final List<PlayerFaction> res = Lists.newArrayList();
         factionRepository.stream().filter(f -> f instanceof PlayerFaction).forEach(f -> res.add((PlayerFaction)f));
