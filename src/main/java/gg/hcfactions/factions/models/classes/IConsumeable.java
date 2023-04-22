@@ -88,12 +88,9 @@ public interface IConsumeable {
         getCooldowns().put(uniqueId, (Time.now() + (getCooldown() * 1000L)));
 
         new Scheduler(getPlugin()).sync(() -> {
-            Bukkit.broadcastMessage("removed from cooldowns attempt: " + getCooldowns().size());
             if (getCooldowns().containsKey(uniqueId) && Bukkit.getPlayer(uniqueId) != null) {
                 Bukkit.getPlayer(uniqueId).sendMessage(ChatColor.GREEN + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " has been unlocked");
                 getCooldowns().remove(uniqueId);
-            } else {
-                Bukkit.broadcastMessage("not in cooldowns map");
             }
         }).delay(getCooldown() * 20L).run();
 
