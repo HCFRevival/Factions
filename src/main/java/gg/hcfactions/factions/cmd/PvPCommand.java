@@ -34,6 +34,5 @@ public class PvPCommand extends BaseCommand {
         }
 
         factionPlayer.finishTimer(ETimerType.PROTECTION);
-        player.sendMessage(FMessage.SUCCESS + "PvP has been enabled");
     }
 }
