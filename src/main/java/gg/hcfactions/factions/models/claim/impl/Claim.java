@@ -65,42 +65,42 @@ public final class Claim implements IClaim, MongoDocument<Claim> {
         }
 
         // Add X
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), location.getZ()), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), location.getZ()), false)) {
             return true;
         }
 
         // Add Z
-        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() + buffer)), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() + buffer)), false)) {
             return true;
         }
 
         // Subtract X
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), location.getZ()), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), location.getZ()), false)) {
             return true;
         }
 
         // Subtract Z
-        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() - buffer)), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() - buffer)), false)) {
             return true;
         }
 
         // Add X, Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() + buffer)), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() + buffer)), false)) {
             return true;
         }
 
         // Subtract X, Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() - buffer)), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() - buffer)), false)) {
             return true;
         }
 
         // Add X, Subtract Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() - buffer)), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() - buffer)), false)) {
             return true;
         }
 
         // Subtract X, Add Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() + buffer)), true)) {
+        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() + buffer)), false)) {
             return true;
         }
 

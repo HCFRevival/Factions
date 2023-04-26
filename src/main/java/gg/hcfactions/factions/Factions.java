@@ -2,10 +2,7 @@ package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
-import gg.hcfactions.factions.cmd.DebugCommand;
-import gg.hcfactions.factions.cmd.FactionCommand;
-import gg.hcfactions.factions.cmd.StateCommand;
-import gg.hcfactions.factions.cmd.StatsCommand;
+import gg.hcfactions.factions.cmd.*;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
@@ -50,6 +47,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new FactionCommand(this));
         registerCommand(new StatsCommand(this));
         registerCommand(new StateCommand(this));
+        registerCommand(new TimerCommand(this));
         registerCommand(new DebugCommand());
 
         // db init
@@ -102,6 +100,7 @@ public final class Factions extends AresPlugin {
         registerListener(new PillarListener(this));
         registerListener(new ClaimBuilderListener(this));
         registerListener(new ClaimListener(this));
+        registerListener(new ShieldListener(this));
     }
 
     @Override

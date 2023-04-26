@@ -3,10 +3,10 @@ package gg.hcfactions.factions.models.player.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.models.claim.EClaimPillarType;
+import gg.hcfactions.factions.models.claim.EShieldType;
 import gg.hcfactions.factions.models.claim.IPillar;
-import gg.hcfactions.factions.models.claim.impl.Claim;
-import gg.hcfactions.factions.models.claim.impl.ClaimPillar;
-import gg.hcfactions.factions.models.claim.impl.MapPillar;
+import gg.hcfactions.factions.models.claim.IShield;
+import gg.hcfactions.factions.models.claim.impl.*;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
@@ -17,6 +17,7 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
@@ -26,6 +27,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class FactionPlayer implements IFactionPlayer, MongoDocument<FactionPlayer> {
     @Getter public final transient PlayerManager playerManager;
@@ -33,6 +35,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     @Getter @Setter public transient boolean safeDisconnecting;
     @Getter @Setter public transient Claim currentClaim;
     @Getter public final Set<IPillar> pillars;
+    @Getter public final Set<IShield> shields;
 
     @Getter public UUID uniqueId;
     @Getter @Setter public double balance;
@@ -49,6 +52,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.resetOnJoin = false;
         this.timers = Sets.newConcurrentHashSet();
         this.pillars = Sets.newHashSet();
+        this.shields = Sets.newConcurrentHashSet();
     }
 
     public FactionPlayer(PlayerManager playerManager, UUID uniqueId, String username) {
@@ -61,6 +65,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.resetOnJoin = false;
         this.timers = Sets.newConcurrentHashSet();
         this.pillars = Sets.newHashSet();
+        this.shields = Sets.newConcurrentHashSet();
     }
 
     public Player getBukkit() {
@@ -74,6 +79,39 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         player.sendMessage(message);
+    }
+
+    /**
+     * Returns a Set collection of Shield Blocks matching the given type
+     * @param type Shield Type
+     * @return Set containing shield blocks matching type
+     */
+    public Set<IShield> getShieldBlocks(EShieldType type) {
+        if (type.equals(EShieldType.COMBAT)) {
+            return shields.stream().filter(s -> s instanceof CombatShield).collect(Collectors.toSet());
+        }
+
+        if (type.equals(EShieldType.PROTECTION)) {
+            return shields.stream().filter(s -> s instanceof ProtectionShield).collect(Collectors.toSet());
+        }
+
+        return null;
+    }
+
+    public IShield getShieldBlockAt(BLocatable location) {
+        if (shields.isEmpty()) {
+            return null;
+        }
+
+        return shields
+                .stream()
+                .filter(shield ->
+                        shield.getLocation().getX() == location.getX() &&
+                                shield.getLocation().getY() == location.getY() &&
+                                shield.getLocation().getZ() == location.getZ() &&
+                                shield.getLocation().getWorldName().equals(location.getWorldName()))
+                .findFirst()
+                .orElse(null);
     }
 
     public ClaimPillar getExistingClaimPillar(EClaimPillarType pillarType) {
@@ -90,12 +128,25 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         pillars.clear();
     }
 
+    public void hideAllShields() {
+        shields.forEach(IShield::hide);
+        shields.clear();
+    }
+
     public boolean hasClaimPillars() {
         return pillars.stream().anyMatch(p -> p instanceof ClaimPillar);
     }
 
     public boolean hasMapPillars() {
         return pillars.stream().anyMatch(p -> p instanceof MapPillar);
+    }
+
+    public boolean hasCombatShields() {
+        return shields.stream().anyMatch(shield -> shield instanceof CombatShield);
+    }
+
+    public boolean hasProtectionShields() {
+        return shields.stream().anyMatch(shield -> shield instanceof ProtectionShield);
     }
 
     public void hideClaimPillars() {
@@ -111,6 +162,34 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         });
 
         toRemove.forEach(pillars::remove);
+    }
+
+    public void hideAllCombatShields() {
+        final List<IShield> toRemove = Lists.newArrayList();
+
+        shields
+                .stream()
+                .filter(shield -> shield instanceof CombatShield)
+                .forEach(combatShield -> {
+                    combatShield.hide();
+                    toRemove.add(combatShield);
+                });
+
+        toRemove.forEach(shields::remove);
+    }
+
+    public void hideAllProtectionShields() {
+        final List<IShield> toRemove = Lists.newArrayList();
+
+        shields
+                .stream()
+                .filter(shield -> shield instanceof ProtectionShield)
+                .forEach(protShield -> {
+                    protShield.hide();
+                    toRemove.add(protShield);
+                });
+
+        toRemove.forEach(shields::remove);
     }
 
     public void hideMapPillars() {

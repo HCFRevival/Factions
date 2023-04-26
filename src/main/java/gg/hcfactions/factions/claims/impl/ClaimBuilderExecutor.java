@@ -96,6 +96,7 @@ public record ClaimBuilderExecutor(@Getter ClaimBuilderManager builderManager) i
             return;
         }
 
+        player.getInventory().addItem(item.get().getItem());
         builderManager.getBuilderRepository().add(builder);
         promise.resolve();
     }
