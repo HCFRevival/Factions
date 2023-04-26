@@ -771,7 +771,7 @@ public final class ClaimListener implements Listener {
                 }
             }
         } else if (getEnvironmentName(toEnv) != null) {
-            player.sendMessage(ChatColor.GOLD + "Now Entering" + ChatColor.RESET + ": " + getEnvironmentName(toEnv) + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+            player.sendMessage(ChatColor.GOLD + "Now Entering:" + getEnvironmentName(toEnv) + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
         }
     }
 
