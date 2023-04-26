@@ -514,7 +514,6 @@ public final class FactionCommand extends BaseCommand {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "You have been given a faction subclaiming axe");
-                return;
             }
 
             @Override

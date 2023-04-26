@@ -20,6 +20,7 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
@@ -1342,12 +1343,22 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void startSubclaiming(Player player, String subclaimName, Promise promise) {
-
+        manager.getPlugin().getSubclaimManager().getExecutor().startSubclaiming(player, subclaimName, promise);
     }
 
     @Override
     public void modifySubclaim(Player player, String subclaimName, String modifier, String username, Promise promise) {
+        if (modifier.equalsIgnoreCase("a") || modifier.equalsIgnoreCase("add")) {
+            manager.getPlugin().getSubclaimManager().getExecutor().addToSubclaim(player, subclaimName, username, promise);
+            return;
+        }
 
+        if (modifier.equalsIgnoreCase("r") || modifier.equalsIgnoreCase("rem") || modifier.equalsIgnoreCase("remove")) {
+            manager.getPlugin().getSubclaimManager().getExecutor().removeFromSubclaim(player, subclaimName, username, promise);
+            return;
+        }
+
+        promise.reject("Invalid modifier. (add or remove)");
     }
 
     @Override
@@ -1362,22 +1373,51 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void unsubclaim(Player player, Promise promise) {
+        final Subclaim inside = manager.getPlugin().getSubclaimManager().getSubclaimAt(new PLocatable(player));
 
+        if (inside == null) {
+            promise.reject(FError.F_NOT_IN_SUBCLAIM.getErrorDescription());
+            return;
+        }
+
+        manager.getPlugin().getSubclaimManager().getExecutor().unsubclaim(player, inside.getName(), promise);
     }
 
     @Override
     public void unsubclaim(Player player, String subclaimName, Promise promise) {
-
+        manager.getPlugin().getSubclaimManager().getExecutor().unsubclaim(player, subclaimName, promise);
     }
 
     @Override
     public void showSubclaimList(Player player) {
+        manager.getPlugin().getSubclaimManager().getExecutor().listSubclaims(player, new Promise() {
+            @Override
+            public void resolve() {}
 
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to display subclaims: " + s);
+            }
+        });
     }
 
     @Override
     public void showSubclaimList(Player player, String factionName) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
+        if (faction == null) {
+            player.sendMessage(FMessage.ERROR + FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
 
+        manager.getPlugin().getSubclaimManager().getExecutor().listSubclaims(player, faction, new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to display subclaims: " + s);
+            }
+        });
     }
 
     @Override

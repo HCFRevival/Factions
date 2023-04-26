@@ -1,6 +1,7 @@
 package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.claims.ClaimManager;
+import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.cmd.*;
 import gg.hcfactions.factions.faction.FactionManager;
@@ -23,6 +24,7 @@ public final class Factions extends AresPlugin {
     @Getter public PlayerManager playerManager;
     @Getter public FactionManager factionManager;
     @Getter public ClaimManager claimManager;
+    @Getter public SubclaimManager subclaimManager;
     @Getter public TimerManager timerManager;
     @Getter public ServerStateManager serverStateManager;
     @Getter public StatsManager statsManager;
@@ -71,6 +73,7 @@ public final class Factions extends AresPlugin {
         playerManager = new PlayerManager(this);
         factionManager = new FactionManager(this);
         claimManager = new ClaimManager(this);
+        subclaimManager = new SubclaimManager(this);
         timerManager = new TimerManager(this);
         serverStateManager = new ServerStateManager(this);
         statsManager = new StatsManager(this, configuration.getStatsConfig());
@@ -80,6 +83,7 @@ public final class Factions extends AresPlugin {
         factionManager.onEnable();
         playerManager.onEnable();
         claimManager.onEnable();
+        subclaimManager.onEnable();
         timerManager.onEnable();
         serverStateManager.onEnable();
         statsManager.onEnable();
@@ -102,6 +106,8 @@ public final class Factions extends AresPlugin {
         registerListener(new ClaimBuilderListener(this));
         registerListener(new ClaimListener(this));
         registerListener(new ShieldListener(this));
+        registerListener(new SubclaimBuilderListener(this));
+        registerListener(new SubclaimListener(this));
     }
 
     @Override
@@ -113,6 +119,7 @@ public final class Factions extends AresPlugin {
 
         // disable and unregister managers
         claimManager.onDisable();
+        subclaimManager.onDisable();
         playerManager.onDisable();
         factionManager.onDisable();
         timerManager.onDisable();

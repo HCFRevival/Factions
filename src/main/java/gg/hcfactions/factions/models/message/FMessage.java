@@ -9,6 +9,7 @@ import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
@@ -18,6 +19,8 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.utils.Colors;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -216,6 +219,22 @@ public final class FMessage {
         player.sendMessage(LAYER_2 + "Class Deactivated" + LAYER_1 + ": " + INFO + playerClass.getName());
     }
 
+    public static void printSubclaimAdded(Subclaim subclaim, String addingUsername, String addedUsername) {
+        subclaim.sendMessage(P_NAME + addingUsername + LAYER_1 + " has " + SUCCESS + "added" + P_NAME + addedUsername + LAYER_1 + " to " + INFO + subclaim.getName());
+    }
+
+    public static void printSubclaimRemoved(Subclaim subclaim, String removingUsername, String removedUsername) {
+        subclaim.sendMessage(P_NAME + removingUsername + LAYER_1 + " has " + ERROR + "added" + P_NAME + removedUsername + LAYER_1 + " to " + INFO + subclaim.getName());
+    }
+
+    public static void printSubclaimCreated(PlayerFaction faction, String creatorUsername, String subclaimName) {
+        faction.sendMessage(P_NAME + creatorUsername + LAYER_1 + " has " + SUCCESS + "created" + LAYER_1 + " a new subclaim: " + INFO + subclaimName);
+    }
+
+    public static void printSubclaimDeleted(Subclaim subclaim, String deletingUsername) {
+        subclaim.sendMessage(P_NAME + deletingUsername + LAYER_1 + " has " + ERROR + "deleted " + INFO + subclaim.getName());
+    }
+
     public static String getPublicFormat(PlayerFaction faction, String displayName, String message, Player receiver) {
         if (faction == null) {
             return displayName + ChatColor.RESET + ": " + message;
@@ -371,5 +390,31 @@ public final class FMessage {
                 player.sendMessage(LAYER_1 + "------------------------------------------------");
             }).run();
         }).run();
+    }
+
+    /**
+     * Handles printing the message showing a list of subclaims
+     * @param player Player
+     * @param subclaims Subclaims to display
+     */
+    public static void listSubclaims(Player player, Collection<Subclaim> subclaims) {
+        player.sendMessage(LAYER_2 + "" + ChatColor.BOLD + "Subclaim List" + LAYER_2 + " (" + LAYER_1 + subclaims.size() + " found" + LAYER_2 + ")");
+
+        int pos = 1;
+
+        for (Subclaim subclaim : subclaims) {
+            player.spigot().sendMessage(
+                    new ComponentBuilder(" ").color(net.md_5.bungee.api.ChatColor.RESET)
+                            .append(" ").color(net.md_5.bungee.api.ChatColor.RESET)
+                            .append(pos + ". ").color(net.md_5.bungee.api.ChatColor.GOLD)
+                            .append(subclaim.getName())
+                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("There is " + subclaim.getMembers().size() + " members in this subclaim").color(net.md_5.bungee.api.ChatColor.YELLOW).create()))
+                            .append(" [").color(net.md_5.bungee.api.ChatColor.GRAY)
+                            .append(subclaim.getCorner(1).toString()).color(net.md_5.bungee.api.ChatColor.GOLD)
+                            .append("]").color(net.md_5.bungee.api.ChatColor.GRAY).create());
+
+            pos += 1;
+        }
     }
 }
