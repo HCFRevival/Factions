@@ -33,6 +33,7 @@ public enum FError {
     F_UNABLE_TO_CREATE("Failed to create faction"),
     F_UNABLE_TO_DISBAND("Failed to disband faction"),
     F_NOT_FOUND("Faction not found"),
+    F_NOT_FOUND_MULTIPLE("No factions found"),
     F_NOT_FROZEN("Faction power is not frozen"),
     F_NOT_ALLOWED_RAIDABLE("You are not able to perform this action while your faction is raid-able"),
     F_NOT_ALLOWED_WHILE_FROZEN("You are not able to perform this action while your faction power is frozen"),

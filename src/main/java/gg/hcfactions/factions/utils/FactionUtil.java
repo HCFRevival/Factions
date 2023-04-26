@@ -12,6 +12,7 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -19,6 +20,13 @@ import java.util.List;
 import java.util.Objects;
 
 public final class FactionUtil {
+    public static final ImmutableList<Material> PILLAR_MATS = ImmutableList.of(
+            Material.BOOKSHELF, Material.SOUL_SAND, Material.PUMPKIN, Material.SPONGE, Material.EMERALD_BLOCK,
+            Material.DIAMOND_BLOCK, Material.GOLD_BLOCK, Material.REDSTONE_BLOCK, Material.LAPIS_BLOCK, Material.IRON_BLOCK,
+            Material.SANDSTONE, Material.PRISMARINE, Material.NETHERRACK, Material.NETHER_BRICK, Material.MELON, Material.END_STONE,
+            Material.PURPUR_PILLAR, Material.BLACKSTONE, Material.CRIMSON_PLANKS
+    );
+
     public static void cleanPlayer(Factions plugin, Player player) {
         Players.resetHealth(player);
         player.teleport(plugin.getConfiguration().getOverworldSpawn());

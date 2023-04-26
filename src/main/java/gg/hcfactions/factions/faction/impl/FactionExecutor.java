@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.faction.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.listeners.events.faction.FactionCreateEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
@@ -9,6 +10,7 @@ import gg.hcfactions.factions.faction.IFactionExecutor;
 import gg.hcfactions.factions.menus.DisbandConfirmationMenu;
 import gg.hcfactions.factions.models.claim.EClaimBufferType;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.claim.impl.MapPillar;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.IFaction;
@@ -20,26 +22,28 @@ import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.utils.Players;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
+import org.codehaus.plexus.util.StringUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public record FactionExecutor(@Getter FactionManager manager) implements IFactionExecutor {
     @Override
@@ -700,8 +704,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction instanceof PlayerFaction) {
-            final PlayerFaction playerFaction = (PlayerFaction) faction;
+        if (faction instanceof final PlayerFaction playerFaction) {
             playerFaction.setHomeLocation(new PLocatable(player));
             FMessage.printHomeUpdate(playerFaction, player, playerFaction.getHomeLocation());
         } else {
@@ -1238,8 +1241,81 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
-    public void showFactionMap(Player player) {
+    public void showFactionMap(Player player, Promise promise) {
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
 
+        if (factionPlayer == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        if (factionPlayer.hasMapPillars()) {
+            factionPlayer.hideMapPillars();
+            player.sendMessage(FMessage.F_MAP_PILLARS_HIDDEN);
+            promise.resolve();
+            return;
+        }
+
+        final PLocatable location = new PLocatable(player);
+
+        new Scheduler(manager.getPlugin()).async(() -> {
+            final Set<IFaction> found = Sets.newHashSet();
+
+            for (Claim claim : manager.getPlugin().getClaimManager().getClaimRepository()) {
+                for (BLocatable corner : claim.getCorners()) {
+                    if (corner.getDistance(location) > 64.0) {
+                        continue;
+                    }
+
+                    final IFaction owner = manager.getFactionById(claim.getOwner());
+
+                    if (owner == null || found.contains(owner)) {
+                        continue;
+                    }
+
+                    found.add(owner);
+                }
+            }
+
+            new Scheduler(manager.getPlugin()).sync(() -> {
+                if (found.isEmpty()) {
+                    promise.reject(FError.F_NOT_FOUND_MULTIPLE.getErrorDescription());
+                    return;
+                }
+
+                int pos = 0;
+
+                player.sendMessage(FMessage.LAYER_2 + "Faction Map (" + FMessage.LAYER_1 + found.size() + " in your area" + FMessage.LAYER_2 + ")");
+
+                for (IFaction faction : found) {
+                    final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
+
+                    if (claims.isEmpty()) {
+                        continue;
+                    }
+
+                    final Material mat = FactionUtil.PILLAR_MATS.get(pos);
+
+                    claims.forEach(c -> {
+                        for (BLocatable corner : c.getCorners()) {
+                            corner.setY(location.getY() - 5);
+
+                            final MapPillar pillar = new MapPillar(player, mat, corner);
+                            factionPlayer.getPillars().add(pillar);
+                            pillar.draw();
+                        }
+                    });
+
+                    player.sendMessage(ChatColor.RESET + " " + ChatColor.RESET + " " + FMessage.LAYER_1 + " - "
+                            + FMessage.LAYER_2 + faction.getName() + ChatColor.GRAY + " (" + ChatColor.AQUA
+                            + StringUtils.capitalise(mat.name().toLowerCase(Locale.ROOT).replaceAll("_", " ")) + ChatColor.GRAY + ")");
+
+                    pos += 1;
+
+                    promise.resolve();
+                }
+            }).run();
+        }).run();
     }
 
     @Override

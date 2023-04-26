@@ -40,7 +40,7 @@ public interface IFactionExecutor {
     void withdrawMoney(Player player, double amount, Promise promise);
     void showFactionInfo(Player player);
     void showFactionInfo(Player player, String name);
-    void showFactionMap(Player player);
+    void showFactionMap(Player player, Promise promise);
     void startClaiming(Player player, Promise promise);
     void startClaiming(Player player, String factionName, Promise promise);
     void startSubclaiming(Player player, String subclaimName, Promise promise);

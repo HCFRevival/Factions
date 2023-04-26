@@ -472,7 +472,15 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("map")
     @Description("View nearby faction claims")
     public void onFactionMap(Player player) {
-        plugin.getFactionManager().getExecutor().showFactionMap(player);
+        plugin.getFactionManager().getExecutor().showFactionMap(player, new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to display map: " + s);
+            }
+        });
     }
 
     @Subcommand("claim")

@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.claim.impl;
 
+import com.google.common.collect.Lists;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.models.claim.IClaim;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
 
+import java.util.List;
 import java.util.UUID;
 
 public final class Claim implements IClaim, MongoDocument<Claim> {
@@ -35,6 +37,20 @@ public final class Claim implements IClaim, MongoDocument<Claim> {
         this.cornerA = cornerA;
         this.cornerB = cornerB;
         this.cost = cost;
+    }
+
+    /**
+     * Collects all corners and returns them in an array
+     * @return Array of claim corner locations
+     */
+    public List<BLocatable> getCorners() {
+        final List<BLocatable> res = Lists.newArrayList();
+
+        for (int i = 1; i <= 4; i++) {
+            res.add(getCorner(i));
+        }
+
+        return res;
     }
 
     /**
