@@ -103,15 +103,11 @@ public final class ClaimManager implements IManager {
         final FindIterable<Document> docs = coll.find();
 
         try (MongoCursor<Document> cursor = docs.cursor()) {
-            final Document doc = cursor.tryNext();
-
-            if (doc == null) {
-                cursor.close();
-                return;
+            while (cursor.hasNext()) {
+                final Document doc = cursor.next();
+                final Claim claim = new Claim(this).fromDocument(doc);
+                claimRepository.add(claim);
             }
-
-            final Claim claim = new Claim(this).fromDocument(doc);
-            claimRepository.add(claim);
         }
 
         final long post = Time.now();
