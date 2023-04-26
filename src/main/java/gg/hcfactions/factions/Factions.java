@@ -48,6 +48,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new StatsCommand(this));
         registerCommand(new StateCommand(this));
         registerCommand(new TimerCommand(this));
+        registerCommand(new PvPCommand(this));
         registerCommand(new DebugCommand());
 
         // db init

@@ -232,7 +232,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.COMBAT)) {
-            // TODO: Remove combat shield
+            hideAllCombatShields();
             sendMessage(FMessage.T_CTAG_EXPIRE);
         }
 
@@ -258,7 +258,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.PROTECTION)) {
-            // TODO: Remove protection shield
+            hideAllProtectionShields();
             sendMessage(FMessage.T_PROTECTION_EXPIRE);
         }
 

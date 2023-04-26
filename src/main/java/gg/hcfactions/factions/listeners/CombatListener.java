@@ -37,6 +37,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.util.List;
 import java.util.Objects;
 
 public record CombatListener(@Getter Factions plugin) implements Listener {
@@ -270,10 +271,8 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                     effect.getType().equals(PotionEffectType.SLOW) ||
                     effect.getType().equals(PotionEffectType.WEAKNESS) ||
                     effect.getType().equals(PotionEffectType.HARM)) {
-
                 isDebuff = true;
                 break;
-
             }
         }
 
@@ -298,9 +297,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             final Claim claim = attackerProfile.getCurrentClaim();
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
-
+            if (owner instanceof final ServerFaction sf) {
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
                     return;
@@ -312,66 +309,13 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             final Claim claim = attackedProfile.getCurrentClaim();
             final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
-
+            if (owner instanceof final ServerFaction sf) {
                 if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
                 }
             }
         }
     }
-
-    /* @EventHandler (priority = EventPriority.LOW)
-    public void onClassConsume(ConsumeClassItemEvent event) {
-        final ClassAddon addon = (ClassAddon)getPlugin().getAddonManager().get(ClassAddon.class);
-
-        if (addon == null) {
-            return;
-        }
-
-        final Player player = event.getPlayer();
-        final AresClass playerClass = addon.getManager().getCurrentClass(player);
-        final FactionPlayer profile = getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
-
-        if (profile.hasTimer(PlayerTimer.PlayerTimerType.PROTECTION)) {
-            player.sendMessage(ChatColor.RED + "You can not use consumable effects while you have PvP Protection");
-            event.setCancelled(true);
-            return;
-        }
-
-        // TODO: Eventually fix this but it's expected only bard will give effects for now
-        if (!(playerClass instanceof Bard)) {
-            return;
-        }
-
-        final Bard bard = (Bard)playerClass;
-
-        if (event.getConsumable().getApplicationType().equals(Consumable.ConsumableApplicationType.INDIVIDUAL)) {
-            return;
-        }
-
-        if (event.getConsumable().getApplicationType().equals(Consumable.ConsumableApplicationType.ALL)) {
-            final List<Player> friendlies = FactionUtil.getNearbyFriendlies(plugin, player, bard.getRange());
-            final List<Player> enemies = FactionUtil.getNearbyEnemies(plugin, player, bard.getRange());
-
-            friendlies.forEach(friendly -> event.getAffectedPlayers().put(friendly.getUniqueId(), true));
-            enemies.forEach(enemy -> event.getAffectedPlayers().put(enemy.getUniqueId(), false));
-
-            return;
-        }
-
-        if (event.getConsumable().getApplicationType().equals(Consumable.ConsumableApplicationType.FRIENDLY_ONLY)) {
-            final List<Player> friendlies = FactionUtil.getNearbyFriendlies(plugin, player, bard.getRange());
-            friendlies.forEach(friendly -> event.getAffectedPlayers().put(friendly.getUniqueId(), true));
-            return;
-        }
-
-        if (event.getConsumable().getApplicationType().equals(Consumable.ConsumableApplicationType.ENEMY_ONLY)) {
-            final List<Player> enemies = FactionUtil.getNearbyEnemies(plugin, player, bard.getRange());
-            enemies.forEach(enemy -> event.getAffectedPlayers().put(enemy.getUniqueId(), false));
-        }
-    } */
 
     @EventHandler (priority = EventPriority.HIGH)
     public void onPlayerDamageLogger(PlayerDamageCombatLoggerEvent event) {
