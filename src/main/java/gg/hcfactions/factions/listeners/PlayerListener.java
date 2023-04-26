@@ -75,7 +75,7 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
     public void onPlayerSetup(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
-        final IFactionPlayer factionPlayer = plugin.getPlayerManager().getPlayer(player);
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
         if (factionPlayer == null) {
             player.kickPlayer(FMessage.ERROR + FError.P_COULD_NOT_LOAD_P.getErrorDescription());
@@ -83,7 +83,8 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
         }
 
         if (!player.hasPlayedBefore() || factionPlayer.isResetOnJoin()) {
-            FactionUtil.cleanPlayer(plugin, player);
+            FactionUtil.cleanPlayer(plugin, factionPlayer);
+            factionPlayer.setResetOnJoin(false);
         }
 
         if (faction != null) {
@@ -104,10 +105,10 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
     @EventHandler /* Clean player when they click the respawn button */
     public void onRespawn(PlayerRespawnEvent event) {
         final Player player = event.getPlayer();
-        final IFactionPlayer factionPlayer = plugin.getPlayerManager().getPlayer(player);
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
         if (!factionPlayer.isResetOnJoin()) {
-            FactionUtil.cleanPlayer(plugin, player);
+            FactionUtil.cleanPlayer(plugin, factionPlayer);
         }
     }
 

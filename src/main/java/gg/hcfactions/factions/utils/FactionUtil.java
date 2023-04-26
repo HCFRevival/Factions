@@ -9,6 +9,9 @@ import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.state.EServerState;
+import gg.hcfactions.factions.models.timer.ETimerType;
+import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
@@ -27,9 +30,18 @@ public final class FactionUtil {
             Material.PURPUR_PILLAR, Material.BLACKSTONE, Material.CRIMSON_PLANKS
     );
 
-    public static void cleanPlayer(Factions plugin, Player player) {
-        Players.resetHealth(player);
+    public static void cleanPlayer(Factions plugin, FactionPlayer factionPlayer) {
+        final Player player = factionPlayer.getBukkit();
+        final int protDuration = plugin.getServerStateManager().getCurrentState().equals(EServerState.SOTW)
+                ? plugin.getConfiguration().getSotwProtectionDuration()
+                : plugin.getConfiguration().getNormalProtectionDuration();
+
+        factionPlayer.getTimers().clear();
+        factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
+
         player.teleport(plugin.getConfiguration().getOverworldSpawn());
+
+        Players.resetHealth(player);
     }
 
     public static void teleportToSafety(Factions plugin, Player player) {

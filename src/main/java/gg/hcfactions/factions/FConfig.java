@@ -67,6 +67,8 @@ public final class FConfig {
     @Getter public int rallyDuration;
     @Getter public int freezeDuration;
     @Getter public int homeDuration;
+    @Getter public int sotwProtectionDuration;
+    @Getter public int normalProtectionDuration;
 
     // classes
     @Getter public int minerClassLimit;
@@ -171,6 +173,8 @@ public final class FConfig {
         rallyDuration = conf.getInt("factions.timers.rally_duration");
         freezeDuration = conf.getInt("factions.timers.freeze_duration");
         homeDuration = conf.getInt("factions.timers.home_duration");
+        sotwProtectionDuration = conf.getInt("factions.timers.protection.sotw");
+        normalProtectionDuration = conf.getInt("factions.timers.protection.normal");
 
         minerClassLimit = conf.getInt("classes.limits.miner");
         archerClassLimit = conf.getInt("classes.limits.archer");
