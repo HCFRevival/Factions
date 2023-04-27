@@ -1,5 +1,7 @@
 package gg.hcfactions.factions;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
@@ -58,15 +60,20 @@ public final class Factions extends AresPlugin {
         mdb.openConnection();
         registerConnectable(mdb);
 
+        // protocol lib init
+        registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
+
         // declare services
         final AccountService accountService = new AccountService(this);
         final DeathbanService deathbanService = new DeathbanService(this, configuration.getDeathbanConfig());
         final CustomItemService customItemService = new CustomItemService(this);
+        final CXService commandXService = new CXService(this);
 
         // register services
         registerService(accountService);
         registerService(deathbanService);
         registerService(customItemService);
+        registerService(commandXService);
         startServices();
 
         // declare managers

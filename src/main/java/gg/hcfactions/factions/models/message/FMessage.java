@@ -187,6 +187,10 @@ public final class FMessage {
         faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "updated" + LAYER_1 + " your faction home to " + INFO + Math.round(location.getX()) + ", " + Math.round(location.getY()) + ", " + Math.round(location.getZ()));
     }
 
+    public static void printHomeUnset(PlayerFaction faction, Player player) {
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "unset" + LAYER_1 + " your faction home");
+    }
+
     public static void printReinviteConsumed(PlayerFaction faction, int newReinvites) {
         faction.sendMessage(LAYER_1 + "Remaining Faction Re-invites: " + (newReinvites <= 2 ? ERROR : INFO) + newReinvites);
     }

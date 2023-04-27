@@ -506,6 +506,29 @@ public final class FactionCommand extends BaseCommand {
         plugin.getFactionManager().getExecutor().startClaiming(player, factionName, promise);
     }
 
+    @Subcommand("unclaim")
+    @Description("Unclaim land for your faction")
+    public void onFactionUnclaim(Player player, @Optional String factionName) {
+        final Promise promise = new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(FMessage.SUCCESS + "Land has been unclaimed");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to unclaim land: " + s);
+            }
+        };
+
+        if (factionName == null) {
+            plugin.getFactionManager().getExecutor().unclaim(player, promise);
+            return;
+        }
+
+        plugin.getFactionManager().getExecutor().unclaim(player, factionName, promise);
+    }
+
     @Subcommand("subclaim")
     @Description("Subclaim land for your faction")
     @Syntax("<name>")

@@ -32,6 +32,7 @@
                                 <includes>
                                     <include>gg.hcfactions.libs:base</include>
                                     <include>gg.hcfactions.libs:bukkit</include>
+                                    <include>gg.hcfactions:CX</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
@@ -81,6 +82,12 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+
+        <!-- protocollib -->
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -121,6 +128,21 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
+        </dependency>
+
+        <!-- command x -->
+        <dependency>
+            <groupId>gg.hcfactions</groupId>
+            <artifactId>CX</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- protocol lib -->
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>5.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

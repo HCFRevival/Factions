@@ -41,10 +41,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public record FactionExecutor(@Getter FactionManager manager) implements IFactionExecutor {
     @Override
@@ -1229,6 +1229,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
                 if (playerFaction == null) {
                     player.sendMessage(FMessage.ERROR + FError.F_NOT_FOUND.getErrorDescription());
+                    return;
                 }
 
                 FMessage.printFactionInfo(manager.getPlugin(), player, playerFaction);
@@ -1363,12 +1364,227 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void unclaim(Player player, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final List<Claim> claims = getManager().getPlugin().getClaimManager().getClaimsByOwner(faction);
+        final PlayerFaction.Member member = faction.getMember(player.getUniqueId());
+
+        if (member == null) {
+            promise.reject(FError.P_COULD_NOT_LOAD_F.getErrorDescription());
+            return;
+        }
+
+        if (member.getRank().equals(PlayerFaction.Rank.MEMBER) && !bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (claims.isEmpty()) {
+            promise.reject("Your faction does not have any claims");
+            return;
+        }
+
+        if (!inside.getOwner().equals(faction.getUniqueId())) {
+            promise.reject("Your faction does not own this claim");
+            return;
+        }
+
+        new Scheduler(manager.getPlugin()).async(() -> {
+            if (claims.size() >= 3) {
+                final List<Claim> otherClaims = claims.stream().filter(c -> !c.getUniqueId().equals(inside.getUniqueId())).collect(Collectors.toList());
+
+                for (Claim oc : otherClaims) {
+                    boolean isValid = false;
+
+                    for (BLocatable perimeter : oc.getPerimeter(64)) {
+                        final List<Claim> comparedClaims = claims
+                                .stream()
+                                .filter(c -> !c.getUniqueId().equals(inside.getUniqueId()) && !c.getUniqueId().equals(oc.getUniqueId()))
+                                .collect(Collectors.toList());
+
+                        for (Claim cc : comparedClaims) {
+                            if (cc.isTouching(perimeter)) {
+                                isValid = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isValid) {
+                        new Scheduler(manager.getPlugin()).sync(() -> {
+                            promise.reject("Claims would no longer be connected");
+                        }).run();
+
+                        return;
+                    }
+                }
+            }
+
+            final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
+            final List<Subclaim> subclaimsToRemove = Lists.newArrayList();
+
+            if (!subclaims.isEmpty()) {
+                for (Subclaim s : subclaims) {
+                    boolean remove = false;
+
+                    for (BLocatable perimeter : s.getPerimeter(64)) {
+                        if (inside.isInside(perimeter, true)) {
+                            remove = true;
+                            break;
+                        }
+                    }
+
+                    if (remove) {
+                        subclaimsToRemove.add(s);
+                    }
+                }
+
+                subclaimsToRemove.forEach(removedSubclaim -> {
+                    manager.getPlugin().getSubclaimManager().getSubclaimRepository().remove(removedSubclaim);
+                    manager.getPlugin().getSubclaimManager().deleteSubclaim(removedSubclaim);
+                });
+            }
+
+            manager.getPlugin().getClaimManager().getClaimRepository().remove(inside);
+            manager.getPlugin().getClaimManager().deleteClaim(inside);
+
+            new Scheduler(manager.getPlugin()).sync(() -> {
+                if (faction.getHomeLocation() != null && inside.isInside(faction.getHomeLocation(), true)) {
+                    faction.setHomeLocation(null);
+                    FMessage.printHomeUnset(faction, player);
+                }
+
+                final double refunded = inside.getCost() * manager.getPlugin().getConfiguration().getClaimRefundPercent();
+                faction.addToBalance(refunded);
+                faction.sendMessage(ChatColor.DARK_GREEN + "$" + String.format("%.2f", refunded) + FMessage.LAYER_1 + " has been refunded to your faction balance");
+
+                if (!subclaimsToRemove.isEmpty()) {
+                    faction.sendMessage(FMessage.INFO + "" + subclaimsToRemove.size() + FMessage.LAYER_1 + " subclaims have been removed by unclaiming land");
+                }
+
+                promise.resolve();
+            }).run();
+        }).run();
     }
 
     @Override
     public void unclaim(Player player, String factionName, Promise promise) {
+        final IFaction faction = manager.getFactionByName(factionName);
+        final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (!bypass) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        final List<Claim> claims = getManager().getPlugin().getClaimManager().getClaimsByOwner(faction);
+
+        if (claims.isEmpty()) {
+            promise.reject("This faction does not have any claims");
+            return;
+        }
+
+        if (!inside.getOwner().equals(faction.getUniqueId())) {
+            promise.reject("This faction does not own this claim");
+            return;
+        }
+
+        new Scheduler(manager.getPlugin()).async(() -> {
+            if (claims.size() >= 3) {
+                final List<Claim> otherClaims = claims.stream().filter(c -> !c.getUniqueId().equals(inside.getUniqueId())).collect(Collectors.toList());
+
+                for (Claim oc : otherClaims) {
+                    boolean isValid = false;
+
+                    for (BLocatable perimeter : oc.getPerimeter(64)) {
+                        final List<Claim> comparedClaims = claims
+                                .stream()
+                                .filter(c -> !c.getUniqueId().equals(inside.getUniqueId()) && !c.getUniqueId().equals(oc.getUniqueId()))
+                                .collect(Collectors.toList());
+
+                        for (Claim cc : comparedClaims) {
+                            if (cc.isTouching(perimeter)) {
+                                isValid = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isValid) {
+                        new Scheduler(manager.getPlugin()).sync(() -> {
+                            promise.reject("Claims would no longer be connected");
+                        }).run();
+
+                        return;
+                    }
+                }
+            }
+
+            final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
+            final List<Subclaim> subclaimsToRemove = Lists.newArrayList();
+
+            if (faction instanceof PlayerFaction) {
+                if (!subclaims.isEmpty()) {
+                    for (Subclaim s : subclaims) {
+                        boolean remove = false;
+
+                        for (BLocatable perimeter : s.getPerimeter(64)) {
+                            if (inside.isInside(perimeter, true)) {
+                                remove = true;
+                                break;
+                            }
+                        }
+
+                        if (remove) {
+                            subclaimsToRemove.add(s);
+                        }
+                    }
+
+                    subclaimsToRemove.forEach(removedSubclaim -> {
+                        manager.getPlugin().getSubclaimManager().getSubclaimRepository().remove(removedSubclaim);
+                        manager.getPlugin().getSubclaimManager().deleteSubclaim(removedSubclaim);
+                    });
+                }
+            }
+
+            manager.getPlugin().getClaimManager().getClaimRepository().remove(inside);
+            manager.getPlugin().getClaimManager().deleteClaim(inside);
+
+            new Scheduler(manager.getPlugin()).sync(() -> {
+                if (faction.getHomeLocation() != null && inside.isInside(faction.getHomeLocation(), true)) {
+                    faction.setHomeLocation(null);
+
+                    if (faction instanceof PlayerFaction) {
+                        FMessage.printHomeUnset((PlayerFaction) faction, player);
+                    }
+                }
+
+                if (faction instanceof final PlayerFaction playerFaction) {
+                    final double refunded = inside.getCost() * manager.getPlugin().getConfiguration().getClaimRefundPercent();
+                    playerFaction.addToBalance(refunded);
+                    playerFaction.sendMessage(ChatColor.DARK_GREEN + "$" + String.format("%.2f", refunded) + FMessage.LAYER_1 + " has been refunded to your faction balance");
+
+                    if (!subclaimsToRemove.isEmpty()) {
+                        playerFaction.sendMessage(FMessage.INFO + "" + subclaimsToRemove.size() + FMessage.LAYER_1 + " subclaims have been removed by unclaiming land");
+                    }
+                }
+
+                promise.resolve();
+            }).run();
+        }).run();
     }
 
     @Override
