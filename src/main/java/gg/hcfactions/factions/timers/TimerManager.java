@@ -2,6 +2,7 @@ package gg.hcfactions.factions.timers;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -13,8 +14,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
@@ -30,11 +31,26 @@ public final class TimerManager implements IManager {
 
     @Override
     public void onEnable() {
-        uiTask = new Scheduler(plugin).sync(() -> {
-            plugin.getPlayerManager().getPlayerRepository().stream().filter(p -> !p.getTimers().isEmpty()).forEach(p -> {
+        final CXService commandXService = (CXService)plugin.getService(CXService.class);
+
+        uiTask = new Scheduler(plugin).sync(() -> Bukkit.getOnlinePlayers().forEach(player -> {
+            final FactionPlayer fp = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+            boolean hasUI = false;
+
+            if (fp.getTimers().isEmpty()) {
+                hasUI = true;
+            }
+
+            else if (commandXService.getRebootModule().isEnabled() && commandXService.getRebootModule().isRebootInProgress()) {
+                hasUI = true;
+            }
+
+            // TODO: Check if event is running here and make hasUI true
+
+            if (hasUI) {
                 final List<String> toRender = Lists.newArrayList();
 
-                p.getTimers().stream().filter(t -> t.getType().isRender()).forEach(rt -> {
+                fp.getTimers().stream().filter(t -> t.getType().isRender()).forEach(rt -> {
                     final String time = (rt.getType().isDecimal() && rt.getRemainingSeconds() < 10)
                             ? Time.convertToDecimal(rt.getRemaining()) + "s"
                             : Time.convertToHHMMSS(rt.getRemaining());
@@ -43,15 +59,19 @@ public final class TimerManager implements IManager {
                 });
 
                 // TODO: Append event timers here
-                // TODO: Append automatic reboots here
 
-                final Player player = ((FactionPlayer)p).getBukkit();
-                if (!toRender.isEmpty() && player != null) {
+                if (commandXService != null) {
+                    if (commandXService.getRebootModule().isEnabled() && commandXService.getRebootModule().isRebootInProgress()) {
+                        toRender.add(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Restart" + ChatColor.RED + ": " + Time.convertToHHMMSS(commandXService.getRebootModule().getTimeUntilReboot()));
+                    }
+                }
+
+                if (!toRender.isEmpty()) {
                     final String hud = Joiner.on(ChatColor.RESET + " " + ChatColor.RESET + " ").join(toRender);
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(hud));
                 }
-            });
-        }).repeat(0L, 1L).run();
+            }
+        })).repeat(0L, 1L).run();
 
         updateTask = new Scheduler(plugin).sync(() -> {
             plugin.getPlayerManager().getPlayerRepository()
