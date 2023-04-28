@@ -45,6 +45,10 @@ public final class TimerManager implements IManager {
                 hasUI = true;
             }
 
+            else if (commandXService.getVanishManager().isVanished(player)) {
+                hasUI = true;
+            }
+
             // TODO: Check if event is running here and make hasUI true
 
             if (hasUI) {
@@ -63,6 +67,10 @@ public final class TimerManager implements IManager {
                 if (commandXService != null) {
                     if (commandXService.getRebootModule().isEnabled() && commandXService.getRebootModule().isRebootInProgress()) {
                         toRender.add(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Restart" + ChatColor.RED + ": " + Time.convertToHHMMSS(commandXService.getRebootModule().getTimeUntilReboot()));
+                    }
+
+                    if (commandXService.getVanishManager().isVanished(player)) {
+                        toRender.add(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
                     }
                 }
 
