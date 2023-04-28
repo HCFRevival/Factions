@@ -37,7 +37,7 @@ public final class TimerManager implements IManager {
             final FactionPlayer fp = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
             boolean hasUI = false;
 
-            if (fp.getTimers().isEmpty()) {
+            if (!fp.getTimers().isEmpty()) {
                 hasUI = true;
             }
 
