@@ -49,7 +49,9 @@ public final class TimerManager implements IManager {
                 hasUI = true;
             }
 
-            // TODO: Check if event is running here and make hasUI true
+            else if (!plugin.getEventManager().getActiveEvents().isEmpty()) {
+                hasUI = true;
+            }
 
             if (hasUI) {
                 final List<String> toRender = Lists.newArrayList();
@@ -62,7 +64,24 @@ public final class TimerManager implements IManager {
                     toRender.add(rt.getType().getDisplayName() + ChatColor.RED + ": " + time);
                 });
 
-                // TODO: Append event timers here
+                plugin.getEventManager().getActiveKothEvents().forEach(kothEvent -> {
+                    if (kothEvent.getSession() != null) {
+                        final long remainingMillis = kothEvent.getSession().getTimer().getRemaining();
+                        final int remainingSeconds = (int)(remainingMillis/1000L);
+
+                        String displayed = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
+
+                        if (remainingMillis <= 0) {
+                            displayed = "Capturing...";
+                        }
+
+                        else if (kothEvent.getSession().isContested()) {
+                            displayed = "Contested";
+                        }
+
+                        toRender.add(kothEvent.getDisplayName() + ChatColor.RED + ": " + displayed);
+                    }
+                });
 
                 if (commandXService != null) {
                     if (commandXService.getRebootModule().isEnabled() && commandXService.getRebootModule().isRebootInProgress()) {

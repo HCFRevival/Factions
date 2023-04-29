@@ -36,6 +36,10 @@ public final class FMessage {
     public static final ChatColor INFO = ChatColor.BLUE;
     public static final ChatColor P_NAME = ChatColor.RESET;
 
+    public static final String KOTH_PREFIX = LAYER_2 + "[" + LAYER_1 + "KOTH" + LAYER_2 + "] " + LAYER_1;
+    public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
+    public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
+
     public static final String T_EPEARL_UNLOCKED = SUCCESS + "Your enderpearls have been unlocked";
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
     public static final String T_CRAPPLE_UNLOCKED = SUCCESS + "Your crapples have been unlocked";
@@ -60,6 +64,12 @@ public final class FMessage {
 
     public static void broadcastCombatLogger(Player player) {
         Bukkit.broadcastMessage(ERROR + "Combat-Logger" + ChatColor.RESET + ": " + player.getName());
+    }
+
+    public static void broadcastCaptureEventMessage(String message) {
+        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcastMessage(KOTH_PREFIX + message);
+        Bukkit.broadcastMessage(" ");
     }
 
     public static void printPlayerJoinedFaction(PlayerFaction faction, Player player) {

@@ -6,6 +6,7 @@ import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.cmd.*;
+import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
@@ -32,6 +33,7 @@ public final class Factions extends AresPlugin {
     @Getter public StatsManager statsManager;
     @Getter public CombatLoggerManager loggerManager;
     @Getter public ClassManager classManager;
+    @Getter public EventManager eventManager;
 
     @Override
     public void onEnable() {
@@ -53,6 +55,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new StateCommand(this));
         registerCommand(new TimerCommand(this));
         registerCommand(new PvPCommand(this));
+        registerCommand(new EventCommand(this));
         registerCommand(new DebugCommand());
 
         // db init
@@ -86,6 +89,7 @@ public final class Factions extends AresPlugin {
         statsManager = new StatsManager(this, configuration.getStatsConfig());
         loggerManager = new CombatLoggerManager(this);
         classManager = new ClassManager(this);
+        eventManager = new EventManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -96,6 +100,7 @@ public final class Factions extends AresPlugin {
         statsManager.onEnable();
         loggerManager.onEnable();
         classManager.onEnable();
+        eventManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -115,6 +120,7 @@ public final class Factions extends AresPlugin {
         registerListener(new ShieldListener(this));
         registerListener(new SubclaimBuilderListener(this));
         registerListener(new SubclaimListener(this));
+        registerListener(new EventBuilderListener(this));
     }
 
     @Override
@@ -134,6 +140,7 @@ public final class Factions extends AresPlugin {
         statsManager.onDisable();
         loggerManager.onDisable();
         classManager.onDisable();
+        eventManager.onDisable();
 
         playerManager = null;
         factionManager = null;
@@ -143,5 +150,6 @@ public final class Factions extends AresPlugin {
         loggerManager = null;
         serverStateManager = null;
         classManager = null;
+        eventManager = null;
     }
 }

@@ -1,0 +1,37 @@
+palace:
+  tier1:
+    test-item:
+      material: 'GOLDEN_APPLE'
+      display_name: '&4&lPalace Apple'
+      lore:
+        - 'This is a test item'
+        - 'pee pee poo poo lol'
+      min_amount: 1
+      max_amount: 8
+      probability: 100
+      enchantments:
+        KNOCKBACK: 2
+  tier2:
+    test-item2:
+      material: 'EMERALD'
+      display_name: '&4&lPalace Emerald'
+      lore:
+        - 'This is a test item'
+        - 'pee pee poo poo lol'
+      min_amount: 1
+      max_amount: 8
+      probability: 100
+      enchantments:
+        KNOCKBACK: 2
+  tier3:
+    test-item3:
+      material: 'CHEST'
+      display_name: '&4&lPalace Chest'
+      lore:
+        - 'This is a test item'
+        - 'pee pee poo poo lol'
+      min_amount: 1
+      max_amount: 8
+      probability: 100
+      enchantments:
+        KNOCKBACK: 2
