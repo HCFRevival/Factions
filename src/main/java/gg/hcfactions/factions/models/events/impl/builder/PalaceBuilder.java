@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.models.events.impl.builder;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.events.builder.ECEBuildStep;
 import gg.hcfactions.factions.models.events.builder.ICaptureEventBuilder;
@@ -142,7 +143,9 @@ public final class PalaceBuilder implements ICaptureEventBuilder<KOTHEvent> {
                 Lists.newArrayList(),
                 lootChestLocation,
                 new CaptureRegion(cornerA, cornerB),
+                null,
                 3600,
+                Maps.newHashMap(),
                 Lists.newArrayList(),
                 new CaptureEventConfig(15, 60, 86400)
         );

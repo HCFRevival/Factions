@@ -11,6 +11,7 @@ import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.player.PlayerManager;
+import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.factions.stats.StatsManager;
 import gg.hcfactions.factions.timers.TimerManager;
@@ -34,6 +35,7 @@ public final class Factions extends AresPlugin {
     @Getter public CombatLoggerManager loggerManager;
     @Getter public ClassManager classManager;
     @Getter public EventManager eventManager;
+    @Getter public ShopManager shopManager;
 
     @Override
     public void onEnable() {
@@ -56,6 +58,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new TimerCommand(this));
         registerCommand(new PvPCommand(this));
         registerCommand(new EventCommand(this));
+        registerCommand(new ShopCommand(this));
         registerCommand(new DebugCommand());
 
         // db init
@@ -90,6 +93,7 @@ public final class Factions extends AresPlugin {
         loggerManager = new CombatLoggerManager(this);
         classManager = new ClassManager(this);
         eventManager = new EventManager(this);
+        shopManager = new ShopManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -101,6 +105,7 @@ public final class Factions extends AresPlugin {
         loggerManager.onEnable();
         classManager.onEnable();
         eventManager.onEnable();
+        shopManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -141,6 +146,7 @@ public final class Factions extends AresPlugin {
         loggerManager.onDisable();
         classManager.onDisable();
         eventManager.onDisable();
+        shopManager.onDisable();
 
         playerManager = null;
         factionManager = null;

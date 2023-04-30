@@ -2,11 +2,13 @@ package gg.hcfactions.factions.events;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.builder.EventBuilderManager;
 import gg.hcfactions.factions.events.impl.EventExecutor;
 import gg.hcfactions.factions.events.tick.EventSchedulerTask;
 import gg.hcfactions.factions.events.tick.KOTHTickingTask;
+import gg.hcfactions.factions.events.tick.PalaceRestockTask;
 import gg.hcfactions.factions.items.EventBuilderWand;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.events.*;
@@ -36,6 +38,7 @@ public final class EventManager implements IManager {
 
     @Getter public KOTHTickingTask kothTickingTask;
     @Getter public EventSchedulerTask eventScheduleTask;
+    @Getter public PalaceRestockTask palaceRestockTask;
 
     public EventManager(Factions plugin) {
         this.plugin = plugin;
@@ -60,9 +63,11 @@ public final class EventManager implements IManager {
 
         kothTickingTask = new KOTHTickingTask(this);
         eventScheduleTask = new EventSchedulerTask(this);
+        palaceRestockTask = new PalaceRestockTask(this);
 
         eventScheduleTask.start();
         kothTickingTask.start();
+        palaceRestockTask.start();
 
         builderManager.onEnable();
         palaceLootManager.onEnable();
@@ -73,8 +78,10 @@ public final class EventManager implements IManager {
         builderManager.onDisable();
         palaceLootManager.onDisable();
 
+        palaceRestockTask.stop();
         kothTickingTask.stop();
         eventScheduleTask.stop();
+
         eventRepository.clear();
     }
 
@@ -154,6 +161,7 @@ public final class EventManager implements IManager {
             for (String eventName : Objects.requireNonNull(conf.getConfigurationSection("data.palace")).getKeys(false)) {
                 final String key = "data.palace." + eventName + ".";
                 final UUID ownerId = (conf.get(key + "owner") != null ? UUID.fromString(conf.getString(key + "owner")) : null);
+                final UUID capturingFaction = (conf.get(key + "capturing_faction") != null ? UUID.fromString(conf.getString(key + "capturing_faction")) : null);
                 final String displayName = ChatColor.translateAlternateColorCodes('&', conf.getString(key + "display_name"));
                 final int ticketsNeeded = conf.getInt(key + "tickets_needed");
                 final int timerDuration = conf.getInt(key + "timer_duration");
@@ -177,6 +185,7 @@ public final class EventManager implements IManager {
 
                 final List<EventSchedule> schedule = Lists.newArrayList();
                 final List<PalaceLootChest> lootChests = Lists.newArrayList();
+                final Map<EPalaceLootTier, Long> lootUnlockTimes = Maps.newHashMap();
 
                 final BLocatable captureChest = new BLocatable(captureChestWorld, captureChestX, captureChestY, captureChestZ);
                 final BLocatable cornerA = new BLocatable(cornerAWorld, cornerAX, cornerAY, cornerAZ);
@@ -209,7 +218,7 @@ public final class EventManager implements IManager {
 
                 // - '-103:54:102:world
                 for (EPalaceLootTier tier : EPalaceLootTier.values()) {
-                    if (conf.get("chests." + tier.getName()) == null) {
+                    if (conf.get(key + "chests." + tier.getName()) == null) {
                         continue;
                     }
 
@@ -231,6 +240,13 @@ public final class EventManager implements IManager {
                     }
                 }
 
+                if (conf.get(key + "unlock_times") != null) {
+                    for (EPalaceLootTier tier : EPalaceLootTier.values()) {
+                        final long unlockTime = conf.getLong(key + "unlock_times." + tier.name);
+                        lootUnlockTimes.put(tier, unlockTime);
+                    }
+                }
+
                 final PalaceEvent event = new PalaceEvent(
                         plugin,
                         ownerId,
@@ -239,7 +255,9 @@ public final class EventManager implements IManager {
                         schedule,
                         captureChest,
                         captureRegion,
+                        capturingFaction,
                         restockInterval,
+                        lootUnlockTimes,
                         lootChests,
                         eventConfig
                 );
@@ -302,17 +320,30 @@ public final class EventManager implements IManager {
 
             if (kothEvent instanceof final PalaceEvent palaceEvent) {
                 conf.set(key + "restock_interval", palaceEvent.getRestockInterval());
+                conf.set(key + "capturing_faction", palaceEvent.getCapturingFaction().toString());
 
-                if (!palaceEvent.getLootChests().isEmpty()) {
+                if (!palaceEvent.getLootUnlockTimes().isEmpty()) {
+                    palaceEvent.getLootUnlockTimes().forEach((tier, timestamp) -> conf.set(key + "unlock_times." + tier.name, timestamp));
+                } else {
+                    conf.set(key + "unlock_times", null);
+                }
+
+                for (EPalaceLootTier tier : EPalaceLootTier.values()) {
+                    final List<PalaceLootChest> chests = palaceEvent.getLootChests().stream().filter(plc -> plc.getLootTier().equals(tier)).collect(Collectors.toList());
+
+                    if (chests.isEmpty()) {
+                        continue;
+                    }
+
                     final List<String> locations = Lists.newArrayList();
 
-                    palaceEvent.getLootChests().forEach(chest -> locations.add(
+                    chests.forEach(chest -> locations.add(
                             chest.getLocation().getX()
                                     + ":" + chest.getLocation().getY()
                                     + ":" + chest.getLocation().getZ()
                                     + ":" + chest.getLocation().getWorldName()));
 
-                    conf.set(key + "chests", locations);
+                    conf.set(key + "chests." + tier.name, locations);
                 }
             }
         }
@@ -361,6 +392,12 @@ public final class EventManager implements IManager {
         final List<KOTHEvent> koths = Lists.newArrayList();
         eventRepository.stream().filter(e -> e.isActive() && e instanceof KOTHEvent).forEach(koth -> koths.add((KOTHEvent) koth));
         return ImmutableList.copyOf(koths);
+    }
+
+    public ImmutableList<PalaceEvent> getPalaceEvents() {
+        final List<PalaceEvent> palaces = Lists.newArrayList();
+        eventRepository.stream().filter(e -> e instanceof PalaceEvent).forEach(palace -> palaces.add((PalaceEvent) palace));
+        return ImmutableList.copyOf(palaces);
     }
 
     public Optional<IEvent> getEventByCaptureChest(Location location) {
