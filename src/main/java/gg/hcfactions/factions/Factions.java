@@ -22,6 +22,7 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
+import org.bukkit.block.data.type.Wall;
 
 public final class Factions extends AresPlugin {
     @Getter public FConfig configuration;
@@ -59,6 +60,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new PvPCommand(this));
         registerCommand(new EventCommand(this));
         registerCommand(new ShopCommand(this));
+        registerCommand(new WalletCommand(this));
         registerCommand(new DebugCommand());
 
         // db init
