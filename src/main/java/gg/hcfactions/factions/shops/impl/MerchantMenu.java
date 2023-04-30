@@ -9,9 +9,9 @@ import org.bukkit.entity.Player;
 
 public final class MerchantMenu extends GenericMenu {
     @Getter public final Factions plugin;
-    private final GenericMerchant merchant;
+    private final GenericMerchant<?> merchant;
 
-    public MerchantMenu(Factions plugin, Player player, GenericMerchant merchant) {
+    public MerchantMenu(Factions plugin, Player player, GenericMerchant<?> merchant) {
         super(plugin, player, merchant.getMerchantName(), 1);
         this.plugin = plugin;
         this.merchant = merchant;

@@ -1,15 +1,18 @@
 package gg.hcfactions.factions.models.shop.impl;
 
 import gg.hcfactions.factions.models.shop.IShop;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Material;
 
 import java.util.List;
 import java.util.UUID;
 
-public record GenericShop(@Getter UUID id,
-                          @Getter String shopName,
-                          @Getter Material iconMaterial,
-                          @Getter int position,
-                          @Getter List<GenericShopItem> items
-) implements IShop {}
+@AllArgsConstructor
+public class GenericShop<T extends GenericShopItem> implements IShop {
+    @Getter public final UUID id;
+    @Getter public final String shopName;
+    @Getter public final Material iconMaterial;
+    @Getter public final int position;
+    @Getter public final List<T> items;
+}

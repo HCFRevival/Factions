@@ -337,6 +337,7 @@ public final class FMessage {
         }
 
         player.sendMessage(spacer + LAYER_2 + "Balance" + LAYER_1 + ": " + INFO + "$" + String.format("%.2f", playerFaction.getBalance()));
+        player.sendMessage(spacer + LAYER_2 + "Tokens" + LAYER_1 + ": " + INFO + playerFaction.getTokens());
         player.sendMessage(spacer + LAYER_2 + "Deaths Until Raid-able" + LAYER_1 + ": " + DTR);
 
         if (playerFaction.isFrozen()) {

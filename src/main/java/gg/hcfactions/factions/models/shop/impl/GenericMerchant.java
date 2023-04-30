@@ -2,10 +2,16 @@ package gg.hcfactions.factions.models.shop.impl;
 
 import gg.hcfactions.factions.models.shop.IMerchant;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.List;
 import java.util.UUID;
 
-public record GenericMerchant(@Getter UUID id, @Getter String merchantName, @Getter BLocatable merchantLocation,
-                              @Getter List<GenericShop> shops) implements IMerchant {}
+@AllArgsConstructor
+public class GenericMerchant<T extends GenericShop> implements IMerchant {
+    @Getter public final UUID id;
+    @Getter public final String merchantName;
+    @Getter public final BLocatable merchantLocation;
+    @Getter public final List<T> shops;
+}

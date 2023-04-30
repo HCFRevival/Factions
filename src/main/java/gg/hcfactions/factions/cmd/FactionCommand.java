@@ -770,6 +770,33 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("token add")
+    @Description("Add tokens to a Faction's token balance")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<faction> <amount>")
+    public void onAddTokens(Player player, String factionName, String amountName) {
+        int amount;
+
+        try {
+            amount = Integer.parseInt(amountName);
+        } catch (NumberFormatException e) {
+            player.sendMessage(ChatColor.RED + "Invalid token amount");
+            return;
+        }
+
+        plugin.getFactionManager().getExecutor().giveTokens(player, factionName, amount, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(FMessage.SUCCESS + "Tokens deposited");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to deposit tokens: " + s);
+            }
+        });
+    }
+
     @Subcommand("rally|r")
     @Description("Set the rally point for your faction")
     public void onRallyUpdate(Player player) {

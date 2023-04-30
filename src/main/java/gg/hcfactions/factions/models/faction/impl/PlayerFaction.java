@@ -7,6 +7,7 @@ import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.models.econ.IBankable;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.shop.ITokenHolder;
 import gg.hcfactions.factions.models.ticking.ITickable;
 import gg.hcfactions.factions.models.timer.ITimeable;
 import gg.hcfactions.factions.models.timer.ETimerType;
@@ -31,7 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITickable, MongoDocument<PlayerFaction> {
+public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITickable, ITokenHolder, MongoDocument<PlayerFaction> {
     @Getter public final FactionManager manager;
 
     @Getter public UUID uniqueId;
@@ -41,6 +42,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     @Getter @Setter public PLocatable rallyLocation;
     @Getter @Setter public int rating;
     @Getter @Setter public double balance;
+    @Getter @Setter public int tokens;
     @Getter @Setter public double dtr;
     @Getter @Setter public int reinvites;
     @Getter @Setter public long nextTick;
@@ -61,6 +63,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.rallyLocation = null;
         this.rating = 0;
         this.balance = 0.0;
+        this.tokens = 0;
         this.dtr = 0.1;
         this.reinvites = manager.getPlugin().getConfiguration().getDefaultFactionReinvites();;
         this.nextTick = Time.now();
@@ -82,6 +85,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.rallyLocation = null;
         this.rating = 0;
         this.balance = 0.0;
+        this.tokens = 0;
         this.dtr = 0.1;
         this.reinvites = manager.getPlugin().getConfiguration().getDefaultFactionReinvites();;
         this.nextTick = Time.now();
@@ -311,6 +315,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
                 "\nhomeLocation: " + (getHomeLocation() != null ? getHomeLocation().toString() : null) +
                 "\nrallyLocation: " + (getRallyLocation() != null ? getRallyLocation().toString() : null) +
                 "\nrating: " + rating +
+                "\nbalance: " + balance +
+                "\ntokens: " + tokens +
                 "\nreinvites: " + reinvites +
                 "\nnextTick: " + nextTick +
                 "\nlastRallyUpdate: " + lastRallyUpdate +
@@ -346,6 +352,10 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         if (document.containsKey("timers")) {
             final List<Document> timerDocs = document.getList("timers", Document.class);
             timerDocs.forEach(td -> timers.add(new FTimer().fromDocument(td)));
+        }
+
+        if (document.containsKey("tokens")) {
+            this.tokens = document.getInteger("tokens");
         }
 
         this.rating = document.getInteger("rating");
@@ -385,6 +395,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
 
         doc.append("rating", rating);
         doc.append("balance", balance);
+        doc.append("tokens", tokens);
         doc.append("dtr", dtr);
         doc.append("reinvites", reinvites);
         doc.append("last_rally_update", lastRallyUpdate);

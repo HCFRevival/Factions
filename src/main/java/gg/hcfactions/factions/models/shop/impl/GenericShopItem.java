@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.models.shop.impl;
 
 import gg.hcfactions.factions.models.shop.IShopItem;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -8,11 +9,14 @@ import org.bukkit.enchantments.Enchantment;
 import java.util.Map;
 import java.util.UUID;
 
-public record GenericShopItem(@Getter UUID id,
-                              @Getter String displayName,
-                              @Getter Material material,
-                              @Getter int amount,
-                              @Getter Map<Enchantment, Integer> enchantments,
-                              @Getter int position,
-                              @Getter double buyPrice,
-                              @Getter double sellPrice) implements IShopItem {}
+@AllArgsConstructor
+public class GenericShopItem implements IShopItem {
+    @Getter public final UUID id;
+    @Getter public final String displayName;
+    @Getter public final Material material;
+    @Getter public final int amount;
+    @Getter public final Map<Enchantment, Integer> enchantments;
+    @Getter public final int position;
+    @Getter public final double buyPrice;
+    @Getter public final double sellPrice;
+}

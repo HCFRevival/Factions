@@ -21,10 +21,21 @@ public final class ShopCommand extends BaseCommand {
 
     @Subcommand("create")
     @Description("Create a new merchant")
-    @Syntax("<name>")
+    @Syntax("<name> [event]")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onCreateMerchant(Player player, String merchantName) {
-        plugin.getShopManager().getExecutor().createMerchant(player, merchantName, new Promise() {
+    public void onCreateMerchant(Player player, String merchantName, @Optional String isEventMerchant) {
+        boolean isEvent = false;
+
+        if (isEventMerchant != null) {
+            if (!isEventMerchant.equalsIgnoreCase("event")) {
+                player.sendMessage(ChatColor.RED + "Invalid event merchant parameters");
+                return;
+            }
+
+            isEvent = true;
+        }
+
+        plugin.getShopManager().getExecutor().createMerchant(player, merchantName, isEvent, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Merchant created");
@@ -99,6 +110,43 @@ public final class ShopCommand extends BaseCommand {
         }
 
         plugin.getShopManager().getExecutor().addToShop(player, merchantName, shopName, hand, position, buyCost, sellCost, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Item added to shop");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to add to shop: " + s);
+            }
+        });
+    }
+
+    @Subcommand("additem")
+    @Description("Add an item to an existing event shop")
+    @Syntax("<merchant> <shop> <position> <tokens>")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@merchants")
+    public void onAddToShop(Player player, String merchantName, String shopName, String positionName, String tokenName) {
+        int position;
+        int tokens;
+
+        try {
+            position = Integer.parseInt(positionName);
+            tokens = Integer.parseInt(tokenName);
+        } catch (NumberFormatException e) {
+            player.sendMessage(ChatColor.RED + "Invalid item attributes");
+            return;
+        }
+
+        final ItemStack hand = player.getInventory().getItemInMainHand();
+
+        if (hand.getType().equals(Material.AIR)) {
+            player.sendMessage(ChatColor.RED + "You are not holding an item");
+            return;
+        }
+
+        plugin.getShopManager().getExecutor().addToEventShop(player, merchantName, shopName, hand, position, tokens, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Item added to shop");

@@ -2,14 +2,12 @@ package gg.hcfactions.factions.models.shop.impl;
 
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.shop.IMerchantVillager;
-import gg.hcfactions.libs.base.consumer.Promise;
+
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -19,10 +17,8 @@ import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_19_R3.util.CraftChatMessage;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.UUID;

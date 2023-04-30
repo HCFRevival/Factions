@@ -1190,6 +1190,20 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
+    public void giveTokens(Player player, String factionName, int amount, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
+
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.addTokens(amount);
+        faction.sendMessage(FMessage.P_NAME + player.getName() + FMessage.LAYER_1 + " adjusted your faction tokens to " + FMessage.INFO + faction.getTokens());
+        promise.resolve();
+    }
+
+    @Override
     public void showFactionInfo(Player player) {
         final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
 

@@ -9,6 +9,9 @@ import gg.hcfactions.factions.models.shop.impl.GenericMerchant;
 import gg.hcfactions.factions.models.shop.impl.GenericShop;
 import gg.hcfactions.factions.models.shop.impl.GenericShopItem;
 import gg.hcfactions.factions.models.shop.impl.MerchantVillager;
+import gg.hcfactions.factions.models.shop.impl.events.EventMerchant;
+import gg.hcfactions.factions.models.shop.impl.events.EventShop;
+import gg.hcfactions.factions.models.shop.impl.events.EventShopItem;
 import gg.hcfactions.factions.shops.impl.ShopExecutor;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.remap.ERemappedEnchantment;
@@ -36,12 +39,6 @@ public final class ShopManager implements IManager {
 
     @Override
     public void onEnable() {
-        final GenericShopItem exampleItem = new GenericShopItem(UUID.randomUUID(), null, Material.DIAMOND, 16, Maps.newHashMap(), 1, 1600.0, 800.50);
-        final GenericShopItem exampleItem2 = new GenericShopItem(UUID.randomUUID(), null, Material.DIAMOND_SWORD, 1, Maps.newHashMap(), 0, 1600.0, 0.0);
-        final GenericShop exampleShop = new GenericShop(UUID.randomUUID(), ChatColor.RED + "Shop Name", Material.EMERALD, 0, Lists.newArrayList(exampleItem, exampleItem2));
-        final GenericMerchant exampleMerchant = new GenericMerchant(UUID.randomUUID(), ChatColor.GOLD + "Example Merchant", new BLocatable("world", 5.0, 72.0, 5.0), Lists.newArrayList(exampleShop));
-        merchantRepository.add(exampleMerchant);
-
         loadMerchants();
 
         plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("merchants", ctx -> {
@@ -51,7 +48,7 @@ public final class ShopManager implements IManager {
         });
 
         merchantRepository.forEach(merchant -> {
-            final MerchantVillager villager = new MerchantVillager(plugin, (GenericMerchant) merchant);
+            final MerchantVillager villager = new MerchantVillager(plugin, (GenericMerchant<?>) merchant);
             villager.spawn();
             merchantVillagers.add(villager);
         });
@@ -103,8 +100,10 @@ public final class ShopManager implements IManager {
             final double merchantY = conf.getDouble(merchantPath + "location.y");
             final double merchantZ = conf.getDouble(merchantPath + "location.z");
             final String merchantWorld = conf.getString(merchantPath + "location.world");
+            final boolean isEventShop = conf.get(merchantPath + "variant") != null && Objects.requireNonNull(conf.getString(merchantPath + "variant")).equalsIgnoreCase("event");
             final BLocatable merchantPosition = new BLocatable(merchantWorld, merchantX, merchantY, merchantZ);
-            final List<GenericShop> shops = Lists.newArrayList();
+            final List<GenericShop<?>> shops = Lists.newArrayList();
+            final List<EventShop> eventShops = Lists.newArrayList();
 
             if (conf.getConfigurationSection(merchantPath + "shops") != null) {
                 for (String shopId : Objects.requireNonNull(conf.getConfigurationSection(merchantPath + "shops")).getKeys(false)) {
@@ -113,8 +112,9 @@ public final class ShopManager implements IManager {
                     final String shopIconName = conf.getString(shopPath + "icon");
                     final int shopIconPosition = conf.getInt(shopPath + "position");
                     final List<GenericShopItem> items = Lists.newArrayList();
+                    final List<EventShopItem> eventShopItems = Lists.newArrayList();
+                    
                     Material shopIcon = null;
-
                     if (shopIconName == null) {
                         plugin.getAresLogger().error("shop icon null: " + shopId);
                         continue;
@@ -136,6 +136,7 @@ public final class ShopManager implements IManager {
                             final int itemPosition = conf.getInt(itemPath + "position");
                             final double itemBuyPrice = conf.getDouble(itemPath + "buy_price");
                             final double itemSellPrice = conf.getDouble(itemPath + "sell_price");
+                            final int itemTokenPrice = conf.get(itemPath + "token_price") != null ? conf.getInt(itemPath + "token_price") : 0;
                             final Map<Enchantment, Integer> itemEnchantments = Maps.newHashMap();
                             Material itemMaterial = null;
 
@@ -165,31 +166,59 @@ public final class ShopManager implements IManager {
                                 }
                             }
 
+                            if (itemTokenPrice > 0) {
+                                final EventShopItem item = new EventShopItem(
+                                        UUID.fromString(shopItemId),
+                                        itemDisplayName,
+                                        itemMaterial,
+                                        itemAmount,
+                                        itemEnchantments,
+                                        itemPosition,
+                                        itemTokenPrice
+                                );
+
+                                eventShopItems.add(item);
+                                continue;
+                            }
+                            
                             final GenericShopItem item = new GenericShopItem(
                                     UUID.fromString(shopItemId),
-                                    itemDisplayName, itemMaterial,
+                                    itemDisplayName,
+                                    itemMaterial,
                                     itemAmount,
                                     itemEnchantments,
                                     itemPosition,
                                     itemBuyPrice,
                                     itemSellPrice
                             );
-
+                            
                             items.add(item);
                         }
                     }
 
-                    final GenericShop shop = new GenericShop(UUID.fromString(shopId), shopName, shopIcon, shopIconPosition, items);
+                    if (isEventShop) {
+                        eventShops.add(new EventShop(UUID.fromString(shopId), shopName, shopIcon, shopIconPosition, eventShopItems));
+                        continue;
+                    }
+                    
+                    final GenericShop<?> shop = new GenericShop<>(UUID.fromString(shopId), shopName, shopIcon, shopIconPosition, items);
                     shops.add(shop);
                 }
             }
 
-            final GenericMerchant merchant = new GenericMerchant(UUID.fromString(merchantId), merchantDisplayName, merchantPosition, shops);
+            if (isEventShop) {
+                merchantRepository.add(new EventMerchant(UUID.fromString(merchantId), merchantDisplayName, merchantPosition, eventShops));
+                plugin.getAresLogger().info("loaded merchant: " + merchantDisplayName + " as an event merchant with " + eventShops.size() + " shops");
+                continue;
+            }
+
+            final GenericMerchant<?> merchant = new GenericMerchant<>(UUID.fromString(merchantId), merchantDisplayName, merchantPosition, shops);
+            plugin.getAresLogger().info("loaded merchant: " + merchantDisplayName + " as a generic merchant with " + shops.size() + " shops");
             merchantRepository.add(merchant);
         }
     }
 
-    public void saveMerchant(GenericMerchant merchant) {
+    public void saveMerchant(GenericMerchant<?> merchant) {
         final YamlConfiguration conf = plugin.loadConfiguration("shops");
         final String merchantPath = "shops." + merchant.getId().toString() + ".";
 
@@ -199,7 +228,11 @@ public final class ShopManager implements IManager {
         conf.set(merchantPath + "location.z", merchant.getMerchantLocation().getZ());
         conf.set(merchantPath + "location.world", merchant.getMerchantLocation().getWorldName());
 
-        for (GenericShop shop : merchant.getShops()) {
+        if (merchant instanceof EventMerchant) {
+            conf.set(merchantPath + "variant", "event");
+        }
+        
+        for (GenericShop<?> shop : merchant.getShops()) {
             final String shopPath = merchantPath + "shops." + shop.getId().toString() + ".";
             conf.set(shopPath + "display_name", shop.getShopName());
             conf.set(shopPath + "icon", shop.getIconMaterial().name());
@@ -213,6 +246,10 @@ public final class ShopManager implements IManager {
                 conf.set(itemPath + "position", item.getPosition());
                 conf.set(itemPath + "buy_price", item.getBuyPrice());
                 conf.set(itemPath + "sell_price", item.getSellPrice());
+                
+                if (item instanceof EventShopItem) {
+                    conf.set(itemPath + "token_price", ((EventShopItem)item).getTokenPrice());
+                }
 
                 if (item.getEnchantments() != null && !item.getEnchantments().isEmpty()) {
                     item.getEnchantments().forEach((enchantment, level) -> conf.set(itemPath + "enchantments." + ERemappedEnchantment.getRemappedEnchantment(enchantment).name(), level));
@@ -223,7 +260,7 @@ public final class ShopManager implements IManager {
         plugin.saveConfiguration("shops", conf);
     }
 
-    public void deleteMerchant(GenericMerchant merchant) {
+    public void deleteMerchant(GenericMerchant<?> merchant) {
         final YamlConfiguration conf = plugin.loadConfiguration("shops");
         conf.set("shops." + merchant.getId().toString(), null);
         plugin.saveConfiguration("shops", conf);
