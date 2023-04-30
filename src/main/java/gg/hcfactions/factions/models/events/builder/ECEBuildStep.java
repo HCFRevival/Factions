@@ -4,6 +4,5 @@ public enum ECEBuildStep {
     DISPLAY_NAME,
     OWNER,
     CORNER_A,
-    CORNER_B,
-    LOOT_CHEST,
+    CORNER_B
 }

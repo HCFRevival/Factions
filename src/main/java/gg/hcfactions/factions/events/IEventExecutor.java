@@ -16,9 +16,10 @@ public interface IEventExecutor {
      * @param eventName Event Name
      * @param ticketsToWin Tickets to win
      * @param timerDuration Timer duration
+     * @param tokenReward Token reward
      * @param promise Promise
      */
-    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, Promise promise);
+    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise);
 
     /**
      * Alter a Capture Event that is already running
@@ -26,9 +27,10 @@ public interface IEventExecutor {
      * @param eventName Event Name
      * @param ticketsToWin Tickets to win
      * @param timerDuration Timer duration
+     * @param tokenReward Token reward
      * @param promise Promise
      */
-    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, Promise promise);
+    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise);
 
     /**
      * Stop an event

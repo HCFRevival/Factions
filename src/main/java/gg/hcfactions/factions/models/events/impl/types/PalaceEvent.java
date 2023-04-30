@@ -10,7 +10,6 @@ import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +36,6 @@ public final class PalaceEvent extends KOTHEvent implements ILootableEvent {
             String name,
             String displayName,
             List<EventSchedule> schedule,
-            BLocatable captureChestLocation,
             CaptureRegion captureRegion,
             UUID capturingFaction,
             int restockInterval,
@@ -45,7 +43,7 @@ public final class PalaceEvent extends KOTHEvent implements ILootableEvent {
             List<PalaceLootChest> lootChests,
             CaptureEventConfig defaultConfig
     ) {
-        super(plugin, owner, name, displayName, schedule, captureChestLocation, captureRegion, defaultConfig);
+        super(plugin, owner, name, displayName, schedule, captureRegion, defaultConfig);
 
         if (capturingFaction != null && plugin.getFactionManager().getFactionById(capturingFaction) != null) {
             this.capturingFaction = capturingFaction;

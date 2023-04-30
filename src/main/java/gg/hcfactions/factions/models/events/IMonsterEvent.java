@@ -13,6 +13,6 @@ public interface IMonsterEvent {
 
     void captureEvent(Player player);
     void startEvent();
-    void startEvent(int uptime);
+    void startEvent(int uptime, int tokenReward);
     void stopEvent();
 }

@@ -5,5 +5,6 @@ import lombok.Getter;
 
 public record CaptureEventConfig(@Getter int defaultTicketsNeededToWin,
                                  @Getter int defaultTimerDuration,
-                                 @Getter int maxLifespan) implements ICaptureEventConfig {
+                                 @Getter int maxLifespan,
+                                 @Getter int tokenReward) implements ICaptureEventConfig {
 }

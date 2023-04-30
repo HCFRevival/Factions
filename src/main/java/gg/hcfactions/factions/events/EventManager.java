@@ -23,7 +23,6 @@ import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.*;
@@ -94,11 +93,7 @@ public final class EventManager implements IManager {
                 final int ticketsNeeded = conf.getInt(key + "tickets_needed");
                 final int timerDuration = conf.getInt(key + "timer_duration");
                 final int maxLifespan = conf.getInt(key + "max_lifespan");
-
-                final String captureChestWorld = conf.getString(key + "capture_chest.world");
-                final double captureChestX = conf.getDouble(key + "capture_chest.x");
-                final double captureChestY = conf.getDouble(key + "capture_chest.y");
-                final double captureChestZ = conf.getDouble(key + "capture_chest.z");
+                final int tokenReward = conf.getInt(key + "token_reward");
 
                 final String cornerAWorld = conf.getString(key + "capture_region.a.world");
                 final double cornerAX = conf.getDouble(key + "capture_region.a.x");
@@ -111,11 +106,10 @@ public final class EventManager implements IManager {
                 final double cornerBZ = conf.getDouble(key + "capture_region.b.z");
 
                 final List<EventSchedule> schedule = Lists.newArrayList();
-                final BLocatable captureChest = new BLocatable(captureChestWorld, captureChestX, captureChestY, captureChestZ);
                 final BLocatable cornerA = new BLocatable(cornerAWorld, cornerAX, cornerAY, cornerAZ);
                 final BLocatable cornerB = new BLocatable(cornerBWorld, cornerBX, cornerBY, cornerBZ);
                 final CaptureRegion captureRegion = new CaptureRegion(cornerA, cornerB);
-                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, maxLifespan);
+                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, maxLifespan, tokenReward);
 
                 for (String dateValue : conf.getStringList(key + "schedule")) {
                     final String[] split = dateValue.split(":");
@@ -146,7 +140,6 @@ public final class EventManager implements IManager {
                         eventName,
                         displayName,
                         schedule,
-                        captureChest,
                         captureRegion,
                         eventConfig
                 );
@@ -167,11 +160,7 @@ public final class EventManager implements IManager {
                 final int timerDuration = conf.getInt(key + "timer_duration");
                 final int maxLifespan = conf.getInt(key + "max_lifespan");
                 final int restockInterval = conf.getInt(key + "restock_interval");
-
-                final String captureChestWorld = conf.getString(key + "capture_chest.world");
-                final double captureChestX = conf.getDouble(key + "capture_chest.x");
-                final double captureChestY = conf.getDouble(key + "capture_chest.y");
-                final double captureChestZ = conf.getDouble(key + "capture_chest.z");
+                final int tokenReward = conf.getInt(key + "token_reward");
 
                 final String cornerAWorld = conf.getString(key + "capture_region.a.world");
                 final double cornerAX = conf.getDouble(key + "capture_region.a.x");
@@ -186,12 +175,10 @@ public final class EventManager implements IManager {
                 final List<EventSchedule> schedule = Lists.newArrayList();
                 final List<PalaceLootChest> lootChests = Lists.newArrayList();
                 final Map<EPalaceLootTier, Long> lootUnlockTimes = Maps.newHashMap();
-
-                final BLocatable captureChest = new BLocatable(captureChestWorld, captureChestX, captureChestY, captureChestZ);
                 final BLocatable cornerA = new BLocatable(cornerAWorld, cornerAX, cornerAY, cornerAZ);
                 final BLocatable cornerB = new BLocatable(cornerBWorld, cornerBX, cornerBY, cornerBZ);
                 final CaptureRegion captureRegion = new CaptureRegion(cornerA, cornerB);
-                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, maxLifespan);
+                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, maxLifespan, tokenReward);
 
                 for (String dateValue : conf.getStringList(key + "schedule")) {
                     final String[] split = dateValue.split(":");
@@ -253,7 +240,6 @@ public final class EventManager implements IManager {
                         eventName,
                         displayName,
                         schedule,
-                        captureChest,
                         captureRegion,
                         capturingFaction,
                         restockInterval,
@@ -292,11 +278,7 @@ public final class EventManager implements IManager {
             conf.set(key + "tickets_needed", kothEvent.getEventConfig().defaultTicketsNeededToWin());
             conf.set(key + "timer_duration", kothEvent.getEventConfig().defaultTimerDuration());
             conf.set(key + "max_lifespan", kothEvent.getEventConfig().getMaxLifespan());
-
-            conf.set(key + "capture_chest.world", kothEvent.getCaptureChestLocation().getWorldName());
-            conf.set(key + "capture_chest.x", kothEvent.getCaptureChestLocation().getX());
-            conf.set(key + "capture_chest.y", kothEvent.getCaptureChestLocation().getY());
-            conf.set(key + "capture_chest.z", kothEvent.getCaptureChestLocation().getZ());
+            conf.set(key + "token_reward", kothEvent.getEventConfig().getTokenReward());
 
             conf.set(key + "capture_region.a.world", kothEvent.getCaptureRegion().getCornerA().getWorldName());
             conf.set(key + "capture_region.a.x", kothEvent.getCaptureRegion().getCornerA().getX());
@@ -398,14 +380,6 @@ public final class EventManager implements IManager {
         final List<PalaceEvent> palaces = Lists.newArrayList();
         eventRepository.stream().filter(e -> e instanceof PalaceEvent).forEach(palace -> palaces.add((PalaceEvent) palace));
         return ImmutableList.copyOf(palaces);
-    }
-
-    public Optional<IEvent> getEventByCaptureChest(Location location) {
-        return eventRepository.stream().filter(e -> e instanceof ICaptureEvent).filter(ce ->
-                        ((ICaptureEvent)ce).getCaptureChestLocation().getX() == location.getX() &&
-                        ((ICaptureEvent)ce).getCaptureChestLocation().getY() == location.getY() &&
-                        ((ICaptureEvent)ce).getCaptureChestLocation().getZ() == location.getZ() &&
-                        ((ICaptureEvent)ce).getCaptureChestLocation().getWorldName().equalsIgnoreCase(Objects.requireNonNull(location.getWorld()).getName())).findAny();
     }
 
     public ImmutableList<IEvent> getEventsAlphabeticalOrder() {

@@ -6,11 +6,6 @@ import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 
 public interface ICaptureEvent {
     /**
-     * @return Location of the loot chest
-     */
-    BLocatable getCaptureChestLocation();
-
-    /**
      * @return Region parameters
      */
     CaptureRegion getCaptureRegion();
@@ -19,11 +14,6 @@ public interface ICaptureEvent {
      * @return Capture Event Config
      */
     ICaptureEventConfig getEventConfig();
-
-    /**
-     * @param block Set the location of the loot chest
-     */
-    void setCaptureChestLocation(BLocatable block);
 
     /**
      * @param region Set the region for capturing the event
@@ -44,8 +34,9 @@ public interface ICaptureEvent {
      * Start this event with the specified parameters
      * @param ticketsNeededToWin Tickets needed for the event to be considered captured
      * @param timerDuration Timer between each ticket capture
+     * @param tokenReward Tokens that will be rewarded to the capturing faction
      */
-    void startEvent(int ticketsNeededToWin, int timerDuration);
+    void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward);
 
     /**
      * Stop the event without rewarding any player

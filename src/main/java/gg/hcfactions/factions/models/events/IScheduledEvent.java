@@ -2,12 +2,15 @@ package gg.hcfactions.factions.models.events;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.models.events.impl.EventSchedule;
+import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public interface IScheduledEvent {
     List<EventSchedule> getSchedule();

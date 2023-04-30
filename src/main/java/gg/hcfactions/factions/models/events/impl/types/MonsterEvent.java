@@ -64,13 +64,13 @@ public final class MonsterEvent implements IEvent, IMonsterEvent, IScheduledEven
 
     @Override
     public void startEvent() {
-        startEvent(3600);
+        startEvent(3600, 3);
     }
 
     @Override
-    public void startEvent(int uptime) {
+    public void startEvent(int uptime, int tokenReward) {
         final String timeDisplay = Time.convertToRemaining(uptime/1000L);
-        session = new MonsterEventSession();
+        session = new MonsterEventSession(tokenReward);
         session.setActive(true);
         Bukkit.broadcastMessage(FMessage.PVE_PREFIX + displayName + FMessage.LAYER_1 + " is now open for " + timeDisplay);
     }

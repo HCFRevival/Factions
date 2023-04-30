@@ -7,12 +7,10 @@ public interface ICaptureEventBuilder<T> extends IEventBuilder {
     ECEBuildStep getCurrentStep();
 
     String getDisplayName();
-    BLocatable getLootChestLocation();
     BLocatable getCornerA();
     BLocatable getCornerB();
 
     void setCurrentStep(ECEBuildStep step);
-    void setLootChestLocation(BLocatable location);
     void setCornerA(BLocatable location);
     void setCornerB(BLocatable location);
 

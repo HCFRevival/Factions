@@ -23,20 +23,20 @@ public final class KOTHSession implements IEventSession {
     @Getter public boolean contested;
     @Getter @Setter public int ticketsNeededToWin;
     @Getter @Setter public int timerDuration;
+    @Getter @Setter public int tokenReward;
     @Getter @Setter public long nextNotificationTime;
     @Getter @Setter public PlayerFaction capturingFaction;
-    @Getter @Setter public long captureChestUnlockTime;
     @Getter public final Map<UUID, Integer> leaderboard;
     @Getter public final KOTHTimer timer;
 
-    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration) {
+    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward) {
         this.event = event;
         this.active = false;
         this.ticketsNeededToWin = ticketsNeededToWin;
         this.timerDuration = timerDuration;
+        this.tokenReward = tokenReward;
         this.nextNotificationTime = Time.now();
         this.capturingFaction = null;
-        this.captureChestUnlockTime = Time.now();
         this.leaderboard = Maps.newConcurrentMap();
         this.timer = new KOTHTimer(event, timerDuration);
         this.timer.setFrozen(true);
@@ -44,10 +44,6 @@ public final class KOTHSession implements IEventSession {
 
     public boolean isCaptured() {
         return capturingFaction != null && !active;
-    }
-
-    public long getTimeUntilCaptureChestUnlock() {
-        return captureChestUnlockTime - Time.now();
     }
 
     public int getTickets(PlayerFaction faction) {

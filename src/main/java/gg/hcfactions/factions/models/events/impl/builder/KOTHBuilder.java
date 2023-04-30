@@ -26,7 +26,6 @@ public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
     @Getter public String displayName;
     @Getter public BLocatable cornerA;
     @Getter public BLocatable cornerB;
-    @Getter public BLocatable lootChestLocation;
 
     public KOTHBuilder(Factions plugin, UUID builderId, String name) {
         this.plugin = plugin;
@@ -37,7 +36,6 @@ public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
         this.owner = null;
         this.cornerA = null;
         this.cornerB = null;
-        this.lootChestLocation = null;
 
         getBuilder().sendMessage(ChatColor.DARK_AQUA + "Enter the display name of the event");
     }
@@ -78,15 +76,6 @@ public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
     @Override
     public void setCornerB(BLocatable location) {
         cornerB = location;
-        currentStep = ECEBuildStep.LOOT_CHEST;
-
-        getBuilder().sendMessage(ChatColor.YELLOW + "Corner B has been set");
-        getBuilder().sendMessage(ChatColor.DARK_AQUA + "Select the Loot Chest for this event");
-    }
-
-    @Override
-    public void setLootChestLocation(BLocatable location) {
-        lootChestLocation = location;
 
         // final step in the build process
         build(new FailablePromise<>() {
@@ -123,20 +112,14 @@ public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
             return;
         }
 
-        if (lootChestLocation == null) {
-            promise.reject("Loot chest is not set");
-            return;
-        }
-
         final KOTHEvent event = new KOTHEvent(
                 plugin,
                 owner.getUniqueId(),
                 name,
                 displayName,
                 Lists.newArrayList(),
-                lootChestLocation,
                 new CaptureRegion(cornerA, cornerB),
-                new CaptureEventConfig(15, 60, 86400)
+                new CaptureEventConfig(15, 60, 86400, 10)
         );
 
         promise.resolve(event);

@@ -93,11 +93,6 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
                         ceb.setCornerB(new BLocatable(block));
                         event.setCancelled(true);
                     }
-
-                    else if (ceb.getCurrentStep().equals(ECEBuildStep.LOOT_CHEST)) {
-                        ceb.setLootChestLocation(new BLocatable(block));
-                        event.setCancelled(true);
-                    }
                 }
             }
         });

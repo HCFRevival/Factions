@@ -29,7 +29,7 @@ public final class EventExecutor implements IEventExecutor {
     @Getter public EventManager manager;
 
     @Override
-    public void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, Promise promise) {
+    public void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -49,12 +49,12 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        captureEvent.startEvent(ticketsToWin, timerDuration);
+        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward);
         promise.resolve();
     }
 
     @Override
-    public void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, Promise promise) {
+    public void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise) {
 
     }
 

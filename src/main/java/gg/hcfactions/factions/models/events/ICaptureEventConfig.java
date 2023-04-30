@@ -15,4 +15,9 @@ public interface ICaptureEventConfig {
      * @return Max time this event can be up for
      */
     int getMaxLifespan();
+
+    /**
+     * @return Tokens that will be rewarded for capturing the event
+     */
+    int getTokenReward();
 }

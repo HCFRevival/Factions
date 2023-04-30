@@ -22,7 +22,6 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     @Getter @Setter public String name;
     @Getter @Setter public String displayName;
     @Getter public final List<EventSchedule> schedule;
-    @Getter @Setter public BLocatable captureChestLocation;
     @Getter @Setter public CaptureRegion captureRegion;
     @Getter @Setter public CaptureEventConfig eventConfig;
     @Getter @Setter KOTHSession session;
@@ -33,7 +32,6 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
             String name,
             String displayName,
             List<EventSchedule> schedule,
-            BLocatable captureChestLocation,
             CaptureRegion captureRegion,
             CaptureEventConfig eventConfig
     ) {
@@ -42,7 +40,6 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
         this.name = name;
         this.displayName = displayName;
         this.schedule = schedule;
-        this.captureChestLocation = captureChestLocation;
         this.captureRegion = captureRegion;
         this.eventConfig = eventConfig;
         this.session = null;
@@ -51,19 +48,19 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     @Override
     public void captureEvent(PlayerFaction faction) {
         session.setActive(false);
-        session.setCaptureChestUnlockTime(Time.now() + (30 * 1000L));
         session.setCapturingFaction(faction);
+        faction.addTokens(session.getTokenReward());
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
     }
 
     @Override
     public void startEvent() {
-        startEvent(eventConfig.defaultTicketsNeededToWin(), eventConfig.defaultTimerDuration());
+        startEvent(eventConfig.defaultTicketsNeededToWin(), eventConfig.defaultTimerDuration(), eventConfig.getTokenReward());
     }
 
     @Override
-    public void startEvent(int ticketsNeededToWin, int timerDuration) {
-        session = new KOTHSession(this, ticketsNeededToWin, timerDuration);
+    public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward) {
+        session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward);
         session.setActive(true);
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can now be contested");
     }

@@ -11,6 +11,7 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -49,12 +50,13 @@ public final class EventMenu extends GenericMenu {
 
                     lore.add(FMessage.LAYER_2 + "Type" + FMessage.LAYER_1 + ": " + FMessage.INFO + "King of the Hill");
                     lore.add(FMessage.LAYER_2 + "Status" + FMessage.LAYER_1 + ": " + (isActive ? ChatColor.GREEN + "Active" : ChatColor.RED + "Inactive"));
-                    lore.add(FMessage.LAYER_2 + "Location" + FMessage.LAYER_1 + ": " + FMessage.INFO + kothEvent.getCaptureChestLocation().toString());
+                    lore.add(FMessage.LAYER_2 + "Location" + FMessage.LAYER_1 + ": " + FMessage.INFO + kothEvent.getCaptureRegion().getCornerA().toString());
 
                     if (isActive) {
                         lore.add(ChatColor.RESET + " ");
                         lore.add(FMessage.LAYER_2 + "Tickets Needed" + FMessage.LAYER_1 + ": " + kothEvent.getSession().getTicketsNeededToWin());
                         lore.add(FMessage.LAYER_2 + "Timer Duration" + FMessage.LAYER_1 + ": " + Time.convertToRemaining(kothEvent.getSession().getTimerDuration()*1000L));
+                        lore.add(FMessage.LAYER_2 + "Token Reward" + FMessage.LAYER_1 + ": " + kothEvent.getSession().getTokenReward());
                     }
 
                     lore.add(ChatColor.RESET + " ");

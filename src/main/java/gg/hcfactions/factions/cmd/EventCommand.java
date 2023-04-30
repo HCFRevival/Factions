@@ -43,22 +43,22 @@ public final class EventCommand extends BaseCommand {
     @Subcommand("start koth")
     @Description("Start a King of the Hill Event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    @Syntax("<name> <tickets> <timer>")
-    public void onStart(Player player, String eventName, String ticketsToWinNamed, String timerIntervalNamed) {
-        final Optional<IEvent> event = plugin.getEventManager().getEvent(eventName);
-
+    @Syntax("<name> <tickets> <timer> <tokens>")
+    public void onStart(Player player, String eventName, String ticketsToWinNamed, String timerIntervalNamed, String tokenRewardName) {
         int ticketsToWin;
         int timerInterval;
+        int tokenReward;
 
         try {
             ticketsToWin = Integer.parseInt(ticketsToWinNamed);
             timerInterval = Integer.parseInt(timerIntervalNamed);
+            tokenReward = Integer.parseInt(tokenRewardName);
         } catch (NumberFormatException e) {
             player.sendMessage(ChatColor.RED + "Invalid Capture Event Config");
             return;
         }
 
-        plugin.getEventManager().getExecutor().startCaptureEvent(player, eventName, ticketsToWin, timerInterval, new Promise() {
+        plugin.getEventManager().getExecutor().startCaptureEvent(player, eventName, ticketsToWin, timerInterval, tokenReward, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Event started");
