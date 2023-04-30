@@ -26,7 +26,7 @@ public final class ShopMenu extends GenericMenu {
     private final GenericShop shop;
 
     public ShopMenu(Factions plugin, Player player, GenericMerchant merchant, GenericShop shop) {
-        super(plugin, player, shop.getShopName(), (shop.getItems().size() > 9) ? shop.getItems().size() % 9 : 1);
+        super(plugin, player, shop.getShopName(), 6);
         this.plugin = plugin;
         this.merchant = merchant;
         this.shop = shop;
@@ -82,6 +82,8 @@ public final class ShopMenu extends GenericMenu {
                 });
             }
         })));
+
+        fill(new ItemBuilder().setMaterial(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.RESET + "").build());
     }
 
     private void handleBuy(GenericShopItem item, Promise promise) {
@@ -102,7 +104,7 @@ public final class ShopMenu extends GenericMenu {
             return;
         }
 
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey());
+        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
 
         factionPlayer.subtractFromBalance(item.getBuyPrice());
 
@@ -123,7 +125,7 @@ public final class ShopMenu extends GenericMenu {
         }
 
         final ItemStack found = PlayerUtil.getFirstItemStackByMaterial(player, item.getMaterial());
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey());
+        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
 
         if (found == null) {
             promise.reject("You do not have any " + itemName + " in your inventory");

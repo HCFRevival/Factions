@@ -11,6 +11,7 @@ import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
+import net.minecraft.world.entity.Entity;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -43,8 +44,26 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
     }
 
     @Override
-    public void deleteMerchant(Player player, GenericMerchant merchant, Promise promise) {
+    public void deleteMerchant(Player player, String merchantName, Promise promise) {
+        final Optional<IMerchant> merchantQuery = manager.getMerchantByName(merchantName);
 
+        if (merchantQuery.isEmpty()) {
+            promise.reject("Merchant not found");
+            return;
+        }
+
+        final GenericMerchant merchant = (GenericMerchant) merchantQuery.get();
+        final MerchantVillager villager = manager.getMerchantVillagers().stream().filter(v -> v.getMerchantId().equals(merchant.getId())).findFirst().orElse(null);
+
+        manager.getMerchantRepository().remove(merchant);
+
+        if (villager != null) {
+            villager.remove(Entity.RemovalReason.DISCARDED);
+            manager.getMerchantVillagers().remove(villager);
+        }
+
+        manager.deleteMerchant(merchant);
+        promise.resolve();
     }
 
     @Override
@@ -72,6 +91,11 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
 
         if (merchant.getShops().stream().anyMatch(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(ChatColor.stripColor(shopName)))) {
             promise.reject("Shop name is already in use");
+            return;
+        }
+
+        if (merchant.getShops().stream().anyMatch(s -> s.getPosition() == position)) {
+            promise.reject("Inventory position is already in use");
             return;
         }
 
@@ -105,6 +129,11 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final String itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
                 ? item.getItemMeta().getDisplayName()
                 : null;
+
+        if (shop.getItems().stream().anyMatch(i -> i.getPosition() == position)) {
+            promise.reject("Inventory position is already in use");
+            return;
+        }
 
         final GenericShopItem shopItem = new GenericShopItem(
                 UUID.randomUUID(),

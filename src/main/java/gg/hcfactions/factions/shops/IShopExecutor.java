@@ -23,10 +23,10 @@ public interface IShopExecutor {
     /**
      * Deletes an existing merchant
      * @param player Player
-     * @param merchant Merchant
+     * @param merchantName Merchant name
      * @param promise Promise
      */
-    void deleteMerchant(Player player, GenericMerchant merchant, Promise promise);
+    void deleteMerchant(Player player, String merchantName, Promise promise);
 
     /**
      * Open merchant inventory for provided merchant

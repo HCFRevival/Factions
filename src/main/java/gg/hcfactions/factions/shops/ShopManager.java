@@ -44,6 +44,12 @@ public final class ShopManager implements IManager {
 
         loadMerchants();
 
+        plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("merchants", ctx -> {
+            final List<String> merchantNames = Lists.newArrayList();
+            merchantRepository.forEach(m -> merchantNames.add(ChatColor.stripColor(m.getMerchantName())));
+            return merchantNames;
+        });
+
         merchantRepository.forEach(merchant -> {
             final MerchantVillager villager = new MerchantVillager(plugin, (GenericMerchant) merchant);
             villager.spawn();
@@ -214,6 +220,12 @@ public final class ShopManager implements IManager {
             }
         }
 
+        plugin.saveConfiguration("shops", conf);
+    }
+
+    public void deleteMerchant(GenericMerchant merchant) {
+        final YamlConfiguration conf = plugin.loadConfiguration("shops");
+        conf.set("shops." + merchant.getId().toString(), null);
         plugin.saveConfiguration("shops", conf);
     }
 

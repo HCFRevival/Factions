@@ -3,6 +3,8 @@ package gg.hcfactions.factions.cmd;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.libs.acf.BaseCommand;
+import gg.hcfactions.libs.acf.CommandHelp;
+import gg.hcfactions.libs.acf.CommandIssuer;
 import gg.hcfactions.libs.acf.annotation.*;
 import gg.hcfactions.libs.base.consumer.Promise;
 import lombok.AllArgsConstructor;
@@ -39,6 +41,7 @@ public final class ShopCommand extends BaseCommand {
     @Description("Add a shop to an existing merchant")
     @Syntax("<merchant> <name> <position>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@merchants")
     public void onAddToMerchant(Player player, String merchantName, String shopName, String positionName) {
         int position;
 
@@ -73,6 +76,7 @@ public final class ShopCommand extends BaseCommand {
     @Description("Add an item to an existing shop")
     @Syntax("<merchant> <shop> <position> <buycost> <sellcost>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@merchants")
     public void onAddToShop(Player player, String merchantName, String shopName, String positionName, String buyName, String sellName) {
         int position;
         double buyCost;
@@ -105,5 +109,30 @@ public final class ShopCommand extends BaseCommand {
                 player.sendMessage(ChatColor.RED + "Failed to add to shop: " + s);
             }
         });
+    }
+
+    @Subcommand("delete")
+    @Description("Delete an existing merchant")
+    @Syntax("<merchant>")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@merchants")
+    public void onRemoveMerchant(Player player, String merchantName) {
+        plugin.getShopManager().getExecutor().deleteMerchant(player, merchantName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Merchant deleted");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + s);
+            }
+        });
+    }
+
+    @HelpCommand
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onHelp(CommandIssuer issuer, CommandHelp help) {
+        help.showHelp(issuer);
     }
 }
