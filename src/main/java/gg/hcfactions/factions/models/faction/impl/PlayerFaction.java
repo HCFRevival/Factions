@@ -23,11 +23,8 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,8 +49,6 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     @Getter public Set<UUID> pendingInvites;
     @Getter public Set<FTimer> timers;
 
-    @Getter public transient Scoreboard scoreboard;
-
     public PlayerFaction(FactionManager manager) {
         this.manager = manager;
         this.uniqueId = null;
@@ -72,8 +67,6 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
         this.timers = Sets.newConcurrentHashSet();
-
-        setupScoreboard();
     }
 
     public PlayerFaction(FactionManager manager, String name) {
@@ -94,45 +87,6 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
         this.timers = Sets.newConcurrentHashSet();
-
-        setupScoreboard();
-    }
-
-    /**
-     * Performs initial scoreboard configuration
-     */
-    public void setupScoreboard() {
-        this.scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-
-        final Team friendly = scoreboard.registerNewTeam("members");
-        friendly.setColor(ChatColor.DARK_GREEN);
-        friendly.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
-        friendly.setCanSeeFriendlyInvisibles(true);
-    }
-
-    /**
-     * Applies faction scoreboard to provided player
-     * @param player Player
-     */
-    public void setupScoreboard(Player player) {
-        if (scoreboard == null) {
-            throw new NullPointerException("attempted to set null scoreboard");
-        }
-
-        Objects.requireNonNull(scoreboard.getTeam("members")).addEntry(player.getName());
-        player.setScoreboard(scoreboard);
-    }
-
-    /**
-     * Revokes faction scoreboard from provided player
-     * @param player Player
-     */
-    public void destroyScoreboard(Player player) {
-        if (scoreboard != null) {
-            Objects.requireNonNull(scoreboard.getTeam("members")).removeEntry(player.getName());
-        }
-
-        player.setScoreboard(Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard());
     }
 
     /**

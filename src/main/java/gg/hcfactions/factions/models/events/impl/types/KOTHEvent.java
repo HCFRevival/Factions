@@ -12,6 +12,7 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.ChatColor;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,13 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
         session.setActive(false);
         session.setCapturingFaction(faction);
         faction.addTokens(session.getTokenReward());
+
+        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
+            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
+                p.getScoreboard().removeLineByQuery(ChatColor.stripColor(displayName));
+            }
+        });
+
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
     }
 
@@ -68,6 +76,13 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     @Override
     public void stopEvent() {
         session = null;
+
+        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
+            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
+                p.getScoreboard().removeLineByQuery(ChatColor.stripColor(displayName));
+            }
+        });
+
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can no longer be contested");
     }
 

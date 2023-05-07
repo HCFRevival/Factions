@@ -92,6 +92,9 @@ deathbans:
   life_use_delay: 60
   shop_url: "https://hcfactions.gg/shop"
 
+scoreboard:
+  title: '&6&lHCFRevival &c[Map #]'
+
 stats:
   map_number: 0.5
 

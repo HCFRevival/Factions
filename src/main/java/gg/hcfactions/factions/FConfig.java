@@ -6,10 +6,12 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
 import gg.hcfactions.libs.bukkit.utils.Configs;
 import lombok.Getter;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class FConfig {
     @Getter public Factions plugin;
@@ -85,6 +87,9 @@ public final class FConfig {
     @Getter public int minDeathbanDuration;
     @Getter public int lifeUseDelay;
     @Getter public String shopUrl;
+
+    // display stuffs
+    @Getter public String scoreboardTitle;
 
     // server states
     @Getter public EServerState initialServerState;
@@ -181,6 +186,8 @@ public final class FConfig {
         bardClassLimit = conf.getInt("classes.limits.bard");
         rogueClassLimit = conf.getInt("classes.limits.rogue");
         diverClassLimit = conf.getInt("classes.limits.diver");
+
+        scoreboardTitle = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString("scoreboard.title")));
 
         deathbansEnabled = conf.getBoolean("deathbans.enabled");
         deathbansStandalone = conf.getBoolean("deathbans.standalone");

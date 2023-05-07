@@ -3,8 +3,10 @@ package gg.hcfactions.factions.models.player;
 import gg.hcfactions.factions.models.claim.IPillar;
 import gg.hcfactions.factions.models.claim.IShield;
 import gg.hcfactions.factions.models.econ.IBankable;
+import gg.hcfactions.factions.models.scoreboard.FScoreboard;
 import gg.hcfactions.factions.models.timer.ITimeable;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import org.bukkit.entity.Player;
 
 import java.util.Set;
 import java.util.UUID;
@@ -19,6 +21,11 @@ public interface IFactionPlayer extends IBankable, ITimeable {
      * @return Bukkit Username
      */
     String getUsername();
+
+    /**
+     * @return Faction Scoreboard
+     */
+    FScoreboard getScoreboard();
 
     /**
      * @return Timers
@@ -51,4 +58,31 @@ public interface IFactionPlayer extends IBankable, ITimeable {
      * @param b If true the player will be reset when they log in the next time
      */
     void setResetOnJoin(boolean b);
+
+    /**
+     * Performs initial scoreboard setup
+     */
+    void setupScoreboard();
+
+    /**
+     * Destroy scoreboard data
+     */
+    void destroyScoreboard();
+
+    /**
+     * Add the provided player to a "friendly" team in the scoreboard, rendering their name green
+     * @param player Player
+     */
+    void addToScoreboard(Player player);
+
+    /**
+     * Remove the provided player from the "friendly" team in the scoreboard
+     * @param player Player
+     */
+    void removeFromScoreboard(Player player);
+
+    /**
+     * Remove all friendly players from scoreboard
+     */
+    void removeAllFromScoreboard();
 }

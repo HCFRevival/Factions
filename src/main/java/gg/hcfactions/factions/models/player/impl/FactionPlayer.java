@@ -12,6 +12,7 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
+import gg.hcfactions.factions.models.scoreboard.FScoreboard;
 import gg.hcfactions.factions.player.PlayerManager;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
@@ -23,6 +24,8 @@ import lombok.Setter;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Team;
 
 import java.util.List;
 import java.util.Set;
@@ -34,12 +37,14 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     @Getter @Setter public transient String username;
     @Getter @Setter public transient boolean safeDisconnecting;
     @Getter @Setter public transient Claim currentClaim;
+    @Getter public FScoreboard scoreboard;
     @Getter public final Set<IPillar> pillars;
     @Getter public final Set<IShield> shields;
 
     @Getter public UUID uniqueId;
     @Getter @Setter public double balance;
     @Getter @Setter public boolean resetOnJoin;
+    @Getter @Setter public boolean preferScoreboardDisplay;
     @Getter public Set<FTimer> timers;
 
     public FactionPlayer(PlayerManager playerManager) {
@@ -50,6 +55,8 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.uniqueId = null;
         this.balance = 0.0;
         this.resetOnJoin = false;
+        this.preferScoreboardDisplay = true;
+        this.scoreboard = null;
         this.timers = Sets.newConcurrentHashSet();
         this.pillars = Sets.newHashSet();
         this.shields = Sets.newConcurrentHashSet();
@@ -63,9 +70,79 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.currentClaim = null;
         this.balance = 0.0;
         this.resetOnJoin = false;
+        this.preferScoreboardDisplay = true;
+        this.scoreboard = null;
         this.timers = Sets.newConcurrentHashSet();
         this.pillars = Sets.newHashSet();
         this.shields = Sets.newConcurrentHashSet();
+    }
+
+    @Override
+    public void setupScoreboard() {
+        this.scoreboard = new FScoreboard(playerManager.getPlugin(), getBukkit(), playerManager.getPlugin().getConfiguration().getScoreboardTitle());
+        getBukkit().setScoreboard(scoreboard.getInternal());
+    }
+
+    @Override
+    public void destroyScoreboard() {
+        if (scoreboard == null) {
+            return;
+        }
+
+        scoreboard.getInternal().clearSlot(DisplaySlot.SIDEBAR);
+        scoreboard = null;
+    }
+
+    @Override
+    public void addToScoreboard(Player player) {
+        if (scoreboard == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to add to scoreboard but scoreboard was null");
+            return;
+        }
+
+        final Team friendly = scoreboard.getInternal().getTeam("friendly");
+        if (friendly == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to add to scoreboard but team was null");
+            return;
+        }
+
+        if (friendly.hasEntry(player.getName())) {
+            return;
+        }
+
+        friendly.addEntry(player.getName());
+    }
+
+    @Override
+    public void removeFromScoreboard(Player player) {
+        if (scoreboard == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but scoreboard was null");
+            return;
+        }
+
+        final Team friendly = scoreboard.getInternal().getTeam("friendly");
+        if (friendly == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but team was null");
+            return;
+        }
+
+        friendly.removeEntry(player.getName());
+    }
+
+    @Override
+    public void removeAllFromScoreboard() {
+        if (scoreboard == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to remove all from scoreboard but scoreboard was null");
+            return;
+        }
+
+        final Team friendly = scoreboard.getInternal().getTeam("friendly");
+        if (friendly == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to remove all from scoreboard but team was null");
+            return;
+        }
+
+        friendly.getEntries().forEach(friendly::removeEntry);
     }
 
     public Player getBukkit() {
@@ -263,6 +340,10 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         removeTimer(type);
+
+        if (scoreboard != null && !scoreboard.isHidden()) {
+            scoreboard.removeLine(type.getScoreboardPosition());
+        }
     }
 
     @Override
@@ -270,6 +351,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.balance = document.getDouble("balance");
         this.resetOnJoin = document.getBoolean("reset_on_join");
+        this.preferScoreboardDisplay = document.getBoolean("prefer_scoreboard");
 
         if (document.containsKey("timers")) {
             final List<Document> timerDocs = document.getList("timers", Document.class);
@@ -288,6 +370,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
                 .append("uuid", uniqueId.toString())
                 .append("balance", balance)
                 .append("reset_on_join", resetOnJoin)
+                .append("prefer_scoreboard", preferScoreboardDisplay)
                 .append("timers", timerDocs);
     }
 }

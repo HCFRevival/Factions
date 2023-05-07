@@ -87,18 +87,39 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
             factionPlayer.setResetOnJoin(false);
         }
 
+        factionPlayer.setupScoreboard();
+
         if (faction != null) {
-            faction.setupScoreboard(player);
+            faction.getOnlineMembers().forEach(onlineMember -> {
+                final FactionPlayer otherFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+                factionPlayer.addToScoreboard(onlineMember.getBukkit());
+
+                if (otherFactionPlayer != null) {
+                    otherFactionPlayer.addToScoreboard(player);
+                }
+            });
         }
     }
 
     @EventHandler /* Destory scoreboard data when player disconnects */
     public void onPlayerDestory(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 
+        if (factionPlayer != null) {
+            factionPlayer.destroyScoreboard();
+        }
+
         if (faction != null) {
-            faction.destroyScoreboard(player);
+            faction.getOnlineMembers().forEach(onlineMember -> {
+                final FactionPlayer otherFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+                if (otherFactionPlayer != null && otherFactionPlayer.getScoreboard() != null) {
+                    otherFactionPlayer.removeFromScoreboard(player);
+                }
+            });
         }
     }
 

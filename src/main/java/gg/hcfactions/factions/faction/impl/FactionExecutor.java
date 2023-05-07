@@ -68,13 +68,14 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         final PlayerFaction faction = new PlayerFaction(manager, factionName);
-        faction.addMember(player.getUniqueId(), PlayerFaction.Rank.LEADER);
-        faction.setupScoreboard(player);
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
 
-        final IFactionPlayer factionPlayer = manager.getPlugin().getPlayerManager().getPlayer(player);
+        faction.addMember(player.getUniqueId(), PlayerFaction.Rank.LEADER);
+
         if (factionPlayer != null) {
             faction.addToBalance(factionPlayer.getBalance());
             factionPlayer.setBalance(0.0);
+            factionPlayer.addToScoreboard(player);
         }
 
         manager.getFactionRepository().add(faction);
@@ -136,19 +137,31 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         final DisbandConfirmationMenu menu = new DisbandConfirmationMenu(manager.getPlugin(), player, faction, () -> {
             final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
+            final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
+
+            faction.getOnlineMembers().forEach(onlineMember -> {
+                final FactionPlayer otherFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+                if (otherFactionPlayer != null) {
+                    otherFactionPlayer.removeAllFromScoreboard();
+                }
+            });
 
             claims.forEach(c -> faction.addToBalance(c.getCost()));
 
             manager.getFactionRepository().remove(faction);
             claims.forEach(manager.getPlugin().getClaimManager().getClaimRepository()::remove);
+            subclaims.forEach(manager.getPlugin().getSubclaimManager().getSubclaimRepository()::remove);
 
             new Scheduler(manager.getPlugin()).async(() -> {
                 manager.deleteFaction(faction);
                 claims.forEach(c -> manager.getPlugin().getClaimManager().deleteClaim(c));
+                subclaims.forEach(sc -> manager.getPlugin().getSubclaimManager().deleteSubclaim(sc));
 
                 if (factionPlayer != null) {
                     new Scheduler(manager.getPlugin()).sync(() -> {
                         factionPlayer.addToBalance(faction.getBalance());
+                        factionPlayer.removeAllFromScoreboard();
                         FMessage.printDepositReceived(player, faction.getBalance());
                     }).run();
                 }
@@ -177,15 +190,28 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         final DisbandConfirmationMenu menu = new DisbandConfirmationMenu(manager.getPlugin(), player, faction, () -> {
             final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
+            final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
+
+            if (faction instanceof final PlayerFaction playerFaction) {
+                playerFaction.getOnlineMembers().forEach(onlineMember -> {
+                    final FactionPlayer otherFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+                    if (otherFactionPlayer != null) {
+                        otherFactionPlayer.removeAllFromScoreboard();
+                    }
+                });
+            }
 
             // delete faction, claims and subclaims from repositories
             manager.getFactionRepository().remove(faction);
             claims.forEach(manager.getPlugin().getClaimManager().getClaimRepository()::remove);
+            subclaims.forEach(manager.getPlugin().getSubclaimManager().getSubclaimRepository()::remove);
 
             new Scheduler(manager.getPlugin()).async(() -> {
                 // delete from db
                 manager.deleteFaction(faction);
                 claims.forEach(c -> manager.getPlugin().getClaimManager().deleteClaim(c));
+                subclaims.forEach(sc -> manager.getPlugin().getSubclaimManager().deleteSubclaim(sc));
 
                 // refund balance
                 if (faction instanceof PlayerFaction) {
@@ -200,6 +226,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     if (factionPlayer != null) {
                         new Scheduler(manager.getPlugin()).sync(() -> {
                             factionPlayer.addToBalance(totalClaimValue);
+                            factionPlayer.removeAllFromScoreboard();
                             FMessage.printDepositReceived(player, totalClaimValue);
                         }).run();
                     }
@@ -451,8 +478,21 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             faction.getMemberHistory().add(player.getUniqueId());
         }
 
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
+
         faction.addMember(player.getUniqueId());
-        faction.setupScoreboard(player);
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final FactionPlayer onlineFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+            if (onlineFactionPlayer != null) {
+                onlineFactionPlayer.addToScoreboard(player);
+            }
+
+            if (factionPlayer != null && onlineFactionPlayer != null) {
+                factionPlayer.addToScoreboard(onlineFactionPlayer.getBukkit());
+            }
+        });
+
         FMessage.printPlayerJoinedFaction(faction, player);
         promise.resolve();
     }
@@ -488,8 +528,19 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
+        final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
+        if (factionPlayer != null) {
+            factionPlayer.removeAllFromScoreboard();
+        }
+
         faction.getMembers().remove(faction.getMember(player.getUniqueId()));
-        faction.destroyScoreboard(player);
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final FactionPlayer onlineFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
+            if (onlineFactionPlayer != null) {
+                onlineFactionPlayer.removeFromScoreboard(player);
+            }
+        });
+
         FMessage.printPlayerLeftFaction(faction, player);
         promise.resolve();
     }
@@ -554,14 +605,25 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
                 if (Bukkit.getPlayer(kickedProfile.getUniqueId()) != null) {
                     final Player kicked = Bukkit.getPlayer(kickedProfile.getUniqueId());
-                    final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(kicked));
+                    final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(Objects.requireNonNull(kicked)));
 
                     if (inside != null && inside.getOwner().equals(faction.getUniqueId())) {
                         promise.reject(FError.F_CANT_KICK_IN_CLAIMS.getErrorDescription());
                         return;
                     }
 
-                    faction.destroyScoreboard(kicked);
+                    final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(kicked);
+                    if (factionPlayer != null) {
+                        factionPlayer.removeAllFromScoreboard();
+                    }
+
+                    faction.getOnlineMembers().forEach(onlineMember -> {
+                        final FactionPlayer onlineFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
+                        if (onlineFactionPlayer != null) {
+                            onlineFactionPlayer.removeFromScoreboard(kicked);
+                        }
+                    });
+
                     kicked.sendMessage(FMessage.F_KICKED_FROM_FAC);
                 }
 
@@ -578,9 +640,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
-    public void kickFromFaction(Player player, String factionName, String username, Promise promise) {
-
-    }
+    public void kickFromFaction(Player player, String factionName, String username, Promise promise) {}
 
     @Override
     public void renameFaction(Player player, String newFactionName, Promise promise) {
