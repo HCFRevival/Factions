@@ -813,6 +813,14 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("reload")
+    @Description("Reload factions config")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onReload(Player player) {
+        plugin.getConfiguration().loadConfig();
+        player.sendMessage(ChatColor.GREEN + "Factions configuration has been reloaded");
+    }
+
     @HelpCommand
     public void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
