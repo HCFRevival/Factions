@@ -56,6 +56,10 @@ public class TimerCommand extends BaseCommand {
         }
 
         if (fp.hasTimer(timerType)) {
+            if (fp.isPreferScoreboardDisplay()) {
+                fp.getScoreboard().removeLine(timerType.getScoreboardPosition());
+            }
+
             fp.removeTimer(timerType);
         }
 

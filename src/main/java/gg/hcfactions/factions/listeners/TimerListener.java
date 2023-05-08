@@ -98,6 +98,10 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         if (factionPlayer.hasTimer(ETimerType.CLASS)) {
+            if (factionPlayer.isPreferScoreboardDisplay()) {
+                factionPlayer.getScoreboard().removeLine(ETimerType.CLASS.getScoreboardPosition());
+            }
+
             factionPlayer.removeTimer(ETimerType.CLASS);
         }
 
@@ -127,6 +131,10 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         if (factionPlayer.hasTimer(ETimerType.CLASS)) {
+            if (factionPlayer.isPreferScoreboardDisplay()) {
+                factionPlayer.getScoreboard().removeLine(ETimerType.CLASS.getScoreboardPosition());
+            }
+
             factionPlayer.removeTimer(ETimerType.CLASS);
         }
     }
@@ -233,6 +241,11 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
+
+            if (factionPlayer.isPreferScoreboardDisplay()) {
+                factionPlayer.getScoreboard().removeLine(timer.getType().getScoreboardPosition());
+            }
+
             FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "moved");
         }
     }
@@ -273,6 +286,11 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
+
+            if (factionPlayer.isPreferScoreboardDisplay()) {
+                factionPlayer.getScoreboard().removeLine(timer.getType().getScoreboardPosition());
+            }
+
             FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "took damage");
         }
     }
@@ -327,11 +345,10 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (!(projectile.getShooter() instanceof Player)) {
+        if (!(projectile.getShooter() instanceof final Player player)) {
             return;
         }
 
-        final Player player = (Player) projectile.getShooter();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {

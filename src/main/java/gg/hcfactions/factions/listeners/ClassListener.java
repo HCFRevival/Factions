@@ -323,7 +323,7 @@ public final class ClassListener implements Listener {
                     }).delay(((long) i * rogue.getBackstabTickrate())).run();
                 }
 
-                attacker.getInventory().setItemInHand(new ItemStack(Material.AIR));
+                attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                 Players.playSound(attacker, Sound.ENTITY_ITEM_BREAK); // TODO: Test this sound and match it to original item break
                 // Players.spawnEffect(attacker, attacked.getLocation(), Effect.HEART, 15, 1); TODO: Change this to new particles
 
