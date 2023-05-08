@@ -7,8 +7,10 @@ import gg.hcfactions.factions.events.menu.EventMenu;
 import gg.hcfactions.factions.models.events.EPalaceLootTier;
 import gg.hcfactions.factions.models.events.ICaptureEvent;
 import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootable;
+import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
@@ -55,12 +57,47 @@ public final class EventExecutor implements IEventExecutor {
 
     @Override
     public void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
 
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = event.get();
+
+        if (!(generic instanceof final KOTHEvent koth)) {
+            promise.reject("Not a capture event");
+            return;
+        }
+
+        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, koth.getEventConfig().getMaxLifespan(), tokenReward));
+        promise.resolve();
     }
 
     @Override
     public void stopEvent(Player player, String eventName, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
 
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = event.get();
+
+        if (generic instanceof final KOTHEvent koth) {
+            if (!koth.isActive()) {
+                promise.reject("Event is not active");
+                return;
+            }
+
+            koth.stopEvent();
+            promise.resolve();
+            return;
+        }
+
+        promise.reject("Unknown event type");
     }
 
     @Override

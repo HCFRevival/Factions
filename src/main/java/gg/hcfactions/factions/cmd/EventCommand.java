@@ -71,6 +71,55 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("stop")
+    @Description("Stop an event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name>")
+    public void onStop(Player player, String eventName) {
+        plugin.getEventManager().getExecutor().stopEvent(player, eventName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event stopped");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to stop event: " + s);
+            }
+        });
+    }
+
+    @Subcommand("koth config")
+    @Description("Update capture event config for KOTH events")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<event> <tickets> <timer> <tokens>")
+    public void onUpdateCaptureConfig(Player player, String eventName, String ticketName, String timerName, String tokenName) {
+        int tickets = 0;
+        int timerDuration = 0;
+        int tokens = 0;
+
+        try {
+            tickets = Integer.parseInt(ticketName);
+            timerDuration = Integer.parseInt(timerName);
+            tokens = Integer.parseInt(tokenName);
+        } catch (NumberFormatException e) {
+            player.sendMessage(ChatColor.RED + "Invalid integer amounts");
+            return;
+        }
+
+        plugin.getEventManager().getExecutor().setCaptureEventConfig(player, eventName, tickets, timerDuration, tokens, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event configuration updated");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to update event config: " + s);
+            }
+        });
+    }
+
     @Subcommand("list")
     @Description("View all events and their information")
     public void onList(Player player) {
