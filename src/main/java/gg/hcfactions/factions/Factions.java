@@ -131,6 +131,7 @@ public final class Factions extends AresPlugin {
         registerListener(new SubclaimBuilderListener(this));
         registerListener(new SubclaimListener(this));
         registerListener(new EventBuilderListener(this));
+        registerListener(new FoundOreListener(this));
     }
 
     @Override
