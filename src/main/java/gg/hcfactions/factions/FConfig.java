@@ -99,6 +99,9 @@ public final class FConfig {
     // stats
     @Getter public int mapNumber;
 
+    // economy
+    @Getter public double startingBalance;
+
     public FConfig(Factions plugin) {
         this.plugin = plugin;
     }
@@ -200,5 +203,7 @@ public final class FConfig {
         initialServerState = EServerState.fromString(conf.getString("server_state.current_state"));
         eotwBorderShrinkRadius = conf.getDouble("server_state.eotw.border_shrink_radius");
         eotwBorderShrinkRate = conf.getInt("server_state.eotw.border_shrink_rate");
+
+        startingBalance = conf.getDouble("economy.starting_balance");
     }
 }

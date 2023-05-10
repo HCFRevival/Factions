@@ -53,7 +53,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.safeDisconnecting = false;
         this.currentClaim = null;
         this.uniqueId = null;
-        this.balance = 0.0;
+        this.balance = playerManager.getPlugin().getConfiguration().getStartingBalance();
         this.resetOnJoin = false;
         this.preferScoreboardDisplay = true;
         this.scoreboard = null;
@@ -68,7 +68,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.username = username;
         this.safeDisconnecting = false;
         this.currentClaim = null;
-        this.balance = 0.0;
+        this.balance = playerManager.getPlugin().getConfiguration().getStartingBalance();
         this.resetOnJoin = false;
         this.preferScoreboardDisplay = true;
         this.scoreboard = null;

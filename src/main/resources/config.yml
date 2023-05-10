@@ -98,6 +98,9 @@ scoreboard:
 stats:
   map_number: 0.5
 
+economy:
+  starting_balance: 100.0
+
 server_state:
   current_state: 'normal'
   eotw:
