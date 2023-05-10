@@ -14,7 +14,6 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerLingeringSplashEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -261,11 +260,10 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof final Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
@@ -415,11 +413,15 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onPlayerResurrect(EntityResurrectEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof final Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
+        if (!player.getInventory().getItemInMainHand().getType().equals(Material.TOTEM_OF_UNDYING)
+                && !player.getInventory().getItemInOffHand().getType().equals(Material.TOTEM_OF_UNDYING)) {
+            return;
+        }
+
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (factionPlayer == null) {
