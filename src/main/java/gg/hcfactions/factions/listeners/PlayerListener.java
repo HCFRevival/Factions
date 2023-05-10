@@ -9,7 +9,6 @@ import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -128,7 +127,7 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
         final Player player = event.getPlayer();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
-        if (!factionPlayer.isResetOnJoin()) {
+        if (factionPlayer.isResetOnJoin()) {
             FactionUtil.cleanPlayer(plugin, factionPlayer);
         }
     }

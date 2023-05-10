@@ -23,6 +23,7 @@ public final class FConfig {
     @Getter public Location overworldSpawn;
     @Getter public Location netherSpawn;
     @Getter public Location endSpawn;
+    @Getter public Location endExit;
 
     // faction naming
     @Getter public int minFactionNameLength;
@@ -133,15 +134,15 @@ public final class FConfig {
     public void loadConfig() {
         final YamlConfiguration conf = plugin.loadConfiguration("config");
         final PLocatable overworldLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
-        final PLocatable netherLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
-        final PLocatable endLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
+        final PLocatable endLoc = Configs.parsePlayerLocation(conf, "factions.spawns.end_spawn");
+        final PLocatable endExitLoc = Configs.parsePlayerLocation(conf, "factions.spawns.end_exit");
 
         mongoUri = conf.getString("databases.mongodb.uri");
         redisUri = conf.getString("databases.redis.uri");
 
         overworldSpawn = overworldLoc.getBukkitLocation();
-        netherSpawn = netherLoc.getBukkitLocation();
         endSpawn = endLoc.getBukkitLocation();
+        endExit = endExitLoc.getBukkitLocation();
 
         minFactionNameLength = conf.getInt("factions.naming.min_faction_name");
         maxFactionNameLength = conf.getInt("factions.naming.max_faction_name");

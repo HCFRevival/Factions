@@ -8,13 +8,15 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
+
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,30 +49,36 @@ public final class SpawnListener implements Listener {
         final Location from = event.getFrom();
         final Location to = event.getTo();
 
-        if (!Objects.requireNonNull(from.getWorld()).getEnvironment().equals(Objects.requireNonNull(Objects.requireNonNull(to).getWorld()).getEnvironment())) {
-            final UUID uniqueId = player.getUniqueId();
-            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+        if (from.getWorld() != null && to != null && to.getWorld() != null) {
+            if (from.getWorld().getEnvironment().equals(to.getWorld().getEnvironment())) {
+                final UUID uniqueId = player.getUniqueId();
+                final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
-            if (factionPlayer.hasTimer(ETimerType.PROTECTION) || factionPlayer.hasTimer(ETimerType.COMBAT)) {
-                event.setCancelled(true);
+                if (factionPlayer.hasTimer(ETimerType.PROTECTION) || factionPlayer.hasTimer(ETimerType.COMBAT)) {
+                    event.setCancelled(true);
 
-                if (!recentlyWarned.contains(player.getUniqueId())) {
-                    if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
-                        player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_CTAG.getErrorDescription());
-                    } else if (factionPlayer.hasTimer(ETimerType.PROTECTION)) {
-                        player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_PVP_PROT.getErrorDescription());
+                    if (!recentlyWarned.contains(player.getUniqueId())) {
+                        if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
+                            player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_CTAG.getErrorDescription());
+                        } else if (factionPlayer.hasTimer(ETimerType.PROTECTION)) {
+                            player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_PVP_PROT.getErrorDescription());
+                        }
+
+                        recentlyWarned.add(uniqueId);
+                        new Scheduler(plugin).sync(() -> recentlyWarned.remove(uniqueId)).delay(20L).run();
                     }
-
-                    recentlyWarned.add(uniqueId);
-                    new Scheduler(plugin).sync(() -> recentlyWarned.remove(uniqueId)).delay(20L).run();
                 }
-
-                return;
             }
         }
+    }
 
-        if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.END_PORTAL)) {
-            new Scheduler(plugin).sync(() -> player.teleport(Objects.requireNonNull(to.getWorld()).getSpawnLocation())).delay(1L).run();
+    @EventHandler
+    public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+        final Player player = event.getPlayer();
+        final World from = event.getFrom();
+
+        if (from.getEnvironment().equals(World.Environment.THE_END)) {
+            new Scheduler(plugin).sync(() -> player.teleport(plugin.getConfiguration().getEndExit())).run();
         }
     }
 }
