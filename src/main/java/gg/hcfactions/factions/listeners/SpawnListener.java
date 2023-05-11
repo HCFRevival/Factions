@@ -77,8 +77,26 @@ public final class SpawnListener implements Listener {
         final Player player = event.getPlayer();
         final World from = event.getFrom();
 
+        // teleporting from the end back to overworld
         if (from.getEnvironment().equals(World.Environment.THE_END)) {
             new Scheduler(plugin).sync(() -> player.teleport(plugin.getConfiguration().getEndExit())).run();
+        }
+    }
+
+    @EventHandler
+    public void onTeleportToSpawn(PlayerTeleportEvent event) {
+        final Player player = event.getPlayer();
+        final Location from = event.getFrom();
+        final Location to = event.getTo();
+
+        if (to == null || to.getWorld() == null || from.getWorld() == null) {
+            return;
+        }
+
+        // teleporting in to the end
+        if (to.getWorld().getEnvironment().equals(World.Environment.THE_END) && !from.getWorld().getEnvironment().equals(World.Environment.THE_END)) {
+            event.setTo(plugin.getConfiguration().getEndSpawn());
+            return;
         }
     }
 }

@@ -6,6 +6,7 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
 import gg.hcfactions.libs.bukkit.utils.Configs;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,10 +21,9 @@ public final class FConfig {
     @Getter public String redisUri;
 
     // world
-    @Getter public Location overworldSpawn;
-    @Getter public Location netherSpawn;
-    @Getter public Location endSpawn;
-    @Getter public Location endExit;
+    @Getter @Setter public Location overworldSpawn;
+    @Getter @Setter public Location endSpawn;
+    @Getter @Setter public Location endExit;
 
     // faction naming
     @Getter public int minFactionNameLength;
@@ -133,16 +133,17 @@ public final class FConfig {
 
     public void loadConfig() {
         final YamlConfiguration conf = plugin.loadConfiguration("config");
-        final PLocatable overworldLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld");
-        final PLocatable endLoc = Configs.parsePlayerLocation(conf, "factions.spawns.end_spawn");
+
         final PLocatable endExitLoc = Configs.parsePlayerLocation(conf, "factions.spawns.end_exit");
+        final PLocatable endSpawnLoc = Configs.parsePlayerLocation(conf, "factions.spawns.end_spawn");
+        final PLocatable overworldSpawnLoc = Configs.parsePlayerLocation(conf, "factions.spawns.overworld_spawn");
+
+        endExit = endExitLoc.getBukkitLocation();
+        endSpawn = endSpawnLoc.getBukkitLocation();
+        overworldSpawn = overworldSpawnLoc.getBukkitLocation();
 
         mongoUri = conf.getString("databases.mongodb.uri");
         redisUri = conf.getString("databases.redis.uri");
-
-        overworldSpawn = overworldLoc.getBukkitLocation();
-        endSpawn = endLoc.getBukkitLocation();
-        endExit = endExitLoc.getBukkitLocation();
 
         minFactionNameLength = conf.getInt("factions.naming.min_faction_name");
         maxFactionNameLength = conf.getInt("factions.naming.max_faction_name");
