@@ -1,6 +1,7 @@
 package gg.hcfactions.factions;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
@@ -24,6 +25,8 @@ import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import lombok.Getter;
 import org.bukkit.block.data.type.Wall;
+
+import java.util.List;
 
 public final class Factions extends AresPlugin {
     @Getter public FConfig configuration;
@@ -62,7 +65,41 @@ public final class Factions extends AresPlugin {
         registerCommand(new EventCommand(this));
         registerCommand(new ShopCommand(this));
         registerCommand(new WalletCommand(this));
+        registerCommand(new SpawnCommand(this));
         registerCommand(new DebugCommand());
+
+        cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
+            final List<String> res = Lists.newArrayList();
+
+            if (factionManager == null) {
+                return res;
+            }
+
+            factionManager.getPlayerFactions().forEach(pf -> res.add(pf.getName()));
+            return res;
+        });
+
+        cmdMng.getCommandCompletions().registerAsyncCompletion("sfactions", ctx -> {
+            final List<String> res = Lists.newArrayList();
+
+            if (factionManager == null) {
+                return res;
+            }
+
+            factionManager.getServerFactions().forEach(sf -> res.add(sf.getName()));
+            return res;
+        });
+
+        cmdMng.getCommandCompletions().registerAsyncCompletion("events", ctx -> {
+            final List<String> res = Lists.newArrayList();
+
+            if (eventManager == null) {
+                return res;
+            }
+
+            eventManager.getEventRepository().forEach(e -> res.add(e.getName()));
+            return res;
+        });
 
         // db init
         final Mongo mdb = new Mongo(configuration.getMongoUri(), getAresLogger());

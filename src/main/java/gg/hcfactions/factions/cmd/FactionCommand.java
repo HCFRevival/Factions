@@ -61,6 +61,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("invite|inv")
     @Description("Invite a player to your faction")
     @Syntax("<name>")
+    @CommandCompletion("@players")
     public void onInvite(Player player, String username) {
         plugin.getFactionManager().getExecutor().createInvite(player, username, new Promise() {
             @Override
@@ -232,6 +233,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("show|who")
     @Description("Fetch details about a faction")
     @Syntax("[name]")
+    @CommandCompletion("@pfactions")
     public void onFactionShow(Player player, @Optional String name) {
         if (name != null) {
             plugin.getFactionManager().getExecutor().showFactionInfo(player, name);
@@ -296,6 +298,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Freeze a faction's power regeneration")
     @Syntax("<name> <duration>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@pfactions")
     public void onFactionPowerFreeze(Player player, String factionName, String freezeTime) {
         long parsed;
         try {
@@ -322,6 +325,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Thaw a faction's power regeneration")
     @Syntax("<name>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@pfactions")
     public void onFactionPowerThaw(Player player, String factionName) {
         plugin.getFactionManager().getExecutor().thawFactionPower(player, factionName, new Promise() {
             @Override
@@ -340,6 +344,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Update a faction's DTR")
     @Syntax("<name> <dtr>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@pfactions")
     public void onFactionSetDTR(Player player, String factionName, String dtr) {
         double v;
         try {
@@ -366,6 +371,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Update a server faction's flag value")
     @Syntax("<name> <flag>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@sfactions")
     public void onFactionFlagSet(Player player, String factionName, String flagName) {
         ServerFaction.Flag flag = ServerFaction.Flag.getFlagByName(flagName);
 
@@ -391,6 +397,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Update a server faction's display name")
     @Syntax("<name> <displayname>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@sfactions")
     public void onFactionDisplayNameUpdate(Player player, String factionName, String displayName) {
         plugin.getFactionManager().getExecutor().setFactionDisplayName(player, factionName, displayName, new Promise() {
             @Override
@@ -410,6 +417,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Update a server faction's buffer value")
     @Syntax("<name> <claim|build> <size>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@sfactions")
     public void onFactionBufferUpdate(
             Player player,
             String factionName,
@@ -447,6 +455,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Update a faction's reinvites")
     @Syntax("<name> <amount>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@pfactions")
     public void onFactionReinviteUpdate(Player player, String factionName, String reinviteAmount) {
         int v;
         try {
@@ -637,6 +646,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("kick")
     @Description("Kick a player from your faction")
     @Syntax("<name>")
+    @CommandCompletion("@players")
     public void onKickFromFaction(Player player, String username) {
         plugin.getFactionManager().getExecutor().kickFromFaction(player, username, new Promise() {
             @Override
@@ -654,6 +664,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("kick")
     @Description("Kick a player from a faction")
     @Syntax("<player> <faction>")
+    @CommandCompletion("@players")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     public void onKickFromFaction(Player player, String username, String factionName) {
         plugin.getFactionManager().getExecutor().kickFromFaction(player, factionName, username, new Promise() {
@@ -689,6 +700,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("promote")
     @Description("Promote a player to the next highest rank in your faction")
     @Syntax("<name>")
+    @CommandCompletion("@players")
     public void onFactionPromotePlayer(Player player, String promotedUsername) {
         plugin.getFactionManager().getExecutor().promotePlayer(player, promotedUsername, new Promise() {
             @Override
@@ -706,6 +718,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("demote")
     @Description("Demote a player to the next lowest rank in your faction")
     @Syntax("<name>")
+    @CommandCompletion("@players")
     public void onFactionDemotePlayer(Player player, String demotedUsername) {
         plugin.getFactionManager().getExecutor().demotePlayer(player, demotedUsername, new Promise() {
             @Override
@@ -774,6 +787,7 @@ public final class FactionCommand extends BaseCommand {
     @Description("Add tokens to a Faction's token balance")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @Syntax("<faction> <amount>")
+    @CommandCompletion("@pfactions")
     public void onAddTokens(Player player, String factionName, String amountName) {
         int amount;
 
