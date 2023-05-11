@@ -50,20 +50,15 @@ public final class SpawnListener implements Listener {
         final Location to = event.getTo();
 
         if (from.getWorld() != null && to != null && to.getWorld() != null) {
-            if (from.getWorld().getEnvironment().equals(to.getWorld().getEnvironment())) {
+            if (!from.getWorld().getEnvironment().equals(to.getWorld().getEnvironment())) {
                 final UUID uniqueId = player.getUniqueId();
                 final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
-                if (factionPlayer.hasTimer(ETimerType.PROTECTION) || factionPlayer.hasTimer(ETimerType.COMBAT)) {
+                if (factionPlayer != null && factionPlayer.hasTimer(ETimerType.PROTECTION) && to.getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
                     event.setCancelled(true);
 
-                    if (!recentlyWarned.contains(player.getUniqueId())) {
-                        if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
-                            player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_CTAG.getErrorDescription());
-                        } else if (factionPlayer.hasTimer(ETimerType.PROTECTION)) {
-                            player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_PVP_PROT.getErrorDescription());
-                        }
-
+                    if (!recentlyWarned.contains(uniqueId)) {
+                        player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_CHANGE_WORLDS_PVP_PROT.getErrorDescription());
                         recentlyWarned.add(uniqueId);
                         new Scheduler(plugin).sync(() -> recentlyWarned.remove(uniqueId)).delay(20L).run();
                     }
