@@ -64,47 +64,20 @@ public final class Claim implements IClaim, MongoDocument<Claim> {
             return false;
         }
 
-        // Add X
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), location.getZ()), false)) {
-            return true;
-        }
+        double minX = Math.min(cornerA.getX(), cornerB.getX());
+        double minZ = Math.min(cornerA.getZ(), cornerB.getZ());
+        double maxX = Math.max(cornerA.getX(), cornerB.getX());
+        double maxZ = Math.max(cornerA.getZ(), cornerB.getZ());
 
-        // Add Z
-        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() + buffer)), false)) {
-            return true;
-        }
+        minX -= buffer;
+        minZ -= buffer;
+        maxX += buffer;
+        maxZ += buffer;
 
-        // Subtract X
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), location.getZ()), false)) {
-            return true;
-        }
-
-        // Subtract Z
-        if (isInside(new BLocatable(location.getWorldName(), location.getX(), location.getY(), (location.getZ() - buffer)), false)) {
-            return true;
-        }
-
-        // Add X, Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() + buffer)), false)) {
-            return true;
-        }
-
-        // Subtract X, Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() - buffer)), false)) {
-            return true;
-        }
-
-        // Add X, Subtract Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() + buffer), location.getY(), (location.getZ() - buffer)), false)) {
-            return true;
-        }
-
-        // Subtract X, Add Z
-        if (isInside(new BLocatable(location.getWorldName(), (location.getX() - buffer), location.getY(), (location.getZ() + buffer)), false)) {
-            return true;
-        }
-
-        return false;
+        return new SimpleRegion(
+                new BLocatable(cornerA.getWorldName(), minX, location.getY(), minZ),
+                new BLocatable(cornerB.getWorldName(), maxX, location.getY(), maxZ))
+                .isInside(location, true);
     }
 
     /**
