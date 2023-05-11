@@ -29,6 +29,10 @@ import java.util.UUID;
 public record DeathbanListener(@Getter Factions plugin) implements Listener {
     @EventHandler (priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        if (!plugin.getConfiguration().isDeathbansEnabled() || !plugin.getConfiguration().isDeathbansStandalone()) {
+            return;
+        }
+
         final Player player = event.getEntity();
         final UUID uniqueId = player.getUniqueId();
         final ServerStateManager stateManager = plugin.getServerStateManager();
@@ -62,6 +66,10 @@ public record DeathbanListener(@Getter Factions plugin) implements Listener {
 
     @EventHandler (priority = EventPriority.MONITOR)
     public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
+        if (!plugin.getConfiguration().isDeathbansEnabled() || !plugin.getConfiguration().isDeathbansStandalone()) {
+            return;
+        }
+
         final CombatLogger logger = event.getLogger();
         final Location location = logger.getBukkitEntity().getLocation();
         final UUID uniqueId = logger.getOwnerId();
