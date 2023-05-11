@@ -88,6 +88,7 @@ deathbans:
   max_durations:
     sotw: 300
     normal: 86400
+    event: 900
   min_duration: 30
   life_use_delay: 60
   shop_url: "https://hcfactions.gg/shop"
