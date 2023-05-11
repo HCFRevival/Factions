@@ -506,6 +506,23 @@ public final class ClaimListener implements Listener {
     }
 
     /**
+     * Handles preventing leaf decay inside server claims
+     * @param event LeavesDecayEvent
+     */
+    @EventHandler
+    public void onBlockFade(LeavesDecayEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        if (plugin.getFactionManager().getFactionById(inside.getOwner()) instanceof ServerFaction) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
      * Prevents players from enderpearling in to claims they are not allowed to enter
      * @param event PlayerTeleportEvent
      */
