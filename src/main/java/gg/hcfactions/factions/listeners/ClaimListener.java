@@ -5,6 +5,8 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerChangeClaimEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -33,6 +35,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -380,11 +383,10 @@ public final class ClaimListener implements Listener {
      */
     @EventHandler
     public void onPlayerHungerChange(FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof final Player player)) {
             return;
         }
 
-        final Player player = (Player)event.getEntity();
         final FactionPlayer profile = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (profile == null || profile.getCurrentClaim() == null) {
@@ -470,7 +472,7 @@ public final class ClaimListener implements Listener {
      * @param event EntityExplodeEvent
      */
     @EventHandler
-    public void onEntityExlode(EntityExplodeEvent event) {
+    public void onEntityExplode(EntityExplodeEvent event) {
         final List<Block> toRemove = Lists.newArrayList();
 
         for (Block block : event.blockList()) {
@@ -556,10 +558,8 @@ public final class ClaimListener implements Listener {
 
                 event.setCancelled(true);
             }
-        } else if (owner instanceof ServerFaction) {
-            final ServerFaction sf = (ServerFaction)owner;
-            //final EventsAddon eventsAddon = (EventsAddon) plugin.getAddonManager().get(EventsAddon.class);
-            //final AresEvent aresEvent = eventsAddon.getManager().getEventByOwnerId(sf.getUniqueId());
+        } else if (owner instanceof final ServerFaction sf) {
+            final Optional<IEvent> eventQuery = plugin.getEventManager().getEvent(sf);
 
             if (profile.getTimer(ETimerType.COMBAT) != null && sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
@@ -579,14 +579,15 @@ public final class ClaimListener implements Listener {
                 event.setCancelled(true);
             }
 
-            /* if (aresEvent instanceof PalaceEvent) { TODO: Reimpl PalaceEvent
-                player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-                player.sendMessage(ChatColor.RED + "You can not enderpearl in Palace claims");
+            if (eventQuery.isPresent() && eventQuery.get() instanceof final PalaceEvent palaceEvent) {
+                if (palaceEvent.isActive()) {
+                    player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+                    player.sendMessage(ChatColor.RED + "You can not enderpearl in Palace claims");
 
-                profile.getTimers().remove(timer);
-
-                event.setCancelled(true);
-            } */
+                    profile.getTimers().remove(timer);
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 
