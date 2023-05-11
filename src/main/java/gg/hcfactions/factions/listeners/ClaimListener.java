@@ -17,6 +17,7 @@ import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import io.papermc.paper.event.entity.EntityMoveEvent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.*;
@@ -519,6 +520,28 @@ public final class ClaimListener implements Listener {
 
         if (plugin.getFactionManager().getFactionById(inside.getOwner()) instanceof ServerFaction) {
             event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents players from being pushed inside safezone claims
+     * @param event PlayerChangeClaimEvent
+     */
+    @EventHandler
+    public void onClaimChangeToggleCollision(PlayerChangeClaimEvent event) {
+        final Player player = event.getPlayer();
+
+        if (event.getClaimTo() != null) {
+            if (plugin.getFactionManager().getFactionById(event.getClaimTo().getOwner()) instanceof final ServerFaction sf) {
+                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    player.setCollidable(false);
+                    return;
+                }
+            }
+        }
+
+        if (!player.isCollidable()) {
+            player.setCollidable(true);
         }
     }
 
