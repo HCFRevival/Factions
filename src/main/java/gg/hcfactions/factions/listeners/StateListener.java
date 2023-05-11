@@ -35,6 +35,7 @@ public final class StateListener implements Listener {
         final int duration = event.getDeathbanDuration();
         final EServerState currentState = plugin.getServerStateManager().getCurrentState();
 
+        // TODO: Do we need this? Is this overwriting a value it shouldn't?
         if (currentState.equals(EServerState.SOTW) && duration > plugin.getConfiguration().getSotwMaxDeathbanDuration()) {
             event.setDeathbanDuration(plugin.getConfiguration().getSotwMaxDeathbanDuration());
         } else if (currentState.equals(EServerState.NORMAL) && duration > plugin.getConfiguration().getNormalMaxDeathbanDuration()) {
