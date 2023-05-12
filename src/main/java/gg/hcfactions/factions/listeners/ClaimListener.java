@@ -1,13 +1,18 @@
 package gg.hcfactions.factions.listeners;
 
 import com.google.common.collect.Lists;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerChangeClaimEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.message.FError;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
@@ -33,6 +38,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -93,20 +99,21 @@ public final class ClaimListener implements Listener {
     private boolean handleBlockModification(Cancellable cancellable, Player player, Block block) {
         final Claim claim = plugin.getClaimManager().getClaimAt(new BLocatable(block));
         final List<Claim> withinBuildBuffer = plugin.getClaimManager().getClaimsNearby(new PLocatable(player), true);
-        final boolean bypass = player.hasPermission("ares.factions.claim");
+        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
         if (claim == null && !withinBuildBuffer.isEmpty() && !bypass) {
-            final Claim insideBuffer = withinBuildBuffer.get(0);
-            final ServerFaction bufferFaction = plugin.getFactionManager().getServerFactionById(insideBuffer.getOwner());
+            for (Claim insideBuffer : withinBuildBuffer) {
+                final ServerFaction bufferFaction = plugin.getFactionManager().getServerFactionById(insideBuffer.getOwner());
 
-            if (bufferFaction != null) {
-                player.sendMessage(
-                        ChatColor.RED + "You can not edit terrain within " +
-                                ChatColor.BLUE + String.format("%.2f", bufferFaction.getBuildBuffer()) +
-                                " blocks" + ChatColor.RED + " of " + ChatColor.RESET + bufferFaction.getDisplayName());
+                if (bufferFaction != null) {
+                    player.sendMessage(
+                            ChatColor.RED + "You can not edit terrain within " +
+                                    ChatColor.BLUE + String.format("%.2f", (double)bufferFaction.getBuildBuffer()) +
+                                    " blocks" + ChatColor.RED + " of " + ChatColor.RESET + bufferFaction.getDisplayName());
 
-                cancellable.setCancelled(true);
-                return false;
+                    cancellable.setCancelled(true);
+                    return false;
+                }
             }
         }
 
@@ -380,11 +387,10 @@ public final class ClaimListener implements Listener {
      */
     @EventHandler
     public void onPlayerHungerChange(FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof final Player player)) {
             return;
         }
 
-        final Player player = (Player)event.getEntity();
         final FactionPlayer profile = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
 
         if (profile == null || profile.getCurrentClaim() == null) {
@@ -470,7 +476,7 @@ public final class ClaimListener implements Listener {
      * @param event EntityExplodeEvent
      */
     @EventHandler
-    public void onEntityExlode(EntityExplodeEvent event) {
+    public void onEntityExplode(EntityExplodeEvent event) {
         final List<Block> toRemove = Lists.newArrayList();
 
         for (Block block : event.blockList()) {
@@ -500,6 +506,45 @@ public final class ClaimListener implements Listener {
 
         if (inside != null || !insideBuildBuffer.isEmpty()) {
             event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Handles preventing leaf decay inside server claims
+     * @param event LeavesDecayEvent
+     */
+    @EventHandler
+    public void onBlockFade(LeavesDecayEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        if (plugin.getFactionManager().getFactionById(inside.getOwner()) instanceof ServerFaction) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents players from being pushed inside safezone claims
+     * @param event PlayerChangeClaimEvent
+     */
+    @EventHandler
+    public void onClaimChangeToggleCollision(PlayerChangeClaimEvent event) {
+        final Player player = event.getPlayer();
+
+        if (event.getClaimTo() != null) {
+            if (plugin.getFactionManager().getFactionById(event.getClaimTo().getOwner()) instanceof final ServerFaction sf) {
+                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    player.setCollidable(false);
+                    return;
+                }
+            }
+        }
+
+        if (!player.isCollidable()) {
+            player.setCollidable(true);
         }
     }
 
@@ -550,43 +595,43 @@ public final class ClaimListener implements Listener {
         if (owner instanceof PlayerFaction) {
             if (profile.getTimer(ETimerType.PROTECTION) != null) {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-                player.sendMessage(ChatColor.RED + "Your enderpearl landed in a claim you are not allowed to enter");
+                player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.getTimers().remove(timer);
+                profile.removeTimer(timer.getType(), true);
 
                 event.setCancelled(true);
             }
-        } else if (owner instanceof ServerFaction) {
-            final ServerFaction sf = (ServerFaction)owner;
-            //final EventsAddon eventsAddon = (EventsAddon) plugin.getAddonManager().get(EventsAddon.class);
-            //final AresEvent aresEvent = eventsAddon.getManager().getEventByOwnerId(sf.getUniqueId());
+        } else if (owner instanceof final ServerFaction sf) {
+            final Optional<IEvent> eventQuery = plugin.getEventManager().getEvent(sf);
 
             if (profile.getTimer(ETimerType.COMBAT) != null && sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-                player.sendMessage(ChatColor.RED + "Your enderpearl landed in a claim you are not allowed to enter");
+                player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.getTimers().remove(timer);
+                profile.removeTimer(timer.getType(), true);
 
                 event.setCancelled(true);
             }
 
             if (profile.getTimer(ETimerType.PROTECTION) != null && sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-                player.sendMessage(ChatColor.RED + "Your enderpearl landed in a claim you are not allowed to enter");
+                player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.getTimers().remove(timer);
+                profile.removeTimer(timer.getType(), true);
 
                 event.setCancelled(true);
             }
 
-            /* if (aresEvent instanceof PalaceEvent) { TODO: Reimpl PalaceEvent
-                player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-                player.sendMessage(ChatColor.RED + "You can not enderpearl in Palace claims");
+            if (eventQuery.isPresent() && eventQuery.get() instanceof final PalaceEvent palaceEvent) {
+                if (palaceEvent.isActive()) {
+                    player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+                    player.sendMessage(ChatColor.RED + "You can not enderpearl in Palace claims");
 
-                profile.getTimers().remove(timer);
+                    profile.removeTimer(timer.getType(), true);
 
-                event.setCancelled(true);
-            } */
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 

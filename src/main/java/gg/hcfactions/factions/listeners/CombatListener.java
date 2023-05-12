@@ -37,7 +37,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
-import java.util.List;
 import java.util.Objects;
 
 public record CombatListener(@Getter Factions plugin) implements Listener {
@@ -199,6 +198,10 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (cloud == null || cloud.getBasePotionData().getType().getEffectType() == null) {
+            return;
+        }
+
         if (!cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.HARM) &&
                 !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.WEAKNESS) &&
                 !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW) &&
@@ -255,7 +258,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
      *
      * @param event PlayerSplashPlayerEvent
      */
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSplashPlayer(PlayerSplashPlayerEvent event) {
         final Player attacker = event.getDamager();
         final Player attacked = event.getDamaged();
@@ -270,7 +273,8 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             if (effect.getType().equals(PotionEffectType.POISON) ||
                     effect.getType().equals(PotionEffectType.SLOW) ||
                     effect.getType().equals(PotionEffectType.WEAKNESS) ||
-                    effect.getType().equals(PotionEffectType.HARM)) {
+                    effect.getType().equals(PotionEffectType.HARM) ||
+                    effect.getType().equals(PotionEffectType.SLOW_FALLING)) {
                 isDebuff = true;
                 break;
             }

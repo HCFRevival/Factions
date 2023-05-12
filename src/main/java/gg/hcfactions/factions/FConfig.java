@@ -83,6 +83,7 @@ public final class FConfig {
     // deathbans
     @Getter public boolean deathbansEnabled;
     @Getter public boolean deathbansStandalone;
+    @Getter public int eventDeathbanDuration;
     @Getter public int sotwMaxDeathbanDuration;
     @Getter public int normalMaxDeathbanDuration;
     @Getter public int minDeathbanDuration;
@@ -115,6 +116,7 @@ public final class FConfig {
         return new DeathbanConfig(
                 deathbansEnabled,
                 deathbansStandalone,
+                eventDeathbanDuration,
                 sotwMaxDeathbanDuration,
                 normalMaxDeathbanDuration,
                 minDeathbanDuration,
@@ -196,6 +198,7 @@ public final class FConfig {
 
         deathbansEnabled = conf.getBoolean("deathbans.enabled");
         deathbansStandalone = conf.getBoolean("deathbans.standalone");
+        eventDeathbanDuration = conf.getInt("deathbans.max_durations.event");
         sotwMaxDeathbanDuration = conf.getInt("deathbans.max_durations.sotw");
         normalMaxDeathbanDuration = conf.getInt("deathbans.max_durations.normal");
         minDeathbanDuration = conf.getInt("deathbans.min_duration");

@@ -36,10 +36,12 @@ public final class FactionUtil {
                 ? plugin.getConfiguration().getSotwProtectionDuration()
                 : plugin.getConfiguration().getNormalProtectionDuration();
 
+        if (factionPlayer.isPreferScoreboardDisplay() && factionPlayer.getScoreboard() != null) {
+            factionPlayer.getTimers().forEach(t -> factionPlayer.getScoreboard().removeLine(t.getType().getScoreboardPosition()));
+        }
+
         factionPlayer.getTimers().clear();
         factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
-
-        player.teleport(plugin.getConfiguration().getOverworldSpawn());
 
         Players.resetHealth(player);
     }

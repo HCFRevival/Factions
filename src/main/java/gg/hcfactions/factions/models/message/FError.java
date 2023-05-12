@@ -13,6 +13,7 @@ public enum FError {
     P_CANT_PERFORM_SELF("You can not perform this action to yourself"),
     P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"),
     P_CAN_NOT_CHANGE_WORLDS_PVP_PROT("You can not change worlds while you have PvP protection"),
+    P_CAN_NOT_PEARL_IN_CLAIM("Your enderpearl landed in a claim you are not allowed to enter"),
     P_CAN_NOT_ATTACK_PVP_PROT("You can not attack others while you have PvP protection"),
     P_CAN_NOT_ATTACK_PVP_PROT_OTHER("This player has PvP protection"),
     P_CAN_NOT_PERFORM_PVP_PROT("You can not perform this action with PvP Protection"),

@@ -17,6 +17,7 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -30,6 +31,8 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public record TimerListener(@Getter Factions plugin) implements Listener {
     /**
@@ -157,9 +160,26 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      *
      * @param event PlayerSplashPlayerEvent
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onCombatTagSplash(PlayerSplashPlayerEvent event) {
         if (event.isCancelled()) {
+            return;
+        }
+
+        boolean isDebuff = false;
+
+        for (PotionEffect effect : event.getPotion().getEffects()) {
+            if (effect.getType().equals(PotionEffectType.POISON) ||
+                    effect.getType().equals(PotionEffectType.SLOW) ||
+                    effect.getType().equals(PotionEffectType.WEAKNESS) ||
+                    effect.getType().equals(PotionEffectType.HARM) ||
+                    effect.getType().equals(PotionEffectType.SLOW_FALLING)) {
+                isDebuff = true;
+                break;
+            }
+        }
+
+        if (!isDebuff) {
             return;
         }
 
@@ -171,10 +191,26 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      *
      * @param event PlayerSplashPlayerEvent
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onCombatTagSplash(PlayerLingeringSplashEvent event) {
         if (event.isCancelled()) {
             return;
+        }
+
+        final AreaEffectCloud cloud = event.getCloud();
+
+        if (cloud == null || cloud.getBasePotionData().getType().getEffectType() == null) {
+            return;
+        }
+
+        if (!cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.HARM) &&
+                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.WEAKNESS) &&
+                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW) &&
+                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.POISON) &&
+                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW_FALLING)) {
+
+            return;
+
         }
 
         handleAttack(event.getDamager(), event.getDamaged());
