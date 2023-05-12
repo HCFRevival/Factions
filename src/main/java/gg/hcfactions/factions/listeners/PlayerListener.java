@@ -125,6 +125,10 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
 
     @EventHandler /* Clean player when they click the respawn button */
     public void onRespawn(PlayerRespawnEvent event) {
+        if (event.getRespawnReason().equals(PlayerRespawnEvent.RespawnReason.END_PORTAL)) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         FactionUtil.cleanPlayer(plugin, factionPlayer);
