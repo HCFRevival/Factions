@@ -176,10 +176,14 @@ public final class ClaimListener implements Listener {
      * Handles teleporting in and out of claims
      * @param event PlayerTeleportEvent
      */
-    @EventHandler
+    @EventHandler (priority = EventPriority.MONITOR)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         // We handle Ender Pearl teleportation above
         if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)) {
+            return;
+        }
+
+        if (event.isCancelled()) {
             return;
         }
 

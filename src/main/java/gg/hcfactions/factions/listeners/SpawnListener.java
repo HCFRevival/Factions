@@ -14,7 +14,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.Set;
@@ -27,15 +27,6 @@ public final class SpawnListener implements Listener {
     public SpawnListener(Factions plugin) {
         this.plugin = plugin;
         this.recentlyWarned = Sets.newConcurrentHashSet();
-    }
-
-    /**
-     * Returns true if the provided player has been warned about changing worlds recently
-     * @param player Player
-     * @return True if the player has been warned recently
-     */
-    private boolean hasBeenRecentlyWarned(Player player) {
-        return recentlyWarned.contains(player.getUniqueId());
     }
 
     /**
@@ -54,7 +45,7 @@ public final class SpawnListener implements Listener {
                 final UUID uniqueId = player.getUniqueId();
                 final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
-                if (factionPlayer != null && factionPlayer.hasTimer(ETimerType.PROTECTION) && to.getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
+                if (factionPlayer != null && factionPlayer.hasTimer(ETimerType.PROTECTION)) {
                     event.setCancelled(true);
 
                     if (!recentlyWarned.contains(uniqueId)) {
@@ -67,20 +58,15 @@ public final class SpawnListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-        final Player player = event.getPlayer();
-        final World from = event.getFrom();
-
-        // teleporting from the end back to overworld
-        if (from.getEnvironment().equals(World.Environment.THE_END)) {
-            new Scheduler(plugin).sync(() -> player.teleport(plugin.getConfiguration().getEndExit())).run();
+    @EventHandler /* Teleports player to end exit */
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        if (event.getRespawnReason().equals(PlayerRespawnEvent.RespawnReason.END_PORTAL)) {
+            event.setRespawnLocation(plugin.getConfiguration().getEndExit());
         }
     }
 
-    @EventHandler
+    @EventHandler /* Teleports player to end spawn */
     public void onTeleportToSpawn(PlayerTeleportEvent event) {
-        final Player player = event.getPlayer();
         final Location from = event.getFrom();
         final Location to = event.getTo();
 
@@ -88,10 +74,13 @@ public final class SpawnListener implements Listener {
             return;
         }
 
+        if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.COMMAND) || event.getCause().equals(PlayerTeleportEvent.TeleportCause.PLUGIN)) {
+            return;
+        }
+
         // teleporting in to the end
         if (to.getWorld().getEnvironment().equals(World.Environment.THE_END) && !from.getWorld().getEnvironment().equals(World.Environment.THE_END)) {
             event.setTo(plugin.getConfiguration().getEndSpawn());
-            return;
         }
     }
 }
