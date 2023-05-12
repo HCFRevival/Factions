@@ -106,7 +106,7 @@ public interface IClass {
                 player.removePotionEffect(effect);
             }
 
-            player.addPotionEffect(new PotionEffect(effect, Integer.MAX_VALUE, level));
+            player.addPotionEffect(new PotionEffect(effect, PotionEffect.INFINITE_DURATION, level));
         });
 
         getActivePlayers().add(player.getUniqueId());
