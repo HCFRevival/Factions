@@ -6,7 +6,6 @@ import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
-import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.logger.impl.CombatLogger;
@@ -29,10 +28,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityCombustByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
@@ -73,32 +69,28 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (attackerProfile.getCurrentClaim() != null) {
-            final Claim claim = attackerProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        final Claim attackerClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacker));
+        final Claim attackedClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacked));
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
+        if (attackerClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackerClaim.getOwner());
 
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    FMessage.printCanNotFightInClaim(attacker, sf.getDisplayName());
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
                     event.setCancelled(true);
                     return;
                 }
             }
         }
 
-        if (attackedProfile.getCurrentClaim() != null) {
-            final Claim claim = attackedProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        if (attackedClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackedClaim.getOwner());
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
-
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    FMessage.printCanNotFightInClaim(attacker, sf.getDisplayName());
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
                     event.setCancelled(true);
-                    return;
                 }
             }
         }
@@ -118,19 +110,15 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onEntityCombustByEntity(EntityCombustByEntityEvent event) {
-        if (!(event.getCombuster() instanceof Projectile) || !(event.getEntity() instanceof Player)) {
+        if (!(event.getCombuster() instanceof final Projectile projectile) || !(event.getEntity() instanceof final Player attacked)) {
             return;
         }
 
-        final Player attacked = (Player) event.getEntity();
-        final Projectile projectile = (Projectile) event.getCombuster();
         final ProjectileSource source = projectile.getShooter();
 
-        if (!(source instanceof Player)) {
+        if (!(source instanceof final Player attacker)) {
             return;
         }
-
-        final Player attacker = (Player) source;
 
         if (attacker.getUniqueId().equals(attacked.getUniqueId())) {
             return;
@@ -153,30 +141,28 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (attackerProfile.getCurrentClaim() != null) {
-            final Claim claim = attackerProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        final Claim attackerClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacker));
+        final Claim attackedClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacked));
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
+        if (attackerClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackerClaim.getOwner());
 
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
                     event.setCancelled(true);
                     return;
                 }
             }
         }
 
-        if (attackedProfile.getCurrentClaim() != null) {
-            final Claim claim = attackedProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        if (attackedClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackedClaim.getOwner());
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
-
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
                     event.setCancelled(true);
-                    return;
                 }
             }
         }
@@ -207,9 +193,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                 !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW) &&
                 !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.POISON) &&
                 !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW_FALLING)) {
-
             return;
-
         }
 
         final FactionPlayer attackerProfile = (FactionPlayer) plugin.getPlayerManager().getPlayer(attacker.getUniqueId());
@@ -225,28 +209,25 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (attackerProfile.getCurrentClaim() != null) {
-            final Claim claim = attackerProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        final Claim attackerClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacker));
+        final Claim attackedClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacked));
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
+        if (attackerClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackerClaim.getOwner());
 
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
                     return;
                 }
             }
         }
 
-        if (attackedProfile.getCurrentClaim() != null) {
-            final Claim claim = attackedProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        if (attackedClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackedClaim.getOwner());
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) owner;
-
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     event.setCancelled(true);
                 }
             }
@@ -297,24 +278,27 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (attackerProfile.getCurrentClaim() != null) {
-            final Claim claim = attackerProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        final Claim attackerClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacker));
+        final Claim attackedClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacked));
 
-            if (owner instanceof final ServerFaction sf) {
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+        if (attackerClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackerClaim.getOwner());
+
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
                     event.setCancelled(true);
                     return;
                 }
             }
         }
 
-        if (attackedProfile.getCurrentClaim() != null) {
-            final Claim claim = attackedProfile.getCurrentClaim();
-            final IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+        if (attackedClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackedClaim.getOwner());
 
-            if (owner instanceof final ServerFaction sf) {
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+            if (owner != null) {
+                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
                     event.setCancelled(true);
                 }
             }
@@ -343,10 +327,10 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         }
 
         if (factionPlayer.getCurrentClaim() != null) {
-            final IFaction faction = plugin.getFactionManager().getFactionById(factionPlayer.getCurrentClaim().getOwner());
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(factionPlayer.getCurrentClaim().getOwner());
 
-            if (faction instanceof ServerFaction && ((ServerFaction)faction).getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                player.sendMessage(ChatColor.RED + FError.P_CAN_NOT_ATTACK_IN_SAFEZONE.getErrorDescription());
+            if (owner != null && owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                FMessage.printCanNotFightInClaim(player, owner.getDisplayName());
                 event.setCancelled(true);
                 return;
             }
@@ -526,16 +510,12 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                 return;
             }
 
-            if (reason.equals(EntityDamageEvent.DamageCause.PROJECTILE) && slain.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-                final EntityDamageByEntityEvent pveEvent = (EntityDamageByEntityEvent) slain.getLastDamageCause();
+            if (reason.equals(EntityDamageEvent.DamageCause.PROJECTILE) && slain.getLastDamageCause() instanceof final EntityDamageByEntityEvent pveEvent) {
                 final Projectile projectile = (Projectile) pveEvent.getDamager();
 
-                if (projectile.getShooter() instanceof LivingEntity) {
-                    final LivingEntity shooter = (LivingEntity) projectile.getShooter();
+                if (projectile.getShooter() instanceof final LivingEntity shooter) {
                     final String distance = String.format("%.2f", shooter.getLocation().distance(slain.getLocation()));
-
                     event.setDeathMessage(prefix + " " + slainUsername + cA + " was shot and killed by " + killerUsername + cA + " from a distance of " + cB + distance + " blocks");
-
                     return;
                 }
             }
