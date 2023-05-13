@@ -7,6 +7,7 @@ import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IConsumeable;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.potion.PotionEffectType;
 
@@ -27,6 +28,8 @@ public final class Diver implements IClass {
     @Getter public Set<UUID> activePlayers;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;
     @Getter public List<IConsumeable> consumables;
+    @Getter @Setter public double damageMultiplier;
+    @Getter @Setter public double minimumRange;
 
     public Diver(ClassManager manager) {
         this.manager = manager;
@@ -34,13 +37,17 @@ public final class Diver implements IClass {
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
         this.consumables = Lists.newArrayList();
+        this.damageMultiplier = 3.0;
+        this.minimumRange = 10.0;
     }
 
-    public Diver(ClassManager manager, int warmup) {
+    public Diver(ClassManager manager, int warmup, double damageMultiplier, double minimumRange) {
         this.manager = manager;
         this.warmup = warmup;
         this.activePlayers = Sets.newConcurrentHashSet();
         this.passiveEffects = Maps.newHashMap();
         this.consumables = Lists.newArrayList();
+        this.damageMultiplier = damageMultiplier;
+        this.minimumRange = minimumRange;
     }
 }
