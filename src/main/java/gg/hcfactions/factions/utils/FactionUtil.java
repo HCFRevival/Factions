@@ -37,7 +37,10 @@ public final class FactionUtil {
                 : plugin.getConfiguration().getNormalProtectionDuration();
 
         factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType(), true));
-        factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
+
+        if (protDuration > 0) {
+            factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
+        }
 
         Players.resetHealth(player);
     }
