@@ -445,6 +445,11 @@ public final class ClaimListener implements Listener {
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         final Claim inside = plugin.getClaimManager().getClaimAt(new PLocatable(event.getEntity()));
 
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.COMMAND)
+                || event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)) {
+            return;
+        }
+
         if (inside != null) {
             final ServerFaction faction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
