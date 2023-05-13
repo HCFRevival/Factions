@@ -53,6 +53,7 @@ public final class KOTHSession implements IEventSession {
     public ImmutableMap<UUID, Integer> getSortedLeaderboard() {
         final List<Map.Entry<UUID, Integer>> collected = new LinkedList<>(leaderboard.entrySet());
         collected.sort(Map.Entry.comparingByValue());
+        Collections.reverse(collected);
 
         final Map<UUID, Integer> sorted = Maps.newLinkedHashMap();
         collected.forEach(entry -> sorted.put(entry.getKey(), entry.getValue()));
