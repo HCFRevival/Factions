@@ -95,6 +95,7 @@ deathbans:
 
 scoreboard:
   title: '&6&lHCFRevival &c[Map #]'
+  footer: '&c&lplay.hcfrevival.net'
 
 stats:
   map_number: 0.5

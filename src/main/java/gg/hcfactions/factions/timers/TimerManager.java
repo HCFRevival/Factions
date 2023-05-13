@@ -196,6 +196,8 @@ public final class TimerManager implements IManager {
         }
 
         factionPlayer.getScoreboard().setLine(0, SPACER);
+        factionPlayer.getScoreboard().setLine(61, ChatColor.RESET + " ");
+        factionPlayer.getScoreboard().setLine(62, plugin.getConfiguration().getScoreboardFooter());
         factionPlayer.getScoreboard().setLine(63, SPACER + ChatColor.RESET);
     }
 }
