@@ -1733,15 +1733,14 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
         if (insideClaim != null) {
-            final IFaction insideFaction = manager.getFactionById(insideClaim.getUniqueId());
+            final IFaction insideFaction = manager.getFactionById(insideClaim.getOwner());
 
             if (insideFaction != null) {
-                if (insideFaction instanceof ServerFaction) {
-                    final ServerFaction sf = (ServerFaction) insideFaction;
-
+                if (insideFaction instanceof final ServerFaction sf) {
                     if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                         Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
                         player.sendMessage(FMessage.T_HOME_COMPLETE);
+                        return;
                     } else if (!bypass) {
                         promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
                         return;
