@@ -88,7 +88,12 @@ public final class KOTHTickingTask {
                         event.getSession().getTimer().setFrozen(false);
                         event.getSession().getTimer().setExpire(Time.now() + (event.getSession().getTimerDuration() * 1000L));
                         event.getSession().setCapturingFaction(f);
-                        FMessage.broadcastCaptureEventMessage(event.getDisplayName() + FMessage.LAYER_1 + " is being controlled by " + FMessage.LAYER_2 + f.getName());
+
+                        if (event.getSession().getNextNotificationTime() <= Time.now()) {
+                            FMessage.broadcastCaptureEventMessage(event.getDisplayName() + FMessage.LAYER_1 + " is being controlled by " + FMessage.LAYER_2 + f.getName());
+                        }
+
+                        event.getSession().setNextNotificationTime(Time.now() + 5000L);
                     });
                 }
             }
