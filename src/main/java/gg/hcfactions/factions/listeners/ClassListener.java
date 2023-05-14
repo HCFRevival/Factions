@@ -398,7 +398,6 @@ public final class ClassListener implements Listener {
         final double dist = locA.distance(locB);
 
         if (dist < diverClass.getMinimumRange()) {
-            Bukkit.broadcastMessage(dist + " < " + diverClass.getMinimumRange());
             return;
         }
 

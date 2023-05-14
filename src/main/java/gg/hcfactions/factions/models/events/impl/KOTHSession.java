@@ -11,7 +11,6 @@ import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.util.Time;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.*;
@@ -70,7 +69,7 @@ public final class KOTHSession implements IEventSession {
 
         if (nextNotificationTime <= Time.now()) {
             FMessage.broadcastCaptureEventMessage(event.getDisplayName() + FMessage.LAYER_1 + " is being contested by " + FMessage.LAYER_2 + Joiner.on(", ").join(names));
-            nextNotificationTime = Time.now() + (5 * 1000L);
+            nextNotificationTime = (Time.now() + 5000L);
         }
     }
 
@@ -85,7 +84,7 @@ public final class KOTHSession implements IEventSession {
 
         if (nextNotificationTime <= Time.now()) {
             FMessage.broadcastCaptureEventMessage(event.getDisplayName() + FMessage.LAYER_1 + " is being controlled by " + FMessage.LAYER_2 + capturingFaction.getName());
-            nextNotificationTime = Time.now() + (5 * 1000L);
+            nextNotificationTime = (Time.now() + 5000L);
         }
     }
 
@@ -98,7 +97,7 @@ public final class KOTHSession implements IEventSession {
 
         if (nextNotificationTime <= Time.now()) {
             FMessage.broadcastCaptureEventMessage(event.getDisplayName() + FMessage.LAYER_1 + " has been reset");
-            nextNotificationTime = Time.now() + (5 * 1000L);
+            nextNotificationTime = (Time.now() + 5000L);
         }
     }
 
