@@ -2,6 +2,7 @@ package gg.hcfactions.factions.cmd;
 
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
@@ -110,6 +111,44 @@ public class TimerCommand extends BaseCommand {
         }
 
         fp.finishTimer(timerType);
+    }
+
+    @CommandAlias("clearcd")
+    @Description("Clear all class cooldowns")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("[player]")
+    @CommandCompletion("@players")
+    public void onClearCooldowns(Player player, @Optional String username) {
+        if (username != null) {
+            final Player otherPlayer = Bukkit.getPlayer(username);
+
+            if (otherPlayer == null) {
+                player.sendMessage(ChatColor.RED + "Player not found");
+                return;
+            }
+
+            final IClass playerClass = plugin.getClassManager().getCurrentClass(otherPlayer);
+
+            if (playerClass == null) {
+                player.sendMessage(ChatColor.RED + "Player does not have an active class");
+                return;
+            }
+
+            playerClass.getConsumables().forEach(consumeable -> consumeable.getCooldowns().remove(otherPlayer.getUniqueId()));
+            player.sendMessage(ChatColor.GREEN + "Cleared class cooldowns for " + otherPlayer.getName());
+            otherPlayer.sendMessage(ChatColor.YELLOW + "Your class cooldowns have been cleared by " + ChatColor.BLUE + player.getName());
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (playerClass == null) {
+            player.sendMessage(ChatColor.RED + "You do not have an active class");
+            return;
+        }
+
+        playerClass.getConsumables().forEach(consumable -> consumable.getCooldowns().remove(player.getUniqueId()));
+        player.sendMessage(ChatColor.YELLOW + "Your class cooldowns have been cleared");
     }
 
     @CommandAlias("togglescoreboard")
