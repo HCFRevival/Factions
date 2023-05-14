@@ -176,10 +176,14 @@ public final class ClaimListener implements Listener {
      * Handles teleporting in and out of claims
      * @param event PlayerTeleportEvent
      */
-    @EventHandler
+    @EventHandler (priority = EventPriority.MONITOR)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         // We handle Ender Pearl teleportation above
         if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)) {
+            return;
+        }
+
+        if (event.isCancelled()) {
             return;
         }
 
@@ -440,6 +444,11 @@ public final class ClaimListener implements Listener {
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         final Claim inside = plugin.getClaimManager().getClaimAt(new PLocatable(event.getEntity()));
+
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.COMMAND)
+                || event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)) {
+            return;
+        }
 
         if (inside != null) {
             final ServerFaction faction = plugin.getFactionManager().getServerFactionById(inside.getOwner());

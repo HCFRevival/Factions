@@ -68,6 +68,11 @@ data:
         cooldown: 45
         application: 'INDIVIDUAL'
   diver:
+    damage_values:
+      # Damage multiplier if minimum distance is met
+      damage_multiplier: 2.0
+      # Minimum distance to apply damage multiplier
+      minimum_distance: 10.0
     warmup: 30
     passive:
       WATER_BREATHING: 1

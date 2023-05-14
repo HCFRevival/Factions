@@ -36,8 +36,11 @@ public final class FactionUtil {
                 ? plugin.getConfiguration().getSotwProtectionDuration()
                 : plugin.getConfiguration().getNormalProtectionDuration();
 
-        factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType(), factionPlayer.isPreferScoreboardDisplay()));
-        factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
+        factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType(), true));
+
+        if (protDuration > 0) {
+            factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
+        }
 
         Players.resetHealth(player);
     }

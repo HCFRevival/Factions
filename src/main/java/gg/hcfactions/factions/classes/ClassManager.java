@@ -78,7 +78,9 @@ public final class ClassManager implements IManager {
             }
 
             else if (className.equalsIgnoreCase("diver")) {
-                playerClass = new Diver(this, warmup);
+                final double damageMultiplier = conf.getDouble(path + "damage_values.damage_multiplier");
+                final double minimumDistance = conf.getDouble(path + "damage_values.minimum_distance");
+                playerClass = new Diver(this, warmup, damageMultiplier, minimumDistance);
             }
 
             else if (className.equalsIgnoreCase("miner")) {

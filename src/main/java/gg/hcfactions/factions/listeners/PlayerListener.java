@@ -83,8 +83,15 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
 
         if (!player.hasPlayedBefore() || factionPlayer.isResetOnJoin()) {
             FactionUtil.cleanPlayer(plugin, factionPlayer);
-            factionPlayer.setResetOnJoin(false);
             player.teleport(plugin.getConfiguration().getOverworldSpawn());
+
+            if (factionPlayer.isResetOnJoin()) {
+                factionPlayer.setResetOnJoin(false);
+
+                // additional inventory wipe to prevent combat logger item dupe
+                player.getInventory().clear();
+                player.getInventory().setArmorContents(null);
+            }
         }
 
         factionPlayer.setupScoreboard();
@@ -125,6 +132,10 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
 
     @EventHandler /* Clean player when they click the respawn button */
     public void onRespawn(PlayerRespawnEvent event) {
+        if (event.getRespawnReason().equals(PlayerRespawnEvent.RespawnReason.END_PORTAL)) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         FactionUtil.cleanPlayer(plugin, factionPlayer);

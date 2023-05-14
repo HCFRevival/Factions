@@ -302,7 +302,7 @@ public final class EventManager implements IManager {
 
             if (kothEvent instanceof final PalaceEvent palaceEvent) {
                 conf.set(key + "restock_interval", palaceEvent.getRestockInterval());
-                conf.set(key + "capturing_faction", palaceEvent.getCapturingFaction().toString());
+                conf.set(key + "capturing_faction", palaceEvent.getCapturingFaction() != null ? palaceEvent.getCapturingFaction().toString() : null);
 
                 if (!palaceEvent.getLootUnlockTimes().isEmpty()) {
                     palaceEvent.getLootUnlockTimes().forEach((tier, timestamp) -> conf.set(key + "unlock_times." + tier.name, timestamp));

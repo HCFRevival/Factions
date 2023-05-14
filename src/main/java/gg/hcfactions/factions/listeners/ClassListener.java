@@ -8,6 +8,7 @@ import gg.hcfactions.factions.models.classes.EPlayerHand;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IConsumeable;
 import gg.hcfactions.factions.models.classes.impl.Archer;
+import gg.hcfactions.factions.models.classes.impl.Diver;
 import gg.hcfactions.factions.models.classes.impl.Rogue;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
@@ -22,6 +23,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -346,5 +348,79 @@ public final class ClassListener implements Listener {
                 }).delay(rogue.getBackstabCooldown() * 20L).run();
             }).run();
         }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onTridentLaunch(ProjectileLaunchEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof Trident)) {
+            return;
+        }
+
+        if (!(event.getEntity().getShooter() instanceof final Player player)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof Diver)) {
+            player.sendMessage(ChatColor.RED + "Tridents can only be used by the Diver class");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onTridentHitPlayer(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof final Trident trident)) {
+            return;
+        }
+
+        if (!(trident.getShooter() instanceof final Player attacker)) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final LivingEntity attacked)) {
+            return;
+        }
+
+        final double pre = event.getDamage();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(attacker);
+
+        if (!(playerClass instanceof final Diver diverClass)) {
+            return;
+        }
+
+        final Location locA = attacker.getLocation().clone();
+        final Location locB = attacked.getLocation().clone();
+        final double dist = locA.distance(locB);
+
+        if (dist < diverClass.getMinimumRange()) {
+            Bukkit.broadcastMessage(dist + " < " + diverClass.getMinimumRange());
+            return;
+        }
+
+        event.setDamage(pre*diverClass.getDamageMultiplier());
+
+        if (attacked instanceof final Player playerDamaged) {
+            playerDamaged.sendMessage(ChatColor.RED + "You have been pierced by a " + ChatColor.DARK_RED + "" + ChatColor.BOLD + "TRIDENT!");
+        }
+
+        final double healthPre = attacked.getHealth();
+        new Scheduler(plugin).sync(() -> {
+            final double healthPost = attacked.getHealth();
+            final double diff = (healthPre - healthPost) / 2;
+
+            final String name = attacked.hasPotionEffect(PotionEffectType.INVISIBILITY) ? ChatColor.GRAY + "? ? ?" :
+                    (attacked instanceof Player) ? ChatColor.GOLD + attacked.getName() :
+                            ChatColor.GOLD + WordUtils.capitalize(attacked.getType().name().toLowerCase().replace("_", " "));
+
+            attacker.sendMessage(ChatColor.YELLOW + "Your trident has" + ChatColor.RED + " pierced " + name +
+                    ChatColor.YELLOW + " from a distance of " + ChatColor.BLUE + String.format("%.2f", dist) + " blocks " +
+                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + ChatColor.YELLOW + ")");
+
+        }).delay(1L).run();
     }
 }

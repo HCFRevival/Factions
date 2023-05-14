@@ -92,6 +92,7 @@ public final class FConfig {
 
     // display stuffs
     @Getter public String scoreboardTitle;
+    @Getter public String scoreboardFooter;
 
     // server states
     @Getter public EServerState initialServerState;
@@ -195,6 +196,7 @@ public final class FConfig {
         diverClassLimit = conf.getInt("classes.limits.diver");
 
         scoreboardTitle = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString("scoreboard.title")));
+        scoreboardFooter = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString("scoreboard.footer")));
 
         deathbansEnabled = conf.getBoolean("deathbans.enabled");
         deathbansStandalone = conf.getBoolean("deathbans.standalone");
