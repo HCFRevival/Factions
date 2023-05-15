@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.models.events.impl.types;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.KOTHCaptureEvent;
 import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
 import gg.hcfactions.factions.models.events.impl.CaptureRegion;
@@ -10,6 +11,7 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.List;
@@ -57,6 +59,8 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
         });
 
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
+
+        Bukkit.getPluginManager().callEvent(new KOTHCaptureEvent(this, faction));
     }
 
     @Override
