@@ -178,11 +178,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        // We handle Ender Pearl teleportation above
-        if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)) {
-            return;
-        }
-
         if (event.isCancelled()) {
             return;
         }
