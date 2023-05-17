@@ -23,6 +23,7 @@ factions:
       rouge: 2,
       miner: 30
   power:
+    max_power: 6.0
     player_power_value: 0.4
     power_tick_interval: 60
     power_tick_player_modifier: 1

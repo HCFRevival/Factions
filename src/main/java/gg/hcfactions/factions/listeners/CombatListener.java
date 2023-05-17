@@ -388,7 +388,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             Bukkit.getPluginManager().callEvent(memberDeathEvent);
 
             if (!(plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1) || plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2))) {
-                faction.setDtr(faction.getDtr() - memberDeathEvent.getSubtractedDTR());
+                faction.setDtr(Math.max((faction.getDtr() - memberDeathEvent.getSubtractedDTR()), -0.99));
                 faction.addTimer(new FTimer(ETimerType.FREEZE, memberDeathEvent.getFreezeDuration()));
             }
         }
@@ -461,7 +461,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             Bukkit.getPluginManager().callEvent(memberDeathEvent);
 
             if (serverStateManager.getCurrentState().equals(EServerState.SOTW) || serverStateManager.getCurrentState().equals(EServerState.NORMAL)) {
-                faction.setDtr(faction.getDtr() - memberDeathEvent.getSubtractedDTR());
+                faction.setDtr(Math.max((faction.getDtr() - memberDeathEvent.getSubtractedDTR()), -0.99));
                 faction.addTimer(new FTimer(ETimerType.FREEZE, memberDeathEvent.getFreezeDuration()));
             }
         }

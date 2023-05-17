@@ -35,6 +35,7 @@ public final class FConfig {
 
     // faction power
     @Getter public double playerPowerValue;
+    @Getter public double powerCap;
     @Getter public int powerTickInterval;
     @Getter public int powerTickPlayerModifier;
     @Getter public boolean reducePowerLossInNether;
@@ -157,6 +158,7 @@ public final class FConfig {
         maxFactionSize = conf.getInt("factions.limits.max_faction_size");
 
         playerPowerValue = conf.getDouble("factions.power.player_power_value");
+        powerCap = conf.getDouble("factions.power.max_power");
         powerTickInterval = conf.getInt("factions.power.power_tick_interval");
         powerTickPlayerModifier = conf.getInt("factions.power_tick_player_modifier");
         reducePowerLossInNether = conf.getBoolean("factions.power.power_loss_reductions.nether");

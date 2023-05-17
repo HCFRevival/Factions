@@ -19,6 +19,7 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.utils.Colors;
+import joptsimple.internal.Strings;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang3.StringUtils;
@@ -269,13 +270,16 @@ public final class FMessage {
         // ◼⚠⬛⬆⬇▴▶▾
         // ⬆⬇➡
         final AccountService acs = (AccountService) plugin.getService(AccountService.class);
-        final String spacer = ChatColor.RESET + " " + LAYER_1 + " - " + ChatColor.RESET;
+        final String spacer = LAYER_1 + " - " + ChatColor.RESET;
         final boolean access = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
-        if (faction instanceof ServerFaction) {
-            final ServerFaction serverFaction = (ServerFaction)faction;
+        if (faction instanceof final ServerFaction serverFaction) {
+            player.sendMessage(
+                    LAYER_1 + "" + ChatColor.STRIKETHROUGH + Strings.repeat('-', 16)
+                            + LAYER_2 + "[ " + INFO + serverFaction.getDisplayName() + LAYER_2 + " ]"
+                            + LAYER_1 + "" + ChatColor.STRIKETHROUGH + Strings.repeat('-', 16)
+            );
 
-            player.sendMessage(LAYER_1 + "------------" + LAYER_2 + "[ " + INFO + serverFaction.getDisplayName() + LAYER_2 + " ]" + LAYER_1 + "------------");
             player.sendMessage(spacer + ChatColor.DARK_PURPLE + StringUtils.capitalize(serverFaction.getFlag().name().toLowerCase().replace("_", " ")));
 
             if (serverFaction.getHomeLocation() != null) {
@@ -289,7 +293,7 @@ public final class FMessage {
                         .getWorld()).getEnvironment().name().toLowerCase().replace("_", " ")));
             }
 
-            player.sendMessage(LAYER_1 + "--------------------------------");
+            player.sendMessage(LAYER_1 + "" + ChatColor.STRIKETHROUGH + Strings.repeat('-', 32));
 
             return;
         }
@@ -312,7 +316,11 @@ public final class FMessage {
             DTR = ChatColor.YELLOW + unformattedDTR;
         }
 
-        player.sendMessage(LAYER_1 + "--------------------" + LAYER_2 + "[ " + INFO + faction.getName() + LAYER_2 + " ]" + LAYER_1 + "--------------------");
+        player.sendMessage(
+                LAYER_1 + "" + ChatColor.STRIKETHROUGH + Strings.repeat('-', 16)
+                + LAYER_2 + "[ " + INFO + faction.getName() + LAYER_2 + " ]"
+                + LAYER_1 + "" + ChatColor.STRIKETHROUGH + Strings.repeat('-', 16)
+        );
 
         if (playerFaction.getAnnouncement() != null && (playerFaction.isMember(player.getUniqueId()) || access)) {
             player.sendMessage(spacer + LAYER_2 + "Announcement" + LAYER_1 + ": " + INFO + playerFaction.getAnnouncement());
@@ -371,14 +379,21 @@ public final class FMessage {
                 for (PlayerFaction.Rank rank : namesByRank.keySet()) {
                     final List<String> names = namesByRank.get(rank);
                     final List<String> formatted = Lists.newArrayList();
+                    final String prefix;
+
+                    switch (rank) {
+                        case LEADER -> prefix = "**";
+                        case OFFICER -> prefix = "*";
+                        default -> prefix = "";
+                    }
 
                     names.sort(Comparator.comparing(name -> Bukkit.getPlayer(name) != null));
 
                     for (String name : names) {
                         if (Bukkit.getPlayer(name) != null) {
-                            formatted.add(ChatColor.GREEN + name);
+                            formatted.add(ChatColor.GREEN + prefix + name);
                         } else {
-                            formatted.add(ChatColor.GRAY + name);
+                            formatted.add(ChatColor.GRAY + prefix + name);
                         }
                     }
 
@@ -386,23 +401,13 @@ public final class FMessage {
                     formattedNames.put(rank, formatted);
                 }
 
-                final List<String> leaders = formattedNames.get(PlayerFaction.Rank.LEADER);
-                final List<String> officers = formattedNames.get(PlayerFaction.Rank.OFFICER);
-                final List<String> members = formattedNames.get(PlayerFaction.Rank.MEMBER);
+                final List<String> result = Lists.newArrayList();
+                result.addAll(formattedNames.get(PlayerFaction.Rank.LEADER));
+                result.addAll(formattedNames.get(PlayerFaction.Rank.OFFICER));
+                result.addAll(formattedNames.get(PlayerFaction.Rank.MEMBER));
 
-                if (!leaders.isEmpty()) {
-                    player.sendMessage(spacer + LAYER_2 + "Leader" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(leaders));
-                }
-
-                if (!officers.isEmpty()) {
-                    player.sendMessage(spacer + LAYER_2 + "Officers" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(officers));
-                }
-
-                if (!members.isEmpty()) {
-                    player.sendMessage(spacer + LAYER_2 + "Members" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(members));
-                }
-
-                player.sendMessage(LAYER_1 + "------------------------------------------------");
+                player.sendMessage(spacer + LAYER_2 + "Members" + LAYER_1 + ": " + Joiner.on(LAYER_1 + ", ").join(result));
+                player.sendMessage(LAYER_1 + "" + ChatColor.STRIKETHROUGH + Strings.repeat('-', 32));
             }).run();
         }).run();
     }

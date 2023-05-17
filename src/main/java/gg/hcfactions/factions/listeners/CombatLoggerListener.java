@@ -4,11 +4,14 @@ import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
+import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.logger.impl.CombatLogger;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.utils.FactionUtil;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -51,6 +54,7 @@ public final class CombatLoggerListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
         final FactionPlayer account = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new PLocatable(player));
         final double radius = 16.0; // TODO: Make this configurable
         boolean combatLog = false;
 
@@ -64,6 +68,14 @@ public final class CombatLoggerListener implements Listener {
 
         if (account == null || player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
             return;
+        }
+
+        if (insideClaim != null) {
+            final ServerFaction sf = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
+
+            if (sf != null && sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                return;
+            }
         }
 
         if (account.hasTimer(ETimerType.COMBAT)) {

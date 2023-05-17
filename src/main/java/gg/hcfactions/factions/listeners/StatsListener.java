@@ -1,7 +1,9 @@
 package gg.hcfactions.factions.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
+import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.KOTHCaptureEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.stats.EStatisticType;
 import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
@@ -10,6 +12,7 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,6 +20,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.List;
 
 public record StatsListener(@Getter Factions plugin) implements Listener {
     /**
@@ -155,22 +160,25 @@ public record StatsListener(@Getter Factions plugin) implements Listener {
         }
     }
 
-    /* @EventHandler (priority = EventPriority.MONITOR)
-    public void onEventCapture(EventCaptureEvent event) {
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onEventCapture(KOTHCaptureEvent event) {
         final List<String> capturingUsernames = Lists.newArrayList();
 
-        event.getFaction().getOnlineMembers().forEach(onlineMember -> {
+        event.getCapturingFaction().getOnlineMembers().forEach(onlineMember -> {
             final Player player = Bukkit.getPlayer(onlineMember.getUniqueId());
 
             if (player != null) {
-                final PlayerStatisticHolder stats = addon.getPlayerStatistics(player.getUniqueId());
-
+                final PlayerStatHolder holder = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
                 capturingUsernames.add(player.getName());
-
-                stats.addToStatistic(PlayerStatisticHolder.StatisticType.EVENT_CAPTURES, 1);
+                holder.addToStatistic(EStatisticType.EVENT_CAPTURES, 1);
             }
         });
 
-        addon.createEventCapture(event.getEvent().getName(), event.getFaction().getUniqueId(), event.getFaction().getName(), capturingUsernames);
-    } */
+        plugin.getStatsManager().createEventCapture(
+                event.getEvent().getName(),
+                event.getCapturingFaction().getUniqueId(),
+                event.getCapturingFaction().getName(),
+                capturingUsernames
+        );
+    }
 }

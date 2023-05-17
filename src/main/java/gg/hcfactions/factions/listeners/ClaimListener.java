@@ -20,7 +20,6 @@ import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -41,16 +40,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-@AllArgsConstructor
-public final class ClaimListener implements Listener {
-    @Getter public final Factions plugin;
-
+public record ClaimListener(@Getter Factions plugin) implements Listener {
     /**
      * Handles processing movement in and out of claims
+     *
      * @param cancellable Movement Event
-     * @param player Player
-     * @param from From Location
-     * @param to To Location
+     * @param player      Player
+     * @param from        From Location
+     * @param to          To Location
      */
     private void handleMovement(Cancellable cancellable, Player player, Location from, Location to) {
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
@@ -108,7 +105,7 @@ public final class ClaimListener implements Listener {
                 if (bufferFaction != null) {
                     player.sendMessage(
                             ChatColor.RED + "You can not edit terrain within " +
-                                    ChatColor.BLUE + String.format("%.2f", (double)bufferFaction.getBuildBuffer()) +
+                                    ChatColor.BLUE + String.format("%.2f", (double) bufferFaction.getBuildBuffer()) +
                                     " blocks" + ChatColor.RED + " of " + ChatColor.RESET + bufferFaction.getDisplayName());
 
                     cancellable.setCancelled(true);
@@ -144,6 +141,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Returns a formatted name of a Bukkit Environment
+     *
      * @param environment Environment
      * @return Name
      */
@@ -165,6 +163,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles moving in and out of claims
+     *
      * @param event PlayerBigMoveEvent
      */
     @EventHandler
@@ -174,15 +173,11 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles teleporting in and out of claims
+     *
      * @param event PlayerTeleportEvent
      */
-    @EventHandler (priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        // We handle Ender Pearl teleportation above
-        if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)) {
-            return;
-        }
-
         if (event.isCancelled()) {
             return;
         }
@@ -192,6 +187,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing block modifications
+     *
      * @param event BlockBreakEvent
      */
     @EventHandler
@@ -201,6 +197,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing block modifications
+     *
      * @param event BlockPlaceEvent
      */
     @EventHandler
@@ -210,6 +207,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing block modifications
+     *
      * @param event PlayerBucketFillEvent
      */
     @EventHandler
@@ -219,6 +217,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing block modifications
+     *
      * @param event PlayerBucketEmptyEvent
      */
     @EventHandler
@@ -228,6 +227,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles blocking piston event
+     *
      * @param event BlockPistonRetractEvent
      */
     @EventHandler
@@ -242,19 +242,13 @@ public final class ClaimListener implements Listener {
             if (pistonClaim == null && affectedClaim != null) {
                 event.setCancelled(true);
                 return;
-            }
-
-            else if (pistonClaim != null && affectedClaim == null) {
+            } else if (pistonClaim != null && affectedClaim == null) {
                 event.setCancelled(true);
                 return;
-            }
-
-            else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
+            } else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
                 event.setCancelled(true);
                 return;
-            }
-
-            else if (!affectedBuildBuffers.isEmpty()) {
+            } else if (!affectedBuildBuffers.isEmpty()) {
                 event.setCancelled(true);
                 return;
             }
@@ -263,6 +257,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles blocking piston event
+     *
      * @param event BlockPistonExtendEvent
      */
     @EventHandler
@@ -277,19 +272,13 @@ public final class ClaimListener implements Listener {
             if (pistonClaim == null && affectedClaim != null) {
                 event.setCancelled(true);
                 return;
-            }
-
-            else if (pistonClaim != null && affectedClaim == null) {
+            } else if (pistonClaim != null && affectedClaim == null) {
                 event.setCancelled(true);
                 return;
-            }
-
-            else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
+            } else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
                 event.setCancelled(true);
                 return;
-            }
-
-            else if (!affectedBuildBuffers.isEmpty()) {
+            } else if (!affectedBuildBuffers.isEmpty()) {
                 event.setCancelled(true);
                 return;
             }
@@ -298,6 +287,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing the creation of a portal inside a
+     *
      * @param event PortalCreateEvent
      */
     @EventHandler
@@ -329,9 +319,10 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing interacting in claims
+     *
      * @param event PlayerInteractEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final Action action = event.getAction();
@@ -387,6 +378,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing food level
+     *
      * @param event FoodLevelChangeEvent
      */
     @EventHandler
@@ -414,6 +406,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing friendly entity damage within Safezone claims
+     *
      * @param event EntityDamageEvent
      */
     @EventHandler
@@ -439,6 +432,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing monster spawning inside safezone claims
+     *
      * @param event CreatureSpawnEvent
      */
     @EventHandler
@@ -461,6 +455,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing entity targeting players standing in Safezone claims
+     *
      * @param event EntityTargetEvent
      */
     @EventHandler
@@ -482,6 +477,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing entity exploding and destroying blocks in claimed land
+     *
      * @param event EntityExplodeEvent
      */
     @EventHandler
@@ -502,6 +498,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing entity block changes inside claimed land
+     *
      * @param event EntityChangeBlockEvent
      */
     @EventHandler
@@ -520,6 +517,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing leaf decay inside server claims
+     *
      * @param event LeavesDecayEvent
      */
     @EventHandler
@@ -536,29 +534,8 @@ public final class ClaimListener implements Listener {
     }
 
     /**
-     * Prevents players from being pushed inside safezone claims
-     * @param event PlayerChangeClaimEvent
-     */
-    @EventHandler
-    public void onClaimChangeToggleCollision(PlayerChangeClaimEvent event) {
-        final Player player = event.getPlayer();
-
-        if (event.getClaimTo() != null) {
-            if (plugin.getFactionManager().getFactionById(event.getClaimTo().getOwner()) instanceof final ServerFaction sf) {
-                if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    player.setCollidable(false);
-                    return;
-                }
-            }
-        }
-
-        if (!player.isCollidable()) {
-            player.setCollidable(true);
-        }
-    }
-
-    /**
      * Prevents players from enderpearling in to claims they are not allowed to enter
+     *
      * @param event PlayerTeleportEvent
      */
     @EventHandler
@@ -646,6 +623,7 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles escorting players who have logged out in event claims outside the claim
+     *
      * @param event PlayerJoinEvent
      */
     @EventHandler
@@ -670,9 +648,7 @@ public final class ClaimListener implements Listener {
                 return;
             }
 
-            if (owner instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)owner;
-
+            if (owner instanceof final ServerFaction sf) {
                 if (sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
                     FactionUtil.teleportToSafety(plugin, player);
                     player.sendMessage(ChatColor.DARK_PURPLE + "You have been escorted outside of the claim you were logged out in");
@@ -686,9 +662,10 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles issuing or revoking class consumable effects for players based on claims
+     *
      * @param event ConsumeClassItemEvent
      */
-    @EventHandler (priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onConsume(ConsumeClassItemEvent event) {
         final Player player = event.getPlayer();
         final Claim inside = plugin.getClaimManager().getClaimAt(new PLocatable(player));
@@ -722,9 +699,7 @@ public final class ClaimListener implements Listener {
                 continue;
             }
 
-            if (affectedInsideFaction instanceof ServerFaction) {
-                final ServerFaction affectedInsideServerFaction = (ServerFaction)affectedInsideFaction;
-
+            if (affectedInsideFaction instanceof final ServerFaction affectedInsideServerFaction) {
                 if (affectedInsideServerFaction.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     toRemove.add(affectedUuid);
                 }
@@ -738,9 +713,10 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles preventing entering claims not allowed with Protection or Combat Tag
+     *
      * @param event PlayerChangeClaimEvent
      */
-    @EventHandler (priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChangeClaim(PlayerChangeClaimEvent event) {
         final Player player = event.getPlayer();
         final FactionPlayer profile = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
@@ -754,7 +730,7 @@ public final class ClaimListener implements Listener {
             }
 
             if (toFaction instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction)toFaction;
+                final ServerFaction sf = (ServerFaction) toFaction;
 
                 if (profile.hasTimer(ETimerType.COMBAT) && sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     player.sendMessage(ChatColor.RED + "You can not enter this claim while combat-tagged");
@@ -777,9 +753,10 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles rendering a chat message for entering and leaving claims
+     *
      * @param event PlayerChangeClaimEvent
      */
-    @EventHandler (priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onClaimChange(PlayerChangeClaimEvent event) {
         final Player player = event.getPlayer();
         final Claim from = event.getClaimFrom();
@@ -800,10 +777,10 @@ public final class ClaimListener implements Listener {
 
             if (owner != null) {
                 if (owner instanceof ServerFaction) {
-                    final ServerFaction serverFaction = (ServerFaction)owner;
+                    final ServerFaction serverFaction = (ServerFaction) owner;
                     player.sendMessage(ChatColor.GOLD + "Now Leaving: " + ChatColor.RESET + serverFaction.getDisplayName() + ChatColor.GOLD + " (" + serverFaction.getFlag().getDisplayName() + ChatColor.GOLD + ")");
                 } else {
-                    final PlayerFaction playerFaction = (PlayerFaction)owner;
+                    final PlayerFaction playerFaction = (PlayerFaction) owner;
                     final ChatColor color = (playerFaction.isMember(player.getUniqueId()) ? ChatColor.GREEN : ChatColor.RED);
                     player.sendMessage(ChatColor.GOLD + "Now Leaving: " + color + playerFaction.getName() + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
                 }
@@ -819,7 +796,7 @@ public final class ClaimListener implements Listener {
                 if (owner instanceof final ServerFaction serverFaction) {
                     player.sendMessage(ChatColor.GOLD + "Now Entering: " + ChatColor.RESET + serverFaction.getDisplayName() + ChatColor.GOLD + " (" + serverFaction.getFlag().getDisplayName() + ChatColor.GOLD + ")");
                 } else {
-                    final PlayerFaction playerFaction = (PlayerFaction)owner;
+                    final PlayerFaction playerFaction = (PlayerFaction) owner;
                     final ChatColor color = (playerFaction.isMember(player.getUniqueId()) ? ChatColor.GREEN : ChatColor.RED);
                     player.sendMessage(ChatColor.GOLD + "Now Entering: " + color + playerFaction.getName() + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
                 }
@@ -831,9 +808,10 @@ public final class ClaimListener implements Listener {
 
     /**
      * Handles freezing timers when entering and leaving claims
+     *
      * @param event PlayerChangeClaimEvent
      */
-    @EventHandler (priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onClaimChangeTimerFreeze(PlayerChangeClaimEvent event) {
         if (event.isCancelled()) {
             return;
@@ -858,7 +836,7 @@ public final class ClaimListener implements Listener {
             final IFaction insideFaction = plugin.getFactionManager().getFactionById(to.getOwner());
 
             if (insideFaction instanceof ServerFaction) {
-                final ServerFaction serverFaction = (ServerFaction)insideFaction;
+                final ServerFaction serverFaction = (ServerFaction) insideFaction;
                 safezone = serverFaction.getFlag().equals(ServerFaction.Flag.SAFEZONE);
             }
         }
