@@ -208,7 +208,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
      * @return DTR cap (double)
      */
     public double getMaxDtr() {
-        return manager.getPlugin().getConfiguration().getPlayerPowerValue() * members.size();
+        final double total = manager.getPlugin().getConfiguration().getPlayerPowerValue() * members.size();
+        return Math.min(total, manager.getPlugin().getConfiguration().getPowerCap());
     }
 
     /**
