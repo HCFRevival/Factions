@@ -23,8 +23,8 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import lombok.Getter;
-import org.bukkit.block.data.type.Wall;
 
 import java.util.List;
 
@@ -112,6 +112,7 @@ public final class Factions extends AresPlugin {
         // declare services
         final AccountService accountService = new AccountService(this);
         final DeathbanService deathbanService = new DeathbanService(this, configuration.getDeathbanConfig());
+        final SyncService syncService = new SyncService(this);
         final CustomItemService customItemService = new CustomItemService(this);
         final RankService rankService = new RankService(this);
         final CXService commandXService = new CXService(this);
@@ -122,6 +123,7 @@ public final class Factions extends AresPlugin {
         registerService(customItemService);
         registerService(commandXService);
         registerService(rankService);
+        registerService(syncService);
         startServices();
 
         // declare managers
