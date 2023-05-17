@@ -58,6 +58,7 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
 
         if (faction != null) {
             FMessage.printFactionMemberOnline(faction, player.getName());
+            FMessage.printFactionInfo(plugin, player, faction);
         }
     }
 
