@@ -54,4 +54,5 @@ public interface IFactionExecutor {
     void showSubclaimList(Player player, String factionName);
     void startHomeTimer(Player player, Promise promise);
     void startStuckTimer(Player player, Promise promise);
+    void printTeamLocate(Player player, Promise promise);
 }

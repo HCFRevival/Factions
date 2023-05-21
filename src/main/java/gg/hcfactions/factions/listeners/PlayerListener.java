@@ -58,7 +58,9 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
 
         if (faction != null) {
             FMessage.printFactionMemberOnline(faction, player.getName());
-            FMessage.printFactionInfo(plugin, player, faction);
+
+            // delay the message so that it doesn't get meshed with other join message crap
+            new Scheduler(plugin).sync(() -> FMessage.printFactionInfo(plugin, player, faction)).delay(5L).run();
         }
     }
 

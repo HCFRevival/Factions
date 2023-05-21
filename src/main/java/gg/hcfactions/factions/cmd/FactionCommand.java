@@ -835,6 +835,20 @@ public final class FactionCommand extends BaseCommand {
         player.sendMessage(ChatColor.GREEN + "Factions configuration has been reloaded");
     }
 
+    @CommandAlias("tl|fl")
+    @Description("Print your current coordinates in Faction Chat")
+    public void onTeamLocate(Player player) {
+        plugin.getFactionManager().getExecutor().printTeamLocate(player, new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to print location: " + s);
+            }
+        });
+    }
+
     @HelpCommand
     public void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
