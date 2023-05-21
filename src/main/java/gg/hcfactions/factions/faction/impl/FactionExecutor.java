@@ -32,6 +32,7 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
+import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -1781,6 +1782,30 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.STUCK, manager.getPlugin().getConfiguration().getStuckDuration()));
+        promise.resolve();
+    }
+
+    @Override
+    public void printTeamLocate(Player player, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final RankService rankService = (RankService) manager.getPlugin().getService(RankService.class);
+        String displayName = ChatColor.RESET + player.getName();
+
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (rankService != null) {
+            displayName = rankService.getFormattedName(player);
+        }
+
+        final String x = String.format("%.2f", player.getLocation().getX());
+        final String y = String.format("%.2f", player.getLocation().getY());
+        final String z = String.format("%.2f", player.getLocation().getZ());
+        final String world = Objects.requireNonNull(player.getLocation().getWorld()).getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " ");
+
+        faction.sendMessage(FMessage.getFactionFormat(displayName, "Located at " + x + ", " + y + ", " + z + ", " + world));
         promise.resolve();
     }
 }
