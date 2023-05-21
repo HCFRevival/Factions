@@ -14,10 +14,10 @@ public interface IPalaceLootChest {
     default Chest getChest() {
         final Block block = getLocation().getBukkitBlock();
 
-        if (block == null || block.getType().equals(Material.CHEST)) {
+        if (block == null || !block.getType().equals(Material.CHEST)) {
             return null;
         }
 
-        return (Chest) block.getBlockData();
+        return (Chest) block.getState();
     }
 }

@@ -77,14 +77,22 @@ public final class PalaceEvent extends KOTHEvent implements ILootableEvent {
 
     @Override
     public void restock() {
+        restock(true);
+    }
+
+    @Override
+    public void restock(boolean broadcast) {
         if (lootChests.isEmpty()) {
             return;
         }
 
         lootChests.forEach(PalaceLootChest::restock);
+        nextRestockTime = Time.now() + (restockInterval*1000L);
 
-        Bukkit.broadcastMessage(" ");
-        Bukkit.broadcastMessage(FMessage.PALACE_PREFIX + displayName + FMessage.LAYER_1 + " has been restocked");
-        Bukkit.broadcastMessage(" ");
+        if (broadcast) {
+            Bukkit.broadcastMessage(" ");
+            Bukkit.broadcastMessage(FMessage.PALACE_PREFIX + displayName + FMessage.LAYER_1 + " has been restocked");
+            Bukkit.broadcastMessage(" ");
+        }
     }
 }

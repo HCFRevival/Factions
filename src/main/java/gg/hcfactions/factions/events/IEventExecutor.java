@@ -93,4 +93,14 @@ public interface IEventExecutor {
      * @param promise Promise
      */
     void openPalaceLootMenu(Player player, EPalaceLootTier tier, Promise promise);
+
+    /**
+     * Restocks all loot chests within an event
+     * @param player Player
+     * @param eventName Event name
+     * @param broadcast If true this event will trigger a global broadcast
+     * @param promise Promise
+     */
+    void restockPalaceEvent(Player player, String eventName, boolean broadcast, Promise promise);
 }
+

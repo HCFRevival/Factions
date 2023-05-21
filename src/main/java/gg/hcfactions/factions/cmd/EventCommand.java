@@ -3,18 +3,17 @@ package gg.hcfactions.factions.cmd;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.events.EPalaceLootTier;
-import gg.hcfactions.factions.models.events.ICaptureEvent;
-import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.libs.acf.BaseCommand;
+import gg.hcfactions.libs.acf.CommandHelp;
 import gg.hcfactions.libs.acf.annotation.*;
 import gg.hcfactions.libs.base.consumer.Promise;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @CommandAlias("event")
 @AllArgsConstructor
@@ -222,5 +221,30 @@ public final class EventCommand extends BaseCommand {
                 player.sendMessage(ChatColor.RED + "Failed to add item: " + s);
             }
         });
+    }
+
+    @Subcommand("restock")
+    @Description("Restock the loot chests within an event")
+    @Syntax("<event> [-b]")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@events")
+    public void onRestock(Player player, String eventName, @Optional String broadcast) {
+        final boolean flag = (broadcast != null && broadcast.equalsIgnoreCase("-b"));
+        plugin.getEventManager().getExecutor().restockPalaceEvent(player, eventName, flag, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event has been restocked");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to restock event: " + s);
+            }
+        });
+    }
+
+    @HelpCommand
+    public void onCommandHelp(CommandSender sender, CommandHelp help) {
+        help.showHelp();
     }
 }

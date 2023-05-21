@@ -27,6 +27,19 @@ public interface ILootableEvent {
     void restock();
 
     /**
+     * Trigger an event restock
+     * @param broadcast If true a broadcast will be printed in chat
+     */
+    void restock(boolean broadcast);
+
+    /**
+     * @return Returns true if this event should restock
+     */
+    default boolean shouldRestock() {
+        return getNextRestockTime() <= Time.now();
+    }
+
+    /**
      * @return Time (in millis) until next restock
      */
     default long getTimeUntilNextRestock() {

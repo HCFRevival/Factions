@@ -1,7 +1,6 @@
 package gg.hcfactions.factions.events.tick;
 
 import gg.hcfactions.factions.events.EventManager;
-import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +16,9 @@ public class PalaceRestockTask {
     }
 
     public void start() {
-        task = new Scheduler(manager.getPlugin()).async(() -> manager.getPlugin().getEventManager().getPalaceEvents()
-                .stream()
-                .filter(palace -> palace.getCapturingFaction() != null)
-                .forEach(PalaceEvent::restock)).repeat(3600 * 20L, 3600 * 20L).run();
+        task = new Scheduler(manager.getPlugin()).async(() ->
+                manager.getPlugin().getEventManager().getPalaceEvents().stream().filter(p -> p.getCapturingFaction() != null && p.shouldRestock()).forEach(palace ->
+                        new Scheduler(manager.getPlugin()).sync(palace::restock).run())).repeat(30*20L, 30*20L).run();
     }
 
     public void stop() {
