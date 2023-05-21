@@ -2,10 +2,12 @@ package gg.hcfactions.factions.listeners;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -17,10 +19,19 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.List;
+import java.util.Set;
 
-public record FoundOreListener(@Getter Factions plugin) implements Listener {
+public final class FoundOreListener implements Listener {
     private static final ImmutableList<Material> TRACKED_ORES = ImmutableList.of(Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE, Material.ANCIENT_DEBRIS);
     private static final String FD_PREFIX = ChatColor.RESET + "[!] ";
+
+    @Getter public Factions plugin;
+    @Getter public Set<Block> foundOres;
+
+    public FoundOreListener(Factions plugin) {
+        this.plugin = plugin;
+        this.foundOres = Sets.newConcurrentHashSet();
+    }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
@@ -35,6 +46,10 @@ public record FoundOreListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (foundOres.contains(block)) {
+            return;
+        }
+
         final int found = countOres(Lists.newArrayList(), block, 0);
 
         if (block.getType().equals(Material.DIAMOND_ORE) || block.getType().equals(Material.DEEPSLATE_DIAMOND_ORE)) {
@@ -44,6 +59,12 @@ public record FoundOreListener(@Getter Factions plugin) implements Listener {
 
         if (block.getType().equals(Material.ANCIENT_DEBRIS)) {
             Bukkit.broadcastMessage(FD_PREFIX + net.md_5.bungee.api.ChatColor.of("#654641") + player.getName() + " found " + found + " Ancient Debris");
+        }
+
+        // cleanup method to prevent a large heap
+        if (foundOres.size() > 500) {
+            plugin.getAresLogger().warn("cleared found ores cache (exceeds 500 entries)");
+            foundOres.clear();
         }
     }
 
@@ -61,6 +82,8 @@ public record FoundOreListener(@Getter Factions plugin) implements Listener {
 
     private int countOres(List<Block> tracked, Block origin, int iter) {
         tracked.add(origin);
+        foundOres.add(origin);
+
         iter += 1;
 
         if (iter > 32) {
@@ -79,6 +102,10 @@ public record FoundOreListener(@Getter Factions plugin) implements Listener {
             }
 
             if (tracked.contains(otherBlock)) {
+                continue;
+            }
+
+            if (foundOres.contains(otherBlock)) {
                 continue;
             }
 

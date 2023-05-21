@@ -22,6 +22,7 @@ import gg.hcfactions.libs.bukkit.AresPlugin;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
+import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import lombok.Getter;
@@ -116,6 +117,7 @@ public final class Factions extends AresPlugin {
         final CustomItemService customItemService = new CustomItemService(this);
         final RankService rankService = new RankService(this);
         final CXService commandXService = new CXService(this);
+        final PunishmentService punishmentService = new PunishmentService(this);
 
         // register services
         registerService(accountService);
@@ -124,6 +126,7 @@ public final class Factions extends AresPlugin {
         registerService(commandXService);
         registerService(rankService);
         registerService(syncService);
+        registerService(punishmentService);
         startServices();
 
         // declare managers
