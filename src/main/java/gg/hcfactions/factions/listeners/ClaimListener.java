@@ -729,22 +729,35 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 return;
             }
 
-            if (toFaction instanceof ServerFaction) {
-                final ServerFaction sf = (ServerFaction) toFaction;
-
+            if (toFaction instanceof final ServerFaction sf) {
                 if (profile.hasTimer(ETimerType.COMBAT) && sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                     player.sendMessage(ChatColor.RED + "You can not enter this claim while combat-tagged");
+
+                    if (player.isInsideVehicle() && player.getVehicle() != null) {
+                        player.getVehicle().removePassenger(player);
+                    }
+
                     event.setCancelled(true);
                     return;
                 }
 
                 if (profile.hasTimer(ETimerType.PROTECTION) && sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
                     player.sendMessage(ChatColor.RED + "You can not enter this claim while you have PvP Protection");
+
+                    if (player.isInsideVehicle() && player.getVehicle() != null) {
+                        player.getVehicle().removePassenger(player);
+                    }
+
                     event.setCancelled(true);
                 }
             } else if (toFaction instanceof PlayerFaction) {
                 if (profile.hasTimer(ETimerType.PROTECTION)) {
                     player.sendMessage(ChatColor.RED + "You can not enter this claim while you have PvP Protection");
+
+                    if (player.isInsideVehicle() && player.getVehicle() != null) {
+                        player.getVehicle().removePassenger(player);
+                    }
+
                     event.setCancelled(true);
                 }
             }
