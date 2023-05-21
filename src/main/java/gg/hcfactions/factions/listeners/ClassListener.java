@@ -27,6 +27,7 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
@@ -372,8 +373,12 @@ public final class ClassListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onTridentHitPlayer(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
         if (!(event.getDamager() instanceof final Trident trident)) {
             return;
         }
@@ -420,6 +425,22 @@ public final class ClassListener implements Listener {
                     ChatColor.YELLOW + " from a distance of " + ChatColor.BLUE + String.format("%.2f", dist) + " blocks " +
                     ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + ChatColor.YELLOW + ")");
 
+        }).delay(1L).run();
+    }
+
+    @EventHandler
+    public void onPlayerRiptide(PlayerRiptideEvent event) {
+        final Player player = event.getPlayer();
+        final Location prevLoc = player.getLocation();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (playerClass instanceof Diver) {
+            return;
+        }
+
+        new Scheduler(plugin).sync(() -> {
+            player.teleport(prevLoc);
+            player.sendMessage(ChatColor.RED + "Tridents can only be used by the Diver class");
         }).delay(1L).run();
     }
 }
