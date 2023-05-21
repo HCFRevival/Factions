@@ -850,7 +850,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final ComponentBuilder pagination = new ComponentBuilder(" ").color(net.md_5.bungee.api.ChatColor.RESET);
 
         if (hasPrevPage) {
-            pagination.append("[Previous Page]")
+            pagination.append("[Previous Page] ")
                     .color(net.md_5.bungee.api.ChatColor.RED)
                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f list " + (page - 1)))
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Visit the previous page").color(net.md_5.bungee.api.ChatColor.GRAY).create()));
