@@ -494,10 +494,8 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             final String defaultDeathMessage = prefix + " " + slainUsername + cA + " slain by " + killerUsername + cA + " while using " + hand;
 
             if (reason.equals(EntityDamageEvent.DamageCause.FALL)) {
-                final double distance = Math.floor(slain.getFallDistance());
-
-                if (distance > 3.0) {
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " fell " + cB + distance + " blocks" + cA + " to their death while fighting " + killerUsername);
+                if (slain.getFallDistance() > 3.0) {
+                    event.setDeathMessage(prefix + " " + slainUsername + cA + " fell " + cB + String.format("%.2f", slain.getFallDistance()) + " blocks" + cA + " to their death while fighting " + killerUsername);
                 } else {
                     event.setDeathMessage(defaultDeathMessage);
                 }
@@ -555,6 +553,10 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                 case STARVATION:
                     event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death while fighting " + killerUsername + cA + " while using " + hand);
                     break;
+                case FLY_INTO_WALL:
+                    event.setDeathMessage(prefix + " " + slainUsername + cA + " slammed in to a wall while fight " + killerUsername + cA + " while using " + hand);
+                case FREEZE:
+                    event.setDeathMessage(prefix + " " + slainUsername + cA + " froze to death while fighting " + killerUsername + cA + " while using " + hand);
                 default:
                     event.setDeathMessage(defaultDeathMessage);
                     break;
@@ -564,10 +566,8 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         }
 
         if (reason.equals(EntityDamageEvent.DamageCause.FALL)) {
-            final double distance = Math.floor(slain.getFallDistance());
-
-            if (distance >= 3.0) {
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " fell " + cB + distance + " blocks" + cA + " to their death");
+            if (slain.getFallDistance() >= 3.0) {
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " fell " + cB + String.format("%.2f", slain.getFallDistance()) + " blocks" + cA + " to their death");
             } else {
                 event.setDeathMessage(prefix + " " + slainUsername + cA + " died");
             }
@@ -612,6 +612,10 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             case STARVATION:
                 event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death");
                 break;
+            case FLY_INTO_WALL:
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " slammed in to a wall");
+            case FREEZE:
+                event.setDeathMessage(prefix + " " + slainUsername + cA + " froze to death");
             default:
                 event.setDeathMessage(prefix + " " + slainUsername + cA + " died");
                 break;
