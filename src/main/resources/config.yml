@@ -53,6 +53,7 @@ factions:
     crapple_duration: 5
     gapple_duration: 3600
     totem_duration: 3600
+    trident_duration: 3
     stuck_duration: 60
     rally_duration: 5
     freeze_duration: 1800

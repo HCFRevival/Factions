@@ -67,6 +67,7 @@ public final class FConfig {
     @Getter public int crappleDuration;
     @Getter public int gappleDuration;
     @Getter public int totemDuration;
+    @Getter public int tridentDuration;
     @Getter public int stuckDuration;
     @Getter public int rallyDuration;
     @Getter public int freezeDuration;
@@ -184,6 +185,7 @@ public final class FConfig {
         crappleDuration = conf.getInt("factions.timers.crapple_duration");
         gappleDuration = conf.getInt("factions.timers.gapple_duration");
         totemDuration = conf.getInt("factions.timers.totem_duration");
+        tridentDuration = conf.getInt("factions.timers.trident_duration");
         stuckDuration = conf.getInt("factions.timers.stuck_duration");
         rallyDuration = conf.getInt("factions.timers.rally_duration");
         freezeDuration = conf.getInt("factions.timers.freeze_duration");
