@@ -534,6 +534,24 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Handles preventing water/lava flowing in to claims
+     * @param event BlockFromToEvent
+     */
+    @EventHandler
+    public void onBlockFromTo(BlockFromToEvent event) {
+        final Claim fromClaim = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+        final Claim toClaim = plugin.getClaimManager().getClaimAt(new BLocatable(event.getToBlock()));
+
+        if (toClaim == null) {
+            return;
+        }
+
+        if (fromClaim == null || !toClaim.getOwner().equals(fromClaim.getOwner())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
      * Prevents players from enderpearling in to claims they are not allowed to enter
      *
      * @param event PlayerTeleportEvent
