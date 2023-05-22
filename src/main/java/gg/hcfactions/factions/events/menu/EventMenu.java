@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
+import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -11,7 +12,6 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
-import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -91,6 +91,16 @@ public final class EventMenu extends GenericMenu {
                             }
                         }
                     } else {
+                        if (kothEvent instanceof final PalaceEvent palace) {
+                            final PlayerFaction capturingFaction = plugin.getFactionManager().getPlayerFactionById(palace.getCapturingFaction());
+
+                            if (capturingFaction != null) {
+                                lore.add(FMessage.LAYER_2 + "Captured By" + FMessage.LAYER_1 + ": " + capturingFaction.getName());
+                                lore.add(FMessage.LAYER_2 + "Next Restock" + FMessage.LAYER_1 + ": " + (palace.getTimeUntilNextRestock() > 0 ? Time.convertToRemaining(palace.getTimeUntilNextRestock()) : "Restocking..."));
+                                lore.add(ChatColor.RESET + " ");
+                            }
+                        }
+
                         lore.add(ChatColor.GRAY + "This event will activate:");
                         lore.add(ChatColor.WHITE + ((kothEvent.getRemainingTimeUntilNextSchedule() != -1) ? Time.convertToRemaining(kothEvent.getRemainingTimeUntilNextSchedule()) : "Unscheduled"));
                     }

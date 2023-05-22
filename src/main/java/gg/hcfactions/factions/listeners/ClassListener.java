@@ -10,6 +10,10 @@ import gg.hcfactions.factions.models.classes.IConsumeable;
 import gg.hcfactions.factions.models.classes.impl.Archer;
 import gg.hcfactions.factions.models.classes.impl.Diver;
 import gg.hcfactions.factions.models.classes.impl.Rogue;
+import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.timer.ETimerType;
+import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -365,11 +369,25 @@ public final class ClassListener implements Listener {
             return;
         }
 
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
         if (!(playerClass instanceof Diver)) {
             player.sendMessage(ChatColor.RED + "Tridents can only be used by the Diver class");
             event.setCancelled(true);
+            return;
+        }
+
+        if (factionPlayer != null) {
+            final FTimer existing = factionPlayer.getTimer(ETimerType.TRIDENT);
+
+            if (existing != null && !existing.isExpired()) {
+                FMessage.printLockedTimer(player, "trident", existing.getRemaining());
+                event.setCancelled(true);
+                return;
+            }
+
+            factionPlayer.addTimer(new FTimer(ETimerType.TRIDENT, plugin.getConfiguration().getTridentDuration()));
         }
     }
 
@@ -433,14 +451,27 @@ public final class ClassListener implements Listener {
         final Player player = event.getPlayer();
         final Location prevLoc = player.getLocation();
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+        final FactionPlayer factionPlayer = (FactionPlayer)plugin.getPlayerManager().getPlayer(player);
+        final FTimer existingTimer = factionPlayer.getTimer(ETimerType.TRIDENT);
 
-        if (playerClass instanceof Diver) {
+        if (!(playerClass instanceof Diver)) {
+            new Scheduler(plugin).sync(() -> {
+                player.teleport(prevLoc);
+                player.sendMessage(ChatColor.RED + "Tridents can only be used by the Diver class");
+            }).delay(1L).run();
+
             return;
         }
 
-        new Scheduler(plugin).sync(() -> {
-            player.teleport(prevLoc);
-            player.sendMessage(ChatColor.RED + "Tridents can only be used by the Diver class");
-        }).delay(1L).run();
+        if (existingTimer != null) {
+            new Scheduler(plugin).sync(() -> {
+                player.teleport(prevLoc);
+                FMessage.printLockedTimer(player, "trident", existingTimer.getRemaining());
+            }).delay(1L).run();
+
+            return;
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.TRIDENT, plugin.getConfiguration().getTridentDuration()));
     }
 }

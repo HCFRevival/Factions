@@ -312,6 +312,10 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             sendMessage(FMessage.T_GAPPLE_UNLOCKED);
         }
 
+        if (type.equals(ETimerType.TRIDENT)) {
+            sendMessage(FMessage.T_TRIDENT_UNLOCKED);
+        }
+
         if (type.equals(ETimerType.STUCK)) {
             FactionUtil.teleportToSafety(playerManager.getPlugin(), getBukkit());
             sendMessage(FMessage.T_STUCK_EXPIRE);

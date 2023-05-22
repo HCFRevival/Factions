@@ -190,4 +190,22 @@ public final class EventExecutor implements IEventExecutor {
         final LootTableMenu<PalaceLootable> menu = new LootTableMenu<>(manager.getPlugin(), player, manager.getPalaceLootManager(), res);
         menu.open();
     }
+
+    @Override
+    public void restockPalaceEvent(Player player, String eventName, boolean broadcast, Promise promise) {
+        final PalaceEvent event = manager.getPalaceEvents().stream().filter(pe -> pe.getName().equalsIgnoreCase(eventName)).findFirst().orElse(null);
+
+        if (event == null) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        if (event.getLootChests().isEmpty()) {
+            promise.reject("This event does not have any loot chests");
+            return;
+        }
+
+        event.restock(broadcast);
+        promise.resolve();
+    }
 }

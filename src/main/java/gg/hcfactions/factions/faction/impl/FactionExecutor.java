@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public record FactionExecutor(@Getter FactionManager manager) implements IFactionExecutor {
     @Override
     public void createPlayerFaction(Player player, String factionName, Promise promise) {
-        final FError nameError = manager.getValidator().isValidName(factionName);
+        final FError nameError = manager.getValidator().isValidName(factionName, false);
         if (nameError != null) {
             promise.reject(nameError.getErrorDescription());
             return;
@@ -85,8 +85,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void createServerFaction(Player player, String factionName, Promise promise) {
-        final FError nameError = manager.getValidator().isValidName(factionName);
-        if (nameError != null && !nameError.equals(FError.F_NAME_INVALID)) {
+        final FError nameError = manager.getValidator().isValidName(factionName, true);
+        if (nameError != null) {
             promise.reject(nameError.getErrorDescription());
             return;
         }
@@ -234,7 +234,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 }
 
                 FMessage.broadcastFactionDisbanded(faction.getName(), player.getName());
-                new Scheduler(manager.getPlugin()).sync(promise::resolve);
+                new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
             }).run();
         });
 
@@ -645,7 +645,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void renameFaction(Player player, String newFactionName, Promise promise) {
-        final FError nameError = manager.getValidator().isValidName(newFactionName);
+        final FError nameError = manager.getValidator().isValidName(newFactionName, false);
         if (nameError != null) {
             promise.reject(nameError.getErrorDescription());
             return;
@@ -686,7 +686,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void renameFaction(Player player, String currentFactionName, String newFactionName, Promise promise) {
-        final FError nameError = manager.getValidator().isValidName(newFactionName);
+        final FError nameError = manager.getValidator().isValidName(newFactionName, true);
         if (nameError != null && !nameError.equals(FError.F_NAME_INVALID)) {
             promise.reject(nameError.getErrorDescription());
             return;
@@ -705,8 +705,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         faction.setName(newFactionName);
 
-        if (faction instanceof PlayerFaction) {
-            final PlayerFaction pf = (PlayerFaction) faction;
+        if (faction instanceof final PlayerFaction pf) {
             pf.sendMessage(
                     FMessage.P_NAME + player.getName()
                             + FMessage.LAYER_1 + " has "
