@@ -7,13 +7,15 @@ databases:
 factions:
   naming:
     min_faction_name: 2
-    max_faction_name: 24
+    max_faction_name: 32
     disallowed_names:
       - nigger
+      - niggers
       - nigga
       - nigs
-      - palace
-      - spawn
+      - fag
+      - faggot
+      - fags
   reinvites: 5
   limits:
     max_faction_size: 30

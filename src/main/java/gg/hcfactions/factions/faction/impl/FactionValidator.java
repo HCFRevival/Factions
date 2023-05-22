@@ -3,22 +3,14 @@ package gg.hcfactions.factions.faction.impl;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
 
-@AllArgsConstructor
-public final class FactionValidator {
-    @Getter public final FactionManager manager;
-
+public record FactionValidator(@Getter FactionManager manager) {
     @Nullable
-    public FError isValidName(String name) {
-        if (!name.matches("^[A-Za-z0-9_.]+$")) {
-            return FError.F_NAME_INVALID;
-        }
-
+    public FError isValidName(String name, boolean skipRegex) {
         if (name.length() < manager.getPlugin().getConfiguration().getMinFactionNameLength()) {
             return FError.F_NAME_TOO_SHORT;
         }
@@ -33,6 +25,10 @@ public final class FactionValidator {
 
         if (manager.getFactionByName(name) != null) {
             return FError.F_NAME_IN_USE;
+        }
+
+        if (!skipRegex && !name.matches("^[A-Za-z0-9_.]+$")) {
+            return FError.F_NAME_INVALID;
         }
 
         return null;
