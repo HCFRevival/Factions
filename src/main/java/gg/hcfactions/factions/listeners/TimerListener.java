@@ -17,10 +17,12 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -475,5 +477,35 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.TOTEM, plugin.getConfiguration().getTotemDuration()));
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onShulkerBoxOpen(PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+        final Block block = event.getClickedBlock();
+        final Action action = event.getAction();
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (!action.equals(Action.RIGHT_CLICK_BLOCK)) {
+            return;
+        }
+
+        if (event.useInteractedBlock().equals(Event.Result.DENY)) {
+            return;
+        }
+
+        if (factionPlayer == null) {
+            plugin.getAresLogger().error("failed to prevent shulker box open: faction player null");
+            return;
+        }
+
+        if (block == null || !block.getType().name().endsWith("_SHULKER_BOX")) {
+            return;
+        }
+
+        if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
+            player.sendMessage(FMessage.ERROR + "You can not use Shulker Boxes while combat-tagged");
+            event.setUseInteractedBlock(Event.Result.DENY);
+        }
     }
 }

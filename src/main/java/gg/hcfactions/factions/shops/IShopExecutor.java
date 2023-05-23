@@ -2,8 +2,6 @@ package gg.hcfactions.factions.shops;
 
 import gg.hcfactions.factions.models.shop.impl.GenericMerchant;
 import gg.hcfactions.factions.models.shop.impl.GenericShop;
-import gg.hcfactions.factions.models.shop.impl.events.EventMerchant;
-import gg.hcfactions.factions.models.shop.impl.events.EventShop;
 import gg.hcfactions.libs.base.consumer.Promise;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -47,7 +45,7 @@ public interface IShopExecutor {
     void openShop(Player player, GenericMerchant<?> merchant, GenericShop<?> shop);
 
     /**
-     * Ad a new shop to a merchant
+     * Add a new shop to a merchant
      * @param player Player
      * @param merchantName Merchant name
      * @param shopName Shop name
@@ -56,6 +54,15 @@ public interface IShopExecutor {
      * @param promise Promise
      */
     void addToMerchant(Player player, String merchantName, String shopName, ItemStack item, int position, Promise promise);
+
+    /**
+     * Remove an existing shop from a merchant
+     * @param player Player
+     * @param merchantName Merchant name
+     * @param shopName Shop name
+     * @param promise Promise
+     */
+    void removeFromMerchant(Player player, String merchantName, String shopName, Promise promise);
 
     /**
      * Adds a new item to a specific shop
@@ -81,4 +88,14 @@ public interface IShopExecutor {
      * @param promise Promise
      */
     void addToEventShop(Player player, String merchantName, String shopName, ItemStack item, int position, int tokenAmount, Promise promise);
+
+    /**
+     * Remove an existing shop item from a shop
+     * @param player Player
+     * @param merchantName Merchant name
+     * @param shopName Shop name
+     * @param index Index position
+     * @param promise Promise
+     */
+    void removeFromShop(Player player, String merchantName, String shopName, int index, Promise promise);
 }

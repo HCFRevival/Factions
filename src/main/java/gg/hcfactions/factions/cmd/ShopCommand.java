@@ -83,6 +83,25 @@ public final class ShopCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("remshop")
+    @Description("Remove a shop from an existing merchant")
+    @Syntax("<merchant> <name>")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@merchants")
+    public void onRemoveFromMerchant(Player player, String merchantName, String shopName) {
+        plugin.getShopManager().getExecutor().removeFromMerchant(player, merchantName, shopName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Shop deleted");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to delete shop: " + s);
+            }
+        });
+    }
+
     @Subcommand("additem")
     @Description("Add an item to an existing shop")
     @Syntax("<merchant> <shop> <position> <buycost> <sellcost>")
@@ -155,6 +174,33 @@ public final class ShopCommand extends BaseCommand {
             @Override
             public void reject(String s) {
                 player.sendMessage(ChatColor.RED + "Failed to add to shop: " + s);
+            }
+        });
+    }
+
+    @Subcommand("remitem|delitem")
+    @Description("Remove an item from an existing shop")
+    @Syntax("<merchant> <shop> <index>")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@merchants")
+    public void onRemoveItem(Player player, String merchantName, String shopName, String indexName) {
+        int i;
+        try {
+            i = Integer.parseInt(indexName);
+        } catch (NumberFormatException ex) {
+            player.sendMessage(ChatColor.RED + "Invalid index: not a number");
+            return;
+        }
+
+        plugin.getShopManager().getExecutor().removeFromShop(player, merchantName, shopName, i, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Item has been removed from shop");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to remove item from shop: " + s);
             }
         });
     }
