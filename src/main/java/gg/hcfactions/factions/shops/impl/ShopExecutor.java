@@ -149,6 +149,34 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public void removeFromMerchant(Player player, String merchantName, String shopName, Promise promise) {
+        final Optional<IMerchant> merchantQuery = manager.getMerchantByName(merchantName);
+
+        if (merchantQuery.isEmpty()) {
+            promise.reject("Merchant not found");
+            return;
+        }
+
+        final IMerchant merchantResult = merchantQuery.get();
+        final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
+        final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
+                .stream()
+                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName))
+                .findFirst()
+                .orElse(null);
+
+        if (shop == null) {
+            promise.reject("Shop not found");
+            return;
+        }
+
+        merchant.getShops().remove(shop);
+        manager.saveMerchant(merchant);
+        promise.resolve();
+    }
+
+    @Override
     public void addToShop(Player player, String merchantName, String shopName, ItemStack item, int position, double buyAmount, double sellAmount, Promise promise) {
         final Optional<IMerchant> merchantQuery = manager.getMerchantByName(merchantName);
 
@@ -248,6 +276,40 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         );
 
         shop.getItems().add(shopItem);
+        manager.saveMerchant(merchant);
+        promise.resolve();
+    }
+
+    @Override
+    public void removeFromShop(Player player, String merchantName, String shopName, int index, Promise promise) {
+        final Optional<IMerchant> merchantQuery = manager.getMerchantByName(merchantName);
+
+        if (merchantQuery.isEmpty()) {
+            promise.reject("Merchant not found");
+            return;
+        }
+
+        final IMerchant merchantResult = merchantQuery.get();
+        final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
+        final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
+                .stream()
+                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName))
+                .findFirst()
+                .orElse(null);
+
+        if (shop == null) {
+            promise.reject("Shop not found");
+            return;
+        }
+
+        final GenericShopItem item = shop.getItems().stream().filter(i -> i.getPosition() == index).findFirst().orElse(null);
+
+        if (item == null) {
+            promise.reject("Item not at position: " + index);
+            return;
+        }
+
+        shop.getItems().remove(item);
         manager.saveMerchant(merchant);
         promise.resolve();
     }

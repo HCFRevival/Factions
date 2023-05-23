@@ -47,6 +47,7 @@ public final class FoundOreListener implements Listener {
         }
 
         if (foundOres.contains(block)) {
+            foundOres.remove(block);
             return;
         }
 
