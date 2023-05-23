@@ -23,11 +23,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.DoubleChestInventory;
 
 import java.util.List;
 import java.util.Optional;
@@ -416,15 +415,34 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
      */
     public ChestSubclaim findChestSubclaimAt(Block block) {
         final BlockFace[] faces = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
-        final Block chest;
+        Block chest = null;
+        Block otherChest = null;
 
         if (block.getType().name().endsWith("_WALL_SIGN")) {
             final WallSign sign = (WallSign)block.getState().getBlockData();
-            chest = block.getRelative(sign.getFacing().getOppositeFace());
+            final Block relative = block.getRelative(sign.getFacing().getOppositeFace());
+
+            if (relative.getType().equals(Material.CHEST) || relative.getType().equals(Material.TRAPPED_CHEST)) {
+                chest = block.getRelative(sign.getFacing().getOppositeFace());
+            }
         } else if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)) {
             chest = block;
-        } else {
+        }
+
+        if (chest == null) {
             return null;
+        }
+
+        if (chest.getState() instanceof final Chest chestBlock) {
+            if (chestBlock.getInventory() instanceof DoubleChestInventory) {
+                for (BlockFace face : faces) {
+                    final Block relative = chest.getRelative(face);
+                    if (relative.getType().equals(chest.getType())) {
+                        otherChest = relative;
+                        break;
+                    }
+                }
+            }
         }
 
         for (BlockFace face : faces) {
@@ -439,6 +457,24 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
 
                 if (sign.getLine(0).equals(ChatColor.AQUA + "[Subclaim]")) {
                     return new ChestSubclaim(chest, sign);
+                }
+            }
+        }
+
+        if (otherChest != null) {
+            for (BlockFace face : faces) {
+                final Block relative = otherChest.getRelative(face);
+
+                if (relative.getType().name().endsWith("_WALL_SIGN")) {
+                    if (!(relative.getBlockData() instanceof WallSign || relative.getBlockData() instanceof Sign)) {
+                        continue;
+                    }
+
+                    final Sign sign = (Sign) relative.getState();
+
+                    if (sign.getLine(0).equals(ChatColor.AQUA + "[Subclaim]")) {
+                        return new ChestSubclaim(chest, sign);
+                    }
                 }
             }
         }
