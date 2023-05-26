@@ -305,7 +305,7 @@ public final class StatsManager implements IManager {
      * @param capturingUsernames Usernames involved with capturing the event
      */
     public void createEventCapture(String eventName, UUID factionUniqueId, String factionName, Collection<String> capturingUsernames) {
-        final EventCaptureStat eventCapture = new EventCaptureStat(factionUniqueId, eventName, factionName, capturingUsernames, config.getMapNumber());
+        final EventCaptureStat eventCapture = new EventCaptureStat(factionUniqueId, factionName, eventName, capturingUsernames, config.getMapNumber());
 
         new Scheduler(plugin).async(() -> {
             final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
