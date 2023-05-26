@@ -26,7 +26,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class ClaimManager implements IManager {
-    public static final String CLAIM_DB_NAME = "dev";
     public static final String CLAIM_DB_COLL_NAME = "claims";
 
     @Getter public final Factions plugin;
@@ -64,7 +63,7 @@ public final class ClaimManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(CLAIM_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save claims with null db instance");
             return;
@@ -93,7 +92,7 @@ public final class ClaimManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(CLAIM_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save claims with null db instance");
             return;
@@ -122,7 +121,7 @@ public final class ClaimManager implements IManager {
             return null;
         }
 
-        final MongoDatabase db = mdb.getDatabase(CLAIM_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to delete claim with null db instance");
             return null;

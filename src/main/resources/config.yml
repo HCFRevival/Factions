@@ -1,6 +1,7 @@
 databases:
   mongodb:
     uri: 'mongodb://0.0.0.0:27017'
+    database: 'dev'
   redis:
     uri: 'redis://0.0.0.0:6379'
 

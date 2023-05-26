@@ -24,7 +24,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class SubclaimManager implements IManager {
-    public static final String SUBCLAIM_DB_NAME = "dev";
     public static final String SUBCLAIM_DB_COLL_NAME = "subclaims";
 
     @Getter public final Factions plugin;
@@ -66,7 +65,7 @@ public final class SubclaimManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(SUBCLAIM_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save claims with null db instance");
             return;
@@ -95,7 +94,7 @@ public final class SubclaimManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(SUBCLAIM_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save claims with null db instance");
             return;
@@ -123,7 +122,7 @@ public final class SubclaimManager implements IManager {
             return null;
         }
 
-        final MongoDatabase db = mdb.getDatabase(SUBCLAIM_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to delete subclaim with null db instance");
             return null;

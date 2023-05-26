@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class FactionManager implements IManager {
-    public static final String FACTION_DB_NAME = "dev";
     public static final String PLAYER_FACTION_DB_COLL_NAME = "player_factions";
     public static final String SERVER_FACTION_DB_COLL_NAME = "server_factions";
 
@@ -82,7 +81,7 @@ public final class FactionManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save factions with null db instance");
             return;
@@ -124,7 +123,7 @@ public final class FactionManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save factions with null db instance");
             return;
@@ -163,7 +162,7 @@ public final class FactionManager implements IManager {
             return null;
         }
 
-        final MongoDatabase db = mdb.getDatabase(FACTION_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to delete faction with null db instance");
             return null;

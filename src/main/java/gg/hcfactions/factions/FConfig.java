@@ -18,6 +18,7 @@ public final class FConfig {
     @Getter public Factions plugin;
 
     @Getter public String mongoUri;
+    @Getter public String mongoDatabaseName;
     @Getter public String redisUri;
 
     // world
@@ -148,6 +149,7 @@ public final class FConfig {
         overworldSpawn = overworldSpawnLoc.getBukkitLocation();
 
         mongoUri = conf.getString("databases.mongodb.uri");
+        mongoDatabaseName = conf.getString("databases.mongodb.database");
         redisUri = conf.getString("databases.redis.uri");
 
         minFactionNameLength = conf.getInt("factions.naming.min_faction_name");
