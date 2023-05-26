@@ -111,12 +111,12 @@ public final class Factions extends AresPlugin {
         registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
 
         // declare services
+        final RankService rankService = new RankService(this);
+        final CXService commandXService = new CXService(this);
+        final CustomItemService customItemService = new CustomItemService(this);
         final AccountService accountService = new AccountService(this, configuration.getMongoDatabaseName());
         final DeathbanService deathbanService = new DeathbanService(this, configuration.getDeathbanConfig());
         final SyncService syncService = new SyncService(this, configuration.getMongoDatabaseName());
-        final CustomItemService customItemService = new CustomItemService(this);
-        final RankService rankService = new RankService(this);
-        final CXService commandXService = new CXService(this);
         final PunishmentService punishmentService = new PunishmentService(this, configuration.getMongoDatabaseName());
 
         // register services
