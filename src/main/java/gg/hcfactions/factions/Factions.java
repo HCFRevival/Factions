@@ -7,10 +7,12 @@ import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.cmd.*;
+import gg.hcfactions.factions.displays.DisplayManager;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
+import gg.hcfactions.factions.models.stats.EStatisticType;
 import gg.hcfactions.factions.player.PlayerManager;
 import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
@@ -42,6 +44,7 @@ public final class Factions extends AresPlugin {
     @Getter public ClassManager classManager;
     @Getter public EventManager eventManager;
     @Getter public ShopManager shopManager;
+    @Getter public DisplayManager displayManager;
 
     @Override
     public void onEnable() {
@@ -67,6 +70,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new ShopCommand(this));
         registerCommand(new WalletCommand(this));
         registerCommand(new SpawnCommand(this));
+        registerCommand(new DisplayCommand(this));
         registerCommand(new DebugCommand());
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
@@ -99,6 +103,16 @@ public final class Factions extends AresPlugin {
             }
 
             eventManager.getEventRepository().forEach(e -> res.add(e.getName()));
+            return res;
+        });
+
+        cmdMng.getCommandCompletions().registerAsyncCompletion("stattypes", ctx -> {
+            final List<String> res = Lists.newArrayList();
+
+            for (EStatisticType type : EStatisticType.values()) {
+                res.add(type.name().toLowerCase());
+            }
+
             return res;
         });
 
@@ -141,6 +155,7 @@ public final class Factions extends AresPlugin {
         classManager = new ClassManager(this);
         eventManager = new EventManager(this);
         shopManager = new ShopManager(this);
+        displayManager = new DisplayManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -153,6 +168,7 @@ public final class Factions extends AresPlugin {
         classManager.onEnable();
         eventManager.onEnable();
         shopManager.onEnable();
+        displayManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -196,6 +212,7 @@ public final class Factions extends AresPlugin {
         classManager.onDisable();
         eventManager.onDisable();
         shopManager.onDisable();
+        displayManager.onDisable();
 
         playerManager = null;
         factionManager = null;
@@ -206,5 +223,6 @@ public final class Factions extends AresPlugin {
         serverStateManager = null;
         classManager = null;
         eventManager = null;
+        displayManager = null;
     }
 }
