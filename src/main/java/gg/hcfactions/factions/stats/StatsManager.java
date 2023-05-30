@@ -28,7 +28,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public final class StatsManager implements IManager {
-    public static final String STATS_DB_NAME = "dev";
     public static final String STATS_DB_PLAYER_COLL_NAME = "stats_players";
     public static final String STATS_DB_FACTION_COLL_NAME = "stats_factions";
     public static final String STATS_DB_KILL_COLL_NAME = "stats_kills";
@@ -66,7 +65,7 @@ public final class StatsManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save player statistics data but mongo db was null");
             return;
@@ -140,7 +139,7 @@ public final class StatsManager implements IManager {
                     return;
                 }
 
-                final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+                final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
                 if (db == null) {
                     new Scheduler(plugin).sync(() -> consumer.accept(emptyHolder)).run();
                     return;
@@ -183,7 +182,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+            final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
             if (db == null) {
                 plugin.getAresLogger().error("attempted to aggregate player leaderboard data but mongo db was null");
                 return;
@@ -226,7 +225,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+            final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
             if (db == null) {
                 plugin.getAresLogger().error("attempted to save player stats when mongo db is null");
                 return;
@@ -266,7 +265,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+            final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
             final MongoCollection<Document> killColl = db.getCollection(STATS_DB_KILL_COLL_NAME);
             // TODO: Faction tracking here
 
@@ -290,7 +289,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+            final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
             final MongoCollection<Document> deathColl = db.getCollection(STATS_DB_DEATH_COLL_NAME);
             // TODO: Faction tracking here
 
@@ -306,7 +305,7 @@ public final class StatsManager implements IManager {
      * @param capturingUsernames Usernames involved with capturing the event
      */
     public void createEventCapture(String eventName, UUID factionUniqueId, String factionName, Collection<String> capturingUsernames) {
-        final EventCaptureStat eventCapture = new EventCaptureStat(factionUniqueId, eventName, factionName, capturingUsernames, config.getMapNumber());
+        final EventCaptureStat eventCapture = new EventCaptureStat(factionUniqueId, factionName, eventName, capturingUsernames, config.getMapNumber());
 
         new Scheduler(plugin).async(() -> {
             final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
@@ -315,7 +314,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoDatabase db = mdb.getDatabase(STATS_DB_NAME);
+            final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
             final MongoCollection<Document> eventColl = db.getCollection(STATS_DB_EVENT_COLL_NAME);
             // TODO: Faction tracking here
 

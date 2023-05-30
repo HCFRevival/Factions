@@ -827,14 +827,6 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("reload")
-    @Description("Reload factions config")
-    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onReload(Player player) {
-        plugin.getConfiguration().loadConfig();
-        player.sendMessage(ChatColor.GREEN + "Factions configuration has been reloaded");
-    }
-
     @CommandAlias("tl|fl")
     @Description("Print your current coordinates in Faction Chat")
     public void onTeamLocate(Player player) {
@@ -847,6 +839,14 @@ public final class FactionCommand extends BaseCommand {
                 player.sendMessage(ChatColor.RED + "Failed to print location: " + s);
             }
         });
+    }
+
+    @Subcommand("reload")
+    @Description("Reload factions config")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onReload(Player player) {
+        plugin.getConfiguration().loadConfig();
+        player.sendMessage(ChatColor.GREEN + "Factions configuration has been reloaded");
     }
 
     @HelpCommand

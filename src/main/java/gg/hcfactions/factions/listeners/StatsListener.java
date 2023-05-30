@@ -10,16 +10,20 @@ import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
@@ -160,6 +164,10 @@ public record StatsListener(@Getter Factions plugin) implements Listener {
         }
     }
 
+    /**
+     * Handles creating event capture entries when capture events are completed
+     * @param event KOTHCaptureEvent
+     */
     @EventHandler (priority = EventPriority.MONITOR)
     public void onEventCapture(KOTHCaptureEvent event) {
         final List<String> capturingUsernames = Lists.newArrayList();
@@ -180,5 +188,47 @@ public record StatsListener(@Getter Factions plugin) implements Listener {
                 event.getCapturingFaction().getName(),
                 capturingUsernames
         );
+    }
+
+    /**
+     * Handles tracking ore breaking for diamond/netherite
+     * @param event BlockBreakEvent
+     */
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onOreMine(BlockBreakEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        final Block block = event.getBlock();
+
+        // we're able to hack in to FoundOre and utilize this meta tag
+        if (block.hasMetadata("player_placed")) {
+            return;
+        }
+
+        final ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand.getItemMeta() != null && hand.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
+            return;
+        }
+
+        if (block.getType().equals(Material.DIAMOND_ORE) || block.getType().equals(Material.DEEPSLATE_DIAMOND_ORE)) {
+            final PlayerStatHolder holder = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
+
+            if (holder != null) {
+                holder.addToStatistic(EStatisticType.MINED_DIAMONDS, block.getDrops(player.getInventory().getItemInMainHand(), player).size());
+            }
+
+            return;
+        }
+
+        if (block.getType().equals(Material.ANCIENT_DEBRIS)) {
+            final PlayerStatHolder holder = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
+
+            if (holder != null) {
+                holder.addToStatistic(EStatisticType.MINED_NETHERITE, block.getDrops(player.getInventory().getItemInMainHand(), player).size());
+            }
+        }
     }
 }

@@ -17,7 +17,9 @@ import java.util.Objects;
 public final class FConfig {
     @Getter public Factions plugin;
 
+    // databases
     @Getter public String mongoUri;
+    @Getter public String mongoDatabaseName;
     @Getter public String redisUri;
 
     // world
@@ -117,6 +119,7 @@ public final class FConfig {
      */
     public DeathbanConfig getDeathbanConfig() {
         return new DeathbanConfig(
+                mongoDatabaseName,
                 deathbansEnabled,
                 deathbansStandalone,
                 eventDeathbanDuration,
@@ -148,6 +151,7 @@ public final class FConfig {
         overworldSpawn = overworldSpawnLoc.getBukkitLocation();
 
         mongoUri = conf.getString("databases.mongodb.uri");
+        mongoDatabaseName = conf.getString("databases.mongodb.database");
         redisUri = conf.getString("databases.redis.uri");
 
         minFactionNameLength = conf.getInt("factions.naming.min_faction_name");

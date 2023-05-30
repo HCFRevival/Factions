@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class PlayerManager implements IManager {
-    public static final String PLAYER_DB_NAME = "dev";
     public static final String PLAYER_DB_COLL_NAME = "players";
 
     @Getter public Factions plugin;
@@ -45,7 +44,7 @@ public final class PlayerManager implements IManager {
             return null;
         }
 
-        final MongoDatabase db = mdb.getDatabase(PLAYER_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to load player with null db instance");
             return null;
@@ -73,7 +72,7 @@ public final class PlayerManager implements IManager {
             return;
         }
 
-        final MongoDatabase db = mdb.getDatabase(PLAYER_DB_NAME);
+        final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
         if (db == null) {
             plugin.getAresLogger().error("attempted to save player with null db instance");
             return;
