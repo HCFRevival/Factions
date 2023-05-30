@@ -6,6 +6,7 @@ import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.logger.impl.CombatLogger;
@@ -433,12 +434,32 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (world.getEnvironment().equals(World.Environment.NETHER) && plugin.getConfiguration().isReducePowerLossInNether()) {
-            event.setSubtractedDTR(event.getSubtractedDTR() / 2.0);
+        // reduce nether
+        if (world.getEnvironment().equals(World.Environment.NETHER) && plugin.getConfiguration().getNetherPowerLossReduction() < event.getSubtractedDTR()) {
+            event.setSubtractedDTR(plugin.getConfiguration().getNetherPowerLossReduction());
         }
 
-        if (world.getEnvironment().equals(World.Environment.THE_END) && plugin.getConfiguration().isReducePowerLossInEnd()) {
-            event.setSubtractedDTR(event.getSubtractedDTR() / 2.0);
+        // reduce end
+        if (world.getEnvironment().equals(World.Environment.THE_END) && plugin.getConfiguration().getEndPowerLossReduction() < event.getSubtractedDTR()) {
+            event.setSubtractedDTR(plugin.getConfiguration().getEndPowerLossReduction());
+        }
+
+        // reduce event claim
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(locatable);
+        if (insideClaim != null) {
+            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
+
+            if (owner != null) {
+                final IEvent activeEvent = plugin.getEventManager().getActiveEvents()
+                        .stream()
+                        .filter(e -> e.getOwner() != null && e.getOwner().equals(owner.getUniqueId()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (activeEvent != null && plugin.getConfiguration().getEventPowerLossReduction() < event.getSubtractedDTR()) {
+                    event.setSubtractedDTR(plugin.getConfiguration().getEventPowerLossReduction());
+                }
+            }
         }
     }
 
