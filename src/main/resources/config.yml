@@ -1,15 +1,31 @@
+# Database Information
 databases:
-  mongodb:
+  # uri = Connection String used to access the database
+  # database = Name of the Mongo parent database. Everything that runs under Factions
+  #            (including services) will utilize this database name
+  mongo:
     uri: 'mongodb://0.0.0.0:27017'
     database: 'dev'
   redis:
     uri: 'redis://0.0.0.0:6379'
 
 factions:
-  naming:
-    min_faction_name: 2
-    max_faction_name: 32
-    disallowed_names:
+  # Maximum amount of players allowed in a single faction
+  max_faction_size: 30
+
+  # Initial amount of reinvites assigned to new factions and replenished when a Palace event is started
+  reinvites: 5
+
+  # Faction Naming
+  name:
+    # Minimum name length requirement
+    min_length: 2
+
+    # Maximum name length requirement
+    max_length: 32
+
+    # List of names that are not permitted by normal players
+    disallowed:
       - nigger
       - niggers
       - nigga
@@ -17,99 +33,153 @@ factions:
       - fag
       - faggot
       - fags
-  reinvites: 5
-  limits:
-    max_faction_size: 30
-    classes:
-      archer: 2
-      bard: 1
-      rouge: 2,
-      miner: 30
+
+  # Class limits, each value determines how many players can have the class
+  # active within a single faction at a any specific time
+  class_limits:
+    archer: 2
+    bard: 2
+    rogue: 2
+    miner: 30
+    diver: 5
+
+  # Faction power values
   power:
+    # Maximum amount of power a faction can have
     max_power: 6.0
+
+    # Power per player (n * onlinePlayers) = max power
     player_power_value: 0.4
+
+    # Power tick interval base time
     power_tick_interval: 60
+
+    # Power tick player modifier, for each online player the tick interval is reduced by this value
     power_tick_player_modifier: 1
+
+    # Power reductions in other worlds/claims
     power_loss_reductions:
-      nether: true
-      end: true
-  ratings:
-    challenger: 10000
-    diamond: 8000
-    platinum: 6000
-    gold: 4000
-    silver: 2000
-    bronze: 1000
+      nether: 0.5
+      end: 0.5
+      event: 0.25
+
+  # Faction claiming values
   claiming:
-    min_claim_size: 8
+    # Minimum claim size (n x n)
+    min_size: 8
+
+    # Maximum claim count (anything greater than 4 allows players to make a ring)
     max_claims: 3
+
+    # Claim value per block (area * n)
     block_value: 10.0
-    refunded_percent: 0.75
-    default_buffers:
-      server_faction_build: 16
-      server_faction_claim: 32
-      player_faction_claim: 1
+
+    # Refunded amount when a player unclaims
+    refund_percentage: 0.8
+
+    # Claim buffer values
+    # build buffer = distance players are not able to break/place
+    # claim buffer = distance players are not allowed to claim within
+    buffer_values:
+      server_build: 1.0
+      server_claim: 100.0
+      player_claim: 1
+
+  # Faction related timer values
   timers:
-    attacker_tag_duration: 30
-    attacked_tag_duration: 10
-    enderpearl_duration: 16
-    crapple_duration: 5
-    gapple_duration: 3600
-    totem_duration: 3600
-    trident_duration: 3
-    stuck_duration: 60
-    rally_duration: 5
-    freeze_duration: 1800
-    home_duration: 10
+    # Time that a factions power will be frozen after losing DTR
+    freeze: 1800
+
+    # Time to wait between rally settings
+    rally: 3
+
+# Map spawn locations
+spawns:
+  overworld:
+    x: 0.0
+    y: 64.0
+    z: 0.0
+    yaw: 0.0
+    pitch: 0.0
+    world: 'world'
+  end_spawn:
+    x: 0.0
+    y: 64.0
+    z: 0.0
+    yaw: 0.0
+    pitch: 0.0
+    world: 'world_the_end'
+  end_exit:
+    x: 250.0
+    y: 64.0
+    z: 0.0
+    yaw: 0.0
+    pitch: 0.0
+    world: 'world'
+
+player:
+  # Player timer durations
+  timers:
+    combat_tag:
+      attacker: 30
+      attacked: 15
+    enderpearl: 16
+    crapple: 5
+    gapple: 300
+    totem: 3600
+    trident: 3
+    stuck: 60
+    home: 10
     protection:
       sotw: 3600
       normal: 1800
-  spawns:
-    overworld_spawn:
-      x: 0.0
-      y: 64.0
-      z: 0.0
-      yaw: 0.0
-      pitch: 0.0
-      world: 'world'
-    end_spawn:
-      x: 0.0
-      y: 64.0
-      z: 0.0
-      yaw: 0.0
-      pitch: 0.0
-      world: 'world_the_end'
-    end_exit:
-      x: 250.0
-      y: 64.0
-      z: 0.0
-      yaw: 0.0
-      pitch: 0.0
-      world: 'world'
 
+# Deathban configuration
 deathbans:
+  # If enabled, deathbans will be registered as a service
   enabled: true
+
+  # Standalone = deathbans are enforced on this server
   standalone: true
-  max_durations:
+
+  # Time (in seconds) players can be deathbanned for
+  ban_durations:
     sotw: 300
-    normal: 86400
+    normal: 10800
     event: 900
-  min_duration: 30
-  life_use_delay: 60
-  shop_url: "https://hcfactions.gg/shop"
 
-scoreboard:
-  title: '&6&lHCFRevival &c[Map #]'
-  footer: '&c&lplay.hcfrevival.net'
+  # Minimum time a player can be deathbanned for
+  min_duration: 60
 
+  # Time (in seconds) a player needs to wait before consuming a life
+  life_use_delay: 30
+
+  # Shop URL to use on the kick message
+  shop_url: 'https://shop.hcfrevival.net/'
+
+# Stat tracking configuration
 stats:
-  map_number: 0.5
+  # Map number is used to categorize which map to track the stats under
+  map: 1
 
+# Economy configuration
 economy:
+  # Amount new players spawn in with
   starting_balance: 100.0
 
-server_state:
-  current_state: 'normal'
+# Scoreboard configuration
+scoreboard:
+  title: '&6&lHCFR &c[Map 1]'
+  footer: '&c&lplay.hcfrevival.net'
+
+# Server state configuration
+state:
+  current: 'normal'
   eotw:
     border_shrink_radius: 100.0
-    border_shrink_rate: 14400
+    border_shrink_rate: 10800
+
+# Lunar configuration
+lunar_api:
+  # If set to true we will use the legacy Lunar API to send packets to Lunar Clients
+  use_legacy: true

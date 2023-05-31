@@ -189,7 +189,7 @@ public final class StatsManager implements IManager {
             }
 
             final MongoCollection<Document> coll = db.getCollection(STATS_DB_PLAYER_COLL_NAME);
-            try (MongoCursor<Document> cursor = coll.find().cursor()) {
+            try (MongoCursor<Document> cursor = coll.find(Filters.eq("map", plugin.getConfiguration().getMapNumber())).cursor()) {
                 while (cursor.hasNext()) {
                     result.add(new PlayerStatHolder().fromDocument(cursor.next()));
                 }
