@@ -27,6 +27,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 public final class FMessage {
@@ -265,6 +266,24 @@ public final class FMessage {
 
     public static String getFactionFormat(String displayName, String message) {
         return ChatColor.DARK_GREEN + "(" + ChatColor.GOLD + "FC" + ChatColor.DARK_GREEN + ") " + ChatColor.RESET + displayName + ChatColor.DARK_GREEN + ": " + message;
+    }
+
+    public static List<String> getEnemyNametag(String username, String factionName) {
+        final List<String> res = Lists.newArrayList();
+
+        if (factionName != null) {
+            res.add(ChatColor.GRAY + "[" + ChatColor.RED + factionName + ChatColor.GRAY + "]");
+        }
+
+        res.add(ChatColor.RED + username);
+        return res;
+    }
+
+    public static List<String> getFriendlyNametag(String username, @Nonnull String factionName) {
+        final List<String> res = Lists.newArrayList();
+        res.add(ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + factionName + ChatColor.GRAY + "]");
+        res.add(ChatColor.DARK_GREEN + username);
+        return res;
     }
 
     public static void printFactionInfo(Factions plugin, Player player, IFaction faction) {

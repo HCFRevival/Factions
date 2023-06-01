@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerEvent;
 public final class FactionCreateEvent extends PlayerEvent implements Cancellable {
     @Getter public static HandlerList handlerList = new HandlerList();
     @Getter @Setter public String factionName;
+    @Getter public boolean serverFaction;
     @Getter @Setter public String cancelMessage;
     @Getter @Setter public boolean cancelled;
 
@@ -18,9 +19,10 @@ public final class FactionCreateEvent extends PlayerEvent implements Cancellable
      * @param who Player
      * @param factionName Name of the faction being created
      */
-    public FactionCreateEvent(Player who, String factionName) {
+    public FactionCreateEvent(Player who, String factionName, boolean isServerFaction) {
         super(who);
         this.factionName = factionName;
+        this.serverFaction = isServerFaction;
         this.cancelMessage = null;
     }
 

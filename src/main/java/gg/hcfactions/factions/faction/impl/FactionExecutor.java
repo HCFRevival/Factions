@@ -3,8 +3,7 @@ package gg.hcfactions.factions.faction.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.FPermissions;
-import gg.hcfactions.factions.listeners.events.faction.FactionCreateEvent;
-import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
+import gg.hcfactions.factions.listeners.events.faction.*;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.faction.IFactionExecutor;
 import gg.hcfactions.factions.menus.DisbandConfirmationMenu;
@@ -64,7 +63,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        final FactionCreateEvent event = new FactionCreateEvent(player, factionName);
+        final FactionCreateEvent event = new FactionCreateEvent(player, factionName, false);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             promise.reject(event.getCancelMessage() != null ? event.getCancelMessage() : FError.F_UNABLE_TO_CREATE.getErrorDescription());
@@ -94,7 +93,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        final FactionCreateEvent event = new FactionCreateEvent(player, factionName);
+        final FactionCreateEvent event = new FactionCreateEvent(player, factionName, true);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             promise.reject(event.getCancelMessage() != null ? event.getCancelMessage() : FError.F_UNABLE_TO_CREATE.getErrorDescription());
@@ -130,19 +129,19 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        final FactionDisbandEvent event = new FactionDisbandEvent(player, faction);
-        Bukkit.getPluginManager().callEvent(event);
-        if (event.isCancelled()) {
-            promise.reject(event.getCancelMessage() != null ? event.getCancelMessage() : FError.F_UNABLE_TO_DISBAND.getErrorDescription());
-            return;
-        }
-
         final IFactionPlayer factionPlayer = manager.getPlugin().getPlayerManager().getPlayer(player);
 
         final DisbandConfirmationMenu menu = new DisbandConfirmationMenu(manager.getPlugin(), player, faction, () -> {
             final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
             final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
             final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
+
+            final FactionDisbandEvent event = new FactionDisbandEvent(player, faction);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                promise.reject(event.getCancelMessage() != null ? event.getCancelMessage() : FError.F_UNABLE_TO_DISBAND.getErrorDescription());
+                return;
+            }
 
             waypoints.forEach(wp -> {
                 wp.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
@@ -515,6 +514,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             }
         });
 
+        final FactionJoinEvent joinEvent = new FactionJoinEvent(player, faction);
+        Bukkit.getPluginManager().callEvent(joinEvent);
+
         FMessage.printPlayerJoinedFaction(faction, player);
         promise.resolve();
     }
@@ -569,6 +571,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 onlineFactionPlayer.removeFromScoreboard(player);
             }
         });
+
+        final FactionLeaveEvent leaveEvent = new FactionLeaveEvent(player, faction, FactionLeaveEvent.Reason.LEAVE);
+        Bukkit.getPluginManager().callEvent(leaveEvent);
 
         FMessage.printPlayerLeftFaction(faction, player);
         promise.resolve();
@@ -632,8 +637,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     return;
                 }
 
-                if (Bukkit.getPlayer(kickedProfile.getUniqueId()) != null) {
-                    final Player kicked = Bukkit.getPlayer(kickedProfile.getUniqueId());
+                final Player kicked = Bukkit.getPlayer(kickedProfile.getUniqueId());
+
+                if (kicked != null) {
                     final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(Objects.requireNonNull(kicked)));
                     final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
 
@@ -660,6 +666,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
                     kicked.sendMessage(FMessage.F_KICKED_FROM_FAC);
                 }
+
+                final FactionLeaveEvent leaveEvent = new FactionLeaveEvent(kicked, faction, FactionLeaveEvent.Reason.LEAVE);
+                Bukkit.getPluginManager().callEvent(leaveEvent);
 
                 FMessage.printPlayerKickedFromFaction(faction, player, kickedProfile.getUsername());
                 faction.removeMember(kickedProfile.getUniqueId());
@@ -706,6 +715,13 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
+        final FactionRenameEvent renameEvent = new FactionRenameEvent(pf, pf.getName(), newFactionName);
+        Bukkit.getPluginManager().callEvent(renameEvent);
+        if (renameEvent.isCancelled()) {
+            promise.reject(renameEvent.getCancelMessage());
+            return;
+        }
+
         pf.setName(newFactionName);
         pf.sendMessage(
                 FMessage.P_NAME + player.getName()
@@ -733,6 +749,13 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final IFaction faction = manager.getFactionByName(currentFactionName);
         if (faction == null) {
             promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        final FactionRenameEvent renameEvent = new FactionRenameEvent(faction, faction.getName(), newFactionName);
+        Bukkit.getPluginManager().callEvent(renameEvent);
+        if (renameEvent.isCancelled()) {
+            promise.reject(renameEvent.getCancelMessage());
             return;
         }
 
