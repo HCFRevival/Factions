@@ -18,6 +18,7 @@ import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.factions.stats.StatsManager;
 import gg.hcfactions.factions.timers.TimerManager;
+import gg.hcfactions.factions.waypoints.WaypointManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.bukkit.AresPlugin;
@@ -45,6 +46,7 @@ public final class Factions extends AresPlugin {
     @Getter public EventManager eventManager;
     @Getter public ShopManager shopManager;
     @Getter public DisplayManager displayManager;
+    @Getter public WaypointManager waypointManager;
 
     @Override
     public void onEnable() {
@@ -156,6 +158,7 @@ public final class Factions extends AresPlugin {
         eventManager = new EventManager(this);
         shopManager = new ShopManager(this);
         displayManager = new DisplayManager(this);
+        waypointManager = new WaypointManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -169,6 +172,7 @@ public final class Factions extends AresPlugin {
         eventManager.onEnable();
         shopManager.onEnable();
         displayManager.onEnable();
+        waypointManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -191,6 +195,7 @@ public final class Factions extends AresPlugin {
         registerListener(new EventBuilderListener(this));
         registerListener(new FoundOreListener(this));
         registerListener(new SpawnListener(this));
+        registerListener(new WaypointListener(this));
     }
 
     @Override
@@ -213,6 +218,7 @@ public final class Factions extends AresPlugin {
         eventManager.onDisable();
         shopManager.onDisable();
         displayManager.onDisable();
+        waypointManager.onDisable();
 
         playerManager = null;
         factionManager = null;
@@ -224,5 +230,6 @@ public final class Factions extends AresPlugin {
         classManager = null;
         eventManager = null;
         displayManager = null;
+        waypointManager = null;
     }
 }

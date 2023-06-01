@@ -23,6 +23,7 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.factions.models.waypoint.impl.FactionWaypoint;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.base.consumer.Promise;
@@ -44,7 +45,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record FactionExecutor(@Getter FactionManager manager) implements IFactionExecutor {
@@ -139,6 +142,12 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final DisbandConfirmationMenu menu = new DisbandConfirmationMenu(manager.getPlugin(), player, faction, () -> {
             final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(faction);
             final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
+            final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
+
+            waypoints.forEach(wp -> {
+                wp.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                manager.getPlugin().getWaypointManager().getWaypointRepository().remove(wp);
+            });
 
             faction.getOnlineMembers().forEach(onlineMember -> {
                 final FactionPlayer otherFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
@@ -194,6 +203,13 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(faction.getUniqueId());
 
             if (faction instanceof final PlayerFaction playerFaction) {
+                final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(playerFaction);
+
+                waypoints.forEach(wp -> {
+                    wp.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                    manager.getPlugin().getWaypointManager().getWaypointRepository().remove(wp);
+                });
+
                 playerFaction.getOnlineMembers().forEach(onlineMember -> {
                     final FactionPlayer otherFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
 
@@ -480,6 +496,11 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
+        final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
+
+        if (!waypoints.isEmpty()) {
+            waypoints.forEach(wp -> wp.send(player, manager.getPlugin().getConfiguration().useLegacyLunarAPI));
+        }
 
         faction.addMember(player.getUniqueId());
         faction.getOnlineMembers().forEach(onlineMember -> {
@@ -530,11 +551,18 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
+        final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
+
         if (factionPlayer != null) {
             factionPlayer.removeAllFromScoreboard();
         }
 
         faction.getMembers().remove(faction.getMember(player.getUniqueId()));
+
+        if (!waypoints.isEmpty()) {
+            waypoints.forEach(wp -> wp.hide(player, manager.getPlugin().getConfiguration().useLegacyLunarAPI));
+        }
+
         faction.getOnlineMembers().forEach(onlineMember -> {
             final FactionPlayer onlineFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
             if (onlineFactionPlayer != null) {
@@ -607,6 +635,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 if (Bukkit.getPlayer(kickedProfile.getUniqueId()) != null) {
                     final Player kicked = Bukkit.getPlayer(kickedProfile.getUniqueId());
                     final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(Objects.requireNonNull(kicked)));
+                    final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
 
                     if (inside != null && inside.getOwner().equals(faction.getUniqueId())) {
                         promise.reject(FError.F_CANT_KICK_IN_CLAIMS.getErrorDescription());
@@ -616,6 +645,10 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(kicked);
                     if (factionPlayer != null) {
                         factionPlayer.removeAllFromScoreboard();
+                    }
+
+                    if (!waypoints.isEmpty()) {
+                        waypoints.forEach(wp -> wp.hide(kicked, manager.getPlugin().getConfiguration().useLegacyLunarAPI));
                     }
 
                     faction.getOnlineMembers().forEach(onlineMember -> {
@@ -745,6 +778,24 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
+        // remove old waypoint
+        final FactionWaypoint existingWaypoint = manager.getPlugin().getWaypointManager().getWaypoints(faction).stream().filter(wp -> wp.getName().equalsIgnoreCase("Home")).findFirst().orElse(null);
+        if (existingWaypoint != null) {
+            existingWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+            manager.getPlugin().getWaypointManager().getWaypointRepository().remove(existingWaypoint);
+        }
+
+        // set new home waypoint
+        final FactionWaypoint homeWaypoint = new FactionWaypoint(faction, "Home", player.getLocation(), Color.GREEN.getRGB());
+        manager.getPlugin().getWaypointManager().getWaypointRepository().add(homeWaypoint);
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final Player bukkitPlayer = onlineMember.getBukkit();
+
+            if (bukkitPlayer != null) {
+                homeWaypoint.send(bukkitPlayer, manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+            }
+        });
+
         faction.setHomeLocation(new PLocatable(player));
         FMessage.printHomeUpdate(faction, player, faction.getHomeLocation());
         promise.resolve();
@@ -766,6 +817,24 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         if (faction instanceof final PlayerFaction playerFaction) {
+            // remove old waypoint
+            final FactionWaypoint existingWaypoint = manager.getPlugin().getWaypointManager().getWaypoints(playerFaction).stream().filter(wp -> wp.getName().equalsIgnoreCase("Home")).findFirst().orElse(null);
+            if (existingWaypoint != null) {
+                existingWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                manager.getPlugin().getWaypointManager().getWaypointRepository().remove(existingWaypoint);
+            }
+
+            // set new home waypoint
+            final FactionWaypoint homeWaypoint = new FactionWaypoint(playerFaction, "Home", player.getLocation(), Color.GREEN.getRGB());
+            manager.getPlugin().getWaypointManager().getWaypointRepository().add(homeWaypoint);
+            playerFaction.getOnlineMembers().forEach(onlineMember -> {
+                final Player bukkitPlayer = onlineMember.getBukkit();
+
+                if (bukkitPlayer != null) {
+                    homeWaypoint.send(bukkitPlayer, manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                }
+            });
+
             playerFaction.setHomeLocation(new PLocatable(player));
             FMessage.printHomeUpdate(playerFaction, player, playerFaction.getHomeLocation());
         } else {
@@ -1065,7 +1134,23 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
+        // remove old rally
+        final FactionWaypoint existing = manager.getPlugin().getWaypointManager().getWaypoints(playerFaction).stream().filter(wp -> wp.getName().equalsIgnoreCase("Rally")).findFirst().orElse(null);
+        if (existing != null) {
+            existing.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+            manager.getPlugin().getWaypointManager().getWaypointRepository().remove(existing);
+        }
+
+        // send new rally
+        final FactionWaypoint rallyWaypoint = new FactionWaypoint(playerFaction, "Rally", player.getLocation(), Color.ORANGE.getRGB());
+        manager.getPlugin().getWaypointManager().getWaypointRepository().add(rallyWaypoint);
+        playerFaction.getOnlineMembers().forEach(onlineMember -> {
+            final Player bukkitPlayer = onlineMember.getBukkit();
+            rallyWaypoint.send(bukkitPlayer, manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+        });
+
         playerFaction.setRallyLocation(new PLocatable(player));
+        playerFaction.addTimer(new FTimer(ETimerType.RALLY_WAYPOINT, 60));
         playerFaction.addTimer(new FTimer(ETimerType.RALLY, manager.getPlugin().getConfiguration().getRallyDuration()));
         playerFaction.setLastRallyUpdate(Time.now());
         FMessage.printRallyUpdate(player, playerFaction);

@@ -12,6 +12,7 @@ import gg.hcfactions.factions.models.ticking.ITickable;
 import gg.hcfactions.factions.models.timer.ITimeable;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.factions.models.waypoint.impl.FactionWaypoint;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
@@ -256,6 +257,19 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     public void finishTimer(ETimerType type) {
         if (type.equals(ETimerType.FREEZE)) {
             sendMessage(FMessage.T_FREEZE_EXPIRE);
+        }
+
+        if (type.equals(ETimerType.RALLY_WAYPOINT)) {
+            final FactionWaypoint rallyWaypoint = manager.getPlugin().getWaypointManager().getWaypoints(this)
+                    .stream()
+                    .filter(wp -> wp.getName().equalsIgnoreCase("Rally"))
+                    .findFirst()
+                    .orElse(null);
+
+            if (rallyWaypoint != null) {
+                rallyWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                manager.getPlugin().getWaypointManager().getWaypointRepository().remove(rallyWaypoint);
+            }
         }
 
         removeTimer(type);
