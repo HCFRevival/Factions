@@ -99,7 +99,13 @@ public enum ETimerType {
             false,
             false,
             false
-    );
+    ),
+    RALLY_WAYPOINT("Rally Waypoint",
+            null,
+            0,
+            false,
+            false,
+            false);
 
     @Getter public final String displayName;
     @Getter public final String scoreboardName;

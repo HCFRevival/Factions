@@ -57,7 +57,7 @@ public final class SpawnCommand extends BaseCommand {
                 writeLocation = "end_exit";
             } else {
                 plugin.getConfiguration().setOverworldSpawn(player.getLocation());
-                writeLocation = "overworld_spawn";
+                writeLocation = "overworld";
             }
         }
 
@@ -72,7 +72,7 @@ public final class SpawnCommand extends BaseCommand {
         }
 
         final YamlConfiguration conf = plugin.loadConfiguration("config");
-        Configs.writePlayerLocation(conf, "factions.spawns." + writeLocation, new PLocatable(player));
+        Configs.writePlayerLocation(conf, "spawns." + writeLocation, new PLocatable(player));
         plugin.saveConfiguration("config", conf);
         player.sendMessage(FMessage.SUCCESS + "Spawnpoint updated");
     }

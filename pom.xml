@@ -34,6 +34,7 @@
                                     <include>gg.hcfactions.libs:bukkit</include>
                                     <include>gg.hcfactions:CX</include>
                                     <include>com.lunarclient:apollo-api</include>
+                                    <include>com.lunarclient:bukkitapi-nethandler</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
@@ -94,6 +95,12 @@
         <repository>
             <id>lunarclient</id>
             <url>https://repo.lunarclient.dev</url>
+        </repository>
+
+        <!-- legacy lunar api -->
+        <repository>
+            <id>lunarclient-private</id>
+            <url>artifactregistry://us-maven.pkg.dev/moonsworth-299m4oir/maven</url>
         </repository>
     </repositories>
 
@@ -157,6 +164,19 @@
             <groupId>com.lunarclient</groupId>
             <artifactId>apollo-api</artifactId>
             <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- legacy lunar api -->
+        <dependency>
+            <groupId>com.lunarclient</groupId>
+            <artifactId>bukkitapi</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.lunarclient</groupId>
+            <artifactId>bukkitapi-nethandler</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

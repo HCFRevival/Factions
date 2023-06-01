@@ -5,4 +5,4 @@ author: John Rockwell <john@hcfactions.gg>
 description: Factions core
 prefix: HCFactions
 api-version: 1.19
-depends: [ProtocolLib]
+depends: [ProtocolLib, LunarClient-API]

@@ -145,6 +145,11 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
+        if (block.getLocation().getWorld() == null) {
+            promise.reject("Invalid block data");
+            return;
+        }
+
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -154,6 +159,15 @@ public final class EventExecutor implements IEventExecutor {
 
         if (!(event.get() instanceof final PalaceEvent palaceEvent)) {
             promise.reject("Event is not a Palace Event");
+            return;
+        }
+
+        if (palaceEvent.getLootChests().stream().anyMatch(pc ->
+                pc.getLocation().getX() == block.getLocation().getX()
+                        && pc.getLocation().getY() == block.getLocation().getY()
+                        && pc.getLocation().getZ() == block.getLocation().getZ()
+                        && pc.getLocation().getWorldName().equalsIgnoreCase(block.getLocation().getWorld().getName()))) {
+            promise.reject("This block is already a Palace Loot Chest");
             return;
         }
 
