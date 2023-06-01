@@ -8,7 +8,6 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
-import gg.hcfactions.factions.models.waypoint.EWaypointType;
 import gg.hcfactions.factions.models.waypoint.IWaypoint;
 import gg.hcfactions.factions.models.waypoint.impl.FactionWaypoint;
 import gg.hcfactions.factions.models.waypoint.impl.GlobalWaypoint;
@@ -112,7 +111,7 @@ public final class WaypointManager implements IManager {
      * @return Optional of IWaypoint
      */
     public Optional<IWaypoint> getWaypoint(String waypointName) {
-        return waypointRepository.stream().filter(w -> w.getType().equals(EWaypointType.GLOBAL) && w.getName().equalsIgnoreCase(waypointName)).findFirst();
+        return waypointRepository.stream().filter(w -> w instanceof GlobalWaypoint && w.getName().equalsIgnoreCase(waypointName)).findFirst();
     }
 
     /**

@@ -50,11 +50,10 @@ public interface IWaypoint {
         }
 
         if (legacy && getLegacyWaypoint() != null) {
-            if (!LunarClientAPI.getInstance().isRunningLunarClient(player)) {
-                return;
+            if (LunarClientAPI.getInstance().isRunningLunarClient(player)) {
+                LunarClientAPI.getInstance().removeWaypoint(player, getLegacyWaypoint());
             }
 
-            LunarClientAPI.getInstance().removeWaypoint(player, getLegacyWaypoint());
             getViewers().remove(player.getUniqueId());
         }
     }
