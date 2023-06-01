@@ -6,15 +6,21 @@ import gg.hcfactions.factions.items.EventBuilderWand;
 import gg.hcfactions.factions.models.events.builder.ECEBuildStep;
 import gg.hcfactions.factions.models.events.builder.ICaptureEventBuilder;
 import gg.hcfactions.factions.models.events.builder.IEventBuilder;
+import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
+import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.libs.bukkit.events.impl.ProcessedChatEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +28,42 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Optional;
 
 public record EventBuilderListener(@Getter Factions plugin) implements Listener {
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onBlockBreak(BlockBreakEvent event) {
+        final Player player = event.getPlayer();
+        final Block block = event.getBlock();
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!block.getType().equals(Material.CHEST)) {
+            return;
+        }
+
+        if (!player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            return;
+        }
+
+        for (PalaceEvent palaceEvent : plugin.getEventManager().getPalaceEvents()) {
+            if (palaceEvent.getLootChests().isEmpty()) {
+                continue;
+            }
+
+            for (PalaceLootChest lootChest : palaceEvent.getLootChests()) {
+                if (lootChest.getLocation().getX() == block.getX()
+                        && lootChest.getLocation().getY() == block.getY()
+                        && lootChest.getLocation().getZ() == block.getZ()
+                        && lootChest.getLocation().getWorldName().equalsIgnoreCase(block.getWorld().getName())) {
+                    player.sendMessage(ChatColor.YELLOW + "Palace chest deleted");
+                    palaceEvent.getLootChests().remove(lootChest);
+                    plugin.getEventManager().saveEvent(palaceEvent);
+                    break;
+                }
+            }
+        }
+    }
+
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
