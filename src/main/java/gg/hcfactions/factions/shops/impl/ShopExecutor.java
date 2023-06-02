@@ -220,6 +220,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 item.getAmount(),
                 item.getItemMeta().getEnchants(),
                 position,
+                false,
                 buyAmount,
                 sellAmount
         );
@@ -271,6 +272,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 item.getType(),
                 item.getAmount(),
                 item.getItemMeta().getEnchants(),
+                false,
                 position,
                 tokenAmount
         );

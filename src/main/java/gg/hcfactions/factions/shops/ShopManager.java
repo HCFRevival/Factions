@@ -136,6 +136,7 @@ public final class ShopManager implements IManager {
                             final int itemPosition = conf.getInt(itemPath + "position");
                             final double itemBuyPrice = conf.getDouble(itemPath + "buy_price");
                             final double itemSellPrice = conf.getDouble(itemPath + "sell_price");
+                            final boolean itemDisabled = conf.get(itemPath + "disabled") != null && conf.getBoolean(itemPath + "disabled");
                             final int itemTokenPrice = conf.get(itemPath + "token_price") != null ? conf.getInt(itemPath + "token_price") : 0;
                             final Map<Enchantment, Integer> itemEnchantments = Maps.newHashMap();
                             Material itemMaterial = null;
@@ -173,6 +174,7 @@ public final class ShopManager implements IManager {
                                         itemMaterial,
                                         itemAmount,
                                         itemEnchantments,
+                                        itemDisabled,
                                         itemPosition,
                                         itemTokenPrice
                                 );
@@ -188,6 +190,7 @@ public final class ShopManager implements IManager {
                                     itemAmount,
                                     itemEnchantments,
                                     itemPosition,
+                                    itemDisabled,
                                     itemBuyPrice,
                                     itemSellPrice
                             );
@@ -275,6 +278,6 @@ public final class ShopManager implements IManager {
     }
 
     public Optional<IMerchant> getMerchantByName(String name) {
-        return merchantRepository.stream().filter(m -> ChatColor.stripColor(m.getMerchantName()).equalsIgnoreCase(name)).findFirst();
+        return merchantRepository.stream().filter(m -> ChatColor.stripColor(m.getMerchantName()).equalsIgnoreCase(name) || ChatColor.stripColor(m.getMerchantName().replaceAll(" ", "")).equalsIgnoreCase(name)).findFirst();
     }
 }

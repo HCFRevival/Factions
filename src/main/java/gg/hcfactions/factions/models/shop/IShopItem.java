@@ -54,6 +54,11 @@ public interface IShopItem {
     double getSellPrice();
 
     /**
+     * @return If true the item can not be purchased/sold
+     */
+    boolean isDisabled();
+
+    /**
      * @return If true this item can be purchased
      */
     default boolean isBuyable() {
@@ -68,6 +73,12 @@ public interface IShopItem {
     }
 
     /**
+     * Sets the disabled state for this shop item
+     * @param b If true the item can not be purchased/sold
+     */
+    void setDisabled(boolean b);
+
+    /**
      * @param asDisplay If true buy/sell info will be added to lore
      * @return ItemStack
      */
@@ -77,6 +88,7 @@ public interface IShopItem {
         builder.setMaterial(getMaterial());
         builder.setAmount(getAmount());
         builder.addFlag(ItemFlag.HIDE_ATTRIBUTES);
+        builder.addFlag(ItemFlag.HIDE_PLACED_ON);
 
         if (getDisplayName() != null) {
             builder.setName(getDisplayName());
@@ -87,7 +99,13 @@ public interface IShopItem {
         }
 
         if (asDisplay) {
+            if (isDisabled()) {
+                builder.setName(ChatColor.DARK_RED + "NOT FOR SALE");
+            }
+
             final List<String> lore = Lists.newArrayList();
+
+            lore.add(ChatColor.RESET + " ");
 
             if (isBuyable()) {
                 lore.add(ChatColor.GREEN + "Buy" + ChatColor.WHITE + ": $" + String.format("%.2f", getBuyPrice()) + ChatColor.YELLOW + " (Left-click)");
