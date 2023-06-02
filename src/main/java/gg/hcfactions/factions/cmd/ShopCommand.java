@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.cmd;
 
+import com.google.common.base.Joiner;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.libs.acf.BaseCommand;
@@ -14,6 +15,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
+
 @CommandAlias("shop")
 @AllArgsConstructor
 public final class ShopCommand extends BaseCommand {
@@ -21,18 +24,22 @@ public final class ShopCommand extends BaseCommand {
 
     @Subcommand("create")
     @Description("Create a new merchant")
-    @Syntax("<name> [event]")
+    @Syntax("[-e] <name>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onCreateMerchant(Player player, String merchantName, @Optional String isEventMerchant) {
+    public void onCreateMerchant(Player player, String args) {
+        final String[] split = args.split(" ");
+        String merchantName = args;
         boolean isEvent = false;
 
-        if (isEventMerchant != null) {
-            if (!isEventMerchant.equalsIgnoreCase("event")) {
-                player.sendMessage(ChatColor.RED + "Invalid event merchant parameters");
+        if (split[0].equalsIgnoreCase("-e")) {
+            isEvent = true;
+
+            if (split.length <= 1) {
+                player.sendMessage(ChatColor.RED + "Merchant name required");
                 return;
             }
 
-            isEvent = true;
+            merchantName = Joiner.on(" ").join(Arrays.asList(split).subList(1, split.length));
         }
 
         plugin.getShopManager().getExecutor().createMerchant(player, merchantName, isEvent, new Promise() {
@@ -53,16 +60,7 @@ public final class ShopCommand extends BaseCommand {
     @Syntax("<merchant> <name> <position>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@merchants")
-    public void onAddToMerchant(Player player, String merchantName, String shopName, String positionName) {
-        int position;
-
-        try {
-            position = Integer.parseInt(positionName);
-        } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid position (not a number)");
-            return;
-        }
-
+    public void onAddToMerchant(Player player, String merchantName, String shopName, int position) {
         final ItemStack hand = player.getInventory().getItemInMainHand();
 
         if (hand.getType().equals(Material.AIR)) {
@@ -107,20 +105,7 @@ public final class ShopCommand extends BaseCommand {
     @Syntax("<merchant> <shop> <position> <buycost> <sellcost>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@merchants")
-    public void onAddToShop(Player player, String merchantName, String shopName, String positionName, String buyName, String sellName) {
-        int position;
-        double buyCost;
-        double sellCost;
-
-        try {
-            position = Integer.parseInt(positionName);
-            buyCost = Double.parseDouble(buyName);
-            sellCost = Double.parseDouble(sellName);
-        } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid item attributes");
-            return;
-        }
-
+    public void onAddToShop(Player player, String merchantName, String shopName, int position, double buyCost, double sellCost) {
         final ItemStack hand = player.getInventory().getItemInMainHand();
 
         if (hand.getType().equals(Material.AIR)) {
@@ -146,18 +131,7 @@ public final class ShopCommand extends BaseCommand {
     @Syntax("<merchant> <shop> <position> <tokens>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@merchants")
-    public void onAddToShop(Player player, String merchantName, String shopName, String positionName, String tokenName) {
-        int position;
-        int tokens;
-
-        try {
-            position = Integer.parseInt(positionName);
-            tokens = Integer.parseInt(tokenName);
-        } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid item attributes");
-            return;
-        }
-
+    public void onAddToShop(Player player, String merchantName, String shopName, int position, int tokens) {
         final ItemStack hand = player.getInventory().getItemInMainHand();
 
         if (hand.getType().equals(Material.AIR)) {
@@ -183,16 +157,8 @@ public final class ShopCommand extends BaseCommand {
     @Syntax("<merchant> <shop> <index>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@merchants")
-    public void onRemoveItem(Player player, String merchantName, String shopName, String indexName) {
-        int i;
-        try {
-            i = Integer.parseInt(indexName);
-        } catch (NumberFormatException ex) {
-            player.sendMessage(ChatColor.RED + "Invalid index: not a number");
-            return;
-        }
-
-        plugin.getShopManager().getExecutor().removeFromShop(player, merchantName, shopName, i, new Promise() {
+    public void onRemoveItem(Player player, String merchantName, String shopName, int index) {
+        plugin.getShopManager().getExecutor().removeFromShop(player, merchantName, shopName, index, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Item has been removed from shop");

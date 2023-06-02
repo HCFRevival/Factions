@@ -5,6 +5,7 @@ import gg.hcfactions.factions.models.shop.impl.GenericMerchant;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
 import lombok.Getter;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public final class MerchantMenu extends GenericMenu {
@@ -12,7 +13,7 @@ public final class MerchantMenu extends GenericMenu {
     private final GenericMerchant<?> merchant;
 
     public MerchantMenu(Factions plugin, Player player, GenericMerchant<?> merchant) {
-        super(plugin, player, merchant.getMerchantName(), 1);
+        super(plugin, player, ChatColor.stripColor(merchant.getMerchantName()), 1);
         this.plugin = plugin;
         this.merchant = merchant;
     }

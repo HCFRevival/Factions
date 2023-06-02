@@ -30,7 +30,7 @@ public final class ShopMenu extends GenericMenu {
     private final GenericShop<?> shop;
 
     public ShopMenu(Factions plugin, Player player, GenericMerchant<?> merchant, GenericShop<?> shop) {
-        super(plugin, player, shop.getShopName(), 6);
+        super(plugin, player, ChatColor.stripColor(shop.getShopName()), 6);
         this.plugin = plugin;
         this.merchant = merchant;
         this.shop = shop;
@@ -107,6 +107,11 @@ public final class ShopMenu extends GenericMenu {
     }
 
     private void handleEventBuy(EventShopItem item, Promise promise) {
+        if (item.isDisabled()) {
+            promise.reject("This item is currently disabled. Check back later.");
+            return;
+        }
+
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 
         if (faction == null) {
@@ -137,6 +142,11 @@ public final class ShopMenu extends GenericMenu {
     }
 
     private void handleBuy(GenericShopItem item, Promise promise) {
+        if (item.isDisabled()) {
+            promise.reject("This item is currently disabled. Check back later.");
+            return;
+        }
+
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
         if (factionPlayer == null) {
@@ -167,6 +177,11 @@ public final class ShopMenu extends GenericMenu {
     }
 
     private void handleSell(GenericShopItem item, Promise promise) {
+        if (item.isDisabled()) {
+            promise.reject("This item is currently disabled. Check back later.");
+            return;
+        }
+
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
         if (factionPlayer == null) {

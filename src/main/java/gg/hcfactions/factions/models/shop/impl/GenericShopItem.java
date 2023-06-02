@@ -3,6 +3,7 @@ package gg.hcfactions.factions.models.shop.impl;
 import gg.hcfactions.factions.models.shop.IShopItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 
@@ -17,6 +18,7 @@ public class GenericShopItem implements IShopItem {
     @Getter public final int amount;
     @Getter public final Map<Enchantment, Integer> enchantments;
     @Getter public final int position;
+    @Getter @Setter public boolean disabled;
     @Getter public final double buyPrice;
     @Getter public final double sellPrice;
 }
