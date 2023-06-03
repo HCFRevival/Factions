@@ -6,10 +6,12 @@ import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
+import gg.hcfactions.libs.bukkit.utils.Worlds;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -156,6 +158,9 @@ public interface IConsumeable {
             }
         });
         // end applying effect to all uuids
+
+        // play audio que at source
+        Worlds.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP);
 
         player.sendMessage(ChatColor.LIGHT_PURPLE + "Your effect was applied to " + ChatColor.AQUA + affected.size() + ChatColor.LIGHT_PURPLE + " players");
     }
