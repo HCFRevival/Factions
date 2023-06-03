@@ -508,7 +508,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                 if (killer.getInventory().getItemInMainHand().hasItemMeta() && Objects.requireNonNull(killer.getInventory().getItemInMainHand().getItemMeta()).hasDisplayName()) {
                     hand = ChatColor.GRAY + "[" + killer.getInventory().getItemInMainHand().getItemMeta().getDisplayName() + ChatColor.GRAY + "]";
                 } else {
-                    hand = ChatColor.RESET + StringUtils.capitalize(killer.getItemInHand().getType().name().replace("_", " ").toLowerCase());
+                    hand = ChatColor.RESET + StringUtils.capitalize(killer.getInventory().getItemInMainHand().getType().name().replace("_", " ").toLowerCase());
                 }
             }
 
