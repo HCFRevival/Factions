@@ -168,7 +168,7 @@ public final class FMessage {
 
     public static void printMemberDeath(PlayerFaction faction, String memberName, double deducted) {
         faction.sendMessage(ChatColor.DARK_RED + "Member Death" + P_NAME + ": " + memberName);
-        faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + Math.round(deducted));
+        faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + deducted);
     }
 
     public static void printFrozenPower(PlayerFaction faction, long duration) {
