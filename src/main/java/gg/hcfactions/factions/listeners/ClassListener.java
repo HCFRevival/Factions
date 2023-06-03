@@ -216,6 +216,7 @@ public final class ClassListener implements Listener {
             return;
         }
 
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
         if (hand == null || hand.getType().equals(Material.AIR)) {
@@ -249,6 +250,14 @@ public final class ClassListener implements Listener {
 
         if (consumeClassItemEvent.isCancelled()) {
             return;
+        }
+
+        if (factionPlayer != null) {
+            if (!factionPlayer.hasTimer(ETimerType.COMBAT)) {
+                FMessage.printCombatTag(player, (plugin.getConfiguration().getAttackerCombatTagDuration()*1000L));
+            }
+
+            factionPlayer.addTimer(new FTimer(ETimerType.COMBAT, plugin.getConfiguration().getAttackerCombatTagDuration()));
         }
 
         consumable.consume(player, event.getItem(), handType);

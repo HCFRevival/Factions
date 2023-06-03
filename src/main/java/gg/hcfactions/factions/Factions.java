@@ -29,6 +29,7 @@ import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 
 import java.util.List;
 
@@ -83,6 +84,23 @@ public final class Factions extends AresPlugin {
             }
 
             factionManager.getPlayerFactions().forEach(pf -> res.add(pf.getName()));
+            return res;
+        });
+
+        cmdMng.getCommandCompletions().registerAsyncCompletion("pfactionsmixed", ctx -> {
+            final List<String> res = Lists.newArrayList();
+
+            if (factionManager == null) {
+                return res;
+            }
+
+            factionManager.getPlayerFactions().forEach(pf -> res.add(pf.getName()));
+            Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
+                if (!res.contains(onlinePlayer.getName())) {
+                    res.add(onlinePlayer.getName());
+                }
+            });
+
             return res;
         });
 

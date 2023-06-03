@@ -147,7 +147,7 @@ public final class FMessage {
     }
 
     public static void printPlayerUninvite(Player player, PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited" + P_NAME + username + LAYER_1 + " from the faction");
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited " + P_NAME + username + LAYER_1 + " from the faction");
     }
 
     public static void printChatChannelChange(Player player, PlayerFaction.ChatChannel channel) {
@@ -168,7 +168,7 @@ public final class FMessage {
 
     public static void printMemberDeath(PlayerFaction faction, String memberName, double deducted) {
         faction.sendMessage(ChatColor.DARK_RED + "Member Death" + P_NAME + ": " + memberName);
-        faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + Math.round(deducted));
+        faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + deducted);
     }
 
     public static void printFrozenPower(PlayerFaction faction, long duration) {

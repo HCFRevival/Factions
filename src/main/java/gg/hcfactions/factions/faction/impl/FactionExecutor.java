@@ -375,7 +375,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER)) {
+        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !bypass) {
             promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
             return;
         }
@@ -1280,15 +1280,15 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     return;
                 }
 
-                if (otherMember.getRank().isHigher(member.getRank()) && !bypass && !leader) {
+                if (otherMember.getRank().isHigherOrEqual(member.getRank()) && !bypass && !leader) {
                     promise.reject(FError.F_HIGHER_RANK.getErrorDescription());
                     return;
                 }
 
-                final PlayerFaction.Rank newRank = PlayerFaction.Rank.OFFICER;
+                final PlayerFaction.Rank newRank = otherMember.getRank().equals(PlayerFaction.Rank.LEADER) ? PlayerFaction.Rank.OFFICER : PlayerFaction.Rank.MEMBER;
 
                 otherMember.setRank(newRank);
-                FMessage.printDemotion(player, demotedAccount.getUsername(), faction, PlayerFaction.Rank.MEMBER);
+                FMessage.printDemotion(player, demotedAccount.getUsername(), faction, newRank);
                 promise.resolve();
             }
 

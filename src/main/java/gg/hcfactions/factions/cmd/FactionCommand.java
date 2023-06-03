@@ -233,7 +233,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("show|who")
     @Description("Fetch details about a faction")
     @Syntax("[name]")
-    @CommandCompletion("@pfactions")
+    @CommandCompletion("@pfactionsmixed")
     public void onFactionShow(Player player, @Optional String name) {
         if (name != null) {
             plugin.getFactionManager().getExecutor().showFactionInfo(player, name);
@@ -267,7 +267,7 @@ public final class FactionCommand extends BaseCommand {
     @Subcommand("chat|channel")
     @Description("Update your faction chat channel")
     @Syntax("[public|faction]")
-    public void onFactionChat(Player player, @Optional String channelName) {
+    public void onFactionChat(Player player, @Optional @Values("public|faction") String channelName) {
         PlayerFaction.ChatChannel channel = null;
 
         if (channelName != null) {

@@ -95,7 +95,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
     private boolean handleBlockModification(Cancellable cancellable, Player player, Block block) {
         final Claim claim = plugin.getClaimManager().getClaimAt(new BLocatable(block));
-        final List<Claim> withinBuildBuffer = plugin.getClaimManager().getClaimsNearby(new PLocatable(player), true);
+        final List<Claim> withinBuildBuffer = plugin.getClaimManager().getClaimsNearby(new BLocatable(block), true);
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
         if (claim == null && !withinBuildBuffer.isEmpty() && !bypass) {
@@ -866,8 +866,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         if (to != null) {
             final IFaction insideFaction = plugin.getFactionManager().getFactionById(to.getOwner());
 
-            if (insideFaction instanceof ServerFaction) {
-                final ServerFaction serverFaction = (ServerFaction) insideFaction;
+            if (insideFaction instanceof final ServerFaction serverFaction) {
                 safezone = serverFaction.getFlag().equals(ServerFaction.Flag.SAFEZONE);
             }
         }

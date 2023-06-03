@@ -55,7 +55,7 @@ public final class FactionUtil {
             }
 
             new Scheduler(plugin).sync(() -> {
-                location.setY(Objects.requireNonNull(location.getBukkitLocation().getWorld()).getHighestBlockYAt(location.getBukkitLocation()));
+                location.setY(Objects.requireNonNull(location.getBukkitLocation().getWorld()).getHighestBlockYAt(location.getBukkitLocation()) + 1);
                 Players.teleportWithVehicle(plugin, player, location.getBukkitLocation());
             }).run();
         }).run();
