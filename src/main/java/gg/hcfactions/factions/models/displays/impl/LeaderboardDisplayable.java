@@ -54,7 +54,7 @@ public final class LeaderboardDisplayable implements IDisplayable {
         }
 
         plugin.getStatsManager().getPlayerLeaderboard(type, playerStatHolders -> {
-            final List<PlayerStatHolder> sublist = playerStatHolders.subList(0, playerStatHolders.size() >= 10 ? 9 : playerStatHolders.size());
+            final List<PlayerStatHolder> sublist = playerStatHolders.subList(0, Math.min(playerStatHolders.size(), 10));
             Collections.reverse(sublist);
 
             new Scheduler(plugin).async(() -> {
