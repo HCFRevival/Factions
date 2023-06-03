@@ -147,7 +147,7 @@ public final class FMessage {
     }
 
     public static void printPlayerUninvite(Player player, PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited" + P_NAME + username + LAYER_1 + " from the faction");
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited " + P_NAME + username + LAYER_1 + " from the faction");
     }
 
     public static void printChatChannelChange(Player player, PlayerFaction.ChatChannel channel) {
