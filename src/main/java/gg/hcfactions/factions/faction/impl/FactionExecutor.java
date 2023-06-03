@@ -375,7 +375,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER)) {
+        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !bypass) {
             promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
             return;
         }
