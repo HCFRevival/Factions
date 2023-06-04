@@ -23,6 +23,7 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import lombok.Getter;
 import org.bson.Document;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -38,6 +39,7 @@ public final class StatsManager implements IManager {
     @Getter public StatsExecutor executor;
     @Getter public StatsConfig config;
     @Getter public Set<IStatHolder> trackerRepository;
+    @Getter public BukkitTask updaterTask;
 
     public StatsManager(Factions plugin, StatsConfig config) {
         this.plugin = plugin;
@@ -48,10 +50,16 @@ public final class StatsManager implements IManager {
     public void onEnable() {
         this.executor = new StatsExecutor(this);
         this.trackerRepository = Sets.newConcurrentHashSet();
+        this.updaterTask = new Scheduler(plugin).async(this::saveStatistics).repeat(60*20L, 60*20L).run();
     }
 
     @Override
     public void onDisable() {
+        if (updaterTask != null) {
+            updaterTask.cancel();
+            updaterTask = null;
+        }
+
         saveStatistics();
 
         this.executor = null;
@@ -59,6 +67,10 @@ public final class StatsManager implements IManager {
     }
 
     public void saveStatistics() {
+        if (trackerRepository.isEmpty()) {
+            return;
+        }
+
         final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
         if (mdb == null) {
             plugin.getAresLogger().error("attempted to save player statistics data but mongo instance was null");
