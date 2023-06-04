@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -33,10 +34,14 @@ public final class FoundOreListener implements Listener {
         this.foundOres = Sets.newConcurrentHashSet();
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         final Player player = event.getPlayer();
         final Block block = event.getBlock();
+
+        if (event.isCancelled()) {
+            return;
+        }
 
         if (!TRACKED_ORES.contains(block.getType())) {
             return;
