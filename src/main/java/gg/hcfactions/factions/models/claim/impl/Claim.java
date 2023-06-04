@@ -60,24 +60,39 @@ public final class Claim implements IClaim, MongoDocument<Claim> {
      * @return True if location is within the provided buffer radius of this claim
      */
     public boolean isInsideBuffer(ILocatable location, double buffer) {
+        return isInsideBuffer(location, buffer, true);
+    }
+
+    /**
+     * Returns true if the provided location is within the buffer radius for this claim
+     * @param location Location to compare against
+     * @param buffer Buffer radius to check
+     * @param ignoreY If true Y level will not be taken in to accont
+     * @return True if location is within the provided buffer radius of this claim
+     * */
+    public boolean isInsideBuffer(ILocatable location, double buffer, boolean ignoreY) {
         if (!location.getWorldName().equals(cornerA.getWorldName())) {
             return false;
         }
 
         double minX = Math.min(cornerA.getX(), cornerB.getX());
+        double minY = Math.min(cornerA.getY(), cornerB.getY());
         double minZ = Math.min(cornerA.getZ(), cornerB.getZ());
         double maxX = Math.max(cornerA.getX(), cornerB.getX());
+        double maxY = Math.max(cornerA.getY(), cornerB.getY());
         double maxZ = Math.max(cornerA.getZ(), cornerB.getZ());
 
         minX -= buffer;
+        minY -= buffer;
         minZ -= buffer;
         maxX += buffer;
+        maxY += buffer;
         maxZ += buffer;
 
         return new SimpleRegion(
-                new BLocatable(cornerA.getWorldName(), minX, location.getY(), minZ),
-                new BLocatable(cornerB.getWorldName(), maxX, location.getY(), maxZ))
-                .isInside(location, true);
+                new BLocatable(cornerA.getWorldName(), minX, (ignoreY ? location.getY() : minY), minZ),
+                new BLocatable(cornerB.getWorldName(), maxX, (ignoreY ? location.getY() : maxY), maxZ))
+                .isInside(location, ignoreY);
     }
 
     /**

@@ -186,10 +186,10 @@ public final class ClaimManager implements IManager {
 
             if (faction instanceof final ServerFaction sf) {
                 if (buildBuffer) {
-                    if (claim.isInsideBuffer(location, sf.getBuildBuffer())) {
+                    if (claim.isInsideBuffer(location, sf.getBuildBuffer(), false)) {
                         result.add(claim);
                     }
-                } else if (claim.isInsideBuffer(location, sf.getClaimBuffer())) {
+                } else if (claim.isInsideBuffer(location, sf.getClaimBuffer(), false)) {
                     result.add(claim);
                 }
 
