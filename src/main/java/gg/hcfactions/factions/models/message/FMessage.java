@@ -215,12 +215,12 @@ public final class FMessage {
 
     public static void printFactionWithdrawn(PlayerFaction faction, Player player, double amount) {
         final String formatted = String.format("%.2f", amount);
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "withdrawn" + INFO + "$" + formatted + LAYER_1 + " from the faction balance");
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "withdrawn" + INFO + " $" + formatted + LAYER_1 + " from the faction balance");
     }
 
     public static void printFactionDeposit(PlayerFaction faction, Player player, double amount) {
         final String formatted = String.format("%.2f", amount);
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "deposited" + INFO + "$" + formatted + LAYER_1 + " in to the faction balance");
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "deposited" + INFO + " $" + formatted + LAYER_1 + " in to the faction balance");
     }
 
     public static void printEotwMessage(String message) {
