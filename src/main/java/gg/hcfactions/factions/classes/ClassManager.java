@@ -80,7 +80,9 @@ public final class ClassManager implements IManager {
             else if (className.equalsIgnoreCase("diver")) {
                 final double damageMultiplier = conf.getDouble(path + "damage_values.damage_multiplier");
                 final double minimumDistance = conf.getDouble(path + "damage_values.minimum_distance");
-                playerClass = new Diver(this, warmup, damageMultiplier, minimumDistance);
+                final int seaCallCooldown = conf.getInt(path + "sea_call_cooldown");
+                final int seaCallDuration = conf.getInt(path + "sea_call_duration");
+                playerClass = new Diver(this, warmup, damageMultiplier, minimumDistance, seaCallCooldown, seaCallDuration);
             }
 
             else if (className.equalsIgnoreCase("miner")) {

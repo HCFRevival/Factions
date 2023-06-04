@@ -73,6 +73,10 @@ data:
       damage_multiplier: 2.0
       # Minimum distance to apply damage multiplier
       minimum_distance: 10.0
+    # Time in seconds a player can use a Heart of the Sea to start rain
+    sea_call_cooldown: 3600
+    # Time in seconds the rain should last when the sea is called
+    sea_call_duration: 600
     warmup: 30
     passive:
       WATER_BREATHING: 1

@@ -10,6 +10,7 @@ import gg.hcfactions.factions.models.classes.IConsumeable;
 import gg.hcfactions.factions.models.classes.impl.Archer;
 import gg.hcfactions.factions.models.classes.impl.Diver;
 import gg.hcfactions.factions.models.classes.impl.Rogue;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
@@ -17,8 +18,13 @@ import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
+import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -193,6 +199,91 @@ public final class ClassListener implements Listener {
                     ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + ChatColor.YELLOW + ")");
 
         }).delay(1L).run();
+    }
+
+    @EventHandler
+    public void onSeaCall(PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+        final World world = player.getWorld();
+
+        if (event.getItem() == null) {
+            return;
+        }
+
+        final ItemStack hand = event.getItem();
+        final EPlayerHand handType = (event.getHand() == null || event.getHand().equals(EquipmentSlot.HAND) ? EPlayerHand.MAIN : EPlayerHand.OFFHAND);
+        final Action action = event.getAction();
+
+        if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.equals(Action.RIGHT_CLICK_AIR)) {
+            return;
+        }
+
+        // Prevents ASSERTION ERROR: TRAP
+        if (!player.getGameMode().equals(GameMode.SURVIVAL)) {
+            return;
+        }
+
+        if (!hand.getType().equals(Material.HEART_OF_THE_SEA)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Diver diver)) {
+            return;
+        }
+
+        if (!world.getEnvironment().equals(World.Environment.NORMAL)) {
+            player.sendMessage(ChatColor.RED + "It can not rain in this world");
+            return;
+        }
+
+        if (!world.isClearWeather()) {
+            player.sendMessage(ChatColor.RED + "It is already raining");
+            return;
+        }
+
+        if (diver.hasSeaCallCooldown(player)) {
+            final long timeUntilNextCall = (diver.getSeaCallCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now());
+            player.sendMessage(ChatColor.RED + "Heart of the Sea is locked for " + ChatColor.RED + "" + ChatColor.BOLD + Time.convertToDecimal(timeUntilNextCall) + ChatColor.RED + "s");
+            return;
+        }
+
+        if (hand.getAmount() > 1) {
+            hand.setAmount(hand.getAmount() - 1);
+        } else if (handType.equals(EPlayerHand.MAIN)) {
+            player.getInventory().setItemInMainHand(null);
+        } else {
+            player.getInventory().setItemInOffHand(null);
+        }
+
+        world.setStorm(true);
+        world.setThunderDuration(diver.getSeaCallDuration()*20);
+        world.setWeatherDuration(diver.getSeaCallDuration()*20);
+
+        // The sea calls for johnsama...
+        final RankService rankService = (RankService) plugin.getService(RankService.class);
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        Bukkit.getOnlinePlayers().stream().filter(op -> op.getWorld().equals(world)).forEach(worldPlayer -> {
+            String displayName = rankService.getFormattedName(player);
+
+            if (faction != null) {
+                if (faction.isMember(worldPlayer)) {
+                    displayName = ChatColor.DARK_GREEN + "[" + faction.getName() + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
+                } else {
+                    displayName = FMessage.LAYER_2 + "[" + FMessage.LAYER_1 + faction.getName() + FMessage.LAYER_2 + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
+                }
+            }
+
+            Players.playSound(worldPlayer, Sound.ITEM_GOAT_HORN_SOUND_3);
+
+            worldPlayer.sendMessage(ChatColor.RESET + " ");
+            worldPlayer.sendMessage(Colors.DARK_AQUA.toBukkit() + "The sea calls for " + displayName);
+            worldPlayer.sendMessage(ChatColor.RESET + " ");
+        });
+
+        diver.getSeaCallCooldowns().put(player.getUniqueId(), (Time.now() + (diver.getSeaCallCooldown()*1000L)));
     }
 
     @EventHandler
