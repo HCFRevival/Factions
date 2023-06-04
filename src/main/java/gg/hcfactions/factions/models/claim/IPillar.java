@@ -21,31 +21,23 @@ public interface IPillar {
             return;
         }
 
+        // set immediately
+        setDrawn(true);
+
         final int startY = (int)getPosition().getY();
         final int finishY = (startY + 32);
-        int cursor = startY;
 
-        while (cursor < finishY) {
-            final Block block = getPosition().getBukkitBlock().getWorld().getBlockAt((int)getPosition().getX(), cursor, (int)getPosition().getZ());
+        for (int y = startY; y < finishY; y++) {
+            final Block block = getPosition().getBukkitBlock().getWorld().getBlockAt((int)getPosition().getX(), y, (int)getPosition().getZ());
 
             if (!block.getType().equals(Material.AIR)) {
-                cursor += 1;
                 continue;
             }
 
             final BLocatable location = new BLocatable(block);
-
-            getViewer().sendBlockChange(
-                    location.getBukkitBlock().getLocation(),
-                    (cursor % 3 == 0 ? getMaterial() : Material.GLASS),
-                    (byte)0
-            );
-
+            getViewer().sendBlockChange(location.getBukkitBlock().getLocation(), (y % 3 == 0 ? getMaterial().createBlockData() : Material.GLASS.createBlockData()));
             getBlocks().add(location);
-            cursor += 1;
         }
-
-        setDrawn(true);
     }
 
     default void hide() {
@@ -55,7 +47,7 @@ public interface IPillar {
 
         getBlocks().forEach(b -> {
             final Block bukkitBlock = b.getBukkitBlock();
-            getViewer().sendBlockChange(bukkitBlock.getLocation(), bukkitBlock.getType(), (byte)0);
+            getViewer().sendBlockChange(bukkitBlock.getLocation(), bukkitBlock.getBlockData());
         });
 
         setDrawn(false);

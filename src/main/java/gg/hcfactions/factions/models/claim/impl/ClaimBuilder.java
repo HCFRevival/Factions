@@ -54,8 +54,7 @@ public final class ClaimBuilder implements IClaimBuilder {
             }
 
             factionPlayer.getPillars().add(pillar);
-
-            new Scheduler(manager.getPlugin()).sync(pillar::draw).delay(5L).run();
+            new Scheduler(manager.getPlugin()).sync(pillar::draw).run();
         }
 
         player.sendMessage(FMessage.LAYER_2 + "Claim point " + FMessage.LAYER_1 + pillarType.name() + FMessage.LAYER_2 + " set at " + FMessage.LAYER_1 + location.toString());
