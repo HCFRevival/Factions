@@ -215,6 +215,7 @@ public final class Factions extends AresPlugin {
         registerListener(new SpawnListener(this));
         registerListener(new WaypointListener(this));
         registerListener(new NameplateListener(this));
+        registerListener(new CosmeticsListener(this));
     }
 
     @Override
