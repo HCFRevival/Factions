@@ -74,6 +74,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new WalletCommand(this));
         registerCommand(new SpawnCommand(this));
         registerCommand(new DisplayCommand(this));
+        registerCommand(new FactionHelpCommand(this));
         registerCommand(new DebugCommand());
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
