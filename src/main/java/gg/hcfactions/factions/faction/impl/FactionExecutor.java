@@ -1641,6 +1641,15 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 if (faction.getHomeLocation() != null && inside.isInside(faction.getHomeLocation(), true)) {
                     faction.setHomeLocation(null);
                     FMessage.printHomeUnset(faction, player);
+
+                    manager.getPlugin().getWaypointManager().getWaypoints(faction)
+                            .stream()
+                            .filter(wp -> wp.getName().equalsIgnoreCase("Home"))
+                            .findFirst()
+                            .ifPresent(homeWaypoint -> {
+                                homeWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                                manager.getPlugin().getWaypointManager().getWaypointRepository().remove(homeWaypoint);
+                            });
                 }
 
                 final double refunded = inside.getCost() * manager.getPlugin().getConfiguration().getClaimRefundPercent();
@@ -1750,6 +1759,12 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     faction.setHomeLocation(null);
 
                     if (faction instanceof PlayerFaction) {
+                        manager.getPlugin().getWaypointManager().getWaypoints(((PlayerFaction) faction))
+                                .stream()
+                                .filter(wp -> wp.getName().equalsIgnoreCase("Home"))
+                                .findFirst()
+                                .ifPresent(homeWaypoint -> homeWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI));
+
                         FMessage.printHomeUnset((PlayerFaction) faction, player);
                     }
                 }
