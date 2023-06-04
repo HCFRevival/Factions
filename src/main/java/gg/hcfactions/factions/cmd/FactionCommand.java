@@ -6,6 +6,7 @@ import gg.hcfactions.factions.models.claim.EClaimBufferType;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.acf.BaseCommand;
 import gg.hcfactions.libs.acf.CommandHelp;
 import gg.hcfactions.libs.acf.annotation.*;
@@ -733,16 +734,28 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("deposit")
+    @Subcommand("deposit|d")
     @Description("Deposit money from your personal balance to your faction balance")
-    @Syntax("<amount>")
+    @Syntax("<amount/all>")
     public void onDepositBalance(Player player, String amount) {
         double v;
-        try {
-            v = Double.parseDouble(amount);
-        } catch (NumberFormatException e) {
-            player.sendMessage(FMessage.ERROR + "Failed to deposit in to faction balance: invalid amount");
-            return;
+
+        if (amount.equalsIgnoreCase("all")) {
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+            if (factionPlayer == null) {
+                player.sendMessage(ChatColor.RED + "Failed to deposit in to faction balance: Failed to obtain profile");
+                return;
+            }
+
+            v = factionPlayer.getBalance();
+        } else {
+            try {
+                v = Double.parseDouble(amount);
+            } catch (NumberFormatException e) {
+                player.sendMessage(FMessage.ERROR + "Failed to deposit in to faction balance: invalid amount");
+                return;
+            }
         }
 
         plugin.getFactionManager().getExecutor().depositMoney(player, v, new Promise() {
@@ -758,7 +771,7 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("withdraw|withdrawl")
+    @Subcommand("withdraw|w")
     @Description("Withdraw money from your faction balance to your personal balance")
     @Syntax("<amount>")
     public void onWithdrawBalance(Player player, String amount) {
