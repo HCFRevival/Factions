@@ -45,6 +45,8 @@ import org.bukkit.entity.Player;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -1303,22 +1305,25 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     public void depositMoney(Player player, double amount, Promise promise) {
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
-        final double roundedAmount = Math.round(amount);
+        final BigDecimal roundedAmount = BigDecimal.valueOf(amount);
+        final double finalAmount = roundedAmount.setScale(2, RoundingMode.HALF_UP).doubleValue();
 
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
             return;
         }
 
-        if (factionPlayer.getBalance() < roundedAmount) {
+        if (factionPlayer.getBalance() < finalAmount) {
             promise.reject(FError.P_CAN_NOT_AFFORD.getErrorDescription());
             return;
         }
 
-        factionPlayer.subtractFromBalance(roundedAmount);
-        FMessage.printFactionDeposit(faction, player, roundedAmount);
-        FMessage.printBalance(player, roundedAmount);
-        faction.setBalance(faction.getBalance() + roundedAmount);
+        factionPlayer.subtractFromBalance(finalAmount);
+        faction.setBalance(faction.getBalance() + finalAmount);
+
+        FMessage.printFactionDeposit(faction, player, finalAmount);
+        FMessage.printBalance(player, factionPlayer.getBalance());
+
         promise.resolve();
     }
 
@@ -1326,7 +1331,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     public void withdrawMoney(Player player, double amount, Promise promise) {
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player.getUniqueId());
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
-        final double roundedAmount = Math.round(amount);
+        final BigDecimal roundedAmount = BigDecimal.valueOf(amount);
+        final double finalAmount = roundedAmount.setScale(2, RoundingMode.HALF_UP).doubleValue();
 
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
@@ -1345,15 +1351,17 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction.getBalance() < roundedAmount) {
+        if (faction.getBalance() < finalAmount) {
             promise.reject(FError.P_CAN_NOT_AFFORD.getErrorDescription());
             return;
         }
 
-        faction.subtractFromBalance(roundedAmount);
-        FMessage.printFactionWithdrawn(faction, player, roundedAmount);
+        faction.subtractFromBalance(finalAmount);
+        factionPlayer.addToBalance(finalAmount);
+
+        FMessage.printFactionWithdrawn(faction, player, finalAmount);
         FMessage.printBalance(player, factionPlayer.getBalance());
-        factionPlayer.addToBalance(roundedAmount);
+
         promise.resolve();
     }
 
@@ -1641,6 +1649,15 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 if (faction.getHomeLocation() != null && inside.isInside(faction.getHomeLocation(), true)) {
                     faction.setHomeLocation(null);
                     FMessage.printHomeUnset(faction, player);
+
+                    manager.getPlugin().getWaypointManager().getWaypoints(faction)
+                            .stream()
+                            .filter(wp -> wp.getName().equalsIgnoreCase("Home"))
+                            .findFirst()
+                            .ifPresent(homeWaypoint -> {
+                                homeWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
+                                manager.getPlugin().getWaypointManager().getWaypointRepository().remove(homeWaypoint);
+                            });
                 }
 
                 final double refunded = inside.getCost() * manager.getPlugin().getConfiguration().getClaimRefundPercent();
@@ -1750,6 +1767,12 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     faction.setHomeLocation(null);
 
                     if (faction instanceof PlayerFaction) {
+                        manager.getPlugin().getWaypointManager().getWaypoints(((PlayerFaction) faction))
+                                .stream()
+                                .filter(wp -> wp.getName().equalsIgnoreCase("Home"))
+                                .findFirst()
+                                .ifPresent(homeWaypoint -> homeWaypoint.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI));
+
                         FMessage.printHomeUnset((PlayerFaction) faction, player);
                     }
                 }

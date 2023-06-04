@@ -220,6 +220,7 @@ public final class StatsManager implements IManager {
         getPlayerLeaderboardData(data -> {
             final List<PlayerStatHolder> stats = Lists.newArrayList(data);
             stats.sort(Comparator.comparingLong(holder -> holder.getStatistic(type)));
+            Collections.reverse(stats);
             consumer.accept(stats);
         });
     }
