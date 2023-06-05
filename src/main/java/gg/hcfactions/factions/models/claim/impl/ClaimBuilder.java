@@ -120,7 +120,7 @@ public final class ClaimBuilder implements IClaimBuilder {
             }
 
             claim.getCornerA().setY(-64);
-            claim.getCornerB().setY(256);
+            claim.getCornerB().setY(320);
         }
 
         new Scheduler(manager.getPlugin()).async(() -> {
