@@ -5,13 +5,15 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
+import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
+import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
-import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.timer.impl.GenericTimer;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,6 +60,14 @@ public final class TimerManager implements IManager {
 
             else if (!plugin.getEventManager().getActiveEvents().isEmpty()) {
                 hasUI = true;
+            }
+
+            else if (plugin.getClassManager().getCurrentClass(player) != null) {
+                final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+                if (playerClass.getConsumables().stream().anyMatch(c -> c.hasCooldown(player))) {
+                    hasUI = true;
+                }
             }
 
             if (!hasUI) {
@@ -137,6 +147,21 @@ public final class TimerManager implements IManager {
             }
         }
 
+        if (plugin.getClassManager().getCurrentClass(player) != null) {
+            final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+            playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(player.getUniqueId())).forEach(cd -> {
+                final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(cd.getEffectType());
+                final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
+                final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
+                final long remainingTime = cd.getCooldowns().get(player.getUniqueId()) - Time.now();
+                final int remainingSeconds = (int)remainingTime / 1000;
+                final net.md_5.bungee.api.ChatColor color = (mapping != null) ? mapping.getColor() : net.md_5.bungee.api.ChatColor.GOLD;
+
+                toRender.add(color + "" + net.md_5.bungee.api.ChatColor.BOLD + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
+            });
+        }
+
         if (!toRender.isEmpty()) {
             final String hud = Joiner.on(ChatColor.RESET + " " + ChatColor.RESET + " ").join(toRender);
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(hud));
@@ -146,6 +171,7 @@ public final class TimerManager implements IManager {
     private void renderSidebar(Player player, FactionPlayer factionPlayer) {
         final CXService commandXService = (CXService)plugin.getService(CXService.class);
         final String SPACER = ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + StringUtils.repeat('-', 24);
+        boolean hasEntries = false;
 
         for (FTimer rt : factionPlayer.getTimers().stream().filter(t -> t.getType().isRender()).collect(Collectors.toList())) {
             final String time = (rt.getType().isDecimal() && rt.getRemainingSeconds() < 10)
@@ -156,6 +182,8 @@ public final class TimerManager implements IManager {
                     rt.getType().getScoreboardPosition(),
                     rt.getType().getDisplayName() + ChatColor.RED + ": " + time
             );
+
+            hasEntries = true;
         }
 
         int eventCursor = 16;
@@ -179,20 +207,51 @@ public final class TimerManager implements IManager {
 
             factionPlayer.getScoreboard().setLine(eventCursor, kothEvent.getDisplayName() + ChatColor.RED + ": " + displayed);
             eventCursor += 1;
+            hasEntries = true;
         }
 
         if (commandXService != null) {
             if (commandXService.getVanishManager().isVanished(player)) {
                 factionPlayer.getScoreboard().setLine(24, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
+                hasEntries = true;
             } else {
                 factionPlayer.getScoreboard().removeLine(24);
             }
 
             if (commandXService.getRebootModule().isEnabled() && commandXService.getRebootModule().isRebootInProgress()) {
                 factionPlayer.getScoreboard().setLine(25, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(commandXService.getRebootModule().getTimeUntilReboot()));
+                hasEntries = true;
             } else {
                 factionPlayer.getScoreboard().removeLine(25);
             }
+        }
+
+        if (plugin.getClassManager().getCurrentClass(player) != null) {
+            final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+            if (playerClass.getConsumables().stream().anyMatch(c -> c.getCooldowns().containsKey(player.getUniqueId()))) {
+                factionPlayer.getScoreboard().setLine(52, ChatColor.GOLD + "" + ChatColor.BOLD + playerClass.getName() + " Effects" + ChatColor.YELLOW + ":");
+
+                if (hasEntries) {
+                    factionPlayer.getScoreboard().setLine(29, ChatColor.RESET + " " + ChatColor.RESET + " ");
+                } else {
+                    factionPlayer.getScoreboard().removeLine(29);
+                }
+            }
+
+            playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(player.getUniqueId())).forEach(cd -> {
+                final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(cd.getEffectType());
+                final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
+                final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
+                final long remainingTime = cd.getCooldowns().get(player.getUniqueId()) - Time.now();
+                final int remainingSeconds = (int)remainingTime / 1000;
+
+                // we do not set hasEntries here
+                if (mapping != null) {
+                    factionPlayer.getScoreboard().setLine(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
+                            + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
+                }
+            });
         }
 
         factionPlayer.getScoreboard().setLine(0, SPACER);

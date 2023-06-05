@@ -2,7 +2,9 @@ package gg.hcfactions.factions.models.classes;
 
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.ClassConsumableReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
@@ -18,6 +20,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -91,8 +94,12 @@ public interface IConsumeable {
 
         new Scheduler(getPlugin()).sync(() -> {
             if (getCooldowns().containsKey(uniqueId) && Bukkit.getPlayer(uniqueId) != null) {
-                Bukkit.getPlayer(uniqueId).sendMessage(ChatColor.GREEN + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " has been unlocked");
+                final FactionPlayer factionPlayer = (FactionPlayer) getPlugin().getPlayerManager().getPlayer(Objects.requireNonNull(Bukkit.getPlayer(uniqueId)));
+                factionPlayer.sendMessage(ChatColor.GREEN + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " has been unlocked");
                 getCooldowns().remove(uniqueId);
+
+                final ClassConsumableReadyEvent readyEvent = new ClassConsumableReadyEvent(player, this);
+                Bukkit.getPluginManager().callEvent(readyEvent);
             }
         }).delay(getCooldown() * 20L).run();
 
