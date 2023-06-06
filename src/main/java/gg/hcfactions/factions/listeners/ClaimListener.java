@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.listeners;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
@@ -21,6 +22,8 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -69,12 +72,18 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         final World.Environment toEnv = to.getWorld().getEnvironment();
 
         if (expectedClaim == null && predictedClaim == null && !fromEnv.equals(toEnv)) {
+            final List<String> notification = Lists.newArrayList();
+
             if (getEnvironmentName(fromEnv) != null) {
-                player.sendMessage(ChatColor.GOLD + "Now Leaving: " + ChatColor.RESET + getEnvironmentName(fromEnv) + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+                notification.add(ChatColor.YELLOW + "Leaving: " + ChatColor.RESET + getEnvironmentName(fromEnv) + ChatColor.YELLOW + " (" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
             }
 
             if (getEnvironmentName(toEnv) != null) {
-                player.sendMessage(ChatColor.GOLD + "Now Entering: " + ChatColor.RESET + getEnvironmentName(toEnv) + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+                notification.add(ChatColor.YELLOW + "Entering: " + ChatColor.RESET + getEnvironmentName(toEnv) + ChatColor.YELLOW + " (" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
+            }
+
+            if (!notification.isEmpty()) {
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Joiner.on(ChatColor.RESET + " ").join(notification)));
             }
         }
 
@@ -327,7 +336,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         final Player player = event.getPlayer();
         final Action action = event.getAction();
         final Block block = event.getClickedBlock();
-        final boolean admin = player.hasPermission("ares.factions.claim");
+        final boolean admin = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
         if (!event.useInteractedBlock().equals(Event.Result.ALLOW)) {
             return;
@@ -803,21 +812,22 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        final List<String> notification = Lists.newArrayList();
+
         if (from != null) {
             final IFaction owner = plugin.getFactionManager().getFactionById(from.getOwner());
 
             if (owner != null) {
-                if (owner instanceof ServerFaction) {
-                    final ServerFaction serverFaction = (ServerFaction) owner;
-                    player.sendMessage(ChatColor.GOLD + "Now Leaving: " + ChatColor.RESET + serverFaction.getDisplayName() + ChatColor.GOLD + " (" + serverFaction.getFlag().getDisplayName() + ChatColor.GOLD + ")");
+                if (owner instanceof final ServerFaction serverFaction) {
+                    notification.add(ChatColor.YELLOW + "Leaving: " + ChatColor.RESET + serverFaction.getDisplayName() + ChatColor.YELLOW + " (" + serverFaction.getFlag().getDisplayName() + ChatColor.YELLOW + ")");
                 } else {
                     final PlayerFaction playerFaction = (PlayerFaction) owner;
                     final ChatColor color = (playerFaction.isMember(player.getUniqueId()) ? ChatColor.GREEN : ChatColor.RED);
-                    player.sendMessage(ChatColor.GOLD + "Now Leaving: " + color + playerFaction.getName() + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+                    notification.add(ChatColor.YELLOW + "Entering: " + color + playerFaction.getName() + ChatColor.YELLOW + " (" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
                 }
             }
         } else if (getEnvironmentName(fromEnv) != null) {
-            player.sendMessage(ChatColor.GOLD + "Now Leaving" + ChatColor.RESET + ": " + getEnvironmentName(fromEnv) + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+            notification.add(ChatColor.YELLOW + "Leaving: " + ChatColor.RESET + getEnvironmentName(fromEnv) + ChatColor.YELLOW + " (" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
         }
 
         if (to != null) {
@@ -825,16 +835,18 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
             if (owner != null) {
                 if (owner instanceof final ServerFaction serverFaction) {
-                    player.sendMessage(ChatColor.GOLD + "Now Entering: " + ChatColor.RESET + serverFaction.getDisplayName() + ChatColor.GOLD + " (" + serverFaction.getFlag().getDisplayName() + ChatColor.GOLD + ")");
+                    notification.add(ChatColor.YELLOW + "Entering: " + ChatColor.RESET + serverFaction.getDisplayName() + ChatColor.YELLOW + " (" + serverFaction.getFlag().getDisplayName() + ChatColor.YELLOW + ")");
                 } else {
                     final PlayerFaction playerFaction = (PlayerFaction) owner;
                     final ChatColor color = (playerFaction.isMember(player.getUniqueId()) ? ChatColor.GREEN : ChatColor.RED);
-                    player.sendMessage(ChatColor.GOLD + "Now Entering: " + color + playerFaction.getName() + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+                    notification.add(ChatColor.YELLOW + "Entering: " + color + playerFaction.getName() + ChatColor.YELLOW + "( " + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
                 }
             }
         } else if (getEnvironmentName(toEnv) != null) {
-            player.sendMessage(ChatColor.GOLD + "Now Entering: " + getEnvironmentName(toEnv) + ChatColor.GOLD + " (" + ChatColor.RED + "Deathban" + ChatColor.GOLD + ")");
+            notification.add(ChatColor.YELLOW + "Entering: " + getEnvironmentName(toEnv) + ChatColor.YELLOW + " (" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
         }
+
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Joiner.on(ChatColor.RESET + " ").join(notification)));
     }
 
     /**

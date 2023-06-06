@@ -590,7 +590,7 @@ public final class ClassListener implements Listener {
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
         // hide scoreboard entry
-        if (factionPlayer != null && factionPlayer.preferScoreboardDisplay && factionPlayer.getScoreboard() != null) {
+        if (factionPlayer != null && factionPlayer.getScoreboard() != null) {
             final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(event.getConsumable().getEffectType());
 
             if (remapped != null) {
@@ -617,7 +617,7 @@ public final class ClassListener implements Listener {
         final Player player = event.getPlayer();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
-        if (factionPlayer == null || !factionPlayer.preferScoreboardDisplay || factionPlayer.getScoreboard() == null) {
+        if (factionPlayer == null || factionPlayer.getScoreboard() == null) {
             return;
         }
 

@@ -91,27 +91,6 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
             FactionUtil.cleanPlayer(plugin, factionPlayer);
             player.teleport(plugin.getConfiguration().getOverworldSpawn());
 
-            // 'prefer scoreboard' setup
-            if (!player.hasPlayedBefore()) {
-                final AccountService accountService = (AccountService) plugin.getService(AccountService.class);
-
-                if (accountService != null) {
-                    accountService.getAccount(player.getUniqueId(), new FailablePromise<>() {
-                        @Override
-                        public void resolve(AresAccount aresAccount) {
-                            if (aresAccount != null) {
-                                factionPlayer.setPreferScoreboardDisplay(aresAccount.getSettings().isEnabled(AresAccount.Settings.SettingValue.PREFER_SCOREBOARD));
-                            }
-                        }
-
-                        @Override
-                        public void reject(String s) {
-                            plugin.getAresLogger().error("encountered an error while trying to load users account: " + s);
-                        }
-                    });
-                }
-            }
-
             if (factionPlayer.isResetOnJoin()) {
                 factionPlayer.setResetOnJoin(false);
 

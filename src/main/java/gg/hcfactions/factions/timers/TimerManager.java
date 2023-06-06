@@ -1,7 +1,5 @@
 package gg.hcfactions.factions.timers;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
@@ -17,15 +15,12 @@ import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public final class TimerManager implements IManager {
@@ -44,7 +39,6 @@ public final class TimerManager implements IManager {
         uiTask = new Scheduler(plugin).sync(() -> Bukkit.getOnlinePlayers().forEach(player -> {
             final FactionPlayer fp = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
             boolean hasUI = false;
-            boolean useScoreboard = fp.isPreferScoreboardDisplay();
 
             if (!fp.getTimers().isEmpty()) {
                 hasUI = true;
@@ -71,13 +65,11 @@ public final class TimerManager implements IManager {
             }
 
             if (!hasUI) {
-                if (fp.isPreferScoreboardDisplay() && fp.getScoreboard() != null && !fp.getScoreboard().isHidden()) {
+                if (fp.getScoreboard() != null && !fp.getScoreboard().isHidden()) {
                     fp.getScoreboard().hide();
                 }
-            } else if (useScoreboard) {
-                renderSidebar(player, fp);
             } else {
-                renderHotbar(player, fp);
+                renderSidebar(player, fp);
             }
         })).repeat(0L, 1L).run();
 
@@ -104,68 +96,6 @@ public final class TimerManager implements IManager {
         updateTask.cancel();
         uiTask = null;
         updateTask = null;
-    }
-
-    private void renderHotbar(Player player, FactionPlayer factionPlayer) {
-        final CXService commandXService = (CXService)plugin.getService(CXService.class);
-        final List<String> toRender = Lists.newArrayList();
-
-        factionPlayer.getTimers().stream().filter(t -> t.getType().isRender()).forEach(rt -> {
-            final String time = (rt.getType().isDecimal() && rt.getRemainingSeconds() < 10)
-                    ? Time.convertToDecimal(rt.getRemaining()) + "s"
-                    : Time.convertToHHMMSS(rt.getRemaining());
-
-            toRender.add(rt.getType().getDisplayName() + ChatColor.RED + ": " + time);
-        });
-
-        plugin.getEventManager().getActiveKothEvents().forEach(kothEvent -> {
-            if (kothEvent.getSession() != null) {
-                final long remainingMillis = kothEvent.getSession().getTimer().getRemaining();
-                final int remainingSeconds = (int)(remainingMillis/1000L);
-
-                String displayed = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
-
-                if (remainingMillis <= 0) {
-                    displayed = "Capturing...";
-                }
-
-                else if (kothEvent.getSession().isContested()) {
-                    displayed = "Contested";
-                }
-
-                toRender.add(kothEvent.getDisplayName() + ChatColor.RED + ": " + displayed);
-            }
-        });
-
-        if (commandXService != null) {
-            if (commandXService.getRebootModule().isEnabled() && commandXService.getRebootModule().isRebootInProgress()) {
-                toRender.add(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Restart" + ChatColor.RED + ": " + Time.convertToHHMMSS(commandXService.getRebootModule().getTimeUntilReboot()));
-            }
-
-            if (commandXService.getVanishManager().isVanished(player)) {
-                toRender.add(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
-            }
-        }
-
-        if (plugin.getClassManager().getCurrentClass(player) != null) {
-            final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
-
-            playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(player.getUniqueId())).forEach(cd -> {
-                final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(cd.getEffectType());
-                final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
-                final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
-                final long remainingTime = cd.getCooldowns().get(player.getUniqueId()) - Time.now();
-                final int remainingSeconds = (int)remainingTime / 1000;
-                final net.md_5.bungee.api.ChatColor color = (mapping != null) ? mapping.getColor() : net.md_5.bungee.api.ChatColor.GOLD;
-
-                toRender.add(color + "" + net.md_5.bungee.api.ChatColor.BOLD + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
-            });
-        }
-
-        if (!toRender.isEmpty()) {
-            final String hud = Joiner.on(ChatColor.RESET + " " + ChatColor.RESET + " ").join(toRender);
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(hud));
-        }
     }
 
     private void renderSidebar(Player player, FactionPlayer factionPlayer) {
