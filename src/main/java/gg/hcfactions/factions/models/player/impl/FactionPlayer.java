@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public final class FactionPlayer implements IFactionPlayer, MongoDocument<FactionPlayer> {
     @Getter public final transient PlayerManager playerManager;
     @Getter @Setter public transient String username;
-    @Getter @Setter public transient boolean safeDisconnecting;
+    @Getter @Setter public transient boolean safeDisconnect;
     @Getter @Setter public transient Claim currentClaim;
     @Getter public FScoreboard scoreboard;
     @Getter public final Set<IPillar> pillars;
@@ -49,7 +49,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     public FactionPlayer(PlayerManager playerManager) {
         this.playerManager = playerManager;
         this.username = null;
-        this.safeDisconnecting = false;
+        this.safeDisconnect = false;
         this.currentClaim = null;
         this.uniqueId = null;
         this.balance = playerManager.getPlugin().getConfiguration().getStartingBalance();
@@ -64,7 +64,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.playerManager = playerManager;
         this.uniqueId = uniqueId;
         this.username = username;
-        this.safeDisconnecting = false;
+        this.safeDisconnect = false;
         this.currentClaim = null;
         this.balance = playerManager.getPlugin().getConfiguration().getStartingBalance();
         this.resetOnJoin = false;
@@ -319,7 +319,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.LOGOUT)) {
-            setSafeDisconnecting(true);
+            setSafeDisconnect(true);
             getBukkit().kickPlayer(FMessage.T_LOGOUT_EXPIRE);
         }
 

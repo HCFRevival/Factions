@@ -67,6 +67,7 @@ public final class FConfig {
     @Getter public int rallyDuration;
     @Getter public int freezeDuration;
     @Getter public int homeDuration;
+    @Getter public int logoutDuration;
     @Getter public int sotwProtectionDuration;
     @Getter public int normalProtectionDuration;
 
@@ -217,6 +218,7 @@ public final class FConfig {
         tridentDuration = conf.getInt("player.timers.trident");
         stuckDuration = conf.getInt("player.timers.stuck");
         homeDuration = conf.getInt("player.timers.home");
+        logoutDuration = conf.getInt("player.timers.logout");
         normalProtectionDuration = conf.getInt("player.timers.protection.normal");
         sotwProtectionDuration = conf.getInt("player.timers.protection.sotw");
         plugin.getAresLogger().info("Combat Tag (Attacker) Duration: " + attackerCombatTagDuration);
@@ -228,6 +230,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Trident Duration: " + tridentDuration);
         plugin.getAresLogger().info("Stuck Duration: " + stuckDuration);
         plugin.getAresLogger().info("Home Duration: " + homeDuration);
+        plugin.getAresLogger().info("Logout Duration: " + logoutDuration);
         plugin.getAresLogger().info("Protection (Normal) Duration: " + normalProtectionDuration);
         plugin.getAresLogger().info("Protection (SOTW) Duration: " + sotwProtectionDuration);
 

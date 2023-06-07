@@ -54,10 +54,22 @@ public interface IFactionPlayer extends IBankable, ITimeable {
     boolean isResetOnJoin();
 
     /**
+     * If true the player will not leave a combat logger when they disconnect
+     * @return If true player does not leave combat loggers
+     */
+    boolean isSafeDisconnect();
+
+    /**
      * Set the players reset flag to the provided state
      * @param b If true the player will be reset when they log in the next time
      */
     void setResetOnJoin(boolean b);
+
+    /**
+     * Set the players safe disconnect flag to the provided state
+     * @param b If true the player will not spawn a combat logger when they disconnect
+     */
+    void setSafeDisconnect(boolean b);
 
     /**
      * Performs initial scoreboard setup
