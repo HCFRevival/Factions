@@ -57,11 +57,8 @@ public class TimerCommand extends BaseCommand {
         }
 
         if (fp.hasTimer(timerType)) {
-            if (fp.isPreferScoreboardDisplay()) {
-                fp.getScoreboard().removeLine(timerType.getScoreboardPosition());
-            }
-
             fp.removeTimer(timerType);
+            fp.getScoreboard().removeLine(timerType.getScoreboardPosition());
         }
 
         final FTimer timer = new FTimer(timerType, duration);
@@ -149,24 +146,5 @@ public class TimerCommand extends BaseCommand {
 
         playerClass.getConsumables().forEach(consumable -> consumable.getCooldowns().remove(player.getUniqueId()));
         player.sendMessage(ChatColor.YELLOW + "Your class cooldowns have been cleared");
-    }
-
-    @CommandAlias("togglescoreboard")
-    @Description("Toggle UI mode for rendering Timers")
-    public void onToggleScoreboard(Player player) {
-        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
-        if (factionPlayer == null) {
-            player.sendMessage(FMessage.ERROR + FError.P_COULD_NOT_LOAD_P.getErrorDescription());
-            return;
-        }
-
-        factionPlayer.setPreferScoreboardDisplay(!factionPlayer.isPreferScoreboardDisplay());
-
-        if (!factionPlayer.isPreferScoreboardDisplay() && !factionPlayer.getScoreboard().isHidden()) {
-            factionPlayer.getScoreboard().hide();
-        }
-
-        player.sendMessage(FMessage.LAYER_1 + "User interface mode has been set to "
-                + ((factionPlayer.isPreferScoreboardDisplay()) ? ChatColor.RED + "Scoreboard" : ChatColor.AQUA + "Hotbar"));
     }
 }

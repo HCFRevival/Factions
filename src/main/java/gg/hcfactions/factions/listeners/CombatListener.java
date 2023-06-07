@@ -14,6 +14,8 @@ import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.state.EServerState;
+import gg.hcfactions.factions.models.stats.EStatisticType;
+import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.state.ServerStateManager;
@@ -359,6 +361,9 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         String deathMessage = prefix + " " + slainUsername + cA + " died";
 
         if (event.getKiller() != null) {
+            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killer.getUniqueId());
+            final int killerKillCount = (int)(killerStats != null ? killerStats.getStatistic(EStatisticType.KILL) : 0);
+
             String hand = ChatColor.RESET + "their fists";
 
             if (!killer.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
@@ -369,7 +374,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                 }
             }
 
-            deathMessage = prefix + " " + slainUsername + cA + " slain by " + killer.getName() + cA + " while using " + hand;
+            deathMessage = prefix + " " + slainUsername + cA + " slain by " + ChatColor.GOLD + killer.getName() + ChatColor.BLUE + "[" + killerKillCount + "]" + cA + " while using " + hand;
         }
 
         Bukkit.broadcastMessage(deathMessage);
@@ -492,16 +497,20 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        final PlayerStatHolder slainStats = plugin.getStatsManager().getPlayerStatistics(slain.getUniqueId());
+        final int slainKillCount = slainStats != null ? (int)slainStats.getStatistic(EStatisticType.KILL) : 0;
         final EntityDamageEvent.DamageCause reason = slain.getLastDamageCause().getCause();
         final String prefix = ChatColor.RED + "RIP:" + ChatColor.RESET;
-        final String slainUsername = ChatColor.GOLD + slain.getName() + ChatColor.RESET;
+        final String slainUsername = ChatColor.GOLD + slain.getName() + ChatColor.BLUE + "[" + slainKillCount + "]" + ChatColor.RESET;
         final ChatColor cA = ChatColor.RED;
         final ChatColor cB = ChatColor.BLUE;
 
         slain.getWorld().strikeLightningEffect(slain.getLocation());
 
         if (killer != null && !killer.getUniqueId().equals(slain.getUniqueId())) {
-            final String killerUsername = ChatColor.GOLD + killer.getName() + ChatColor.RESET;
+            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killer.getUniqueId());
+            final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) + 1 : 0;
+            final String killerUsername = ChatColor.GOLD + killer.getName() + ChatColor.BLUE + "[" + killerKillCount + ChatColor.BLUE + "]" +  ChatColor.RESET;
             String hand = ChatColor.RESET + "their fists";
 
             if (!killer.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {

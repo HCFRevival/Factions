@@ -183,3 +183,13 @@ state:
 lunar_api:
   # If set to true we will use the legacy Lunar API to send packets to Lunar Clients
   use_legacy: true
+
+# Custom crafting recipes
+custom_recipes:
+  saddle: true
+  heart_of_the_sea: true
+  trident: true
+  chainmail_armor: true
+  totem: true
+  gapple: true
+  nametag: true

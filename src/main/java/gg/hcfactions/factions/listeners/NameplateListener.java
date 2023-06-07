@@ -130,7 +130,7 @@ public record NameplateListener(@Getter Factions plugin) implements Listener {
 
                 if (bukkitMember != null) {
                     if (LunarClientAPI.getInstance().isRunningLunarClient(bukkitMember) && acs.getCachedAccount(bukkitMember.getUniqueId()).getSettings().isEnabled(AresAccount.Settings.SettingValue.LUNAR_FACTION_NAMEPLATES)) {
-                        LunarClientAPI.getInstance().overrideNametag(bukkitMember, List.of(ChatColor.RESET + bukkitMember.getName()), bukkitMember);
+                        LunarClientAPI.getInstance().overrideNametag(bukkitMember, List.of(ChatColor.RED + bukkitMember.getName()), bukkitMember);
                     }
 
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

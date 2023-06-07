@@ -2,6 +2,7 @@ package gg.hcfactions.factions;
 
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.stats.StatsConfig;
+import gg.hcfactions.factions.utils.FRecipes;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
 import gg.hcfactions.libs.bukkit.utils.Configs;
 import lombok.Getter;
@@ -67,6 +68,7 @@ public final class FConfig {
     @Getter public int rallyDuration;
     @Getter public int freezeDuration;
     @Getter public int homeDuration;
+    @Getter public int logoutDuration;
     @Getter public int sotwProtectionDuration;
     @Getter public int normalProtectionDuration;
 
@@ -107,6 +109,15 @@ public final class FConfig {
     // lunar
     @Getter public boolean useLegacyLunarAPI;
 
+    // custom crafting recipes
+    @Getter public boolean saddleRecipeEnabled;
+    @Getter public boolean heartOfTheSeaRecipeEnabled;
+    @Getter public boolean tridentRecipeEnabled;
+    @Getter public boolean chainmailArmorRecipeEnabled;
+    @Getter public boolean totemRecipeEnabled;
+    @Getter public boolean gappleRecipeEnabled;
+    @Getter public boolean nametagRecipeEnabled;
+
     public FConfig(Factions plugin) {
         this.plugin = plugin;
     }
@@ -126,6 +137,22 @@ public final class FConfig {
                 minDeathbanDuration,
                 lifeUseDelay,
                 shopUrl
+        );
+    }
+
+    /**
+     * Parses custom recipe config values and returns a recipe config
+     * @return Faction Custom Recipe Config
+     */
+    public FRecipes.Config getRecipeConfig() {
+        return new FRecipes.Config(
+                saddleRecipeEnabled,
+                heartOfTheSeaRecipeEnabled,
+                tridentRecipeEnabled,
+                chainmailArmorRecipeEnabled,
+                totemRecipeEnabled,
+                gappleRecipeEnabled,
+                nametagRecipeEnabled
         );
     }
 
@@ -217,6 +244,7 @@ public final class FConfig {
         tridentDuration = conf.getInt("player.timers.trident");
         stuckDuration = conf.getInt("player.timers.stuck");
         homeDuration = conf.getInt("player.timers.home");
+        logoutDuration = conf.getInt("player.timers.logout");
         normalProtectionDuration = conf.getInt("player.timers.protection.normal");
         sotwProtectionDuration = conf.getInt("player.timers.protection.sotw");
         plugin.getAresLogger().info("Combat Tag (Attacker) Duration: " + attackerCombatTagDuration);
@@ -228,6 +256,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Trident Duration: " + tridentDuration);
         plugin.getAresLogger().info("Stuck Duration: " + stuckDuration);
         plugin.getAresLogger().info("Home Duration: " + homeDuration);
+        plugin.getAresLogger().info("Logout Duration: " + logoutDuration);
         plugin.getAresLogger().info("Protection (Normal) Duration: " + normalProtectionDuration);
         plugin.getAresLogger().info("Protection (SOTW) Duration: " + sotwProtectionDuration);
 
@@ -268,5 +297,20 @@ public final class FConfig {
 
         useLegacyLunarAPI = conf.getBoolean("lunar_api.use_legacy");
         plugin.getAresLogger().info("Use Legacy Lunar API: " + useLegacyLunarAPI);
+
+        saddleRecipeEnabled = conf.getBoolean("custom_recipes.saddle");
+        heartOfTheSeaRecipeEnabled = conf.getBoolean("custom_recipes.heart_of_the_sea");
+        tridentRecipeEnabled = conf.getBoolean("custom_recipes.trident");
+        chainmailArmorRecipeEnabled = conf.getBoolean("custom_recipes.chainmail_armor");
+        totemRecipeEnabled = conf.getBoolean("custom_recipes.totem");
+        gappleRecipeEnabled = conf.getBoolean("custom_recipes.gapple");
+        nametagRecipeEnabled = conf.getBoolean("custom_recipes.nametag");
+        plugin.getAresLogger().info("Saddle Recipe: " + saddleRecipeEnabled);
+        plugin.getAresLogger().info("Heart of the Sea Recipe: " + heartOfTheSeaRecipeEnabled);
+        plugin.getAresLogger().info("Trident Recipe: " + tridentRecipeEnabled);
+        plugin.getAresLogger().info("Chainmail Armor Recipe: " + chainmailArmorRecipeEnabled);
+        plugin.getAresLogger().info("Totem Recipe: " + totemRecipeEnabled);
+        plugin.getAresLogger().info("Gapple Recipe: " + gappleRecipeEnabled);
+        plugin.getAresLogger().info("Nametag Recipe: " + nametagRecipeEnabled);
     }
 }

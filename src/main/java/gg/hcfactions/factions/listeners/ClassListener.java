@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
+import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
 import gg.hcfactions.factions.models.classes.EPlayerHand;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IConsumeable;
@@ -17,14 +18,12 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
+import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextColor;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -238,7 +237,7 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        if (!world.isClearWeather()) {
+        if (world.hasStorm()) {
             player.sendMessage(ChatColor.RED + "It is already raining");
             return;
         }
@@ -573,5 +572,60 @@ public final class ClassListener implements Listener {
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.TRIDENT, plugin.getConfiguration().getTridentDuration()));
+    }
+
+    /**
+     * Clear expired consumable effects from scoreboard
+     * @param event ClassConsumableReadyEvent
+     */
+    @EventHandler
+    public void onConsumableReady(ClassConsumableReadyEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (playerClass == null) {
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        // hide scoreboard entry
+        if (factionPlayer != null && factionPlayer.getScoreboard() != null) {
+            final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(event.getConsumable().getEffectType());
+
+            if (remapped != null) {
+                final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
+
+                if (mapping != null) {
+                    factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
+                }
+            }
+
+            if (playerClass.getConsumables().stream().noneMatch(c -> c.hasCooldown(player))) {
+                factionPlayer.getScoreboard().removeLine(29);
+                factionPlayer.getScoreboard().removeLine(52);
+            }
+        }
+    }
+
+    /**
+     * Clear scoreboard entries for player class cooldowns
+     * @param event ClassDeactivateEvent
+     */
+    @EventHandler
+    public void onPlayerClassDeactivate(ClassDeactivateEvent event) {
+        final Player player = event.getPlayer();
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (factionPlayer == null || factionPlayer.getScoreboard() == null) {
+            return;
+        }
+
+        factionPlayer.getScoreboard().removeLine(29);
+        factionPlayer.getScoreboard().removeLine(52);
+
+        for (EEffectScoreboardMapping mapping : EEffectScoreboardMapping.values()) {
+            factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
+        }
     }
 }

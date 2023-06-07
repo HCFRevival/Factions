@@ -18,6 +18,7 @@ import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.factions.stats.StatsManager;
 import gg.hcfactions.factions.timers.TimerManager;
+import gg.hcfactions.factions.utils.FRecipes;
 import gg.hcfactions.factions.waypoints.WaypointManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
@@ -75,6 +76,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new SpawnCommand(this));
         registerCommand(new DisplayCommand(this));
         registerCommand(new FactionHelpCommand(this));
+        registerCommand(new LogoutCommand(this));
         registerCommand(new DebugCommand());
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
@@ -217,6 +219,9 @@ public final class Factions extends AresPlugin {
         registerListener(new WaypointListener(this));
         registerListener(new NameplateListener(this));
         registerListener(new CosmeticsListener(this));
+
+        // custom recipes
+        new FRecipes(this, configuration.getRecipeConfig()).register();
     }
 
     @Override

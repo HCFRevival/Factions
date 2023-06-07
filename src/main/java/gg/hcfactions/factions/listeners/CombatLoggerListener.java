@@ -70,6 +70,10 @@ public final class CombatLoggerListener implements Listener {
             return;
         }
 
+        if (account.isSafeDisconnect()) {
+            return;
+        }
+
         if (insideClaim != null) {
             final ServerFaction sf = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
 

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public final class FactionPlayer implements IFactionPlayer, MongoDocument<FactionPlayer> {
     @Getter public final transient PlayerManager playerManager;
     @Getter @Setter public transient String username;
-    @Getter @Setter public transient boolean safeDisconnecting;
+    @Getter @Setter public transient boolean safeDisconnect;
     @Getter @Setter public transient Claim currentClaim;
     @Getter public FScoreboard scoreboard;
     @Getter public final Set<IPillar> pillars;
@@ -44,18 +44,16 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     @Getter public UUID uniqueId;
     @Getter @Setter public double balance;
     @Getter @Setter public boolean resetOnJoin;
-    @Getter @Setter public boolean preferScoreboardDisplay;
     @Getter public Set<FTimer> timers;
 
     public FactionPlayer(PlayerManager playerManager) {
         this.playerManager = playerManager;
         this.username = null;
-        this.safeDisconnecting = false;
+        this.safeDisconnect = false;
         this.currentClaim = null;
         this.uniqueId = null;
         this.balance = playerManager.getPlugin().getConfiguration().getStartingBalance();
         this.resetOnJoin = false;
-        this.preferScoreboardDisplay = true;
         this.scoreboard = null;
         this.timers = Sets.newConcurrentHashSet();
         this.pillars = Sets.newHashSet();
@@ -66,11 +64,10 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.playerManager = playerManager;
         this.uniqueId = uniqueId;
         this.username = username;
-        this.safeDisconnecting = false;
+        this.safeDisconnect = false;
         this.currentClaim = null;
         this.balance = playerManager.getPlugin().getConfiguration().getStartingBalance();
         this.resetOnJoin = false;
-        this.preferScoreboardDisplay = true;
         this.scoreboard = null;
         this.timers = Sets.newConcurrentHashSet();
         this.pillars = Sets.newHashSet();
@@ -293,7 +290,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     public void removeTimer(ETimerType type, boolean removeScoreboard) {
         getTimers().removeIf(t -> t.getType().equals(type));
 
-        if (removeScoreboard && preferScoreboardDisplay && scoreboard != null) {
+        if (removeScoreboard && scoreboard != null) {
             scoreboard.removeLine(type.getScoreboardPosition());
         }
     }
@@ -322,7 +319,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.LOGOUT)) {
-            setSafeDisconnecting(true);
+            setSafeDisconnect(true);
             getBukkit().kickPlayer(FMessage.T_LOGOUT_EXPIRE);
         }
 
@@ -369,7 +366,6 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         this.uniqueId = UUID.fromString(document.getString("uuid"));
         this.balance = document.getDouble("balance");
         this.resetOnJoin = document.getBoolean("reset_on_join");
-        this.preferScoreboardDisplay = document.getBoolean("prefer_scoreboard");
 
         if (document.containsKey("timers")) {
             final List<Document> timerDocs = document.getList("timers", Document.class);
@@ -388,7 +384,6 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
                 .append("uuid", uniqueId.toString())
                 .append("balance", balance)
                 .append("reset_on_join", resetOnJoin)
-                .append("prefer_scoreboard", preferScoreboardDisplay)
                 .append("timers", timerDocs);
     }
 }
