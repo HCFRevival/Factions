@@ -375,7 +375,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 event.setUseInteractedBlock(Event.Result.DENY);
             }
         } else if (owner instanceof final PlayerFaction pf) {
-            if (!pf.isRaidable() && pf.getMember(player.getUniqueId()) == null && !admin) {
+            if (!pf.isRaidable() && pf.getMember(player.getUniqueId()) == null) {
                 if (!action.equals(Action.PHYSICAL)) {
                     player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.YELLOW + pf.getName());
                 }
