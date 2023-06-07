@@ -23,7 +23,9 @@ public final class EventSchedulerTask {
                     manager.getKothTickingTask().start();
                 }
 
-                koth.startEvent();
+                if (!koth.isActive()) {
+                    koth.startEvent();
+                }
             }
         })).repeat(0L, 60 * 20L).run();
     }
