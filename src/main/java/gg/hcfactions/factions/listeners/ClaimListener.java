@@ -21,6 +21,7 @@ import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -34,6 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.ItemStack;
@@ -291,6 +293,80 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 event.setCancelled(true);
                 return;
             }
+        }
+    }
+
+    /**
+     * Handle item frame edit events
+     *
+     * @param event PlayerItemFrameChangeEvent
+     */
+    @EventHandler
+    public void onPlayerEditItemFrame(PlayerItemFrameChangeEvent event) {
+        final Player player = event.getPlayer();
+
+        if (player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            return;
+        }
+
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(event.getItemFrame().getLocation().getBlock()));
+        if (insideClaim == null) {
+            return;
+        }
+
+        final IFaction claimOwner = plugin.getFactionManager().getFactionById(insideClaim.getOwner());
+        if (claimOwner == null) {
+            return;
+        }
+
+        if (claimOwner instanceof final ServerFaction sf) {
+            player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.RESET + sf.getDisplayName());
+            event.setCancelled(true);
+            return;
+        }
+
+        final PlayerFaction pf = (PlayerFaction) claimOwner;
+        if (!pf.isMember(player) && !pf.isRaidable()) {
+            player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.YELLOW + pf.getName());
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Handle item frame break event
+     *
+     * @param event HangingBreakByEntityEvent
+     */
+    @EventHandler
+    public void onItemFrame(HangingBreakByEntityEvent event) {
+        if (!(event.getRemover() instanceof final Player player)) {
+            return;
+        }
+
+        if (player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            return;
+        }
+
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(event.getEntity().getLocation().getBlock()));
+        if (insideClaim == null) {
+            return;
+        }
+
+        final IFaction claimOwner = plugin.getFactionManager().getFactionById(insideClaim.getOwner());
+        if (claimOwner == null) {
+            return;
+        }
+
+        if (claimOwner instanceof final ServerFaction sf) {
+            player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.RESET + sf.getDisplayName());
+            event.setCancelled(true);
+            return;
+        }
+
+        final PlayerFaction pf = (PlayerFaction) claimOwner;
+        if (!pf.isMember(player) && !pf.isRaidable()) {
+            player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.YELLOW + pf.getName());
+            event.setCancelled(true);
         }
     }
 
