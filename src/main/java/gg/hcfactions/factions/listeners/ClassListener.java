@@ -237,7 +237,7 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        if (!world.isClearWeather()) {
+        if (world.hasStorm()) {
             player.sendMessage(ChatColor.RED + "It is already raining");
             return;
         }
