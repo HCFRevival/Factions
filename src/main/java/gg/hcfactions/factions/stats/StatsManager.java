@@ -98,8 +98,6 @@ public final class StatsManager implements IManager {
                 pColl.insertOne(((PlayerStatHolder) ph).toDocument());
             }
         });
-
-        plugin.getAresLogger().info("finished writing player statistics to db");
     }
 
     /**
