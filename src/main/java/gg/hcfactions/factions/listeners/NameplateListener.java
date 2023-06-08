@@ -39,6 +39,12 @@ public record NameplateListener(@Getter Factions plugin) implements Listener {
             final PlayerFaction otherFaction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
             final AresAccount otherAccount = acs.getCachedAccount(player.getUniqueId());
 
+            /*
+                self is a member of other (friendly)
+                self is not a member of other, but they have a faction (enemy)
+                self is not a member of any faction (red)
+             */
+
             // send self to other players
             if (otherAccount.getSettings().isEnabled(AresAccount.Settings.SettingValue.LUNAR_FACTION_NAMEPLATES) && LunarClientAPI.getInstance().isRunningLunarClient(player)) {
                 if (otherFaction != null && otherFaction.isMember(viewer)) {
@@ -49,27 +55,33 @@ public record NameplateListener(@Getter Factions plugin) implements Listener {
                     LunarClientAPI.getInstance().overrideNametag(viewer, FMessage.getEnemyNametag(viewer.getName(), selfFaction.getName()), player);
                 }
 
-                else if (!viewer.getUniqueId().equals(player.getUniqueId())) {
+                else if (!player.getUniqueId().equals(viewer.getUniqueId())) {
                     LunarClientAPI.getInstance().overrideNametag(viewer, List.of(ChatColor.RED + viewer.getName()), player);
                 }
             }
 
+            // self is not null, other player is member of self (friendly)
+            // other faction is not null (enemy)
+            // other faction is null and viewer is not player (red)
+            // player is self (white)
 
             // send other players to self
-            if (selfFaction != null && selfFaction.isMember(player)) {
-                LunarClientAPI.getInstance().overrideNametag(player, FMessage.getFriendlyNametag(player.getName(), selfFaction.getName()), viewer);
-            }
+            if (selfAccount.getSettings().isEnabled(AresAccount.Settings.SettingValue.LUNAR_FACTION_NAMEPLATES) && LunarClientAPI.getInstance().isRunningLunarClient(viewer)) {
+                if (selfFaction != null && selfFaction.isMember(player)) {
+                    LunarClientAPI.getInstance().overrideNametag(player, FMessage.getFriendlyNametag(player.getName(), selfFaction.getName()), viewer);
+                }
 
-            else if (otherFaction != null) {
-                LunarClientAPI.getInstance().overrideNametag(player, FMessage.getEnemyNametag(player.getName(), otherFaction.getName()), viewer);
-            }
+                else if (otherFaction != null) {
+                    LunarClientAPI.getInstance().overrideNametag(player, FMessage.getEnemyNametag(player.getName(), otherFaction.getName()), viewer);
+                }
 
-            else if (!viewer.getUniqueId().equals(player.getUniqueId())) {
-                LunarClientAPI.getInstance().overrideNametag(player, List.of(ChatColor.RED + player.getName()), viewer);
-            }
+                else if (!viewer.getUniqueId().equals(player.getUniqueId())) {
+                    LunarClientAPI.getInstance().overrideNametag(player, List.of(ChatColor.RED + player.getName()), viewer);
+                }
 
-            else {
-                LunarClientAPI.getInstance().overrideNametag(player, List.of(ChatColor.RESET + player.getName()), viewer);
+                else {
+                    LunarClientAPI.getInstance().overrideNametag(player, List.of(ChatColor.RESET + player.getName()), viewer);
+                }
             }
         }
     }
