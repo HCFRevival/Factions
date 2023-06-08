@@ -60,29 +60,6 @@ public final class ShopManager implements IManager {
     }
 
     public void loadMerchants() {
-        /*
-            MerchantName:
-                display_name: 'Example Merchant'
-                location:
-                    x: 100
-                    y: 100
-                    z: 100
-                    world: world
-                shops:
-                    ShopName:
-                        display_name
-                        icon: DIAMOND
-                        position: 10
-                        items:
-                           aei32041-390f294asjk-1903949ak1-3o034012:
-                                display_name: Diamond Block
-                                material: DIAMOND_BLOCk
-                                amount: 16
-                                position: 10
-                                buy_price: 0
-                                sell_price: 3400
-         */
-
         final YamlConfiguration conf = plugin.loadConfiguration("shops");
 
         merchantRepository.clear();
@@ -139,6 +116,7 @@ public final class ShopManager implements IManager {
                             final boolean itemDisabled = conf.get(itemPath + "disabled") != null && conf.getBoolean(itemPath + "disabled");
                             final int itemTokenPrice = conf.get(itemPath + "token_price") != null ? conf.getInt(itemPath + "token_price") : 0;
                             final Map<Enchantment, Integer> itemEnchantments = Maps.newHashMap();
+                            final List<String> itemLore = Lists.newArrayList();
                             Material itemMaterial = null;
 
                             if (itemMaterialName == null) {
@@ -167,12 +145,19 @@ public final class ShopManager implements IManager {
                                 }
                             }
 
+                            if (conf.get(itemPath + "lore") != null) {
+                                for (String loreLine : conf.getStringList(itemPath + "lore")) {
+                                    itemLore.add(ChatColor.translateAlternateColorCodes('&', loreLine));
+                                }
+                            }
+
                             if (itemTokenPrice > 0) {
                                 final EventShopItem item = new EventShopItem(
                                         UUID.fromString(shopItemId),
                                         itemDisplayName,
                                         itemMaterial,
                                         itemAmount,
+                                        itemLore,
                                         itemEnchantments,
                                         itemDisabled,
                                         itemPosition,
@@ -188,6 +173,7 @@ public final class ShopManager implements IManager {
                                     itemDisplayName,
                                     itemMaterial,
                                     itemAmount,
+                                    itemLore,
                                     itemEnchantments,
                                     itemPosition,
                                     itemDisabled,
@@ -252,6 +238,10 @@ public final class ShopManager implements IManager {
                 
                 if (item instanceof EventShopItem) {
                     conf.set(itemPath + "token_price", ((EventShopItem)item).getTokenPrice());
+                }
+
+                if (item.getLore() != null && !item.getLore().isEmpty()) {
+                    conf.set(itemPath + "lore", item.getLore());
                 }
 
                 if (item.getEnchantments() != null && !item.getEnchantments().isEmpty()) {

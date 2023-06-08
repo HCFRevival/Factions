@@ -34,6 +34,11 @@ public interface IShopItem {
     int getAmount();
 
     /**
+     * @return Item lore to apply
+     */
+    List<String> getLore();
+
+    /**
      * @return Enchantments to apply
      */
     Map<Enchantment, Integer> getEnchantments();
@@ -84,6 +89,7 @@ public interface IShopItem {
      */
     default ItemStack getItem(boolean asDisplay) {
         final ItemBuilder builder = new ItemBuilder();
+        final List<String> lore = Lists.newArrayList();
 
         builder.setMaterial(getMaterial());
         builder.setAmount(getAmount());
@@ -98,12 +104,14 @@ public interface IShopItem {
             builder.addEnchant(getEnchantments());
         }
 
+        if (getLore() != null && !getLore().isEmpty()) {
+            lore.addAll(getLore());
+        }
+
         if (asDisplay) {
             if (isDisabled()) {
                 builder.setName(ChatColor.DARK_RED + "NOT FOR SALE");
             }
-
-            final List<String> lore = Lists.newArrayList();
 
             lore.add(ChatColor.RESET + " ");
 
@@ -114,10 +122,9 @@ public interface IShopItem {
             if (isSellable()) {
                 lore.add(ChatColor.RED + "Sell" + ChatColor.WHITE + ": $" + String.format("%.2f", getSellPrice()) + ChatColor.YELLOW + " (Right-click)");
             }
-
-            builder.addLore(lore);
         }
 
+        builder.addLore(lore);
         return builder.build();
     }
 }

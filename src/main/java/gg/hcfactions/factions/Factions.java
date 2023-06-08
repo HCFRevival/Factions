@@ -7,6 +7,7 @@ import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.cmd.*;
+import gg.hcfactions.factions.crowbar.CrowbarManager;
 import gg.hcfactions.factions.displays.DisplayManager;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
@@ -49,6 +50,7 @@ public final class Factions extends AresPlugin {
     @Getter public ShopManager shopManager;
     @Getter public DisplayManager displayManager;
     @Getter public WaypointManager waypointManager;
+    @Getter public CrowbarManager crowbarManager;
 
     @Override
     public void onEnable() {
@@ -77,7 +79,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new DisplayCommand(this));
         registerCommand(new FactionHelpCommand(this));
         registerCommand(new LogoutCommand(this));
-        registerCommand(new DebugCommand());
+        registerCommand(new DebugCommand(this));
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
             final List<String> res = Lists.newArrayList();
@@ -180,6 +182,7 @@ public final class Factions extends AresPlugin {
         shopManager = new ShopManager(this);
         displayManager = new DisplayManager(this);
         waypointManager = new WaypointManager(this);
+        crowbarManager = new CrowbarManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -194,6 +197,7 @@ public final class Factions extends AresPlugin {
         shopManager.onEnable();
         displayManager.onEnable();
         waypointManager.onEnable();
+        crowbarManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -219,6 +223,7 @@ public final class Factions extends AresPlugin {
         registerListener(new WaypointListener(this));
         registerListener(new NameplateListener(this));
         registerListener(new CosmeticsListener(this));
+        registerListener(new CrowbarListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();
@@ -245,6 +250,7 @@ public final class Factions extends AresPlugin {
         shopManager.onDisable();
         displayManager.onDisable();
         waypointManager.onDisable();
+        crowbarManager.onDisable();
 
         playerManager = null;
         factionManager = null;
