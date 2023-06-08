@@ -17,14 +17,26 @@ import java.util.UUID;
 public final class EventShopItem extends GenericShopItem {
     @Getter public final int tokenPrice;
 
-    public EventShopItem(UUID id, String displayName, Material material, int amount, Map<Enchantment, Integer> enchantments,  boolean disabled, int position, int tokenPrice) {
-        super(id, displayName, material, amount, enchantments, position, disabled, 0.0, 0.0);
+    public EventShopItem(
+            UUID id,
+            String displayName,
+            Material material,
+            int amount,
+            List<String> lore,
+            Map<Enchantment, Integer> enchantments,
+            boolean disabled,
+            int position,
+            int tokenPrice
+    ) {
+        super(id, displayName, material, amount, lore, enchantments, position, disabled, 0.0, 0.0);
         this.tokenPrice = tokenPrice;
     }
 
     @Override
     public ItemStack getItem(boolean asDisplay) {
         final ItemBuilder builder = new ItemBuilder();
+        final List<String> lore = Lists.newArrayList();
+
         builder.setMaterial(material);
         builder.setAmount(amount);
         builder.addFlag(ItemFlag.HIDE_ATTRIBUTES);
@@ -37,17 +49,20 @@ public final class EventShopItem extends GenericShopItem {
             builder.addEnchant(enchantments);
         }
 
+        if (getLore() != null && !getLore().isEmpty()) {
+            lore.addAll(getLore());
+        }
+
         if (asDisplay) {
             if (isDisabled()) {
                 builder.setName(ChatColor.DARK_RED + "NOT FOR SALE");
             }
 
-            final List<String> lore = Lists.newArrayList();
             lore.add(ChatColor.RESET + " ");
             lore.add(ChatColor.AQUA + "Token Buy Price" + ChatColor.RED + ": " + tokenPrice);
-            builder.addLore(lore);
         }
 
+        builder.addLore(lore);
         return builder.build();
     }
 }

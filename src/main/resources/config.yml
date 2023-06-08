@@ -179,6 +179,10 @@ state:
     border_shrink_radius: 100.0
     border_shrink_rate: 10800
 
+# Starter kits are given to players their first time joining or upon respawning
+starter_kit:
+  enabled: true
+
 # Lunar configuration
 lunar_api:
   # If set to true we will use the legacy Lunar API to send packets to Lunar Clients
