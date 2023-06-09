@@ -25,7 +25,7 @@ public final class EventMenu extends GenericMenu {
     @Getter public Factions plugin;
 
     public EventMenu(Factions plugin, Player player) {
-        super(plugin, player, "Events", plugin.getEventManager().getEventRepository().size() % 9);
+        super(plugin, player, "Events", 3);
         this.plugin = plugin;
     }
 
