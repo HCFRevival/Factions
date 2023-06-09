@@ -74,6 +74,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new TimerCommand(this));
         registerCommand(new PvPCommand(this));
         registerCommand(new EventCommand(this));
+        registerCommand(new KOTHCommand(this));
         registerCommand(new ShopCommand(this));
         registerCommand(new WalletCommand(this));
         registerCommand(new SpawnCommand(this));
