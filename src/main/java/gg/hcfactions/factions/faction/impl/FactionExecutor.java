@@ -413,7 +413,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
         if (manager.getPlayerFactionByPlayer(player) != null) {
-            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            promise.reject(FError.P_ALREADY_IN_FAC.getErrorDescription());
             return;
         }
 
