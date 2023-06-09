@@ -190,11 +190,15 @@ public record NameplateListener(@Getter Factions plugin) implements Listener {
                     continue;
                 }
 
+                final PlayerFaction otherFaction = plugin.getFactionManager().getPlayerFactionByPlayer(onlinePlayer);
+
                 if (LunarClientAPI.getInstance().isRunningLunarClient(player) && acs.getCachedAccount(player.getUniqueId()).getSettings().isEnabled(AresAccount.Settings.SettingValue.LUNAR_FACTION_NAMEPLATES)) {
                     if (event.getFaction().isMember(onlinePlayer)) {
                         LunarClientAPI.getInstance().overrideNametag(onlinePlayer, FMessage.getFriendlyNametag(onlinePlayer.getName(), event.getFaction().getName()), player);
+                    } else if (otherFaction != null) {
+                        LunarClientAPI.getInstance().overrideNametag(onlinePlayer, FMessage.getEnemyNametag(onlinePlayer.getName(), otherFaction.getName()), player);
                     } else {
-                        LunarClientAPI.getInstance().overrideNametag(onlinePlayer, FMessage.getEnemyNametag(onlinePlayer.getName(), event.getFaction().getName()), player);
+                        LunarClientAPI.getInstance().overrideNametag(onlinePlayer, List.of(ChatColor.RED + onlinePlayer.getName()), player);
                     }
                 }
 
