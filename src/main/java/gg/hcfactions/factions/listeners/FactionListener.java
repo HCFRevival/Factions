@@ -14,11 +14,13 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.utils.FactionUtil;
 import lombok.Getter;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.ProjectileHitEvent;
 
 import java.util.List;
 
@@ -147,5 +149,35 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
             final List<Player> enemies = FactionUtil.getNearbyEnemies(plugin, player, bard.getBardRange());
             enemies.forEach(enemy -> event.getAffectedPlayers().put(enemy.getUniqueId(), false));
         }
+    }
+
+    /**
+     * Allows projectiles to phase through allies
+     * @param event ProjectileHitEvent
+     */
+    @EventHandler
+    public void onProjectileCollide(ProjectileHitEvent event) {
+        if (!(event.getEntity().getShooter() instanceof final Player player)) {
+            return;
+        }
+
+        if (!(event.getHitEntity() instanceof final Player otherPlayer)) {
+            return;
+        }
+
+        if (!(event.getEntity().getType().equals(EntityType.ARROW)
+                || event.getEntity().getType().equals(EntityType.SPECTRAL_ARROW)
+                || event.getEntity().getType().equals(EntityType.ENDER_PEARL)
+                || event.getEntity().getType().equals(EntityType.TRIDENT))) {
+            return;
+        }
+
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        if (faction == null || !faction.isMember(otherPlayer)) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 }

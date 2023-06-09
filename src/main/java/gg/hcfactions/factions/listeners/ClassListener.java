@@ -168,6 +168,10 @@ public final class ClassListener implements Listener {
         final double damagePerBlock = archerClass.getDamagePerBlock();
         final Location locA = player.getLocation().clone();
         final Location locB = damaged.getLocation().clone();
+
+        // flatten to 2D then calculate
+        locA.setY(0.0);
+        locB.setY(0.0);
         final double distance = locA.distance(locB);
 
         archerClass.addHit(player, (LivingEntity) damaged, 10); // TODO: Make configurable
@@ -196,7 +200,8 @@ public final class ClassListener implements Listener {
 
             player.sendMessage(ChatColor.YELLOW + "Your arrow has" + ChatColor.RED + " pierced " + name +
                     ChatColor.YELLOW + " from a distance of " + ChatColor.BLUE + String.format("%.2f", distance) + " blocks " +
-                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + ChatColor.YELLOW + ")");
+                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + (hitCount > 1 ? ChatColor.GOLD + " x" + hitCount : "")
+                    + ChatColor.YELLOW + ")");
 
         }).delay(1L).run();
     }
