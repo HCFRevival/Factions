@@ -200,7 +200,7 @@ public final class ClassListener implements Listener {
 
             player.sendMessage(ChatColor.YELLOW + "Your arrow has" + ChatColor.RED + " pierced " + name +
                     ChatColor.YELLOW + " from a distance of " + ChatColor.BLUE + String.format("%.2f", distance) + " blocks " +
-                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + (hitCount > 1 ? ChatColor.GOLD + "x" + hitCount : "")
+                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + (hitCount > 1 ? ChatColor.GOLD + " x" + hitCount : "")
                     + ChatColor.YELLOW + ")");
 
         }).delay(1L).run();
