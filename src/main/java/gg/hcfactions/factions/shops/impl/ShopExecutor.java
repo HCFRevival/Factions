@@ -162,7 +162,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
         final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName))
+                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName) || ChatColor.stripColor(s.getShopName()).startsWith(shopName))
                 .findFirst()
                 .orElse(null);
 
@@ -194,7 +194,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
         final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName))
+                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName) || ChatColor.stripColor(s.getShopName()).startsWith(shopName))
                 .filter(ms -> (!(ms instanceof EventShop)))
                 .findFirst()
                 .orElse(null);
@@ -218,6 +218,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 itemDisplayName,
                 item.getType(),
                 item.getAmount(),
+                item.getItemMeta().getLore(),
                 item.getItemMeta().getEnchants(),
                 position,
                 false,
@@ -271,6 +272,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 itemDisplayName,
                 item.getType(),
                 item.getAmount(),
+                item.getItemMeta().getLore(),
                 item.getItemMeta().getEnchants(),
                 false,
                 position,
@@ -295,7 +297,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
         final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName))
+                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName) || ChatColor.stripColor(s.getShopName()).startsWith(shopName))
                 .findFirst()
                 .orElse(null);
 

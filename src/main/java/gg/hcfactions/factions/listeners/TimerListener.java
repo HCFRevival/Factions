@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.listeners;
 
+import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassUnreadyEvent;
@@ -465,6 +466,31 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.TOTEM, plugin.getConfiguration().getTotemDuration()));
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+        final ItemStack item = event.getItem();
+
+        if (item == null || !item.getType().equals(Material.FIREWORK_ROCKET)) {
+            return;
+        }
+
+        if (!player.isGliding()) {
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (factionPlayer == null) {
+            return;
+        }
+
+        if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
+            player.sendMessage(FMessage.ERROR + "You can not boost while combat-tagged");
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)

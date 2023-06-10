@@ -93,13 +93,16 @@ public interface IConsumeable {
         getCooldowns().put(uniqueId, (Time.now() + (getCooldown() * 1000L)));
 
         new Scheduler(getPlugin()).sync(() -> {
-            if (getCooldowns().containsKey(uniqueId) && Bukkit.getPlayer(uniqueId) != null) {
-                final FactionPlayer factionPlayer = (FactionPlayer) getPlugin().getPlayerManager().getPlayer(Objects.requireNonNull(Bukkit.getPlayer(uniqueId)));
-                factionPlayer.sendMessage(ChatColor.GREEN + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " has been unlocked");
+            if (getCooldowns().containsKey(uniqueId)) {
                 getCooldowns().remove(uniqueId);
 
-                final ClassConsumableReadyEvent readyEvent = new ClassConsumableReadyEvent(player, this);
-                Bukkit.getPluginManager().callEvent(readyEvent);
+                if (Bukkit.getPlayer(uniqueId) != null) {
+                    final FactionPlayer factionPlayer = (FactionPlayer) getPlugin().getPlayerManager().getPlayer(Objects.requireNonNull(Bukkit.getPlayer(uniqueId)));
+                    final ClassConsumableReadyEvent readyEvent = new ClassConsumableReadyEvent(player, this);
+
+                    factionPlayer.sendMessage(ChatColor.GREEN + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " has been unlocked");
+                    Bukkit.getPluginManager().callEvent(readyEvent);
+                }
             }
         }).delay(getCooldown() * 20L).run();
 

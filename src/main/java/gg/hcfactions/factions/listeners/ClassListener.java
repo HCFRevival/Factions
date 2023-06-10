@@ -23,6 +23,7 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
+import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
@@ -167,6 +168,10 @@ public final class ClassListener implements Listener {
         final double damagePerBlock = archerClass.getDamagePerBlock();
         final Location locA = player.getLocation().clone();
         final Location locB = damaged.getLocation().clone();
+
+        // flatten to 2D then calculate
+        locA.setY(0.0);
+        locB.setY(0.0);
         final double distance = locA.distance(locB);
 
         archerClass.addHit(player, (LivingEntity) damaged, 10); // TODO: Make configurable
@@ -195,7 +200,8 @@ public final class ClassListener implements Listener {
 
             player.sendMessage(ChatColor.YELLOW + "Your arrow has" + ChatColor.RED + " pierced " + name +
                     ChatColor.YELLOW + " from a distance of " + ChatColor.BLUE + String.format("%.2f", distance) + " blocks " +
-                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + ChatColor.YELLOW + ")");
+                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + (hitCount > 1 ? ChatColor.GOLD + " x" + hitCount : "")
+                    + ChatColor.YELLOW + ")");
 
         }).delay(1L).run();
     }
@@ -430,8 +436,9 @@ public final class ClassListener implements Listener {
                 }
 
                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                Players.playSound(attacker, Sound.ENTITY_ITEM_BREAK); // TODO: Test this sound and match it to original item break
-                // Players.spawnEffect(attacker, attacked.getLocation(), Effect.HEART, 15, 1); TODO: Change this to new particles
+
+                Objects.requireNonNull(attackedLocation.getWorld()).spawnParticle(Particle.HEART, attackedLocation.getX(), attackedLocation.getY() + 1.0, attackerLocation.getZ(), 3, 2.0, 2.0, 2.0);
+                Worlds.playSound(attackedLocation, Sound.ENTITY_ITEM_BREAK);
 
                 if (!attacked.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                     attacker.sendMessage(ChatColor.YELLOW + "You have " + ChatColor.RED + "backstabbed" + ChatColor.GOLD + " " + attacked.getName());

@@ -92,8 +92,10 @@ public final class FConfig {
     // display
     @Getter public String scoreboardTitle;
     @Getter public String scoreboardFooter;
-
     @Getter public int displayUpdateInterval;
+
+    // starter kit
+    @Getter public boolean starterKitEnabled;
 
     // server states
     @Getter public EServerState initialServerState;
@@ -234,6 +236,8 @@ public final class FConfig {
         plugin.getAresLogger().info("Overworld Spawn set to: " + overworldSpawn.toString());
         plugin.getAresLogger().info("End Spawn set to: " + endSpawn.toString());
         plugin.getAresLogger().info("End Exit set to: " + endExit.toString());
+
+        starterKitEnabled = conf.getBoolean("starter_kit.enabled");
 
         attackerCombatTagDuration = conf.getInt("player.timers.combat_tag.attacker");
         attackedCombatTagDuration = conf.getInt("player.timers.combat_tag.attacked");
