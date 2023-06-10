@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassActivateEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
@@ -179,5 +180,27 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         }
 
         event.setCancelled(true);
+    }
+
+    /**
+     * Prints a faction raidable broadcast if a faction
+     * loses enough DTR to go negative
+     *
+     * @param event FactionMemberDeathEvent
+     */
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onFactionMemberDeath(FactionMemberDeathEvent event) {
+        final PlayerFaction faction = event.getFaction();
+        final double subtracted = event.getSubtractedDTR();
+
+        if (faction.isRaidable()) {
+            return;
+        }
+
+        if ((faction.getDtr() - subtracted) > 0.0) {
+            return;
+        }
+
+        FMessage.broadcastFactionRaidable(faction);
     }
 }
