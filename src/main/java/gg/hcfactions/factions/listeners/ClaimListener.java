@@ -554,7 +554,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         if (inside != null) {
             final ServerFaction faction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
-            if (faction != null) {
+            if (faction != null && faction.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                 event.setCancelled(true);
             }
         }
@@ -588,7 +588,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (event.getEntity() instanceof FallingBlock) {
+        if ((event.getEntity() instanceof FallingBlock) || (event.getEntity() instanceof Player)) {
             return;
         }
 
