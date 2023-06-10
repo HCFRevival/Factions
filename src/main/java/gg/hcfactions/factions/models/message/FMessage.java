@@ -75,6 +75,10 @@ public final class FMessage {
         Bukkit.broadcastMessage(" ");
     }
 
+    public static void broadcastFactionRaidable(PlayerFaction faction) {
+        Bukkit.broadcastMessage(ChatColor.RESET + faction.getName() + ChatColor.RED + " is now " + ChatColor.DARK_RED + "RAID-ABLE");
+    }
+
     public static void printPlayerJoinedFaction(PlayerFaction faction, Player player) {
         faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "joined" + LAYER_1 + " the faction");
     }
