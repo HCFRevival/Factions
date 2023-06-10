@@ -554,7 +554,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         if (inside != null) {
             final ServerFaction faction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
-            if (faction != null) {
+            if (faction != null && faction.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                 event.setCancelled(true);
             }
         }
@@ -588,7 +588,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (event.getEntity() instanceof FallingBlock) {
+        if ((event.getEntity() instanceof FallingBlock) || (event.getEntity() instanceof Player)) {
             return;
         }
 
@@ -616,6 +616,28 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         if (plugin.getFactionManager().getFactionById(inside.getOwner()) instanceof ServerFaction) {
             event.setCancelled(true);
         }
+    }
+
+    /**
+     * Disables block fading inside server faction claims
+     *
+     * @param event BlockFadeEvent
+     */
+    @EventHandler
+    public void onBlockFade(BlockFadeEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        final ServerFaction sf = plugin.getFactionManager().getServerFactionById(inside.getOwner());
+
+        if (sf == null) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 
     /**
