@@ -937,7 +937,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 } else {
                     final PlayerFaction playerFaction = (PlayerFaction) owner;
                     final ChatColor color = (playerFaction.isMember(player.getUniqueId()) ? ChatColor.GREEN : ChatColor.RED);
-                    notification.add(ChatColor.YELLOW + "Entering: " + color + playerFaction.getName() + ChatColor.YELLOW + "(" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
+                    notification.add(ChatColor.YELLOW + "Entering: " + color + playerFaction.getName() + ChatColor.YELLOW + " (" + ChatColor.RED + "Deathban" + ChatColor.YELLOW + ")");
                 }
             }
         } else if (getEnvironmentName(toEnv) != null) {
