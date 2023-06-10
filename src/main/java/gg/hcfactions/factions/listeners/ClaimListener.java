@@ -619,6 +619,28 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Disables block fading inside server faction claims
+     *
+     * @param event BlockFadeEvent
+     */
+    @EventHandler
+    public void onBlockFade(BlockFadeEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        final ServerFaction sf = plugin.getFactionManager().getServerFactionById(inside.getOwner());
+
+        if (sf == null) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    /**
      * Handles preventing water/lava flowing in to claims
      * @param event BlockFromToEvent
      */
