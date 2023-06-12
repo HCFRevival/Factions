@@ -67,7 +67,6 @@ public record CrowbarListener(@Getter Factions plugin) implements Listener {
 
     @EventHandler (priority = EventPriority.MONITOR)
     public void onBlockPlace(BlockPlaceEvent event) {
-        final Player player = event.getPlayer();
         final Block block = event.getBlock();
         final ItemStack item = event.getItemInHand();
 
@@ -91,8 +90,6 @@ public record CrowbarListener(@Getter Factions plugin) implements Listener {
         try {
             type = EntityType.valueOf(entityTypeName);
         } catch (IllegalArgumentException e) {
-            player.sendMessage(net.md_5.bungee.api.ChatColor.RED + "Invalid spawner type: Please notify a staff member for assistance");
-            plugin.getAresLogger().warn(player.getName() + " attempted to place an invalid spawner type: " + entityTypeName);
             return;
         }
 
