@@ -310,8 +310,25 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
             promise.reject("This chest is placed inside a subclaim you do not have access to");
             return;
         }
-
         final Sign signBlock = (Sign) block.getState();
+        boolean invalid = true;
+
+        for (int i = 1; i < 3; i++) {
+            final String line = signBlock.getLine(i);
+
+            if (line.equals("")) {
+                continue;
+            }
+
+            invalid = false;
+            break;
+        }
+
+        if (invalid) {
+            promise.reject("Invalid username entries");
+            return;
+        }
+
         signBlock.setLine(0, ChatColor.AQUA + "[Subclaim]");
         promise.resolve();
     }
