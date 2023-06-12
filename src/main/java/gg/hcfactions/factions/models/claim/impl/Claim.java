@@ -124,6 +124,59 @@ public final class Claim implements IClaim, MongoDocument<Claim> {
         return false;
     }
 
+    /**
+     * Returns the closest BLocatable perimeter block found
+     * to the provided location.
+     *
+     * @param location Locatable
+     * @return BLocatable
+     */
+    public BLocatable getClosestPerimeter(ILocatable location) {
+        return getClosestPerimeter(location, 0.0);
+    }
+
+    /**
+     * Returns the closest BLocatable perimeter block found
+     * to the provided location.
+     *
+     * @param location Locatable
+     * @param buffer Distance to apply on the claim border
+     * @return BLocatable
+     */
+    public BLocatable getClosestPerimeter(ILocatable location, double buffer) {
+        if (!location.getWorldName().equals(cornerA.getWorldName())) {
+            return null;
+        }
+
+        double minX = Math.min(cornerA.getX(), cornerB.getX());
+        double minZ = Math.min(cornerA.getZ(), cornerB.getZ());
+        double maxX = Math.max(cornerA.getX(), cornerB.getX());
+        double maxZ = Math.max(cornerA.getZ(), cornerB.getZ());
+
+        minX -= buffer;
+        minZ -= buffer;
+        maxX += buffer;
+        maxZ += buffer;
+
+        final SimpleRegion region = new SimpleRegion(
+                new BLocatable(cornerA.getWorldName(), minX, location.getY(), minZ),
+                new BLocatable(cornerB.getWorldName(), maxX, location.getY(), maxZ));
+
+        BLocatable closestPosition = null;
+        double dist = Double.MAX_VALUE;
+
+        for (BLocatable perimeter : region.getPerimeter((int)Math.round(location.getY()))) {
+            final double calculatedDist = perimeter.getDistance(location);
+
+            if (calculatedDist < dist) {
+                dist = calculatedDist;
+                closestPosition = perimeter;
+            }
+        }
+
+        return closestPosition;
+    }
+
     @Override
     public Claim fromDocument(Document document) {
         this.uniqueId = UUID.fromString(document.getString("uuid"));

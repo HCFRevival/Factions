@@ -145,7 +145,14 @@ public final class ClaimBuilder implements IClaimBuilder {
                 for (BLocatable perimeter : claim.getPerimeter(64)) {
                     for (Claim nearby : manager.getClaimsNearby(perimeter, false)) {
                         if (!nearby.getOwner().equals(faction.getUniqueId())) {
-                            new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Claim is too close to an existing claim")).run();
+                            final IFaction nearbyFaction = manager.getPlugin().getFactionManager().getFactionById(nearby.getOwner());
+                            final double buffer = (nearbyFaction instanceof ServerFaction) ? ((ServerFaction)nearbyFaction).getClaimBuffer() : manager.getPlugin().getConfiguration().getDefaultPlayerFactionClaimBuffer();
+                            final BLocatable closestPerimeter = nearby.getClosestPerimeter(perimeter, buffer);
+                            final double closestDist = (closestPerimeter != null) ? closestPerimeter.getDistance(perimeter) : 0.0;
+
+                            new Scheduler(manager.getPlugin()).sync(() ->
+                                    promise.reject("Claim can not be within " + buffer + " blocks of " + nearbyFaction.getName() + " (Currently " + closestDist + " blocks away)")).run();
+
                             return;
                         }
                     }
