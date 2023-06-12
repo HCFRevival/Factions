@@ -241,11 +241,11 @@ public final class FMessage {
     }
 
     public static void printSubclaimAdded(Subclaim subclaim, String addingUsername, String addedUsername) {
-        subclaim.sendMessage(P_NAME + addingUsername + LAYER_1 + " has " + SUCCESS + "added" + P_NAME + addedUsername + LAYER_1 + " to " + INFO + subclaim.getName());
+        subclaim.sendMessage(P_NAME + addingUsername + LAYER_1 + " has " + SUCCESS + "added " + P_NAME + addedUsername + LAYER_1 + " to " + INFO + subclaim.getName());
     }
 
     public static void printSubclaimRemoved(Subclaim subclaim, String removingUsername, String removedUsername) {
-        subclaim.sendMessage(P_NAME + removingUsername + LAYER_1 + " has " + ERROR + "added" + P_NAME + removedUsername + LAYER_1 + " to " + INFO + subclaim.getName());
+        subclaim.sendMessage(P_NAME + removingUsername + LAYER_1 + " has " + ERROR + "removed " + P_NAME + removedUsername + LAYER_1 + " from " + INFO + subclaim.getName());
     }
 
     public static void printSubclaimCreated(PlayerFaction faction, String creatorUsername, String subclaimName) {
