@@ -84,8 +84,8 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
 
         final PlayerFaction insideClaimOwner = plugin.getFactionManager().getPlayerFactionById(insideClaim.getOwner());
 
-        if (
-                insideClaimOwner != null &&
+        if (!player.hasPermission(FPermissions.P_FACTIONS_ADMIN) &&
+                        insideClaimOwner != null &&
                         !insideClaimOwner.isRaidable() &&
                         !subclaim.canAccess(player) &&
                         insideClaimOwner.isMember(player.getUniqueId()) &&
