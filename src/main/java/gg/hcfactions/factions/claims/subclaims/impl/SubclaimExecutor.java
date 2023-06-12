@@ -312,6 +312,7 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
         }
 
         final Sign signBlock = (Sign) block.getState();
+
         signBlock.setLine(0, ChatColor.AQUA + "[Subclaim]");
         promise.resolve();
     }

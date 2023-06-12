@@ -1,10 +1,17 @@
 package gg.hcfactions.factions.crowbar.impl;
 
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.crowbar.CrowbarManager;
 import gg.hcfactions.factions.crowbar.ICrowbarExecutor;
 import gg.hcfactions.factions.items.Crowbar;
+import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.crowbar.ECrowbarUseType;
+import gg.hcfactions.factions.models.faction.IFaction;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -53,6 +60,26 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
         if (lore == null) {
             promise.reject("Encountered an error while parsing crowbar item lore");
             return;
+        }
+
+        final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new BLocatable(block));
+
+        if (insideClaim != null) {
+            final IFaction insideFaction = manager.getPlugin().getFactionManager().getFactionById(insideClaim.getOwner());
+
+            if (insideFaction != null) {
+                if (insideFaction instanceof final PlayerFaction pf) {
+                    if (!pf.isMember(player) && !pf.isRaidable() && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                        promise.reject(FError.F_CLAIM_NO_ACCESS.getErrorDescription());
+                        return;
+                    }
+                }
+
+                else if (insideFaction instanceof final ServerFaction sf && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                    promise.reject(FError.F_CLAIM_NO_ACCESS.getErrorDescription());
+                    return;
+                }
+            }
         }
 
         ItemStack toDrop = new ItemStack(block.getType(), 1);

@@ -46,6 +46,7 @@ public enum FError {
     F_CANT_WARP_IN_CLAIM("You can not warp out of this claim"),
     F_HIGHER_RANK("This player has equal or a higher rank than you"),
     F_RANK_NOT_FOUND("Rank not found"),
+    F_CLAIM_NO_ACCESS("You do not have access to this claim"),
     F_SUBCLAIM_NOT_FOUND("Subclaim not found"),
     F_NOT_IN_SUBCLAIM("You are not standing inside a subclaim"),
     F_SUBCLAIM_NO_ACCESS("You do not have access to this subclaim"),
