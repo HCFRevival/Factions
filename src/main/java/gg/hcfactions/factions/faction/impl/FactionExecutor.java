@@ -1366,7 +1366,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
-    public void giveTokens(Player player, String factionName, int amount, Promise promise) {
+    public void addTokens(Player player, String factionName, int amount, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
 
         if (faction == null) {
@@ -1375,6 +1375,20 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         faction.addTokens(amount);
+        faction.sendMessage(FMessage.P_NAME + player.getName() + FMessage.LAYER_1 + " adjusted your faction tokens to " + FMessage.INFO + faction.getTokens());
+        promise.resolve();
+    }
+
+    @Override
+    public void subtractTokens(Player player, String factionName, int amount, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
+
+        if (faction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        faction.subtractTokens(Math.max(amount, 0));
         faction.sendMessage(FMessage.P_NAME + player.getName() + FMessage.LAYER_1 + " adjusted your faction tokens to " + FMessage.INFO + faction.getTokens());
         promise.resolve();
     }

@@ -796,12 +796,12 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("token add")
-    @Description("Add tokens to a Faction's token balance")
+    @Subcommand("token")
+    @Description("Update a factions token balance")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    @Syntax("<faction> <amount>")
+    @Syntax("<add|remove> <faction> <amount>")
     @CommandCompletion("@pfactions")
-    public void onAddTokens(Player player, String factionName, String amountName) {
+    public void onUpdateTokens(Player player, @Values("add|remove")String modifier, String factionName, String amountName) {
         int amount;
 
         try {
@@ -811,15 +811,31 @@ public final class FactionCommand extends BaseCommand {
             return;
         }
 
-        plugin.getFactionManager().getExecutor().giveTokens(player, factionName, amount, new Promise() {
+        if (modifier.equalsIgnoreCase("add")) {
+            plugin.getFactionManager().getExecutor().addTokens(player, factionName, amount, new Promise() {
+                @Override
+                public void resolve() {
+                    player.sendMessage(FMessage.SUCCESS + "Tokens added successfully");
+                }
+
+                @Override
+                public void reject(String s) {
+                    player.sendMessage(FMessage.ERROR + "Failed to add tokens: " + s);
+                }
+            });
+
+            return;
+        }
+
+        plugin.getFactionManager().getExecutor().subtractTokens(player, factionName, amount, new Promise() {
             @Override
             public void resolve() {
-                player.sendMessage(FMessage.SUCCESS + "Tokens deposited");
+                player.sendMessage(FMessage.SUCCESS + "Tokens subtracted successfully");
             }
 
             @Override
             public void reject(String s) {
-                player.sendMessage(FMessage.ERROR + "Failed to deposit tokens: " + s);
+                player.sendMessage(FMessage.ERROR + "Failed to remove tokens: " + s);
             }
         });
     }
