@@ -15,8 +15,8 @@ import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -74,7 +74,7 @@ public final class CombatLogger extends Villager implements ICombatLogger {
 
     @Override
     public void spawn() {
-        level.addFreshEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
+        level().addFreshEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
     }
 
     @Override
