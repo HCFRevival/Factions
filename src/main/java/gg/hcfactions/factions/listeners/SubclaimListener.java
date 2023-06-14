@@ -16,6 +16,8 @@ import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -197,6 +199,7 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
     public void onSignChange(SignChangeEvent event) {
         final Player player = event.getPlayer();
         final Block block = event.getBlock();
+        final Sign sign = (Sign)block.getState();
         final String[] lines = event.getLines();
         final String l0 = lines[0];
 
@@ -231,6 +234,8 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
             @Override
             public void resolve() {
                 event.setLine(0, ChatColor.AQUA + "[Subclaim]");
+                sign.setEditable(false);
+
                 player.sendMessage(FMessage.SUCCESS + "Chest has been subclaimed successfully");
             }
 
