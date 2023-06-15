@@ -237,6 +237,16 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Handles preventing sign changes
+     *
+     * @param event SignChangeEvent
+     */
+    @EventHandler
+    public void onSignEdit(SignChangeEvent event) {
+        handleBlockModification(event, event.getPlayer(), event.getBlock());
+    }
+
+    /**
      * Handles blocking piston event
      *
      * @param event BlockPistonRetractEvent
