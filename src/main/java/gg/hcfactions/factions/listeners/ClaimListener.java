@@ -2,6 +2,7 @@ package gg.hcfactions.factions.listeners;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import gg.hcfactions.cx.event.PortalPlatformGenerateEvent;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
@@ -996,5 +997,20 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         } else if (!safezone && protectionTimer.isFrozen()) {
             protectionTimer.setFrozen(false);
         }
+    }
+
+    /**
+     * Listens for Portal Platform Generate and removes any blocks that are inside a claim
+     *
+     * @param event PortalPlatformGenerateEvent
+     */
+    @EventHandler
+    public void onPortalPlatformGenerate(PortalPlatformGenerateEvent event) {
+        if (plugin.getClaimManager().getClaimAt(new BLocatable(event.getOrigin().getBlock())) != null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        event.getBlockList().removeIf(b -> plugin.getClaimManager().getClaimAt(new BLocatable(b)) != null);
     }
 }

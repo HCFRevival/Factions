@@ -17,7 +17,9 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerLingeringSplashEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
 import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.EnderPearl;
@@ -33,6 +35,7 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -520,6 +523,36 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
             player.sendMessage(FMessage.ERROR + "You can not use Shulker Boxes while combat-tagged");
             event.setUseInteractedBlock(Event.Result.DENY);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerChangeWorld(PlayerTeleportEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        final Location from = event.getFrom();
+        final Location to = event.getTo();
+        final PlayerTeleportEvent.TeleportCause cause = event.getCause();
+
+        if (!cause.equals(PlayerTeleportEvent.TeleportCause.END_PORTAL)) {
+            return;
+        }
+
+        if (to == null || from == null || to.getWorld() == null || from.getWorld() == null) {
+            return;
+        }
+
+        if (!to.getWorld().getEnvironment().equals(World.Environment.THE_END)) {
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (factionPlayer != null && !factionPlayer.hasTimer(ETimerType.PROTECTION) && plugin.getConfiguration().getEnterEndProtectionDuration() > 0) {
+            factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, plugin.getConfiguration().getEnterEndProtectionDuration()));
         }
     }
 }
