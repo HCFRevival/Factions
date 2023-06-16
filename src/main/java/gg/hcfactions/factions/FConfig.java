@@ -71,6 +71,7 @@ public final class FConfig {
     @Getter public int logoutDuration;
     @Getter public int sotwProtectionDuration;
     @Getter public int normalProtectionDuration;
+    @Getter public int enterEndProtectionDuration;
 
     // classes
     @Getter public int minerClassLimit;
@@ -119,6 +120,7 @@ public final class FConfig {
     @Getter public boolean totemRecipeEnabled;
     @Getter public boolean gappleRecipeEnabled;
     @Getter public boolean nametagRecipeEnabled;
+    @Getter public boolean smithingUpgradeRecipeEnabled;
 
     public FConfig(Factions plugin) {
         this.plugin = plugin;
@@ -154,7 +156,8 @@ public final class FConfig {
                 chainmailArmorRecipeEnabled,
                 totemRecipeEnabled,
                 gappleRecipeEnabled,
-                nametagRecipeEnabled
+                nametagRecipeEnabled,
+                smithingUpgradeRecipeEnabled
         );
     }
 
@@ -251,6 +254,7 @@ public final class FConfig {
         logoutDuration = conf.getInt("player.timers.logout");
         normalProtectionDuration = conf.getInt("player.timers.protection.normal");
         sotwProtectionDuration = conf.getInt("player.timers.protection.sotw");
+        enterEndProtectionDuration = conf.getInt("player.timers.protection.enter_end");
         plugin.getAresLogger().info("Combat Tag (Attacker) Duration: " + attackerCombatTagDuration);
         plugin.getAresLogger().info("Combat Tag (Attacked) Duration: " + attackedCombatTagDuration);
         plugin.getAresLogger().info("Enderpearl Duration: " + enderpearlDuration);
@@ -263,6 +267,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Logout Duration: " + logoutDuration);
         plugin.getAresLogger().info("Protection (Normal) Duration: " + normalProtectionDuration);
         plugin.getAresLogger().info("Protection (SOTW) Duration: " + sotwProtectionDuration);
+        plugin.getAresLogger().info("Protection (Enter End) Duration: " + enterEndProtectionDuration);
 
         deathbansEnabled = conf.getBoolean("deathbans.enabled");
         deathbansStandalone = conf.getBoolean("deathbans.standalone");
@@ -309,6 +314,7 @@ public final class FConfig {
         totemRecipeEnabled = conf.getBoolean("custom_recipes.totem");
         gappleRecipeEnabled = conf.getBoolean("custom_recipes.gapple");
         nametagRecipeEnabled = conf.getBoolean("custom_recipes.nametag");
+        smithingUpgradeRecipeEnabled = conf.getBoolean("custom_recipes.smithing_upgrade");
         plugin.getAresLogger().info("Saddle Recipe: " + saddleRecipeEnabled);
         plugin.getAresLogger().info("Heart of the Sea Recipe: " + heartOfTheSeaRecipeEnabled);
         plugin.getAresLogger().info("Trident Recipe: " + tridentRecipeEnabled);
