@@ -30,6 +30,7 @@ public final class FRecipes {
         final NamespacedKey totemKey = new NamespacedKey(plugin, "craftable_totem");
         final NamespacedKey gappleKey = new NamespacedKey(plugin, "craftable_gapple");
         final NamespacedKey nametagKey = new NamespacedKey(plugin, "craftable_nametag");
+        final NamespacedKey smithingUpgradeKey = new NamespacedKey(plugin, "craftable_smithing_upgrade");
 
         if (config.isSaddlesEnabled() && Bukkit.getRecipe(saddleKey) == null) {
             final ShapedRecipe recipe = new ShapedRecipe(saddleKey, new ItemStack(Material.SADDLE, 1));
@@ -140,6 +141,17 @@ public final class FRecipes {
             Bukkit.addRecipe(recipe);
             plugin.getAresLogger().info("registered recipe: nametag");
         }
+
+        if (config.isSmithingUpgradeEnabled() && Bukkit.getRecipe(smithingUpgradeKey) == null) {
+            final ShapedRecipe recipe = new ShapedRecipe(smithingUpgradeKey, new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE));
+
+            recipe.shape("NNN", "NDN", "NNN");
+            recipe.setIngredient('N', Material.NETHER_BRICK);
+            recipe.setIngredient('D', Material.DIAMOND);
+
+            Bukkit.addRecipe(recipe);
+            plugin.getAresLogger().info("registered recipe: smithing upgrade template");
+        }
     }
 
     @AllArgsConstructor
@@ -151,5 +163,6 @@ public final class FRecipes {
         @Getter @Setter public boolean totemEnabled;
         @Getter @Setter public boolean gappleEnabled;
         @Getter @Setter public boolean nametagsEnabled;
+        @Getter @Setter public boolean smithingUpgradeEnabled;
     }
 }

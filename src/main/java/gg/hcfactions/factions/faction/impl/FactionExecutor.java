@@ -205,6 +205,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
             if (faction instanceof final PlayerFaction playerFaction) {
                 final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(playerFaction);
+                final FactionDisbandEvent event = new FactionDisbandEvent(player, playerFaction);
+
+                Bukkit.getPluginManager().callEvent(event);
 
                 waypoints.forEach(wp -> {
                     wp.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
@@ -1143,17 +1146,6 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        final PlayerFaction.Member member = playerFaction.getMember(player.getUniqueId());
-        if (member == null) {
-            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
-            return;
-        }
-
-        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
-            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
-            return;
-        }
-
         if (playerFaction.hasTimer(ETimerType.RALLY)) {
             promise.reject(FError.F_NOT_ALLOWED_COOLDOWN.getErrorDescription());
             return;
@@ -1469,6 +1461,10 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
             for (Claim claim : manager.getPlugin().getClaimManager().getClaimRepository()) {
                 for (BLocatable corner : claim.getCorners()) {
+                    if (!corner.getWorldName().equals(location.getWorldName())) {
+                        continue;
+                    }
+
                     if (corner.getDistance(location) > 64.0) {
                         continue;
                     }

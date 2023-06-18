@@ -95,8 +95,10 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
                 factionPlayer.setResetOnJoin(false);
 
                 // additional inventory wipe to prevent combat logger item dupe
-                player.getInventory().clear();
-                player.getInventory().setArmorContents(null);
+                new Scheduler(plugin).sync(() -> {
+                    player.getInventory().clear();
+                    player.getInventory().setArmorContents(null);
+                }).delay(1L).run();
             }
         }
 

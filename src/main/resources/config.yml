@@ -133,6 +133,7 @@ player:
     protection:
       sotw: 3600
       normal: 1800
+      enter_end: 3
 
 # Deathban configuration
 deathbans:
@@ -197,3 +198,4 @@ custom_recipes:
   totem: true
   gapple: true
   nametag: true
+  smithing_upgrade: true
