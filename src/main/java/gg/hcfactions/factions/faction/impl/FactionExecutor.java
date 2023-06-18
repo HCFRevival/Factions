@@ -1143,17 +1143,6 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        final PlayerFaction.Member member = playerFaction.getMember(player.getUniqueId());
-        if (member == null) {
-            promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
-            return;
-        }
-
-        if (!member.getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
-            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
-            return;
-        }
-
         if (playerFaction.hasTimer(ETimerType.RALLY)) {
             promise.reject(FError.F_NOT_ALLOWED_COOLDOWN.getErrorDescription());
             return;
