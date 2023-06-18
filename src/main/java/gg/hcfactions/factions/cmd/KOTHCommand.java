@@ -16,7 +16,6 @@ import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,7 +35,6 @@ public final class KOTHCommand extends BaseCommand {
         }
 
         koths.sort(Comparator.comparingLong(KOTHEvent::getRemainingTimeUntilNextSchedule));
-        Collections.reverse(koths);
 
         // Courtyard will go active in 3 hours, 2 minutes and 45 seconds
         final KOTHEvent nextEvent = koths.get(0);
