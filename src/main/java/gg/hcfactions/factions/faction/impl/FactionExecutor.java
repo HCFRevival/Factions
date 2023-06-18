@@ -205,6 +205,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
             if (faction instanceof final PlayerFaction playerFaction) {
                 final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(playerFaction);
+                final FactionDisbandEvent event = new FactionDisbandEvent(player, playerFaction);
+
+                Bukkit.getPluginManager().callEvent(event);
 
                 waypoints.forEach(wp -> {
                     wp.hideAll(manager.getPlugin().getConfiguration().useLegacyLunarAPI);
