@@ -1300,6 +1300,11 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final BigDecimal roundedAmount = BigDecimal.valueOf(amount);
         final double finalAmount = roundedAmount.setScale(2, RoundingMode.HALF_UP).doubleValue();
 
+        if (finalAmount <= 0.0) {
+            promise.reject(FError.P_CAN_NOT_AFFORD.getErrorDescription());
+            return;
+        }
+
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
             return;
@@ -1325,6 +1330,11 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
         final BigDecimal roundedAmount = BigDecimal.valueOf(amount);
         final double finalAmount = roundedAmount.setScale(2, RoundingMode.HALF_UP).doubleValue();
+
+        if (finalAmount <= 0.0) {
+            promise.reject(FError.P_CAN_NOT_AFFORD.getErrorDescription());
+            return;
+        }
 
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
@@ -1354,6 +1364,25 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         FMessage.printFactionWithdrawn(faction, player, finalAmount);
         FMessage.printBalance(player, factionPlayer.getBalance());
 
+        promise.resolve();
+    }
+
+    @Override
+    public void setBalance(Player player, String factionName, double amount, Promise promise) {
+        final PlayerFaction playerFaction = manager.getPlayerFactionByName(factionName);
+
+        if (playerFaction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        if (amount <= 0.0) {
+            promise.reject("Invalid amount");
+            return;
+        }
+
+        playerFaction.setBalance(amount);
+        FMessage.printFactionBalanceSet(playerFaction, player, amount);
         promise.resolve();
     }
 

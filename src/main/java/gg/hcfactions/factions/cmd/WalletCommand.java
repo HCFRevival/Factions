@@ -74,6 +74,11 @@ public final class WalletCommand extends BaseCommand {
             return;
         }
 
+        if (amount <= 0.0) {
+            player.sendMessage(FMessage.ERROR + "Invalid amount");
+            return;
+        }
+
         if (!factionPlayer.canAfford(amount)) {
             player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_AFFORD.getErrorDescription());
             return;

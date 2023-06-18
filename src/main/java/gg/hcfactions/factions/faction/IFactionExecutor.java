@@ -38,6 +38,7 @@ public interface IFactionExecutor {
     void demotePlayer(Player player, String username, Promise promise);
     void depositMoney(Player player, double amount, Promise promise);
     void withdrawMoney(Player player, double amount, Promise promise);
+    void setBalance(Player player, String factionName, double amount, Promise promise);
     void addTokens(Player player, String factionName, int amount, Promise promise);
     void subtractTokens(Player player, String factionName, int amount, Promise promise);
     void showFactionInfo(Player player);

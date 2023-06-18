@@ -39,6 +39,10 @@ public interface IBankable {
      * @return True if this account can afford this price
      */
     default boolean canAfford(double amt) {
+        if (amt < 0.0) {
+            return false;
+        }
+
         return getBalance() >= amt;
     }
 }
