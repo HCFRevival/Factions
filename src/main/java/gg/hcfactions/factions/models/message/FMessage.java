@@ -323,7 +323,7 @@ public final class FMessage {
         }
 
         final PlayerFaction playerFaction = (PlayerFaction)faction;
-        final String unformattedDTR = String.format("%.2f", playerFaction.getDtr());
+        final String unformattedDTR = String.format("%.2f", playerFaction.getDtr()) + "/" + String.format("%.2f", playerFaction.getMaxDtr());
         String DTR;
 
         if (playerFaction.getDtr() >= playerFaction.getMaxDtr()) {
