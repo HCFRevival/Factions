@@ -1458,6 +1458,10 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
             for (Claim claim : manager.getPlugin().getClaimManager().getClaimRepository()) {
                 for (BLocatable corner : claim.getCorners()) {
+                    if (!corner.getWorldName().equals(location.getWorldName())) {
+                        continue;
+                    }
+
                     if (corner.getDistance(location) > 64.0) {
                         continue;
                     }
