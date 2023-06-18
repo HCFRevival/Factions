@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
@@ -51,6 +52,11 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
 
         if (remainingUses == 0) {
             promise.reject("Crowbar is too weak");
+            return;
+        }
+
+        if (useType.equals(ECrowbarUseType.SPAWNER) && !block.getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
+            promise.reject("Crowbars can only be used in the Overworld");
             return;
         }
 
