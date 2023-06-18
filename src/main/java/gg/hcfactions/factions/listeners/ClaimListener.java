@@ -382,7 +382,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
-     * Handles preventing the creation of a portal inside a
+     * Handles preventing the creation of a portal inside a claim
      *
      * @param event PortalCreateEvent
      */
@@ -406,6 +406,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 final ServerFaction serverFaction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
                 if (serverFaction != null) {
+                    plugin.getAresLogger().error(event.getEventName() + " failed! Reason: inside a claim");
                     event.setCancelled(true);
                     return;
                 }
@@ -455,6 +456,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         if (owner instanceof final ServerFaction sf) {
             if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                // allow players to interact w/ crafting benches inside safezone claims
+                if (action.equals(Action.RIGHT_CLICK_BLOCK) && block.getType().equals(Material.CRAFTING_TABLE)) {
+                    return;
+                }
+
                 if (!action.equals(Action.PHYSICAL)) {
                     player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.RESET + sf.getDisplayName());
                 }
