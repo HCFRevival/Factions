@@ -227,6 +227,11 @@ public final class FMessage {
         faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "deposited" + INFO + " $" + formatted + LAYER_1 + " in to the faction balance");
     }
 
+    public static void printFactionBalanceSet(PlayerFaction faction, Player player, double amount) {
+        final String formatted = String.format("%.2f", amount);
+        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + LAYER_2 + "updated" + LAYER_1 + " your faction balance to " + INFO + " $" + formatted);
+    }
+
     public static void printEotwMessage(String message) {
         Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + Colors.DARK_AQUA.toBukkit() + message);
     }
@@ -323,7 +328,7 @@ public final class FMessage {
         }
 
         final PlayerFaction playerFaction = (PlayerFaction)faction;
-        final String unformattedDTR = String.format("%.2f", playerFaction.getDtr());
+        final String unformattedDTR = String.format("%.2f", playerFaction.getDtr()) + "/" + String.format("%.2f", playerFaction.getMaxDtr());
         String DTR;
 
         if (playerFaction.getDtr() >= playerFaction.getMaxDtr()) {

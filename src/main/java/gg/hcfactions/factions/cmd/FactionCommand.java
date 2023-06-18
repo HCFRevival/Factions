@@ -796,6 +796,25 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("setbalance|setbal")
+    @Description("Set a factions balance")
+    @Syntax("<faction> <amount>")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@pfactions")
+    public void onSetBalance(Player player, String factionName, double amount) {
+        plugin.getFactionManager().getExecutor().setBalance(player, factionName, amount, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Balance update complete");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to update balance: " + s);
+            }
+        });
+    }
+
     @Subcommand("token")
     @Description("Update a factions token balance")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
