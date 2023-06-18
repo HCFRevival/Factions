@@ -46,7 +46,7 @@ public final class WalletCommand extends BaseCommand {
     @CommandAlias("pay")
     @Description("Pay a player money from your balance")
     @Syntax("<player>")
-    @CommandPermission("@players")
+    @CommandCompletion("@players")
     public void onPay(Player player, String otherPlayerName, String amountNamed) {
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         final FactionPlayer otherFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(otherPlayerName);
