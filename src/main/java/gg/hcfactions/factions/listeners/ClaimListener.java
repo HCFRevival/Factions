@@ -658,6 +658,21 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Handles preventing blocks from bring inside claims
+     * @param event BlockBurnEvent
+     */
+    @EventHandler
+    public void onBlockBurn(BlockBurnEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    /**
      * Handles preventing water/lava flowing in to claims
      * @param event BlockFromToEvent
      */
