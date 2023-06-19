@@ -283,4 +283,67 @@ public record NameplateListener(@Getter Factions plugin) implements Listener {
             }
         }
     }
+
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onFactionFocus(FactionFocusEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final AccountService acs = (AccountService)plugin.getService(AccountService.class);
+
+        if (acs == null) {
+            plugin.getAresLogger().error("failed to obtain account service");
+            return;
+        }
+
+        final PlayerFaction faction = event.getFaction();
+        final Player toFocus = event.getFocusedPlayer();
+        final PlayerFaction focusedFaction = plugin.getFactionManager().getPlayerFactionByPlayer(toFocus);
+        final String focusedFactionName = (focusedFaction != null) ? focusedFaction.getName() : null;
+
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final Player onlinePlayer = onlineMember.getBukkit();
+
+            if (onlinePlayer != null
+                    && acs.getCachedAccount(onlinePlayer.getUniqueId()).getSettings().isEnabled(AresAccount.Settings.SettingValue.LUNAR_FACTION_NAMEPLATES)
+                    && LunarClientAPI.getInstance().isRunningLunarClient(onlinePlayer)) {
+
+                LunarClientAPI.getInstance().overrideNametag(toFocus, FMessage.getFocusedNametag(toFocus.getName(), focusedFactionName), onlinePlayer);
+            }
+        });
+    }
+
+    @EventHandler
+    public void onFactionUnfocusEvent(FactionUnfocusEvent event) {
+        final Player focusedPlayer = event.getFocusedPlayer();
+
+        if (focusedPlayer == null) {
+            return;
+        }
+
+        final PlayerFaction focusingFaction = event.getFaction();
+        final PlayerFaction focusedFaction = plugin.getFactionManager().getPlayerFactionByPlayer(focusedPlayer);
+        final AccountService acs = (AccountService)plugin.getService(AccountService.class);
+
+        if (acs == null) {
+            plugin.getAresLogger().error("failed to obtain account service");
+            return;
+        }
+
+        focusingFaction.getOnlineMembers().forEach(onlineMember -> {
+            final Player onlinePlayer = onlineMember.getBukkit();
+
+            if (onlinePlayer != null
+                && acs.getCachedAccount(onlinePlayer.getUniqueId()).getSettings().isEnabled(AresAccount.Settings.SettingValue.LUNAR_FACTION_NAMEPLATES)
+                && LunarClientAPI.getInstance().isRunningLunarClient(onlinePlayer)) {
+
+                if (focusedFaction != null) {
+                    LunarClientAPI.getInstance().overrideNametag(focusedPlayer, FMessage.getEnemyNametag(focusedPlayer.getName(), focusedFaction.getName()), onlinePlayer);
+                } else {
+                    LunarClientAPI.getInstance().overrideNametag(focusedPlayer, List.of(ChatColor.RED + focusedPlayer.getName()), onlinePlayer);
+                }
+            }
+        });
+    }
 }

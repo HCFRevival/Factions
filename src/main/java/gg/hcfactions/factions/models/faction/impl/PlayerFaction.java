@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.faction.FactionManager;
+import gg.hcfactions.factions.listeners.events.faction.FactionUnfocusEvent;
 import gg.hcfactions.factions.models.econ.IBankable;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -26,6 +27,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,6 +47,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     @Getter @Setter public int reinvites;
     @Getter @Setter public long nextTick;
     @Getter @Setter public long lastRallyUpdate;
+    @Getter @Setter public UUID focusedPlayerId;
     @Getter public Set<Member> members;
     @Getter public Set<UUID> memberHistory;
     @Getter public Set<UUID> pendingInvites;
@@ -64,6 +67,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.reinvites = manager.getPlugin().getConfiguration().getDefaultFactionReinvites();;
         this.nextTick = Time.now();
         this.lastRallyUpdate = 0L;
+        this.focusedPlayerId = null;
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
@@ -84,6 +88,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.reinvites = manager.getPlugin().getConfiguration().getDefaultFactionReinvites();;
         this.nextTick = Time.now();
         this.lastRallyUpdate = 0L;
+        this.focusedPlayerId = null;
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
@@ -136,6 +141,30 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
      */
     public boolean isReinvited(UUID uniqueId) {
         return memberHistory.contains(uniqueId);
+    }
+
+    /**
+     * Returns true if this factions power is frozen
+     * @return True if faction power frozen
+     */
+    public boolean isFrozen() {
+        final FTimer frozenTimer = getTimer(ETimerType.FREEZE);
+        return frozenTimer != null && !frozenTimer.isExpired();
+    }
+
+    /**
+     * Returns true if this faction has an active focus player
+     * @return True if focus player is not null
+     */
+    public boolean isFocusing() {
+        return focusedPlayerId != null;
+    }
+
+    /**
+     * @return True if the faction home is set
+     */
+    public boolean hasHome() {
+        return homeLocation != null;
     }
 
     /**
@@ -192,6 +221,26 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     }
 
     /**
+     * Returns an optional containing the player this faction
+     * is currently focusing.
+     *
+     * @return Optional of Bukkit Player
+     */
+    public Optional<Player> getFocusedPlayer() {
+        if (focusedPlayerId == null) {
+            return Optional.empty();
+        }
+
+        final Player focusedPlayer = Bukkit.getPlayer(focusedPlayerId);
+
+        if (focusedPlayer == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(focusedPlayer);
+    }
+
+    /**
      * Send a message to online members in the faction
      * @param message Message to display
      */
@@ -211,22 +260,6 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     public double getMaxDtr() {
         final double total = manager.getPlugin().getConfiguration().getPlayerPowerValue() * members.size();
         return Math.min(total, manager.getPlugin().getConfiguration().getPowerCap());
-    }
-
-    /**
-     * @return True if the faction home is set
-     */
-    public boolean hasHome() {
-        return homeLocation != null;
-    }
-
-    /**
-     * Returns true if this factions power is frozen
-     * @return True if faction power frozen
-     */
-    public boolean isFrozen() {
-        final FTimer frozenTimer = getTimer(ETimerType.FREEZE);
-        return frozenTimer != null && !frozenTimer.isExpired();
     }
 
     @Override
@@ -272,6 +305,16 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
             }
         }
 
+        if (type.equals(ETimerType.FOCUS)) {
+            if (focusedPlayerId != null) {
+                final Player focusedPlayer = Bukkit.getPlayer(focusedPlayerId);
+                final FactionUnfocusEvent unfocusEvent = new FactionUnfocusEvent(this, focusedPlayer);
+                Bukkit.getPluginManager().callEvent(unfocusEvent);
+            }
+
+            focusedPlayerId = null;
+        }
+
         removeTimer(type);
     }
 
@@ -289,6 +332,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
                 "\nreinvites: " + reinvites +
                 "\nnextTick: " + nextTick +
                 "\nlastRallyUpdate: " + lastRallyUpdate +
+                "\nfocusPlayerId: " + focusedPlayerId +
                 "\nmembers: " + members.toString() +
                 "\npendingInvites: " + pendingInvites.toString() +
                 "\nmemberHistory: " + memberHistory.toString() +

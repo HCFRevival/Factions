@@ -1982,4 +1982,38 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         faction.sendMessage(FMessage.getFactionFormat(displayName, "Located at " + x + ", " + y + ", " + z + ", " + world));
         promise.resolve();
     }
+
+    @Override
+    public void focusPlayer(Player player, Player toFocus, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (faction.hasTimer(ETimerType.FOCUS)) {
+            promise.reject("Please wait " + Time.convertToRemaining(faction.getTimer(ETimerType.FOCUS).getRemaining()) + " before performing this action again");
+            return;
+        }
+
+        if (faction.isMember(toFocus)) {
+            promise.reject("You can not focus your own faction members");
+            return;
+        }
+
+        final FactionFocusEvent focusEvent = new FactionFocusEvent(faction, player, toFocus);
+        Bukkit.getPluginManager().callEvent(focusEvent);
+
+        if (focusEvent.isCancelled()) {
+            promise.reject("Focus event cancelled");
+            return;
+        }
+
+        faction.addTimer(new FTimer(ETimerType.FOCUS, 60));
+        faction.setFocusedPlayerId(toFocus.getUniqueId());
+        FMessage.printFocusing(faction, player, toFocus);
+        FMessage.printFocusedByFaction(faction, toFocus);
+        promise.resolve();
+    }
 }

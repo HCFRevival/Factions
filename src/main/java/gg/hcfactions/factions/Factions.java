@@ -80,6 +80,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new SpawnCommand(this));
         registerCommand(new DisplayCommand(this));
         registerCommand(new FactionHelpCommand(this));
+        registerCommand(new FocusCommand(this));
         registerCommand(new LogoutCommand(this));
         registerCommand(new DebugCommand(this));
 

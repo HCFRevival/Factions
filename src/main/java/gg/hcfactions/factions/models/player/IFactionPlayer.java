@@ -88,10 +88,24 @@ public interface IFactionPlayer extends IBankable, ITimeable {
     void addToScoreboard(Player player);
 
     /**
+     * Adds the provided player to the scoreboard with the provided entry type
+     * @param player Player
+     * @param entryType Scoreboard Entry Type
+     */
+    void addToScoreboard(Player player, EScoreboardEntryType entryType);
+
+    /**
      * Remove the provided player from the "friendly" team in the scoreboard
      * @param player Player
      */
     void removeFromScoreboard(Player player);
+
+    /**
+     * Remove the provided player from the provided scoreboard entry type
+     * @param player Player
+     * @param entryType Scoreboard Entry Type
+     */
+    void removeFromScoreboard(Player player, EScoreboardEntryType entryType);
 
     /**
      * Remove all friendly players from scoreboard

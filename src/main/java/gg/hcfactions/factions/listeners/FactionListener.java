@@ -1,7 +1,9 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.faction.FactionFocusEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
+import gg.hcfactions.factions.listeners.events.faction.FactionUnfocusEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassActivateEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
@@ -11,10 +13,13 @@ import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.EScoreboardEntryType;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.utils.FactionUtil;
+import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
+import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -22,6 +27,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.List;
 
@@ -202,5 +208,93 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         }
 
         FMessage.broadcastFactionRaidable(faction);
+    }
+
+    /**
+     * Play an audio queue for focused player
+     * @param event FactionFocusEvent
+     */
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onFactionFocus(FactionFocusEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player toFocus = event.getFocusedPlayer();
+        Players.playSound(toFocus, Sound.BLOCK_NOTE_BLOCK_BANJO);
+    }
+
+    /**
+     * Prints unfocused message to focused player
+     * @param event FactionUnfocusEvent
+     */
+    @EventHandler
+    public void onFactionUnfocus(FactionUnfocusEvent event) {
+        final PlayerFaction focusingFaction = event.getFaction();
+        final Player focusedPlayer = event.getFocusedPlayer();
+
+        FMessage.printNoLongerFocused(focusingFaction, focusedPlayer);
+    }
+
+    /**
+     * Cleans up focused players quitting
+     * @param event PlayerQuitEvent
+     */
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+
+        plugin.getFactionManager().getPlayerFactions()
+                .stream()
+                .filter(pf -> pf.getFocusedPlayerId() != null && pf.getFocusedPlayerId().equals(player.getUniqueId()))
+                .forEach(f -> {
+
+                    f.getOnlineMembers().forEach(onlineMember -> {
+                        final FactionPlayer onlineFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+                        onlineFactionPlayer.removeFromScoreboard(player, EScoreboardEntryType.FOCUS);
+                    });
+                });
+    }
+
+    /**
+     * Updates nameplates to focus color
+     * @param event FactionFocusEvent
+     */
+    @EventHandler (priority = EventPriority.HIGH)
+    public void onFocusNameplateUpdate(FactionFocusEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player toFocus = event.getFocusedPlayer();
+        final PlayerFaction faction = event.getFaction();
+
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final Player onlinePlayer = onlineMember.getBukkit();
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlinePlayer);
+
+            if (factionPlayer != null) {
+                factionPlayer.addToScoreboard(toFocus, EScoreboardEntryType.FOCUS);
+            }
+        });
+    }
+
+    /**
+     * Removes focus color from nameplates
+     * @param event FactionUnfocusEvent
+     */
+    @EventHandler
+    public void onUnfocusUpdate(FactionUnfocusEvent event) {
+        final Player focused = event.getFocusedPlayer();
+        final PlayerFaction faction = event.getFaction();
+
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final Player onlinePlayer = onlineMember.getBukkit();
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlinePlayer);
+
+            if (factionPlayer != null) {
+                factionPlayer.removeFromScoreboard(focused, EScoreboardEntryType.FOCUS);
+            }
+        });
     }
 }
