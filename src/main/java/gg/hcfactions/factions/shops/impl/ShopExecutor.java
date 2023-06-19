@@ -314,7 +314,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         }
 
         shop.getItems().remove(item);
-        manager.saveMerchant(merchant);
+        manager.deleteShopItem(merchant, shop, item);
         promise.resolve();
     }
 }

@@ -259,6 +259,12 @@ public final class ShopManager implements IManager {
         plugin.saveConfiguration("shops", conf);
     }
 
+    public void deleteShopItem(GenericMerchant<?> merchant, GenericShop<?> shop, GenericShopItem item) {
+        final YamlConfiguration conf = plugin.loadConfiguration("shops");
+        conf.set("shops." + merchant.getId().toString() + ".shops." + shop.getId().toString() + ".items." + item.getId().toString(), null);
+        plugin.saveConfiguration("shops", conf);
+    }
+
     public Optional<IMerchant> getMerchantById(UUID uniqueId) {
         return merchantRepository.stream().filter(m -> m.getId().equals(uniqueId)).findFirst();
     }
