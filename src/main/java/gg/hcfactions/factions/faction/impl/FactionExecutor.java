@@ -1882,11 +1882,14 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void startHomeTimer(Player player, Promise promise) {
-        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
-
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
         if (factionPlayer == null) {
             promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
+            promise.reject(FError.P_CANT_PERFORM_WHILE_COMBAT_TAGGED.getErrorDescription());
             return;
         }
 
@@ -1909,19 +1912,21 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 if (insideFaction instanceof final ServerFaction sf) {
                     if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                         Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
-                        player.sendMessage(FMessage.T_HOME_COMPLETE);
-                        return;
-                    } else if (!bypass) {
-                        promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                        promise.resolve();
                         return;
                     }
-                } else {
-                    final PlayerFaction playerFaction = (PlayerFaction) insideFaction;
 
-                    if (!playerFaction.getUniqueId().equals(faction.getUniqueId()) && !bypass) {
+                    promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                    return;
+                }
+
+                else if (insideFaction instanceof final PlayerFaction pf) {
+                    if (!pf.isMember(player)) {
                         promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
                         return;
                     }
+
+                    Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
                 }
             }
         }

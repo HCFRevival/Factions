@@ -11,7 +11,8 @@ public enum FError {
     C_DOES_NOT_MEET_ARMOR_REQ("You do not meet the armor requirements for this class"),
     C_CLASS_LIMIT_MET("Your faction is at the limit for this class"),
     P_CANT_PERFORM_SELF("You can not perform this action to yourself"),
-    P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"),
+    P_CANT_PERFORM_WHILE_COMBAT_TAGGED("You can not perform this action while combat-tagged"),
+    P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"), /* deprecated, use P_CANT_PERFORM_WHILE_COMBAT_TAGGED */
     P_CAN_NOT_CHANGE_WORLDS_PVP_PROT("You can not change worlds while you have PvP protection"),
     P_CAN_NOT_PEARL_IN_CLAIM("Your enderpearl landed in a claim you are not allowed to enter"),
     P_CAN_NOT_ATTACK_PVP_PROT("You can not attack others while you have PvP protection"),
