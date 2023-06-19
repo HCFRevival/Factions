@@ -7,7 +7,9 @@ import gg.hcfactions.factions.events.menu.EventMenu;
 import gg.hcfactions.factions.models.events.EPalaceLootTier;
 import gg.hcfactions.factions.models.events.ICaptureEvent;
 import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.IScheduledEvent;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
+import gg.hcfactions.factions.models.events.impl.EventSchedule;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootable;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
@@ -106,8 +108,68 @@ public final class EventExecutor implements IEventExecutor {
     }
 
     @Override
-    public void addEventSchedule(Player player, String eventName, int day, int hour, int minute, Promise promise) {
+    public void addEventSchedule(Player player, String eventName, int day, int hour, int minute, boolean temp, Promise promise) {
+        final Optional<IEvent> eventQuery = manager.getEvent(eventName);
 
+        if (eventQuery.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent event = eventQuery.get();
+
+        if (!(event instanceof final IScheduledEvent scheduledEvent)) {
+            promise.reject("This type of event can not be scheduled");
+            return;
+        }
+
+        final Optional<EventSchedule> scheduleQuery = scheduledEvent.getScheduleAt(day, hour, minute);
+
+        if (scheduleQuery.isPresent()) {
+            promise.reject("This event is already scheduled to start at this time");
+            return;
+        }
+
+        final EventSchedule schedule = new EventSchedule(hour, minute, day);
+        scheduledEvent.getSchedule().add(schedule);
+
+        if (!temp) {
+            manager.saveEvent((IEvent) scheduledEvent);
+        }
+
+        promise.resolve();
+    }
+
+    @Override
+    public void removeEventSchedule(Player player, String eventName, int day, int hour, int minute, boolean temp, Promise promise) {
+        final Optional<IEvent> eventQuery = manager.getEvent(eventName);
+
+        if (eventQuery.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent event = eventQuery.get();
+
+        if (!(event instanceof final IScheduledEvent scheduledEvent)) {
+            promise.reject("This type of event can not be scheduled");
+            return;
+        }
+
+        final Optional<EventSchedule> scheduleQuery = scheduledEvent.getScheduleAt(day, hour, minute);
+
+        if (scheduleQuery.isEmpty()) {
+            promise.reject("This event is not scheduled to start at this time");
+            return;
+        }
+
+        scheduledEvent.getSchedule().remove(scheduleQuery.get());
+
+        if (!temp) {
+            manager.saveEvent((IEvent) scheduledEvent);
+        }
+
+        promise.resolve();
     }
 
     @Override

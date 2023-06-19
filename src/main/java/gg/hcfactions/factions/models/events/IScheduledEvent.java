@@ -10,10 +10,15 @@ import org.bukkit.Bukkit;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 public interface IScheduledEvent {
     List<EventSchedule> getSchedule();
+
+    default Optional<EventSchedule> getScheduleAt(int dayOfWeek, int hourOfDay, int minuteOfHour) {
+        return getSchedule().stream().filter(s -> s.getDay() == dayOfWeek && s.getHour() == hourOfDay && s.getMinute() == minuteOfHour).findFirst();
+    }
 
     default boolean shouldStart() {
         if (getSchedule().isEmpty()) {
