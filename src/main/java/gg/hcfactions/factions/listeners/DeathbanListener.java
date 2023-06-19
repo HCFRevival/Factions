@@ -73,10 +73,11 @@ public record DeathbanListener(@Getter Factions plugin) implements Listener {
         final CombatLogger logger = event.getLogger();
         final Location location = logger.getBukkitEntity().getLocation();
         final UUID uniqueId = logger.getOwnerId();
+        final String deathMessage = "Your combat-logger was slain" + (event.getKiller() != null ? ChatColor.RED + " by " + event.getKiller().getName() : "");
         final Claim insideClaim = plugin.getClaimManager().getClaimAt(
                 new PLocatable(Objects.requireNonNull(location.getWorld()).getName(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch()));
-        boolean inEvent = false;
 
+        boolean inEvent = false;
         if (insideClaim != null && plugin.getFactionManager().getFactionById(insideClaim.getOwner()) instanceof final ServerFaction sf) {
             final Optional<IEvent> eventQuery = plugin.getEventManager().getEvent(sf);
 
@@ -94,7 +95,7 @@ public record DeathbanListener(@Getter Factions plugin) implements Listener {
 
             final PlayerDeathbanEvent deathbanEvent = new PlayerDeathbanEvent(
                     uniqueId,
-                    ChatColor.RED + "Your combat-logger was slain by " + ChatColor.YELLOW + event.getKiller().getName(),
+                    deathMessage,
                     (int)(holder.getStatistic(EStatisticType.PLAYTIME) / 1000L),
                     isInEvent,
                     plugin.getServerStateManager().getCurrentState().equals(EServerState.SOTW),
