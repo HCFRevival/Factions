@@ -1927,6 +1927,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     }
 
                     Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
+                    return;
                 }
             }
         }
