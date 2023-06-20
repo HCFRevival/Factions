@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.models.events.impl.types;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.events.event.KOTHCaptureEvent;
 import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
@@ -72,6 +73,9 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward) {
         session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward);
         session.setActive(true);
+
+        Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
+
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can now be contested");
     }
 

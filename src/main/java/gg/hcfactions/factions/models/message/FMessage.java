@@ -20,11 +20,13 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import joptsimple.internal.Strings;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
@@ -277,6 +279,27 @@ public final class FMessage {
         return ChatColor.DARK_GREEN + "(" + ChatColor.GOLD + "FC" + ChatColor.DARK_GREEN + ") " + ChatColor.RESET + displayName + ChatColor.DARK_GREEN + ": " + message;
     }
 
+    public static void printFocusedByFaction(PlayerFaction faction, Player player) {
+        player.sendMessage(LAYER_1 + "You are being " + ERROR + "focused" + LAYER_1 + " by " + INFO + faction.getName());
+    }
+
+    public static void printFocusing(PlayerFaction faction, Player initiated, Player player) {
+        faction.sendMessage(P_NAME + initiated.getName() + LAYER_1 + " wants to focus " + ChatColor.LIGHT_PURPLE + player.getName());
+    }
+
+    public static void printNoLongerFocused(PlayerFaction faction, Player player) {
+        player.sendMessage(LAYER_1 + "You are no longer being " + ERROR + "focused" + LAYER_1 + " by " + INFO + faction.getName());
+    }
+
+    public static void printStaffDeathMessage(Player viewer, String username, Location location) {
+        viewer.spigot().sendMessage(
+                new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
+                        .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + location.getWorld()))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
+                        .create());
+    }
+
     public static List<String> getEnemyNametag(String username, String factionName) {
         final List<String> res = Lists.newArrayList();
 
@@ -292,6 +315,17 @@ public final class FMessage {
         final List<String> res = Lists.newArrayList();
         res.add(ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + factionName + ChatColor.GRAY + "]");
         res.add(ChatColor.DARK_GREEN + username);
+        return res;
+    }
+
+    public static List<String> getFocusedNametag(String username, String factionName) {
+        final List<String> res = Lists.newArrayList();
+
+        if (factionName != null) {
+            res.add(ChatColor.GRAY + "[" + ChatColor.LIGHT_PURPLE + factionName + ChatColor.GRAY + "]");
+        }
+
+        res.add(ChatColor.LIGHT_PURPLE + username);
         return res;
     }
 

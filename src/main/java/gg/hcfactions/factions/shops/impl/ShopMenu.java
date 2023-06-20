@@ -18,7 +18,6 @@ import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -138,6 +137,8 @@ public final class ShopMenu extends GenericMenu {
                 + FMessage.SUCCESS + "purchased" + ChatColor.AQUA + " x" + item.getAmount() + ChatColor.RESET + " "
                 + itemName + FMessage.LAYER_1 + " for " + ChatColor.DARK_AQUA + item.getTokenPrice() + " tokens");
 
+        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + itemName + " with " + item.getTokenPrice() + " tokens");
+
         promise.resolve();
     }
 
@@ -172,6 +173,8 @@ public final class ShopMenu extends GenericMenu {
         player.sendMessage(FMessage.LAYER_1 + "Purchased " + ChatColor.AQUA + "x" + item.getAmount()
                 + ChatColor.RESET + " " + itemName + FMessage.LAYER_1 + " for " + ChatColor.DARK_GREEN
                 + String.format("%.2f", item.getBuyPrice()));
+
+        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
 
         promise.resolve();
     }
@@ -222,5 +225,7 @@ public final class ShopMenu extends GenericMenu {
                 + ChatColor.RESET + " " + itemName
                 + FMessage.LAYER_1 + " for " + ChatColor.DARK_GREEN
                 + "$" + String.format("%.2f", soldPrice));
+
+        plugin.getAresLogger().info(player.getName() + " sold x" + item.getAmount() + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
     }
 }

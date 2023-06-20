@@ -3,6 +3,7 @@ package gg.hcfactions.factions.cmd;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.events.EPalaceLootTier;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.acf.BaseCommand;
 import gg.hcfactions.libs.acf.CommandHelp;
 import gg.hcfactions.libs.acf.annotation.*;
@@ -13,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 @CommandAlias("event")
@@ -239,6 +241,96 @@ public final class EventCommand extends BaseCommand {
             @Override
             public void reject(String s) {
                 player.sendMessage(ChatColor.RED + "Failed to restock event: " + s);
+            }
+        });
+    }
+
+    /*
+        /event schedule <eventName> <add|rem> <day> <hr:min>
+     */
+    @Subcommand("schedule")
+    @Description("Modify event schedules")
+    @Syntax("<event> <add|rem> <day> <hr:min> [temp]")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@events")
+    public void onSchedule(
+            Player player,
+            String eventName,
+            @Values("add|rem") String modifier,
+            @Values("sunday|monday|tuesday|wednesday|thursday|friday|saturday") String dayOfWeekName,
+            String timeName,
+            @Optional String temp
+    ) {
+        final boolean isTemp = (temp != null && temp.equalsIgnoreCase("temp"));
+        int dayOfWeek = -1;
+
+        switch (dayOfWeekName.toLowerCase()) {
+            case "sunday" -> dayOfWeek = 1;
+            case "monday" -> dayOfWeek = 2;
+            case "tuesday" -> dayOfWeek = 3;
+            case "wednesday" -> dayOfWeek = 4;
+            case "thursday" -> dayOfWeek = 5;
+            case "friday" -> dayOfWeek = 6;
+            case "saturday" -> dayOfWeek = 7;
+        }
+
+        if (dayOfWeek == -1) {
+            player.sendMessage(FMessage.ERROR + "Invalid day of week");
+            return;
+        }
+
+        final String[] timeSplit = timeName.split(":");
+        int hourOfDay;
+        int minuteOfHour;
+
+        if (timeSplit.length != 2) {
+            player.sendMessage(ChatColor.RED + "Invalid time format");
+            return;
+        }
+
+        try {
+            hourOfDay = Integer.parseInt(timeSplit[0]);
+            minuteOfHour = Integer.parseInt(timeSplit[1]);
+        } catch (NumberFormatException e) {
+            player.sendMessage(ChatColor.RED + "Invalid time format");
+            return;
+        }
+
+        if (hourOfDay < 0 || hourOfDay > 23) {
+            player.sendMessage(ChatColor.RED + "Hours must be 0-23");
+            return;
+        }
+
+        if (minuteOfHour < 0 || minuteOfHour > 59) {
+            player.sendMessage(ChatColor.RED + "Minutes must be 0-60");
+            return;
+        }
+
+        if (modifier.equalsIgnoreCase("add")) {
+            plugin.getEventManager().getExecutor().addEventSchedule(player, eventName, dayOfWeek, hourOfDay, minuteOfHour, isTemp, new Promise() {
+                @Override
+                public void resolve() {
+                    player.sendMessage(FMessage.SUCCESS + "Event schedule updated");
+                }
+
+                @Override
+                public void reject(String s) {
+                    player.sendMessage(FMessage.ERROR + "Failed to update event schedule: " + s);
+                }
+            });
+
+            return;
+        }
+
+        plugin.getEventManager().getExecutor().removeEventSchedule(player, eventName, dayOfWeek, hourOfDay, minuteOfHour, isTemp, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(FMessage.SUCCESS + "Event schedule updated");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(FMessage.ERROR + "Failed to update event schedule: " + s);
             }
         });
     }

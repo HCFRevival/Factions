@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import com.mongodb.client.model.Filters;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
@@ -343,6 +344,26 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             FMessage.printCanNotAttackFactionMembers(player);
             event.setCancelled(true);
         }
+    }
+
+    /**
+     * Prints death coordinates upon player death
+     * @param event PlayerDeathEvent
+     */
+    @EventHandler
+    public void onPrintDeathLocation(PlayerDeathEvent event) {
+        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                FMessage.printStaffDeathMessage(staff, event.getEntity().getName(), event.getEntity().getLocation()));
+    }
+
+    /**
+     * Prints combat logger coordinates upon player death
+     * @param event CombatLoggerDeathEvent
+     */
+    @EventHandler
+    public void onPrintLoggerDeathLocation(CombatLoggerDeathEvent event) {
+        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                FMessage.printStaffDeathMessage(staff, event.getLogger().getOwnerUsername(), event.getLogger().getBukkitEntity().getLocation()));
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)

@@ -57,4 +57,5 @@ public interface IFactionExecutor {
     void startHomeTimer(Player player, Promise promise);
     void startStuckTimer(Player player, Promise promise);
     void printTeamLocate(Player player, Promise promise);
+    void focusPlayer(Player player, Player toFocus, Promise promise);
 }

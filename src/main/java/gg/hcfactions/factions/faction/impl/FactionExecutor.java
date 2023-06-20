@@ -1882,11 +1882,14 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void startHomeTimer(Player player, Promise promise) {
-        final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
-
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
         if (factionPlayer == null) {
             promise.reject(FError.P_COULD_NOT_LOAD_P.getErrorDescription());
+            return;
+        }
+
+        if (factionPlayer.hasTimer(ETimerType.COMBAT)) {
+            promise.reject(FError.P_CANT_PERFORM_WHILE_COMBAT_TAGGED.getErrorDescription());
             return;
         }
 
@@ -1909,19 +1912,22 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 if (insideFaction instanceof final ServerFaction sf) {
                     if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                         Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
-                        player.sendMessage(FMessage.T_HOME_COMPLETE);
-                        return;
-                    } else if (!bypass) {
-                        promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                        promise.resolve();
                         return;
                     }
-                } else {
-                    final PlayerFaction playerFaction = (PlayerFaction) insideFaction;
 
-                    if (!playerFaction.getUniqueId().equals(faction.getUniqueId()) && !bypass) {
+                    promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                    return;
+                }
+
+                else if (insideFaction instanceof final PlayerFaction pf) {
+                    if (!pf.isMember(player)) {
                         promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
                         return;
                     }
+
+                    Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
+                    return;
                 }
             }
         }
@@ -1975,6 +1981,40 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final String world = Objects.requireNonNull(player.getLocation().getWorld()).getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " ");
 
         faction.sendMessage(FMessage.getFactionFormat(displayName, "Located at " + x + ", " + y + ", " + z + ", " + world));
+        promise.resolve();
+    }
+
+    @Override
+    public void focusPlayer(Player player, Player toFocus, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (faction.hasTimer(ETimerType.FOCUS)) {
+            promise.reject("Please wait " + Time.convertToRemaining(faction.getTimer(ETimerType.FOCUS).getRemaining()) + " before performing this action again");
+            return;
+        }
+
+        if (faction.isMember(toFocus)) {
+            promise.reject("You can not focus your own faction members");
+            return;
+        }
+
+        final FactionFocusEvent focusEvent = new FactionFocusEvent(faction, player, toFocus);
+        Bukkit.getPluginManager().callEvent(focusEvent);
+
+        if (focusEvent.isCancelled()) {
+            promise.reject("Focus event cancelled");
+            return;
+        }
+
+        faction.addTimer(new FTimer(ETimerType.FOCUS, 60));
+        faction.setFocusedPlayerId(toFocus.getUniqueId());
+        FMessage.printFocusing(faction, player, toFocus);
+        FMessage.printFocusedByFaction(faction, toFocus);
         promise.resolve();
     }
 }

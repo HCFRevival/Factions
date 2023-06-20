@@ -105,7 +105,14 @@ public enum ETimerType {
             0,
             false,
             false,
-            false);
+            false),
+    FOCUS("Focus",
+            null,
+            0,
+            false,
+            false,
+            false
+    );
 
     @Getter public final String displayName;
     @Getter public final String scoreboardName;

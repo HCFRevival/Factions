@@ -55,9 +55,22 @@ public interface IEventExecutor {
      * @param day Day
      * @param hour Hour
      * @param minute Minute
+     * @param temp If true schedule will not be saved
      * @param promise Promise
      */
-    void addEventSchedule(Player player, String eventName, int day, int hour, int minute, Promise promise);
+    void addEventSchedule(Player player, String eventName, int day, int hour, int minute, boolean temp, Promise promise);
+
+    /**
+     * Remove a scheduled start time from an event
+     * @param player Player
+     * @param eventName Event name
+     * @param day Day of week
+     * @param hour Hour of day
+     * @param minute Minute of hour
+     * @param temp If true schedule will not be saved
+     * @param promise Promise
+     */
+    void removeEventSchedule(Player player, String eventName, int day, int hour, int minute, boolean temp, Promise promise);
 
     /**
      * Add a new loot item to the Palace Loot Table

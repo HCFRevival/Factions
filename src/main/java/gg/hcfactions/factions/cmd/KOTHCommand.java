@@ -16,7 +16,6 @@ import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -30,13 +29,14 @@ public final class KOTHCommand extends BaseCommand {
     public void onNextKoth(Player player) {
         final List<KOTHEvent> koths = Lists.newArrayList();
         plugin.getEventManager().getEventRepository().stream().filter(event -> event instanceof KOTHEvent).forEach(koth -> koths.add(((KOTHEvent) koth)));
+        koths.removeIf(koth -> koth.getSchedule().isEmpty()); // TODO: Refactor: this sucks, let's just filter them in the first place
 
         if (koths.isEmpty() || koths.stream().noneMatch(kothEvent -> kothEvent.getRemainingTimeUntilNextSchedule() > -1L)) {
             player.sendMessage(ChatColor.RED + "No events found");
+            return;
         }
 
         koths.sort(Comparator.comparingLong(KOTHEvent::getRemainingTimeUntilNextSchedule));
-        Collections.reverse(koths);
 
         // Courtyard will go active in 3 hours, 2 minutes and 45 seconds
         final KOTHEvent nextEvent = koths.get(0);

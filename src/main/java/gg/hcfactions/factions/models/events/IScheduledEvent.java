@@ -2,25 +2,23 @@ package gg.hcfactions.factions.models.events;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.models.events.impl.EventSchedule;
-import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import org.bukkit.Bukkit;
 
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.Future;
+import java.util.*;
 
 public interface IScheduledEvent {
     List<EventSchedule> getSchedule();
+
+    default Optional<EventSchedule> getScheduleAt(int dayOfWeek, int hourOfDay, int minuteOfHour) {
+        return getSchedule().stream().filter(s -> s.getDay() == dayOfWeek && s.getHour() == hourOfDay && s.getMinute() == minuteOfHour).findFirst();
+    }
 
     default boolean shouldStart() {
         if (getSchedule().isEmpty()) {
             return false;
         }
 
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         final int day = calendar.get(Calendar.DAY_OF_WEEK);
         final int hour = calendar.get(Calendar.HOUR_OF_DAY);
         final int min = calendar.get(Calendar.MINUTE);

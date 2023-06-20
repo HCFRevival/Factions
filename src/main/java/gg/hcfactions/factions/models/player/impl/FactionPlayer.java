@@ -11,6 +11,7 @@ import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.EScoreboardEntryType;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.scoreboard.FScoreboard;
 import gg.hcfactions.factions.player.PlayerManager;
@@ -97,7 +98,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             return;
         }
 
-        final Team friendly = scoreboard.getInternal().getTeam("friendly");
+        final Team friendly = scoreboard.getInternal().getTeam(EScoreboardEntryType.FRIENDLY.getScoreboardTeamName());
         if (friendly == null) {
             playerManager.getPlugin().getAresLogger().error("attempted to add to scoreboard but team was null");
             return;
@@ -111,19 +112,55 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     }
 
     @Override
+    public void addToScoreboard(Player player, EScoreboardEntryType entryType) {
+        if (scoreboard == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to add to scoreboard but scoreboard was null");
+            return;
+        }
+
+        final Team team = scoreboard.getInternal().getTeam(entryType.getScoreboardTeamName());
+        if (team == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to add to scoreboard but team was null");
+            return;
+        }
+
+        if (team.hasEntry(player.getName())) {
+            return;
+        }
+
+        team.addEntry(player.getName());
+    }
+
+    @Override
     public void removeFromScoreboard(Player player) {
         if (scoreboard == null) {
             playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but scoreboard was null");
             return;
         }
 
-        final Team friendly = scoreboard.getInternal().getTeam("friendly");
+        final Team friendly = scoreboard.getInternal().getTeam(EScoreboardEntryType.FRIENDLY.getScoreboardTeamName());
         if (friendly == null) {
             playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but team was null");
             return;
         }
 
         friendly.removeEntry(player.getName());
+    }
+
+    @Override
+    public void removeFromScoreboard(Player player, EScoreboardEntryType entryType) {
+        if (scoreboard == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but scoreboard was null");
+            return;
+        }
+
+        final Team team = scoreboard.getInternal().getTeam(entryType.getScoreboardTeamName());
+        if (team == null) {
+            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but team was null");
+            return;
+        }
+
+        team.removeEntry(player.getName());
     }
 
     @Override
