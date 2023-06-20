@@ -106,7 +106,7 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (insideSubclaim == null || insideSubclaim.canAccess(player)) {
+        if (insideSubclaim != null && insideSubclaim.canAccess(player)) {
             return;
         }
 
