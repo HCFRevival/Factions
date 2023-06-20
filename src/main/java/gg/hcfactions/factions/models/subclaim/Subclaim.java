@@ -121,17 +121,21 @@ public final class Subclaim implements IRegion, MongoDocument<Subclaim> {
         final PlayerFaction faction = subclaimManager.getPlugin().getFactionManager().getPlayerFactionById(owner);
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (bypass) {
+            return true;
+        }
+
         if (faction == null) {
             return true;
         }
 
         final PlayerFaction.Member member = faction.getMember(player.getUniqueId());
 
-        if (member == null && !bypass) {
+        if (member == null) {
             return false;
         }
 
-        if (member != null && member.getRank().equals(PlayerFaction.Rank.MEMBER) && !isMember(player.getUniqueId()) && !bypass) {
+        if (member.getRank().equals(PlayerFaction.Rank.MEMBER) && !isMember(player.getUniqueId())) {
             return false;
         }
 

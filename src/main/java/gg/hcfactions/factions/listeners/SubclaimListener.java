@@ -11,13 +11,11 @@ import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -42,6 +40,10 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
         final Subclaim subclaim = plugin.getSubclaimManager().getSubclaimAt(new BLocatable(block));
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
+        if (bypass) {
+            return;
+        }
+
         if (subclaim == null) {
             return;
         }
@@ -52,7 +54,7 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (!subclaim.canAccess(player) && !faction.isRaidable() && faction.isMember(player.getUniqueId()) && !bypass) {
+        if (!subclaim.canAccess(player) && !faction.isRaidable() && faction.isMember(player.getUniqueId())) {
             player.sendMessage(FMessage.ERROR + FError.F_SUBCLAIM_NO_ACCESS.getErrorDescription());
             cancellable.setCancelled(true);
         }
@@ -86,17 +88,30 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
 
         final PlayerFaction insideClaimOwner = plugin.getFactionManager().getPlayerFactionById(insideClaim.getOwner());
 
-        if (!player.hasPermission(FPermissions.P_FACTIONS_ADMIN) &&
-                        insideClaimOwner != null &&
-                        !insideClaimOwner.isRaidable() &&
-                        !subclaim.canAccess(player) &&
-                        insideClaimOwner.isMember(player.getUniqueId()) &&
-                        (insideSubclaim == null || insideSubclaim.canAccess(player))) {
-
-            player.sendMessage(FMessage.ERROR + FError.F_SUBCLAIM_NO_ACCESS.getErrorDescription());
-            cancellable.setCancelled(true);
-
+        if (player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            return;
         }
+
+        if (insideClaimOwner == null || insideClaimOwner.isRaidable()) {
+            return;
+        }
+
+        final PlayerFaction.Member member = insideClaimOwner.getMember(player.getUniqueId());
+
+        if (member != null && member.getRank().isHigher(PlayerFaction.Rank.MEMBER)) {
+            return;
+        }
+
+        if (subclaim.canAccess(player)) {
+            return;
+        }
+
+        if (insideSubclaim == null || insideSubclaim.canAccess(player)) {
+            return;
+        }
+
+        player.sendMessage(FMessage.ERROR + FError.F_SUBCLAIM_NO_ACCESS.getErrorDescription());
+        cancellable.setCancelled(true);
     }
 
     /**
