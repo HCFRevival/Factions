@@ -20,11 +20,13 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import joptsimple.internal.Strings;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
@@ -287,6 +289,15 @@ public final class FMessage {
 
     public static void printNoLongerFocused(PlayerFaction faction, Player player) {
         player.sendMessage(LAYER_1 + "You are no longer being " + ERROR + "focused" + LAYER_1 + " by " + INFO + faction.getName());
+    }
+
+    public static void printStaffDeathMessage(Player viewer, String username, Location location) {
+        viewer.spigot().sendMessage(
+                new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
+                        .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + location.getWorld()))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
+                        .create());
     }
 
     public static List<String> getEnemyNametag(String username, String factionName) {
