@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.models.events.impl.types;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.IMonsterEvent;
 import gg.hcfactions.factions.models.events.IScheduledEvent;
@@ -72,6 +73,9 @@ public final class MonsterEvent implements IEvent, IMonsterEvent, IScheduledEven
         final String timeDisplay = Time.convertToRemaining(uptime/1000L);
         session = new MonsterEventSession(tokenReward);
         session.setActive(true);
+
+        Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
+
         Bukkit.broadcastMessage(FMessage.PVE_PREFIX + displayName + FMessage.LAYER_1 + " is now open for " + timeDisplay);
     }
 
