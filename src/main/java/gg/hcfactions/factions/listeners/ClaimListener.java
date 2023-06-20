@@ -406,7 +406,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 final ServerFaction serverFaction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
                 if (serverFaction != null) {
-                    plugin.getAresLogger().error(event.getEventName() + " failed! Reason: inside a claim");
+                    plugin.getAresLogger().error(event.getEventName() + " failed! Reason: inside a claim (" + serverFaction.getName() + ")");
                     event.setCancelled(true);
                     return;
                 }
