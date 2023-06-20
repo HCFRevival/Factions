@@ -33,6 +33,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -40,6 +41,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
@@ -634,5 +636,24 @@ public final class ClassListener implements Listener {
         for (EEffectScoreboardMapping mapping : EEffectScoreboardMapping.values()) {
             factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
         }
+    }
+
+    /**
+     * Reapplies class effects after a player uses a totem
+     * @param event EntityResurrectEvent
+     */
+    @EventHandler
+    public void onPlayerResurrect(EntityResurrectEvent event) {
+        if (!(event.getEntity() instanceof final Player player)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (playerClass == null) {
+            return;
+        }
+
+        new Scheduler(plugin).sync(() -> playerClass.getPassiveEffects().forEach((passive, amplifier) -> player.addPotionEffect(new PotionEffect(passive, PotionEffect.INFINITE_DURATION, amplifier)))).run();
     }
 }
