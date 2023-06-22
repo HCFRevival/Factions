@@ -547,7 +547,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction.getMember(player.getUniqueId()).getRank().equals(PlayerFaction.Rank.LEADER)) {
+        if (faction.getMember(player.getUniqueId()).getRank().equals(PlayerFaction.Rank.LEADER) && faction.getMembersByRank(PlayerFaction.Rank.LEADER).size() <= 1) {
             promise.reject(FError.F_REASSIGN_LEADER.getErrorDescription());
             return;
         }
