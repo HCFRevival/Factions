@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.cmd;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
@@ -50,8 +51,18 @@ public final class FactionHelpCommand extends BaseCommand {
                 final String amplify = potionLimit.isAmplifiable() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No";
                 final String extend = potionLimit.isExtendable() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No";
                 final String disabled = potionLimit.isDisabled() ? ChatColor.RED + "Yes" : ChatColor.GREEN + "No";
+                final String splashable = potionLimit.canSplash() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No";
 
-                potionLimits.add(FMessage.LAYER_1 + potionName + ": " + "Amplifiable: " + amplify + FMessage.LAYER_1 + ", Extendable: " + extend + FMessage.LAYER_1 + ", Disabled: " + disabled);
+                values.add(FMessage.LAYER_1 + "Amplifiable: " + amplify);
+                values.add(FMessage.LAYER_1 + "Extendable: " + extend);
+
+                if (!potionLimit.canSplash()) {
+                    values.add(FMessage.LAYER_1 + "Splashable: " + splashable);
+                }
+
+                values.add(FMessage.LAYER_1 + "Disabled: " + disabled);
+
+                potionLimits.add(FMessage.LAYER_1 + potionName + ": " + Joiner.on(FMessage.LAYER_1 + ", ").join(values));
             });
 
             if (!enchantmentLimits.isEmpty()) {
