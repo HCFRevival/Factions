@@ -39,10 +39,12 @@ public final class FConfig {
     @Getter public double playerPowerValue;
     @Getter public double powerCap;
     @Getter public int powerTickInterval;
-    @Getter public int powerTickPlayerModifier;
     @Getter public double netherPowerLossReduction;
     @Getter public double endPowerLossReduction;
     @Getter public double eventPowerLossReduction;
+
+    /* @deprecated */
+    @Getter public int powerTickPlayerModifier;
 
     // faction limits
     @Getter public int maxFactionSize;
