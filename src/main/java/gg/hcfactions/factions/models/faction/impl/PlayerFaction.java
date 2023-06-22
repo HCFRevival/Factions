@@ -264,17 +264,16 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
 
     @Override
     public void tick() {
-        final long next = Time.now()
-                + ((manager.getPlugin().getConfiguration().getPowerTickInterval()*1000L)
-                - (long)getOnlineMembers().size()*manager.getPlugin().getConfiguration().getPowerTickPlayerModifier());
+        final long next = Time.now() + (manager.getPlugin().getConfiguration().getPowerTickInterval()*1000L);
+        setNextTick(next);
 
+        // clear out rally after expire time
+        // TODO: Make this configurable
         if (((Time.now() - lastRallyUpdate) / 1000L) >= 300) {
             setRallyLocation(null);
         }
 
-        setNextTick(next);
-
-        if (getOnlineMembers().isEmpty() || isFrozen() || getDtr() == getMaxDtr()) {
+        if (isFrozen() || getDtr() == getMaxDtr()) {
             return;
         }
 
