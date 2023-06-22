@@ -248,6 +248,16 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Handles preventing armor stand manipulation in claims
+     *
+     * @param event PlayerArmorStandManipulateEvent
+     */
+    @EventHandler
+    public void onArmorStandManipulation(PlayerArmorStandManipulateEvent event) {
+        handleBlockModification(event, event.getPlayer(), event.getRightClicked().getLocation().getBlock());
+    }
+
+    /**
      * Handles blocking piston event
      *
      * @param event BlockPistonRetractEvent
