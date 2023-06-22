@@ -71,6 +71,10 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (!(event.getEntity() instanceof Monster)) {
+            return;
+        }
+
         final PLocatable loc = new PLocatable(event.getEntity());
         final Claim insideClaim = plugin.getClaimManager().getClaimAt(loc);
 
