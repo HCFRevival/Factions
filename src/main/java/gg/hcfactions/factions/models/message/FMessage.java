@@ -121,9 +121,12 @@ public final class FMessage {
     }
 
     public static void printRallyUpdate(Player player, PlayerFaction playerFaction) {
-        final BLocatable location = new BLocatable(player.getLocation().getBlock());
-        final String env = StringUtils.capitalize(location.getBukkitBlock().getWorld().getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " "));
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + location.getX() + " " + location.getY() + " " + location.getZ() + " " + env);
+        final int x = player.getLocation().getBlockX();
+        final int y = player.getLocation().getBlockY();
+        final int z = player.getLocation().getBlockZ();
+        final String env = StringUtils.capitalize(player.getWorld().getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " "));
+
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + x + " " + y + " " + z + " " + env);
     }
 
     public static void printPlayerInvite(Player player, PlayerFaction playerFaction, String username) {
