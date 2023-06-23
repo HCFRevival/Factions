@@ -92,6 +92,9 @@ public final class FConfig {
     @Getter public int lifeUseDelay;
     @Getter public String shopUrl;
 
+    // events
+    @Getter public int eventTicketLossPerDeath;
+
     // display
     @Getter public String scoreboardTitle;
     @Getter public String scoreboardFooter;
@@ -287,6 +290,9 @@ public final class FConfig {
         plugin.getAresLogger().info("Minimum Deathban Duration: " + minDeathbanDuration);
         plugin.getAresLogger().info("Life Use Delay: " + lifeUseDelay);
         plugin.getAresLogger().info("Shop URL: " + shopUrl);
+
+        eventTicketLossPerDeath = conf.getInt("events.koth.ticket_loss_per_death");
+        plugin.getAresLogger().info("KOTH Ticket Loss Per Death: " + eventTicketLossPerDeath);
 
         mapNumber = conf.getInt("stats.map");
         plugin.getAresLogger().info("Stats tracked under Map: " + mapNumber);
