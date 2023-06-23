@@ -123,6 +123,13 @@ public final class CosmeticsListener implements Listener {
         }
     }
 
+    /**
+     * Adds rank display to tablist
+     *
+     * TODO: Should we move this to CommandX?
+     *
+     * @param event PlayerJoinEvent
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
