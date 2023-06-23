@@ -13,6 +13,7 @@ import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -24,6 +25,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -203,6 +205,45 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
         }
 
         handleBlockModification(event, player, block);
+    }
+
+    @EventHandler
+    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        final Location sourceLoc = event.getSource().getLocation();
+        final Location destLoc = event.getDestination().getLocation();
+
+        if (sourceLoc == null || destLoc == null) {
+            return;
+        }
+
+        final Block origin = sourceLoc.getBlock();
+        final Block destination = destLoc.getBlock();
+
+        if (plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(destination) != null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        final Subclaim originSubclaim = plugin.getSubclaimManager().getSubclaimAt(new BLocatable(origin));
+        final Subclaim destSubclaim = plugin.getSubclaimManager().getSubclaimAt(new BLocatable(destination));
+
+        if (originSubclaim != null) {
+            if (destSubclaim == null || !destSubclaim.getUniqueId().equals(originSubclaim.getUniqueId())) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        if (destSubclaim != null) {
+            if (originSubclaim == null || !originSubclaim.getUniqueId().equals(destSubclaim.getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
     }
 
     /**
