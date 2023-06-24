@@ -198,8 +198,6 @@ public final class EventExecutor implements IEventExecutor {
             enchantments.putAll(hand.getItemMeta().getEnchants());
         }
 
-        manager.getPlugin().getAresLogger().info(enchantments.toString());
-
         final PalaceLootable lootable = new PalaceLootable(
                 UUID.randomUUID().toString(),
                 hand.getItemMeta() != null ? hand.getItemMeta().getDisplayName() : null,
