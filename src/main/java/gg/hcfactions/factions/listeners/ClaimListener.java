@@ -29,10 +29,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
@@ -255,6 +252,26 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     @EventHandler
     public void onArmorStandManipulation(PlayerArmorStandManipulateEvent event) {
         handleBlockModification(event, event.getPlayer(), event.getRightClicked().getLocation().getBlock());
+    }
+
+    /**
+     * Handles preventing breaking armor stands in claims
+     *
+     * @param event EntityDamageByEntityEvent
+     */
+    @EventHandler
+    public void test(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof ArmorStand)) {
+            return;
+        }
+
+        if (!(event.getDamager() instanceof final Player player)) {
+            return;
+        }
+
+        final Block block = event.getEntity().getLocation().getBlock();
+
+        handleBlockModification(event, player, block);
     }
 
     /**
