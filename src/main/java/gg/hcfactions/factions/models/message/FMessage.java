@@ -18,6 +18,8 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
+import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
+import gg.hcfactions.libs.bukkit.services.impl.deathbans.impl.Deathban;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import joptsimple.internal.Strings;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -119,8 +121,12 @@ public final class FMessage {
     }
 
     public static void printRallyUpdate(Player player, PlayerFaction playerFaction) {
-        final BLocatable location = new BLocatable(player.getLocation().getBlock());
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + location);
+        final int x = player.getLocation().getBlockX();
+        final int y = player.getLocation().getBlockY();
+        final int z = player.getLocation().getBlockZ();
+        final String env = StringUtils.capitalize(player.getWorld().getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " "));
+
+        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + x + " " + y + " " + z + " " + env);
     }
 
     public static void printPlayerInvite(Player player, PlayerFaction playerFaction, String username) {
@@ -295,7 +301,7 @@ public final class FMessage {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
                         .color(net.md_5.bungee.api.ChatColor.GRAY)
-                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + location.getWorld()))
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
                         .create());
     }
@@ -333,6 +339,7 @@ public final class FMessage {
         // ◼⚠⬛⬆⬇▴▶▾
         // ⬆⬇➡
         final AccountService acs = (AccountService) plugin.getService(AccountService.class);
+        final DeathbanService dbs = (DeathbanService) plugin.getService(DeathbanService.class);
         final String spacer = LAYER_1 + " - " + ChatColor.RESET;
         final boolean access = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
 
@@ -421,15 +428,21 @@ public final class FMessage {
 
         new Scheduler(plugin).async(() -> {
             final Map<PlayerFaction.Rank, List<String>> namesByRank = Maps.newHashMap();
+            final List<String> deathbannedUsernames = Lists.newArrayList();
 
             for (PlayerFaction.Rank rank : PlayerFaction.Rank.values()) {
                 final List<String> usernames = Lists.newArrayList();
 
                 for (PlayerFaction.Member member : playerFaction.getMembersByRank(rank)) {
                     final AresAccount account = acs.getAccount(member.getUniqueId());
+                    final Deathban deathban = dbs.getDeathban(member.getUniqueId());
 
                     if (account != null) {
                         usernames.add(account.getUsername());
+
+                        if (deathban != null && !deathban.isExpired()) {
+                            deathbannedUsernames.add(account.getUsername());
+                        }
                     }
                 }
 
@@ -455,6 +468,8 @@ public final class FMessage {
                     for (String name : names) {
                         if (Bukkit.getPlayer(name) != null) {
                             formatted.add(ChatColor.GREEN + prefix + name);
+                        } else if (deathbannedUsernames.contains(name)) {
+                            formatted.add(ChatColor.RED + prefix + name);
                         } else {
                             formatted.add(ChatColor.GRAY + prefix + name);
                         }

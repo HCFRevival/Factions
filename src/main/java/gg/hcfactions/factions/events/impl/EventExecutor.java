@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.events.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.events.IEventExecutor;
 import gg.hcfactions.factions.events.menu.EventMenu;
@@ -21,10 +22,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -181,12 +185,25 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
+
+        final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
+
+        if (hand.getType().equals(Material.ENCHANTED_BOOK)) {
+            final EnchantmentStorageMeta encMeta = (EnchantmentStorageMeta) hand.getItemMeta();
+
+            if (encMeta != null) {
+                enchantments.putAll(encMeta.getStoredEnchants());
+            }
+        } else if (hand.getItemMeta() != null) {
+            enchantments.putAll(hand.getItemMeta().getEnchants());
+        }
+
         final PalaceLootable lootable = new PalaceLootable(
                 UUID.randomUUID().toString(),
                 hand.getItemMeta() != null ? hand.getItemMeta().getDisplayName() : null,
                 hand.getType(),
                 hand.getItemMeta().getLore() != null ? hand.getItemMeta().getLore() : Lists.newArrayList(),
-                hand.getItemMeta().getEnchants(),
+                enchantments,
                 minAmount,
                 maxAmount,
                 probability,

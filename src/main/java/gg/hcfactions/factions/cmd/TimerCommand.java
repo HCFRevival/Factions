@@ -2,9 +2,11 @@ package gg.hcfactions.factions.cmd;
 
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.menus.PlayerTimerMenu;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
@@ -17,16 +19,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @CommandAlias("timer")
-public class TimerCommand extends BaseCommand {
+public final class TimerCommand extends BaseCommand {
     @Getter public final Factions plugin;
 
     @Subcommand("give")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @Description("Assign a timer to a player")
     @Syntax("<player> <timer> <duration>")
-    @CommandCompletion("@players")
+    @CommandCompletion("@players @timers")
     public void onGive(Player player, String playerName, String timerName, String durationName) {
         final Player assignedTo = Bukkit.getPlayer(playerName);
 
@@ -79,7 +84,7 @@ public class TimerCommand extends BaseCommand {
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @Description("Remove a timer from a player")
     @Syntax("<player> <timer>")
-    @CommandCompletion("@players")
+    @CommandCompletion("@players @timers")
     public void onRemove(Player player, String playerName, String timerName) {
         final Player assignedTo = Bukkit.getPlayer(playerName);
 
@@ -108,6 +113,30 @@ public class TimerCommand extends BaseCommand {
         }
 
         fp.finishTimer(timerType);
+    }
+
+    @Subcommand("list")
+    @Description("View a list of all players who have a provided timer type")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @CommandCompletion("@timers")
+    public void onTimerList(Player player, String timerName) {
+        final ETimerType type = ETimerType.fromString(timerName);
+
+        if (type == null) {
+            player.sendMessage(ChatColor.RED + "Invalid timer type");
+            return;
+        }
+
+        final List<IFactionPlayer> initialEntries = plugin.getPlayerManager().getPlayerRepository().stream().filter(fp -> fp.hasTimer(type)).collect(Collectors.toList());
+
+        if (initialEntries.isEmpty()) {
+            player.sendMessage(ChatColor.RED + "No entries found");
+            return;
+        }
+
+        final PlayerTimerMenu menu = new PlayerTimerMenu(plugin, player, type, initialEntries);
+
+        menu.open();
     }
 
     @CommandAlias("clearcd")

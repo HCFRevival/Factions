@@ -2,6 +2,8 @@ package gg.hcfactions.factions.cmd;
 
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.libs.acf.BaseCommand;
 import gg.hcfactions.libs.acf.annotation.CommandAlias;
 import gg.hcfactions.libs.acf.annotation.CommandCompletion;
@@ -17,7 +19,7 @@ import org.bukkit.entity.Player;
 public final class FocusCommand extends BaseCommand {
     @Getter public final Factions plugin;
 
-    @CommandAlias("focus|f")
+    @CommandAlias("focus")
     @CommandCompletion("@players")
     @Description("Temporarily highlight a player for everyone in your faction")
     public void onFocus(Player player, String username) {
@@ -25,6 +27,13 @@ public final class FocusCommand extends BaseCommand {
 
         if (toFocus == null) {
             player.sendMessage(ChatColor.RED + "Player not found");
+            return;
+        }
+
+        final FactionPlayer focusedFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(toFocus);
+
+        if (focusedFactionPlayer != null && !focusedFactionPlayer.hasTimer(ETimerType.COMBAT)) {
+            player.sendMessage(ChatColor.RED + toFocus.getName() + " is not combat-tagged");
             return;
         }
 

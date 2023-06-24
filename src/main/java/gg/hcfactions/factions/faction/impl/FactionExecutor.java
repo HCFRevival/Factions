@@ -547,7 +547,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction.getMember(player.getUniqueId()).getRank().equals(PlayerFaction.Rank.LEADER)) {
+        if (faction.getMember(player.getUniqueId()).getRank().equals(PlayerFaction.Rank.LEADER) && faction.getMembersByRank(PlayerFaction.Rank.LEADER).size() <= 1) {
             promise.reject(FError.F_REASSIGN_LEADER.getErrorDescription());
             return;
         }
@@ -1911,13 +1911,17 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             if (insideFaction != null) {
                 if (insideFaction instanceof final ServerFaction sf) {
                     if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
+                        player.setFallDistance(0); // reset fall distance in case they're falling
                         Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
+
                         promise.resolve();
                         return;
                     }
 
-                    promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
-                    return;
+                    if (!sf.getFlag().equals(ServerFaction.Flag.LANDMARK)) {
+                        promise.reject(FError.F_CANT_WARP_IN_CLAIM.getErrorDescription());
+                        return;
+                    }
                 }
 
                 else if (insideFaction instanceof final PlayerFaction pf) {
@@ -1926,6 +1930,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                         return;
                     }
 
+                    player.setFallDistance(0); // reset fall distance in case they're falling
                     Players.teleportWithVehicle(manager.getPlugin(), player, faction.getHomeLocation().getBukkitLocation());
                     return;
                 }

@@ -23,6 +23,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -120,5 +121,24 @@ public final class CosmeticsListener implements Listener {
                 player.sendMessage(" ");
             }
         }
+    }
+
+    /**
+     * Adds rank display to tablist
+     *
+     * TODO: Should we move this to CommandX?
+     *
+     * @param event PlayerJoinEvent
+     */
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
+        final RankService rankService = (RankService) plugin.getService(RankService.class);
+
+        if (rankService == null) {
+            return;
+        }
+
+        player.setPlayerListName(rankService.getFormattedName(player));
     }
 }

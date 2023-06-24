@@ -5,17 +5,19 @@ import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import org.bukkit.World;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -71,6 +73,10 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (!(event.getEntity() instanceof Monster)) {
+            return;
+        }
+
         final PLocatable loc = new PLocatable(event.getEntity());
         final Claim insideClaim = plugin.getClaimManager().getClaimAt(loc);
 
@@ -97,5 +103,42 @@ public record EventListener(@Getter Factions plugin) implements Listener {
         }
 
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        final Player player = event.getEntity();
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        if (pf == null) {
+            return;
+        }
+
+        if (plugin.getEventManager().getActiveKothEvents().isEmpty()) {
+            return;
+        }
+
+        for (KOTHEvent koth : plugin.getEventManager().getActiveKothEvents()) {
+            final int currentTickets = koth.getSession().getTickets(pf);
+
+            if (currentTickets <= 0) {
+                continue;
+            }
+
+            final int newTickets = currentTickets - plugin.getConfiguration().getEventTicketLossPerDeath();
+            
+            if (newTickets <= 0) {
+                koth.getSession().getLeaderboard().remove(pf.getUniqueId());
+                pf.sendMessage(" ");
+                pf.sendMessage(FMessage.KOTH_PREFIX + "Your faction is no longer on the leaderboard for " + koth.getDisplayName());
+                pf.sendMessage(" ");
+                continue;
+            }
+
+            koth.getSession().getLeaderboard().put(pf.getUniqueId(), newTickets);
+            pf.sendMessage(" ");
+            pf.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + koth.getDisplayName());
+            pf.sendMessage(" ");
+        }
     }
 }

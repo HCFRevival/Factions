@@ -1,5 +1,8 @@
 package gg.hcfactions.factions.listeners;
 
+import com.google.common.collect.Lists;
+import gg.hcfactions.cx.CXService;
+import gg.hcfactions.cx.rollback.impl.RollbackInventory;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
@@ -29,8 +32,12 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @AllArgsConstructor
 public final class CombatLoggerListener implements Listener {
@@ -226,5 +233,24 @@ public final class CombatLoggerListener implements Listener {
                 plugin.getLoggerManager().getLoggerRepository().remove(inChunkLogger);
             }
         });
+    }
+
+    @EventHandler
+    public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
+        final CXService cxService = (CXService) plugin.getService(CXService.class);
+        if (cxService == null) {
+            return;
+        }
+
+        final CombatLogger logger = event.getLogger();
+        final CraftLivingEntity livingEntity = (CraftLivingEntity) logger.getBukkitEntity();
+        final List<ItemStack> armorContents = Lists.newArrayList();
+
+        if (livingEntity.getEquipment() != null) {
+            armorContents.addAll(Arrays.asList(livingEntity.getEquipment().getArmorContents()));
+        }
+
+        final RollbackInventory inv = cxService.getRollbackManager().createInventory(logger.getOwnerUsername(), logger.getLoggerInventory(), armorContents);
+        cxService.getRollbackManager().getRollbackRepository().add(inv);
     }
 }

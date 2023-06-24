@@ -15,6 +15,7 @@ import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
+import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.player.PlayerManager;
 import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
@@ -138,6 +139,16 @@ public final class Factions extends AresPlugin {
             final List<String> res = Lists.newArrayList();
 
             for (EStatisticType type : EStatisticType.values()) {
+                res.add(type.name().toLowerCase());
+            }
+
+            return res;
+        });
+
+        cmdMng.getCommandCompletions().registerAsyncCompletion("timers", ctx -> {
+            final List<String> res = Lists.newArrayList();
+
+            for (ETimerType type : ETimerType.values()) {
                 res.add(type.name().toLowerCase());
             }
 

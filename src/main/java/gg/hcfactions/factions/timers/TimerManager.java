@@ -124,8 +124,17 @@ public final class TimerManager implements IManager {
 
             final long remainingMillis = kothEvent.getSession().getTimer().getRemaining();
             final int remainingSeconds = (int)(remainingMillis/1000L);
+            int capturingFactionsTickets = 0;
+
+            if (kothEvent.getSession().getCapturingFaction() != null) {
+                capturingFactionsTickets = kothEvent.getSession().getLeaderboard().getOrDefault(kothEvent.getSession().getCapturingFaction().getUniqueId(), 0);
+            }
 
             String displayed = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
+
+            if (kothEvent.getSession().getTicketsNeededToWin() > 1 && capturingFactionsTickets > 0) {
+                displayed = displayed + ChatColor.BLUE + " [" + capturingFactionsTickets + "]";
+            }
 
             if (remainingMillis <= 0) {
                 displayed = "Capturing...";

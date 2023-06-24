@@ -158,6 +158,12 @@ deathbans:
   # Shop URL to use on the kick message
   shop_url: 'https://shop.hcfrevival.net/'
 
+# Events configuration
+events:
+  koth:
+    # Amount of tickets a faction should lose if a member of their faction dies
+    ticket_loss_per_death: 5
+
 # Stat tracking configuration
 stats:
   # Map number is used to categorize which map to track the stats under

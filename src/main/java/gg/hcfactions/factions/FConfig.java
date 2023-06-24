@@ -39,10 +39,12 @@ public final class FConfig {
     @Getter public double playerPowerValue;
     @Getter public double powerCap;
     @Getter public int powerTickInterval;
-    @Getter public int powerTickPlayerModifier;
     @Getter public double netherPowerLossReduction;
     @Getter public double endPowerLossReduction;
     @Getter public double eventPowerLossReduction;
+
+    /* @deprecated */
+    @Getter public int powerTickPlayerModifier;
 
     // faction limits
     @Getter public int maxFactionSize;
@@ -89,6 +91,9 @@ public final class FConfig {
     @Getter public int minDeathbanDuration;
     @Getter public int lifeUseDelay;
     @Getter public String shopUrl;
+
+    // events
+    @Getter public int eventTicketLossPerDeath;
 
     // display
     @Getter public String scoreboardTitle;
@@ -285,6 +290,9 @@ public final class FConfig {
         plugin.getAresLogger().info("Minimum Deathban Duration: " + minDeathbanDuration);
         plugin.getAresLogger().info("Life Use Delay: " + lifeUseDelay);
         plugin.getAresLogger().info("Shop URL: " + shopUrl);
+
+        eventTicketLossPerDeath = conf.getInt("events.koth.ticket_loss_per_death");
+        plugin.getAresLogger().info("KOTH Ticket Loss Per Death: " + eventTicketLossPerDeath);
 
         mapNumber = conf.getInt("stats.map");
         plugin.getAresLogger().info("Stats tracked under Map: " + mapNumber);

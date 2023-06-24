@@ -265,10 +265,10 @@ public final class FactionCommand extends BaseCommand {
         plugin.getFactionManager().getExecutor().showFactionList(player, 1);
     }
 
-    @Subcommand("chat|channel")
+    @Subcommand("chat|channel|c")
     @Description("Update your faction chat channel")
     @Syntax("[public|faction]")
-    public void onFactionChat(Player player, @Optional @Values("public|faction") String channelName) {
+    public void onFactionChat(Player player, @Optional @Values("p|pub|public|f|fac|faction") String channelName) {
         PlayerFaction.ChatChannel channel = null;
 
         if (channelName != null) {
