@@ -1620,6 +1620,11 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
+        if (inside == null) {
+            promise.reject("You are not standing inside of a claim");
+            return;
+        }
+
         if (!inside.getOwner().equals(faction.getUniqueId())) {
             promise.reject("Your faction does not own this claim");
             return;
