@@ -4,6 +4,7 @@ import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
+import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
@@ -11,6 +12,7 @@ import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.factions.models.logger.impl.CombatLogger;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
@@ -30,8 +32,38 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public record EventListener(@Getter Factions plugin) implements Listener {
+    private void handleEventDeath(PlayerFaction playerFaction) {
+        if (plugin.getEventManager().getActiveKothEvents().isEmpty()) {
+            return;
+        }
+
+        for (KOTHEvent koth : plugin.getEventManager().getActiveKothEvents()) {
+            final int currentTickets = koth.getSession().getTickets(playerFaction);
+
+            if (currentTickets <= 0) {
+                continue;
+            }
+
+            final int newTickets = currentTickets - plugin.getConfiguration().getEventTicketLossPerDeath();
+
+            if (newTickets <= 0) {
+                koth.getSession().getLeaderboard().remove(playerFaction.getUniqueId());
+                playerFaction.sendMessage(" ");
+                playerFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction is no longer on the leaderboard for " + koth.getDisplayName());
+                playerFaction.sendMessage(" ");
+                continue;
+            }
+
+            koth.getSession().getLeaderboard().put(playerFaction.getUniqueId(), newTickets);
+            playerFaction.sendMessage(" ");
+            playerFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + koth.getDisplayName());
+            playerFaction.sendMessage(" ");
+        }
+    }
+
     /**
      * Wipes existing leaderboard data for KOTH events
      * when a faction disbands
@@ -115,6 +147,41 @@ public record EventListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Subtract tokens on player death
+     *
+     * @param event PlayerDeathEvent
+     */
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        final Player player = event.getEntity();
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        if (pf == null) {
+            return;
+        }
+
+        handleEventDeath(pf);
+    }
+
+    /**
+     * Subtract tokens on combat logger death
+     *
+     * @param event CombatLoggerDeathEvent
+     */
+    @EventHandler
+    public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
+        final CombatLogger logger = event.getLogger();
+        final UUID uniqueId = logger.getOwnerId();
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionByPlayer(uniqueId);
+
+        if (pf == null) {
+            return;
+        }
+
+        handleEventDeath(pf);
+    }
+
+    /**
      * Protects palace loot chests from being opened
      * @param event PlayerInteractEvent
      */
@@ -167,42 +234,5 @@ public record EventListener(@Getter Factions plugin) implements Listener {
 
         event.setUseInteractedBlock(Event.Result.DENY);
         player.sendMessage(FMessage.ERROR + "This chest will unlock in " + Time.convertToRemaining(unlockTime - Time.now()));
-    }
-
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        final Player player = event.getEntity();
-        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionByPlayer(player);
-
-        if (pf == null) {
-            return;
-        }
-
-        if (plugin.getEventManager().getActiveKothEvents().isEmpty()) {
-            return;
-        }
-
-        for (KOTHEvent koth : plugin.getEventManager().getActiveKothEvents()) {
-            final int currentTickets = koth.getSession().getTickets(pf);
-
-            if (currentTickets <= 0) {
-                continue;
-            }
-
-            final int newTickets = currentTickets - plugin.getConfiguration().getEventTicketLossPerDeath();
-            
-            if (newTickets <= 0) {
-                koth.getSession().getLeaderboard().remove(pf.getUniqueId());
-                pf.sendMessage(" ");
-                pf.sendMessage(FMessage.KOTH_PREFIX + "Your faction is no longer on the leaderboard for " + koth.getDisplayName());
-                pf.sendMessage(" ");
-                continue;
-            }
-
-            koth.getSession().getLeaderboard().put(pf.getUniqueId(), newTickets);
-            pf.sendMessage(" ");
-            pf.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + koth.getDisplayName());
-            pf.sendMessage(" ");
-        }
     }
 }
