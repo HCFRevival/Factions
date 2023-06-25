@@ -190,25 +190,13 @@ public final class EventCommand extends BaseCommand {
     @Description("Add a new item to the Palace Loot Table")
     @Syntax("<t1|t2|t3> <min> <max> <probability>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onAddPalaceLoot(Player player, @Values("t1|t2|t3") String tierName, String minName, String maxName, String probName) {
+    public void onAddPalaceLoot(Player player, @Values("t1|t2|t3") String tierName, int minAmount, int maxAmount, int probability) {
         EPalaceLootTier tier;
-        int minAmount;
-        int maxAmount;
-        int probability;
 
         try {
             tier = EPalaceLootTier.valueOf(tierName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             player.sendMessage(ChatColor.RED + "Invalid loot tier");
-            return;
-        }
-
-        try {
-            minAmount = Integer.parseInt(minName);
-            maxAmount = Integer.parseInt(maxName);
-            probability = Integer.parseInt(probName);
-        } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid min/max/probability");
             return;
         }
 
