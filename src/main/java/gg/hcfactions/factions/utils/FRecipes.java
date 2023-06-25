@@ -159,7 +159,7 @@ public final class FRecipes {
 
             recipe.shape(" N ", "NMN", " N ");
             recipe.setIngredient('N', Material.GOLD_NUGGET);
-            recipe.setIngredient('M', Material.MELON);
+            recipe.setIngredient('M', Material.MELON_SLICE);
 
             Bukkit.addRecipe(recipe);
             plugin.getAresLogger().info("registered recipe: simple glistening melon");
