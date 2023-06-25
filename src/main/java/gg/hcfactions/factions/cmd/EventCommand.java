@@ -159,6 +159,13 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("loot palace reload")
+    @Description("Reload Palace Loot Table")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onPalaceLootReload(CommandSender sender) {
+        plugin.getEventManager().getPalaceLootManager().loadTiers();
+    }
+
     @Subcommand("loot palace chest add")
     @Description("Add a Palace Chest to a Palace Event")
     @Syntax("<event> <t1|t2|t3>")

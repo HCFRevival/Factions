@@ -33,11 +33,7 @@ public final class PalaceLootManager extends LootManager implements IManager {
 
     @Override
     public void onEnable() {
-        for (EPalaceLootTier tier : EPalaceLootTier.values()) {
-            loadTier(tier);
-        }
-
-        plugin.getAresLogger().info("loaded " + lootRepository.size() + " palace lootables");
+        loadTiers();
     }
 
     @Override
@@ -45,7 +41,19 @@ public final class PalaceLootManager extends LootManager implements IManager {
         lootRepository.clear();
     }
 
-    private void loadTier(EPalaceLootTier tier) {
+    public void loadTiers() {
+        if (!lootRepository.isEmpty()) {
+            lootRepository.clear();
+        }
+
+        for (EPalaceLootTier tier : EPalaceLootTier.values()) {
+            loadTier(tier);
+        }
+
+        plugin.getAresLogger().info("loaded " + lootRepository.size() + " palace lootables");
+    }
+
+    public void loadTier(EPalaceLootTier tier) {
         final YamlConfiguration conf = plugin.loadConfiguration("event-loot");
         final List<GenericLootable> res = load(conf, "palace." + tier.name);
         res.forEach(gl -> lootRepository.add(new PalaceLootable(gl, tier)));
