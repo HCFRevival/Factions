@@ -133,7 +133,7 @@ public interface IConsumeable {
         affected.forEach(affectedId -> {
             final Player affectedPlayer = Bukkit.getPlayer(affectedId);
 
-            if (affectedPlayer != null) {
+            if (affectedPlayer != null && (affectedPlayer.hasPotionEffect(getEffectType()) && affectedPlayer.getPotionEffect(getEffectType()).getAmplifier() > getAmplifier())) {
                 final IClass affectedPlayerClass = getPlugin().getClassManager().getCurrentClass(affectedPlayer);
                 final PotionEffect existingPotionEffect = (affectedPlayer.hasPotionEffect(getEffectType()) ? Players.getPotionEffect(affectedPlayer, getEffectType()) : null);
                 final boolean hasExistingClassPassive = (affectedPlayerClass != null && affectedPlayerClass.getPassiveEffects().containsKey(getEffectType()));
