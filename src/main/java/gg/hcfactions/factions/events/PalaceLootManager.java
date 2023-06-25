@@ -63,7 +63,7 @@ public final class PalaceLootManager extends LootManager implements IManager {
     public ImmutableList<ItemStack> getItems(EPalaceLootTier tier, int amount) {
         final List<ItemStack> res = Lists.newArrayListWithExpectedSize(amount);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 250; i++) {
             if (res.size() >= amount) {
                 break;
             }
