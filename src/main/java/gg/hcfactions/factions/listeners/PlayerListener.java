@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.listeners;
 
+import com.google.common.collect.Lists;
 import com.mongodb.client.model.Filters;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -15,15 +16,25 @@ import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
+import java.util.List;
 import java.util.UUID;
 
-public record PlayerListener(@Getter Factions plugin) implements Listener {
+public final class PlayerListener implements Listener {
+    @Getter public final Factions plugin;
+    @Getter public final List<UUID> recentlyDisconnected;
+
+    public PlayerListener(Factions plugin) {
+        this.plugin = plugin;
+        this.recentlyDisconnected = Lists.newArrayList();
+    }
+
     @EventHandler /* Handles loading FactionPlayer in to memory */
     public void onPlayerLoad(AsyncPlayerPreLoginEvent event) {
         final UUID uniqueId = event.getUniqueId();
@@ -49,6 +60,16 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
         plugin.getPlayerManager().getPlayerRepository().add(loaded);
     }
 
+    @EventHandler (priority = EventPriority.HIGHEST) /* Handles enforcing reconnect attempts */
+    public void onPlayerReconnectAttempt(AsyncPlayerPreLoginEvent event) {
+        final UUID uniqueId = event.getUniqueId();
+
+        if (recentlyDisconnected.contains(uniqueId)) {
+            event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
+            event.setKickMessage(FMessage.ERROR + "Please wait a moment before trying to re-connect");
+        }
+    }
+
     @EventHandler /* Handles printing join message for faction members */
     public void onJoinMessage(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
@@ -62,6 +83,14 @@ public record PlayerListener(@Getter Factions plugin) implements Listener {
             // delay the message so that it doesn't get meshed with other join message crap
             new Scheduler(plugin).sync(() -> FMessage.printFactionInfo(plugin, player, faction)).delay(5L).run();
         }
+    }
+
+    @EventHandler /* Handles applying a cooldown to a player which disallows them from quickly relogging */
+    public void onDisconnectCooldownApply(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+
+        recentlyDisconnected.add(player.getUniqueId());
+        new Scheduler(plugin).sync(() -> recentlyDisconnected.remove(player.getUniqueId())).delay(plugin.getConfiguration().getReconnectCooldownDuration() * 20L).run();
     }
 
     @EventHandler /* Handles printing quit message for faction members */
