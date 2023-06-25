@@ -476,7 +476,7 @@ public final class FMessage {
                     names.sort(Comparator.comparing(name -> Bukkit.getPlayer(name) != null));
 
                     for (String name : names) {
-                        if (Bukkit.getPlayer(name) != null) {
+                        if (Bukkit.getPlayerExact(name) != null) {
                             formatted.add(ChatColor.GREEN + prefix + name);
                         } else if (deathbannedUsernames.contains(name)) {
                             formatted.add(ChatColor.RED + prefix + name);
