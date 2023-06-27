@@ -31,6 +31,7 @@ public final class FRecipes {
         final NamespacedKey gappleKey = new NamespacedKey(plugin, "craftable_gapple");
         final NamespacedKey nametagKey = new NamespacedKey(plugin, "craftable_nametag");
         final NamespacedKey smithingUpgradeKey = new NamespacedKey(plugin, "craftable_smithing_upgrade");
+        final NamespacedKey simpleGlisteningMelonKey = new NamespacedKey(plugin, "craftable_simple_glistening_melon");
 
         if (config.isSaddlesEnabled() && Bukkit.getRecipe(saddleKey) == null) {
             final ShapedRecipe recipe = new ShapedRecipe(saddleKey, new ItemStack(Material.SADDLE, 1));
@@ -152,6 +153,17 @@ public final class FRecipes {
             Bukkit.addRecipe(recipe);
             plugin.getAresLogger().info("registered recipe: smithing upgrade template");
         }
+
+        if (config.isSimpleGlisteningMelonEnabled() && Bukkit.getRecipe(simpleGlisteningMelonKey) == null) {
+            final ShapedRecipe recipe = new ShapedRecipe(simpleGlisteningMelonKey, new ItemStack(Material.GLISTERING_MELON_SLICE));
+
+            recipe.shape(" N ", "NMN", " N ");
+            recipe.setIngredient('N', Material.GOLD_NUGGET);
+            recipe.setIngredient('M', Material.MELON_SLICE);
+
+            Bukkit.addRecipe(recipe);
+            plugin.getAresLogger().info("registered recipe: simple glistening melon");
+        }
     }
 
     @AllArgsConstructor
@@ -164,5 +176,6 @@ public final class FRecipes {
         @Getter @Setter public boolean gappleEnabled;
         @Getter @Setter public boolean nametagsEnabled;
         @Getter @Setter public boolean smithingUpgradeEnabled;
+        @Getter @Setter public boolean simpleGlisteningMelonEnabled;
     }
 }

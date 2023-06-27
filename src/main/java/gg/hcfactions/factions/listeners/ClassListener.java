@@ -430,8 +430,15 @@ public final class ClassListener implements Listener {
                             return;
                         }
 
-                        final double health = Math.max((attacked.getHealth() - rogue.getBackstabDamage()), 0.0);
+                        // Consume absorption hearts first
+                        if (attacked.getAbsorptionAmount() > 0) {
+                            final double health = Math.max((attacked.getAbsorptionAmount() - rogue.getBackstabDamage()), 0.0);
+                            attacked.damage(0.0);
+                            attacked.setAbsorptionAmount(health);
+                            return;
+                        }
 
+                        final double health = Math.max((attacked.getHealth() - rogue.getBackstabDamage()), 0.0);
                         attacked.damage(0.0); // Create the illusion of the player taking flinching damage
                         attacked.setHealth(health);
                     }).delay(((long) i * rogue.getBackstabTickrate())).run();

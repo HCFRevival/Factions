@@ -113,10 +113,12 @@ public final class CombatLoggerListener implements Listener {
             return;
         }
 
+        // Print logger messages
         FMessage.broadcastCombatLogger(player);
+        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff -> FMessage.printStaffCombatLogger(staff, player.getName(), player.getLocation()));
 
+        // Spawn logger in
         final CombatLogger logger = new CombatLogger(player.getLocation(), player, 30); // TODO: Make this configurable
-
         logger.spawn();
         plugin.getLoggerManager().getLoggerRepository().add(logger);
 

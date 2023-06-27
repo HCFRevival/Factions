@@ -306,6 +306,16 @@ public final class FMessage {
                         .create());
     }
 
+    public static void printStaffCombatLogger(Player viewer, String username, Location location) {
+        viewer.spigot().sendMessage(
+                new ComponentBuilder("[Teleport to " + username + "'s Combat Logger]")
+                        .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
+                        .create()
+        );
+    }
+
     public static List<String> getEnemyNametag(String username, String factionName) {
         final List<String> res = Lists.newArrayList();
 
@@ -466,7 +476,7 @@ public final class FMessage {
                     names.sort(Comparator.comparing(name -> Bukkit.getPlayer(name) != null));
 
                     for (String name : names) {
-                        if (Bukkit.getPlayer(name) != null) {
+                        if (Bukkit.getPlayerExact(name) != null) {
                             formatted.add(ChatColor.GREEN + prefix + name);
                         } else if (deathbannedUsernames.contains(name)) {
                             formatted.add(ChatColor.RED + prefix + name);

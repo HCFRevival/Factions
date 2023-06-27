@@ -15,9 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
@@ -66,10 +64,11 @@ public final class PalaceEvent extends KOTHEvent implements ILootableEvent {
             final LocalDate monday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
             final LocalDate wednesday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY));
             final LocalDate friday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+            final ZoneOffset offset = ZoneId.of("America/New_York").getRules().getOffset(Instant.now());
 
-            lootUnlockTimes.put(EPalaceLootTier.T3, monday.atStartOfDay().toEpochSecond(ZoneOffset.UTC));
-            lootUnlockTimes.put(EPalaceLootTier.T2, wednesday.atStartOfDay().toEpochSecond(ZoneOffset.UTC));
-            lootUnlockTimes.put(EPalaceLootTier.T1, friday.atStartOfDay().toEpochSecond(ZoneOffset.UTC));
+            lootUnlockTimes.put(EPalaceLootTier.T3, monday.atStartOfDay().toInstant(offset).toEpochMilli());
+            lootUnlockTimes.put(EPalaceLootTier.T2, wednesday.atStartOfDay().toInstant(offset).toEpochMilli());
+            lootUnlockTimes.put(EPalaceLootTier.T1, friday.atStartOfDay().toInstant(offset).toEpochMilli());
 
             plugin.getEventManager().saveEvent(this);
         }).run();

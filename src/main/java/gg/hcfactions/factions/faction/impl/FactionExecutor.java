@@ -645,13 +645,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 final Player kicked = Bukkit.getPlayer(kickedProfile.getUniqueId());
 
                 if (kicked != null) {
-                    final Claim inside = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(Objects.requireNonNull(kicked)));
                     final List<FactionWaypoint> waypoints = manager.getPlugin().getWaypointManager().getWaypoints(faction);
-
-                    if (inside != null && inside.getOwner().equals(faction.getUniqueId())) {
-                        promise.reject(FError.F_CANT_KICK_IN_CLAIMS.getErrorDescription());
-                        return;
-                    }
 
                     final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(kicked);
                     if (factionPlayer != null) {
@@ -1617,6 +1611,11 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         if (claims.isEmpty()) {
             promise.reject("Your faction does not have any claims");
+            return;
+        }
+
+        if (inside == null) {
+            promise.reject("You are not standing inside of a claim");
             return;
         }
 

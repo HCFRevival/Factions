@@ -260,7 +260,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
      * @param event EntityDamageByEntityEvent
      */
     @EventHandler
-    public void test(EntityDamageByEntityEvent event) {
+    public void onArmorStandBreak(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof ArmorStand)) {
             return;
         }
@@ -482,6 +482,24 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         }
 
         if (owner instanceof final ServerFaction sf) {
+            if (sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
+                if (    block.getType().equals(Material.LEVER)
+                        || block.getType().equals(Material.CHEST)
+                        || block.getType().equals(Material.TRAPPED_CHEST)
+                        || block.getType().name().endsWith("_DOOR")
+                        || block.getType().name().endsWith("_FENCE_GATE")
+                        || block.getType().name().endsWith("_BUTTON")
+                ) {
+                    return;
+                }
+
+                if (!action.equals(Action.PHYSICAL)) {
+                    player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.RESET + sf.getDisplayName());
+                }
+
+                event.setUseInteractedBlock(Event.Result.DENY);
+            }
+
             if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
                 // allow players to interact w/ crafting benches inside safezone claims
                 if (action.equals(Action.RIGHT_CLICK_BLOCK) && block.getType().equals(Material.CRAFTING_TABLE)) {

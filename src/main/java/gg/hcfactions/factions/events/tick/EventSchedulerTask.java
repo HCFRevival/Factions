@@ -24,7 +24,7 @@ public final class EventSchedulerTask {
                 }
 
                 if (!koth.isActive()) {
-                    koth.startEvent();
+                    new Scheduler(manager.getPlugin()).sync(koth::startEvent).run();
                 }
             }
         })).repeat(0L, 60 * 20L).run();

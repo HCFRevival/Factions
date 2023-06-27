@@ -74,6 +74,7 @@ public final class FConfig {
     @Getter public int sotwProtectionDuration;
     @Getter public int normalProtectionDuration;
     @Getter public int enterEndProtectionDuration;
+    @Getter public int reconnectCooldownDuration;
 
     // classes
     @Getter public int minerClassLimit;
@@ -126,6 +127,7 @@ public final class FConfig {
     @Getter public boolean gappleRecipeEnabled;
     @Getter public boolean nametagRecipeEnabled;
     @Getter public boolean smithingUpgradeRecipeEnabled;
+    @Getter public boolean simpleGlisteningMelonEnabled;
 
     public FConfig(Factions plugin) {
         this.plugin = plugin;
@@ -162,7 +164,8 @@ public final class FConfig {
                 totemRecipeEnabled,
                 gappleRecipeEnabled,
                 nametagRecipeEnabled,
-                smithingUpgradeRecipeEnabled
+                smithingUpgradeRecipeEnabled,
+                simpleGlisteningMelonEnabled
         );
     }
 
@@ -260,6 +263,7 @@ public final class FConfig {
         normalProtectionDuration = conf.getInt("player.timers.protection.normal");
         sotwProtectionDuration = conf.getInt("player.timers.protection.sotw");
         enterEndProtectionDuration = conf.getInt("player.timers.protection.enter_end");
+        reconnectCooldownDuration = conf.getInt("player.reconnect_cooldown");
         plugin.getAresLogger().info("Combat Tag (Attacker) Duration: " + attackerCombatTagDuration);
         plugin.getAresLogger().info("Combat Tag (Attacked) Duration: " + attackedCombatTagDuration);
         plugin.getAresLogger().info("Enderpearl Duration: " + enderpearlDuration);
@@ -273,6 +277,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Protection (Normal) Duration: " + normalProtectionDuration);
         plugin.getAresLogger().info("Protection (SOTW) Duration: " + sotwProtectionDuration);
         plugin.getAresLogger().info("Protection (Enter End) Duration: " + enterEndProtectionDuration);
+        plugin.getAresLogger().info("Player Reconnect Cooldown Duration: " + reconnectCooldownDuration);
 
         deathbansEnabled = conf.getBoolean("deathbans.enabled");
         deathbansStandalone = conf.getBoolean("deathbans.standalone");
@@ -323,6 +328,7 @@ public final class FConfig {
         gappleRecipeEnabled = conf.getBoolean("custom_recipes.gapple");
         nametagRecipeEnabled = conf.getBoolean("custom_recipes.nametag");
         smithingUpgradeRecipeEnabled = conf.getBoolean("custom_recipes.smithing_upgrade");
+        simpleGlisteningMelonEnabled = conf.getBoolean("custom_recipes.easy_glistening_melon");
         plugin.getAresLogger().info("Saddle Recipe: " + saddleRecipeEnabled);
         plugin.getAresLogger().info("Heart of the Sea Recipe: " + heartOfTheSeaRecipeEnabled);
         plugin.getAresLogger().info("Trident Recipe: " + tridentRecipeEnabled);
@@ -330,5 +336,6 @@ public final class FConfig {
         plugin.getAresLogger().info("Totem Recipe: " + totemRecipeEnabled);
         plugin.getAresLogger().info("Gapple Recipe: " + gappleRecipeEnabled);
         plugin.getAresLogger().info("Nametag Recipe: " + nametagRecipeEnabled);
+        plugin.getAresLogger().info("Simple Glistening Melon Recipe: " + simpleGlisteningMelonEnabled);
     }
 }

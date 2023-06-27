@@ -135,6 +135,9 @@ player:
       normal: 1800
       enter_end: 3
 
+  # Cooldown that players must wait before re-joining the server
+  reconnect_cooldown: 10
+
 # Deathban configuration
 deathbans:
   # If enabled, deathbans will be registered as a service
@@ -205,3 +208,4 @@ custom_recipes:
   gapple: true
   nametag: true
   smithing_upgrade: true
+  easy_glistening_melon: true

@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionFocusEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionUnfocusEvent;
@@ -10,6 +11,7 @@ import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.factions.models.classes.EConsumableApplicationType;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.impl.*;
+import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -296,5 +298,19 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
                 factionPlayer.removeFromScoreboard(focused, EScoreboardEntryType.FOCUS);
             }
         });
+    }
+
+    /**
+     * Resets all reinvites when a Palace event starts
+     *
+     * @param event EventStartEvent
+     */
+    @EventHandler
+    public void onEventStart(EventStartEvent event) {
+        if (!(event.getEvent() instanceof PalaceEvent)) {
+            return;
+        }
+
+        plugin.getFactionManager().getPlayerFactions().forEach(pf -> pf.setReinvites(plugin.getConfiguration().getDefaultFactionReinvites()));
     }
 }
