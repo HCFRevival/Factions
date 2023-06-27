@@ -301,6 +301,7 @@ public final class FMessage {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
                         .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .italic(true)
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
                         .create());
@@ -310,6 +311,7 @@ public final class FMessage {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Combat Logger]")
                         .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .italic(true)
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
                         .create()
