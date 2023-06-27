@@ -13,11 +13,16 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.utils.Players;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -54,6 +59,12 @@ public final class FactionUtil {
 
     public static void teleportToSafety(Factions plugin, Player player) {
         final PLocatable location = new PLocatable(player);
+        final World.Environment env = player.getWorld().getEnvironment();
+
+        if (env.equals(World.Environment.THE_END)) {
+            Players.teleportWithVehicle(plugin, player, plugin.getConfiguration().getEndExit());
+            return;
+        }
 
         new Scheduler(plugin).async(() -> {
             while (plugin.getClaimManager().getClaimAt(location) != null) {
@@ -62,7 +73,32 @@ public final class FactionUtil {
             }
 
             new Scheduler(plugin).sync(() -> {
-                location.setY(Objects.requireNonNull(location.getBukkitLocation().getWorld()).getHighestBlockYAt(location.getBukkitLocation()) + 1);
+                int y = Objects.requireNonNull(location.getBukkitLocation().getWorld()).getHighestBlockYAt(location.getBukkitLocation());
+
+                // nether ceiling check
+                if (env.equals(World.Environment.NETHER)) {
+                    for (int i = 125; i > 0; i--) {
+                        final int lowerY = i - 1;
+                        final int floorY = i - 2;
+                        y = i;
+
+                        final Block head = Objects.requireNonNull(location.getBukkitLocation().getWorld()).getBlockAt(location.getBukkitLocation().getBlockX(), y, location.getBukkitLocation().getBlockZ());
+                        final Block feet = location.getBukkitLocation().getWorld().getBlockAt(location.getBukkitLocation().getBlockX(), lowerY, location.getBukkitLocation().getBlockZ());
+                        final Block floor = location.getBukkitLocation().getWorld().getBlockAt(location.getBukkitLocation().getBlockX(), floorY, location.getBukkitLocation().getBlockZ());
+
+                        if (!head.getType().equals(Material.AIR) || !feet.getType().equals(Material.AIR)) {
+                            continue;
+                        }
+
+                        if (!floor.getType().isSolid()) {
+                            continue;
+                        }
+
+                        break;
+                    }
+                }
+
+                location.setY(y);
                 Players.teleportWithVehicle(plugin, player, location.getBukkitLocation());
             }).run();
         }).run();
