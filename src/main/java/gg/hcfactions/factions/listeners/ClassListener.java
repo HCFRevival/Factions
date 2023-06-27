@@ -4,10 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
-import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
-import gg.hcfactions.factions.models.classes.EPlayerHand;
-import gg.hcfactions.factions.models.classes.IClass;
-import gg.hcfactions.factions.models.classes.IConsumeable;
+import gg.hcfactions.factions.models.classes.*;
 import gg.hcfactions.factions.models.classes.impl.Archer;
 import gg.hcfactions.factions.models.classes.impl.Diver;
 import gg.hcfactions.factions.models.classes.impl.Rogue;
@@ -35,10 +32,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRiptideEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -46,6 +40,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -662,5 +657,35 @@ public final class ClassListener implements Listener {
         }
 
         new Scheduler(plugin).sync(() -> playerClass.getPassiveEffects().forEach((passive, amplifier) -> player.addPotionEffect(new PotionEffect(passive, PotionEffect.INFINITE_DURATION, amplifier)))).run();
+    }
+
+    @EventHandler
+    public void onPlayerHeldItemChange(PlayerItemHeldEvent event) {
+        final Player player = event.getPlayer();
+        final ItemStack item = player.getInventory().getItem(event.getNewSlot());
+
+        if (item == null) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final IHoldableClass holdableClass)) {
+            return;
+        }
+
+        final Optional<IClassHoldable> holdableQuery = holdableClass.getHoldable(item.getType());
+
+        if (holdableQuery.isEmpty()) {
+            return;
+        }
+
+        final IClassHoldable holdable = holdableQuery.get();
+
+        if (!holdableClass.shouldReapplyHoldable(player.getUniqueId(), holdable)) {
+            return;
+        }
+
+        holdable.apply(player, holdableClass.getHoldableUpdateRate(), true);
     }
 }

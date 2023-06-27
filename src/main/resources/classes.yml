@@ -90,11 +90,21 @@ data:
   bard:
     range: 16.0
     warmup: 30
+    holdable_update_rate: 5
     passive:
       SPEED: 2
       DAMAGE_RESISTANCE: 4
       FIRE_RESISTANCE: 1
       WEAKNESS: 2
+    holdables:
+      SPEED:
+        material: 'SUGAR'
+        amplifier: 1
+        duration: 16
+      INCREASE_DAMAGE:
+        material: 'BLAZE_POWDER'
+        duration: 10
+        amplifier: 0
     consumables:
       SPEED:
         material: 'SUGAR'
