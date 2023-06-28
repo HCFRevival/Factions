@@ -51,6 +51,11 @@ data:
       consecutive_multiplier: 1.25
       # Base damage value for a consecutive shot
       consecutive_base: 5.0
+    mark:
+      # Time (in seconds) an archer mark lasts
+      duration: 10
+      # Damage percentage players should take extra while marked
+      increase_percent: 0.15
     warmup: 30
     passive:
       SPEED: 2

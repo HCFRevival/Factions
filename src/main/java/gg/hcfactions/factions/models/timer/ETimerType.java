@@ -86,6 +86,13 @@ public enum ETimerType {
             false,
             true
     ),
+    ARCHER_MARK(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Mark",
+            Colors.GOLD.toBukkit() + "Mark",
+            14,
+            true,
+            true,
+            false
+    ),
     FREEZE(Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Freeze",
             null,
             0,

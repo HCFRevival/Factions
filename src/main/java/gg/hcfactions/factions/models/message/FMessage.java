@@ -57,6 +57,7 @@ public final class FMessage {
     public static final String T_PROTECTION_EXPIRE = SUCCESS + "Your combat protection has expired";
     public static final String T_FREEZE_EXPIRE = SUCCESS + "Your faction will now begin regenerating power";
     public static final String T_HOME_COMPLETE = SUCCESS + "You have been returned to your faction home";
+    public static final String T_ARCHER_MARK_COMPLETE = SUCCESS + "You are no longer marked";
 
     public static final String F_KICKED_FROM_FAC = ERROR + "You have been kicked from the faction";
     public static final String F_MAP_PILLARS_HIDDEN = LAYER_1 + "Map pillars have been hidden";
