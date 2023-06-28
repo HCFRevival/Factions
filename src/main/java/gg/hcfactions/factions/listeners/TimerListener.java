@@ -1,6 +1,5 @@
 package gg.hcfactions.factions.listeners;
 
-import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassUnreadyEvent;

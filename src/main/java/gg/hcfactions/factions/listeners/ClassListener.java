@@ -598,6 +598,13 @@ public final class ClassListener implements Listener {
         event.setDamage(pre*diverClass.getDamageMultiplier());
 
         if (attacked instanceof final Player playerDamaged) {
+            // reset trident CD on non-riptide trident hit
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(attacker);
+
+            if (factionPlayer.hasTimer(ETimerType.TRIDENT)) {
+                factionPlayer.finishTimer(ETimerType.TRIDENT);
+            }
+
             playerDamaged.sendMessage(ChatColor.RED + "You have been pierced by a " + ChatColor.DARK_RED + "" + ChatColor.BOLD + "TRIDENT!");
         }
 

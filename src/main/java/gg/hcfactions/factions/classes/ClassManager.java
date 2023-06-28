@@ -58,8 +58,10 @@ public final class ClassManager implements IManager {
                 final double consecutiveBase = conf.getDouble(path + "damage_values.consecutive_base");
                 final double consecutiveMulti = conf.getDouble(path + "damage_values.consecutive_multiplier");
                 final double damagePerBlock = conf.getDouble(path + "damage_values.per_block");
+                final int markDuration = conf.getInt(path + "mark.duration");
+                final double markPercent = conf.getDouble(path + "mark.increase_percent");
 
-                playerClass = new Archer(this, warmup, maxDealtDamage, consecutiveBase, consecutiveMulti, damagePerBlock);
+                playerClass = new Archer(this, warmup, maxDealtDamage, consecutiveBase, consecutiveMulti, damagePerBlock, markDuration, markPercent);
             }
 
             else if (className.equalsIgnoreCase("bard")) {
