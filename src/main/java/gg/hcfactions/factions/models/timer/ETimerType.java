@@ -8,8 +8,8 @@ import net.md_5.bungee.api.ChatColor;
 @AllArgsConstructor
 public enum ETimerType {
     TRIDENT(
-      Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Trident",
-      Colors.AQUA.toBukkit() + "Trident",
+      Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Riptide",
+      Colors.AQUA.toBukkit() + "Riptide",
       13,
       true,
       true,
@@ -85,6 +85,13 @@ public enum ETimerType {
             true,
             false,
             true
+    ),
+    ARCHER_MARK(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Mark",
+            Colors.GOLD.toBukkit() + "Mark",
+            14,
+            true,
+            true,
+            false
     ),
     FREEZE(Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Freeze",
             null,

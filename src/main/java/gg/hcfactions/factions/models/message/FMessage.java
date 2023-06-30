@@ -50,13 +50,14 @@ public final class FMessage {
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
     public static final String T_CRAPPLE_UNLOCKED = SUCCESS + "Your crapples have been unlocked";
     public static final String T_GAPPLE_UNLOCKED = SUCCESS + "Your gapples have been unlocked";
-    public static final String T_TRIDENT_UNLOCKED = SUCCESS + "Your trident has been unlocked";
+    public static final String T_TRIDENT_UNLOCKED = SUCCESS + "Your riptide has been unlocked";
     public static final String T_HOME_EXPIRE = SUCCESS + "You have been returned to your faction home";
     public static final String T_STUCK_EXPIRE = SUCCESS + "You have been teleported to safety";
     public static final String T_LOGOUT_EXPIRE = SUCCESS + "You have been disconnected safely";
     public static final String T_PROTECTION_EXPIRE = SUCCESS + "Your combat protection has expired";
     public static final String T_FREEZE_EXPIRE = SUCCESS + "Your faction will now begin regenerating power";
     public static final String T_HOME_COMPLETE = SUCCESS + "You have been returned to your faction home";
+    public static final String T_ARCHER_MARK_COMPLETE = SUCCESS + "You are no longer marked";
 
     public static final String F_KICKED_FROM_FAC = ERROR + "You have been kicked from the faction";
     public static final String F_MAP_PILLARS_HIDDEN = LAYER_1 + "Map pillars have been hidden";
@@ -301,6 +302,7 @@ public final class FMessage {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
                         .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .italic(true)
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
                         .create());
@@ -310,6 +312,7 @@ public final class FMessage {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Combat Logger]")
                         .color(net.md_5.bungee.api.ChatColor.GRAY)
+                        .italic(true)
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
                         .create()

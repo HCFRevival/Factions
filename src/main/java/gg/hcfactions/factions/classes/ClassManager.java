@@ -5,15 +5,14 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.classes.EConsumableApplicationType;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.classes.IHoldableClass;
 import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +20,6 @@ import java.util.Objects;
 public final class ClassManager implements IManager {
     @Getter public final Factions plugin;
     @Getter public final List<IClass> classes;
-    @Getter @Setter public BukkitTask passiveUpdateTask;
 
     public ClassManager(Factions plugin) {
         this.plugin = plugin;
@@ -60,8 +58,10 @@ public final class ClassManager implements IManager {
                 final double consecutiveBase = conf.getDouble(path + "damage_values.consecutive_base");
                 final double consecutiveMulti = conf.getDouble(path + "damage_values.consecutive_multiplier");
                 final double damagePerBlock = conf.getDouble(path + "damage_values.per_block");
+                final int markDuration = conf.getInt(path + "mark.duration");
+                final double markPercent = conf.getDouble(path + "mark.increase_percent");
 
-                playerClass = new Archer(this, warmup, maxDealtDamage, consecutiveBase, consecutiveMulti, damagePerBlock);
+                playerClass = new Archer(this, warmup, maxDealtDamage, consecutiveBase, consecutiveMulti, damagePerBlock, markDuration, markPercent);
             }
 
             else if (className.equalsIgnoreCase("bard")) {
@@ -108,6 +108,32 @@ public final class ClassManager implements IManager {
                 }
 
                 plugin.getAresLogger().info("loaded " + playerClass.getPassiveEffects().size() + " passive effects for " + playerClass.getName());
+            }
+
+            if (conf.get(path + "holdables") != null && playerClass instanceof final IHoldableClass holdableClass) {
+                final int holdableUpdateRate = conf.getInt(path + "holdable_update_rate");
+                holdableClass.setHoldableUpdateRate(holdableUpdateRate);
+
+                for (String effectName : Objects.requireNonNull(conf.getConfigurationSection(path + "holdables")).getKeys(false)) {
+                    final String hPath = path + "holdables." + effectName + ".";
+                    final String materialName = conf.getString(hPath + "material");
+                    final int amplifier = conf.getInt(hPath + "amplifier");
+                    final int duration = conf.getInt(hPath + "duration");
+                    final PotionEffectType effect = PotionEffectType.getByName(effectName);
+                    final Material material;
+
+                    try {
+                        material = Material.valueOf(materialName);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getAresLogger().error("invalid mat", e);
+                        continue;
+                    }
+
+                    final Holdable holdable = new Holdable(plugin, material, effect, amplifier, duration);
+                    holdableClass.getHoldables().add(holdable);
+                }
+
+                plugin.getAresLogger().info("loaded " + holdableClass.getHoldables().size() + " holdables for " + playerClass.getName());
             }
 
             if (conf.get(path + "consumables") != null) {

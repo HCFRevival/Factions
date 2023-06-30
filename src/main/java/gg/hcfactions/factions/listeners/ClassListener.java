@@ -4,10 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
-import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
-import gg.hcfactions.factions.models.classes.EPlayerHand;
-import gg.hcfactions.factions.models.classes.IClass;
-import gg.hcfactions.factions.models.classes.IConsumeable;
+import gg.hcfactions.factions.models.classes.*;
 import gg.hcfactions.factions.models.classes.impl.Archer;
 import gg.hcfactions.factions.models.classes.impl.Diver;
 import gg.hcfactions.factions.models.classes.impl.Rogue;
@@ -34,11 +31,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRiptideEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -46,6 +41,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -136,8 +132,79 @@ public final class ClassListener implements Listener {
         playerClass.deactivate(player);
     }
 
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onArcherTagDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof final Player damaged)) {
+            return;
+        }
+
+        if (!(event.getDamager() instanceof Player)) {
+            return;
+        }
+
+        final Archer archerClass = (Archer)plugin.getClassManager().getClassByName("Archer");
+
+        if (archerClass == null) {
+            return;
+        }
+
+        if (archerClass.getMarkedEntities().contains(damaged.getUniqueId())) {
+            event.setDamage(event.getDamage() + event.getDamage() * archerClass.getMarkPercentage());
+        }
+    }
+
     @EventHandler (priority = EventPriority.MONITOR)
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+    public void onArcherTag(ProjectileHitEvent event) {
+        if (!(event.getEntity() instanceof final SpectralArrow arrow)) {
+            return;
+        }
+
+        if (!(event.getEntity().getShooter() instanceof final Player shooter)) {
+            return;
+        }
+
+        if (!(event.getHitEntity() instanceof final LivingEntity damaged)) {
+            return;
+        }
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(shooter);
+
+        if (!(playerClass instanceof final Archer archerClass)) {
+            return;
+        }
+
+        if (archerClass.getMarkedEntities().contains(damaged.getUniqueId())) {
+            return;
+        }
+
+        final String name = damaged.hasPotionEffect(PotionEffectType.INVISIBILITY) ? ChatColor.GRAY + "? ? ?" :
+                (damaged instanceof Player) ? ChatColor.GOLD + damaged.getName() :
+                        ChatColor.GOLD + WordUtils.capitalize(damaged.getType().name().toLowerCase().replace("_", " "));
+
+        final int percent = (int)Math.round(archerClass.getMarkPercentage() * 100);
+
+        arrow.setGlowingTicks(archerClass.getMarkDuration() * 20);
+        archerClass.mark(damaged);
+
+        shooter.sendMessage(ChatColor.YELLOW + "Your arrow has" + ChatColor.BLUE + " marked " + name + ChatColor.YELLOW + " for " + ChatColor.BLUE + archerClass.getMarkDuration() + " seconds");
+
+        if (damaged instanceof final Player damagedPlayer) {
+            final FactionPlayer factionPlayer = (FactionPlayer)plugin.getPlayerManager().getPlayer(damagedPlayer);
+
+            if (factionPlayer != null) {
+                factionPlayer.addTimer(new FTimer(ETimerType.ARCHER_MARK, archerClass.getMarkDuration()));
+            }
+
+            damaged.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "MARKED! " + ChatColor.YELLOW + "You will take " + ChatColor.RED + percent + "% Increased Damage" + ChatColor.YELLOW + " for " + ChatColor.BLUE + archerClass.getMarkDuration() + " seconds");
+        }
+    }
+
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onDistanceArcher(EntityDamageByEntityEvent event) {
         final Entity damager = event.getDamager();
         final Entity damaged = event.getEntity();
         double damage = event.getFinalDamage();
@@ -146,15 +213,18 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        if (!(damager instanceof Arrow)) {
+        if (!(damager instanceof final Arrow arrow)) {
+            return;
+        }
+
+        // Use archer tag instead
+        if (arrow instanceof SpectralArrow) {
             return;
         }
 
         if (!(damaged instanceof LivingEntity)) {
             return;
         }
-
-        final Projectile arrow = (Projectile)damager;
 
         if (!(arrow.getShooter() instanceof final Player player)) {
             return;
@@ -484,25 +554,11 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
         if (!(playerClass instanceof Diver)) {
             player.sendMessage(ChatColor.RED + "Tridents can only be used by the Diver class");
             event.setCancelled(true);
-            return;
-        }
-
-        if (factionPlayer != null) {
-            final FTimer existing = factionPlayer.getTimer(ETimerType.TRIDENT);
-
-            if (existing != null && !existing.isExpired()) {
-                FMessage.printLockedTimer(player, "trident", existing.getRemaining());
-                event.setCancelled(true);
-                return;
-            }
-
-            factionPlayer.addTimer(new FTimer(ETimerType.TRIDENT, plugin.getConfiguration().getTridentDuration()));
         }
     }
 
@@ -542,6 +598,13 @@ public final class ClassListener implements Listener {
         event.setDamage(pre*diverClass.getDamageMultiplier());
 
         if (attacked instanceof final Player playerDamaged) {
+            // reset trident CD on non-riptide trident hit
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(attacker);
+
+            if (factionPlayer.hasTimer(ETimerType.TRIDENT)) {
+                factionPlayer.finishTimer(ETimerType.TRIDENT);
+            }
+
             playerDamaged.sendMessage(ChatColor.RED + "You have been pierced by a " + ChatColor.DARK_RED + "" + ChatColor.BOLD + "TRIDENT!");
         }
 
@@ -662,5 +725,35 @@ public final class ClassListener implements Listener {
         }
 
         new Scheduler(plugin).sync(() -> playerClass.getPassiveEffects().forEach((passive, amplifier) -> player.addPotionEffect(new PotionEffect(passive, PotionEffect.INFINITE_DURATION, amplifier)))).run();
+    }
+
+    @EventHandler
+    public void onPlayerHeldItemChange(PlayerItemHeldEvent event) {
+        final Player player = event.getPlayer();
+        final ItemStack item = player.getInventory().getItem(event.getNewSlot());
+
+        if (item == null) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final IHoldableClass holdableClass)) {
+            return;
+        }
+
+        final Optional<IClassHoldable> holdableQuery = holdableClass.getHoldable(item.getType());
+
+        if (holdableQuery.isEmpty()) {
+            return;
+        }
+
+        final IClassHoldable holdable = holdableQuery.get();
+
+        if (!holdableClass.shouldReapplyHoldable(player.getUniqueId(), holdable)) {
+            return;
+        }
+
+        holdable.apply(player, holdableClass.getHoldableUpdateRate(), true);
     }
 }

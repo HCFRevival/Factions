@@ -365,6 +365,10 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             sendMessage(FMessage.T_CTAG_EXPIRE);
         }
 
+        if (type.equals(ETimerType.ARCHER_MARK)) {
+            sendMessage(FMessage.T_ARCHER_MARK_COMPLETE);
+        }
+
         if (type.equals(ETimerType.HOME)) {
             final PlayerFaction faction = playerManager.getPlugin().getFactionManager().getPlayerFactionByPlayer(uniqueId);
 

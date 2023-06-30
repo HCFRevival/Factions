@@ -3,6 +3,7 @@ package gg.hcfactions.factions.listeners;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.event.PortalPlatformGenerateEvent;
+import gg.hcfactions.cx.event.ShulkerPlaceEvent;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
@@ -1078,5 +1079,32 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         }
 
         event.getBlockList().removeIf(b -> plugin.getClaimManager().getClaimAt(new BLocatable(b)) != null);
+    }
+
+    /**
+     * Listens for shulker places and removes the lock duration if it is placed inside a claim
+     * the placing player is a member of
+     *
+     * @param event ShulkerPlaceEvent
+     */
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onLockedShulkerPlace(ShulkerPlaceEvent event) {
+        final Player player = event.getPlayer();
+        final Block block = event.getBlock();
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(block));
+
+        if (inside == null) {
+            return;
+        }
+
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionById(inside.getOwner());
+
+        if (pf == null) {
+            return;
+        }
+
+        if (pf.isMember(player)) {
+            event.setDuration(0);
+        }
     }
 }
