@@ -6,6 +6,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
 import gg.hcfactions.factions.models.classes.*;
 import gg.hcfactions.factions.models.classes.impl.Archer;
+import gg.hcfactions.factions.models.classes.impl.Bard;
 import gg.hcfactions.factions.models.classes.impl.Diver;
 import gg.hcfactions.factions.models.classes.impl.Rogue;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -730,6 +731,7 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        holdable.apply(player, holdableClass.getHoldableUpdateRate(), true);
+        final double range = (playerClass instanceof final Bard bard) ? bard.getBardRange() : 16.0;
+        holdable.apply(player, holdableClass.getHoldableUpdateRate(), range, true);
     }
 }
