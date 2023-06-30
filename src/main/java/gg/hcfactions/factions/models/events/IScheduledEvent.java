@@ -20,7 +20,7 @@ public interface IScheduledEvent {
 
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         final int day = calendar.get(Calendar.DAY_OF_WEEK);
-        final int hour = calendar.get(Calendar.HOUR_OF_DAY) + 1; // incr 1 here because it's odd to schedule everything with 0 index
+        final int hour = calendar.get(Calendar.HOUR_OF_DAY);
         final int min = calendar.get(Calendar.MINUTE);
 
         return getSchedule().stream().anyMatch(s -> s.getDay() == day && s.getHour() == hour && s.getMinute() == min);

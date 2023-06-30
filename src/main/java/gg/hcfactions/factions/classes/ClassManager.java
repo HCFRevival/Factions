@@ -11,14 +11,12 @@ import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IHoldableClass;
 import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
-import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,8 +24,6 @@ import java.util.Objects;
 public final class ClassManager implements IManager {
     @Getter public final Factions plugin;
     @Getter public final List<IClass> classes;
-
-    private BukkitTask classValidationTask;
 
     public ClassManager(Factions plugin) {
         this.plugin = plugin;
@@ -37,15 +33,11 @@ public final class ClassManager implements IManager {
     @Override
     public void onEnable() {
         loadClasses();
-        classValidationTask = new Scheduler(plugin).sync(() -> Bukkit.getOnlinePlayers().forEach(this::validateClass)).repeat(10*20L, 10*20L).run();
     }
 
     @Override
     public void onDisable() {
         classes.clear();
-
-        classValidationTask.cancel();
-        classValidationTask = null;
     }
 
     @Override
