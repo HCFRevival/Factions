@@ -266,13 +266,20 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (!(event.getDamager() instanceof final Player player)) {
+        final Block block = event.getEntity().getLocation().getBlock();
+
+        if (event.getDamager() instanceof final Player player) {
+            handleBlockModification(event, player, block);
             return;
         }
 
-        final Block block = event.getEntity().getLocation().getBlock();
+        if (event.getDamager() instanceof Projectile) {
+            final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(block));
 
-        handleBlockModification(event, player, block);
+            if (inside != null) {
+                event.setCancelled(true);
+            }
+        }
     }
 
     /**
