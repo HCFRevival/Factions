@@ -90,31 +90,7 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        final IClass actualClass = getPlugin().getClassManager().getCurrentClass(player);
-        final IClass expectedClass = getPlugin().getClassManager().getClassByArmor(player);
-
-        if (expectedClass != null) {
-            if (actualClass != null) {
-                final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, actualClass);
-                Bukkit.getPluginManager().callEvent(deactivateEvent);
-                actualClass.deactivate(player);
-            }
-
-            final ClassReadyEvent readyEvent = new ClassReadyEvent(player, expectedClass);
-            readyEvent.setMessagePrinted(true);
-            Bukkit.getPluginManager().callEvent(readyEvent);
-
-            return;
-        }
-
-        if (actualClass != null) {
-            final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, actualClass);
-            Bukkit.getPluginManager().callEvent(deactivateEvent);
-            actualClass.deactivate(player);
-        } else {
-            final ClassUnreadyEvent unreadyEvent = new ClassUnreadyEvent(player);
-            Bukkit.getPluginManager().callEvent(unreadyEvent);
-        }
+        plugin.getClassManager().validateClass(player);
     }
 
     @EventHandler /* Removes player from class upon disconnect */

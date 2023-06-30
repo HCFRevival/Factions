@@ -2,17 +2,23 @@ package gg.hcfactions.factions.classes;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.ClassDeactivateEvent;
+import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
+import gg.hcfactions.factions.listeners.events.player.ClassUnreadyEvent;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.classes.EConsumableApplicationType;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IHoldableClass;
 import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +26,8 @@ import java.util.Objects;
 public final class ClassManager implements IManager {
     @Getter public final Factions plugin;
     @Getter public final List<IClass> classes;
+
+    private BukkitTask classValidationTask;
 
     public ClassManager(Factions plugin) {
         this.plugin = plugin;
@@ -29,11 +37,15 @@ public final class ClassManager implements IManager {
     @Override
     public void onEnable() {
         loadClasses();
+        classValidationTask = new Scheduler(plugin).sync(() -> Bukkit.getOnlinePlayers().forEach(this::validateClass)).repeat(10*20L, 10*20L).run();
     }
 
     @Override
     public void onDisable() {
         classes.clear();
+
+        classValidationTask.cancel();
+        classValidationTask = null;
     }
 
     @Override
@@ -169,6 +181,34 @@ public final class ClassManager implements IManager {
             }
 
             classes.add(playerClass);
+        }
+    }
+
+    public void validateClass(Player player) {
+        final IClass actualClass = getPlugin().getClassManager().getCurrentClass(player);
+        final IClass expectedClass = getPlugin().getClassManager().getClassByArmor(player);
+
+        if (expectedClass != null) {
+            if (actualClass != null) {
+                final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, actualClass);
+                Bukkit.getPluginManager().callEvent(deactivateEvent);
+                actualClass.deactivate(player);
+            }
+
+            final ClassReadyEvent readyEvent = new ClassReadyEvent(player, expectedClass);
+            readyEvent.setMessagePrinted(true);
+            Bukkit.getPluginManager().callEvent(readyEvent);
+
+            return;
+        }
+
+        if (actualClass != null) {
+            final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, actualClass);
+            Bukkit.getPluginManager().callEvent(deactivateEvent);
+            actualClass.deactivate(player);
+        } else {
+            final ClassUnreadyEvent unreadyEvent = new ClassUnreadyEvent(player);
+            Bukkit.getPluginManager().callEvent(unreadyEvent);
         }
     }
 
