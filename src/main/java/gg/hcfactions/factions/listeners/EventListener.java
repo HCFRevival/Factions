@@ -241,7 +241,7 @@ public record EventListener(@Getter Factions plugin) implements Listener {
 
     /**
      * Disables block explosions inside active event claims
-     * @param event EntityExplodeEvent
+     * @param event ExplosionPrimeEvent
      */
     @EventHandler
     public void onExplosion(ExplosionPrimeEvent event) {
