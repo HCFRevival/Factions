@@ -485,7 +485,7 @@ public final class ClassListener implements Listener {
                             return;
                         }
 
-                        final double health = Math.max((attacked.getHealth() - rogue.getBackstabDamage()), 0.0);
+                        final double health = Math.max((attacked.getHealth() - rogue.getBackstabDamage()), 0.5);
                         attacked.damage(0.0); // Create the illusion of the player taking flinching damage
                         attacked.setHealth(health);
                     }).delay(((long) i * rogue.getBackstabTickrate())).run();
