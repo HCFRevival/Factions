@@ -62,9 +62,10 @@ public interface IClassHoldable {
     /**
      * Applies the effect and marks the player as a holder
      * @param player Player
+     * @param range Range to perform nearby player lookup
      * @param updateInterval Interval where this should be updated again
      */
-    default void apply(Player player, int updateInterval, boolean initial) {
+    default void apply(Player player, int updateInterval, double range, boolean initial) {
         if (!player.isOnline()
                 || player.isDead()
                 || (!player.getInventory().getItemInMainHand().getType().equals(getMaterial()) && !initial)
@@ -74,8 +75,8 @@ public interface IClassHoldable {
             return;
         }
 
-        final PotionEffect eff = new PotionEffect(getEffectType(), getDuration()*20, getAmplifier());
-        final List<Player> affected = Lists.newArrayList(FactionUtil.getNearbyFriendlies(getPlugin(), player, 16.0));
+        final PotionEffect eff = new PotionEffect(getEffectType(), getDuration() * 20, getAmplifier());
+        final List<Player> affected = Lists.newArrayList(FactionUtil.getNearbyFriendlies(getPlugin(), player, range));
         affected.add(player);
 
         for (Player affectedPlayer : affected) {
@@ -88,7 +89,7 @@ public interface IClassHoldable {
                     continue;
                 }
 
-                if (Objects.requireNonNull(affectedPlayer.getPotionEffect(getEffectType())).getDuration() > (getDuration()*20)) {
+                if (Objects.requireNonNull(affectedPlayer.getPotionEffect(getEffectType())).getDuration() > (getDuration() * 20)) {
                     continue;
                 }
 
@@ -98,7 +99,7 @@ public interface IClassHoldable {
             affectedPlayer.addPotionEffect(eff);
         }
 
-        getCurrentHolders().put(player.getUniqueId(), (Time.now() + (updateInterval*1000L)));
-        new Scheduler(getPlugin()).sync(() -> apply(player, updateInterval, false)).delay(updateInterval*20L).run();
+        getCurrentHolders().put(player.getUniqueId(), (Time.now() + (updateInterval * 1000L)));
+        new Scheduler(getPlugin()).sync(() -> apply(player, updateInterval, range, false)).delay(updateInterval*20L).run();
     }
 }

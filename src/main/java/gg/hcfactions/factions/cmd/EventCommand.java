@@ -38,9 +38,6 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
-    /*
-    /event start courtyard 20 60
-     */
     @Subcommand("start koth")
     @Description("Start a King of the Hill Event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
@@ -86,6 +83,25 @@ public final class EventCommand extends BaseCommand {
             @Override
             public void reject(String s) {
                 player.sendMessage(ChatColor.RED + "Failed to stop event: " + s);
+            }
+        });
+    }
+
+    @Subcommand("delete|del")
+    @Description("Delete an event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name>")
+    @CommandCompletion("@events")
+    public void onDelete(Player player, String eventName) {
+        plugin.getEventManager().getExecutor().deleteEvent(player, eventName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event deleted");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to delete event: " + s);
             }
         });
     }

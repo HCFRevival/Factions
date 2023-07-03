@@ -10,6 +10,7 @@ import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
+import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.logger.impl.CombatLogger;
@@ -18,6 +19,7 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
+import net.minecraft.world.entity.vehicle.MinecartTNT;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Monster;
@@ -27,6 +29,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -234,5 +237,41 @@ public record EventListener(@Getter Factions plugin) implements Listener {
 
         event.setUseInteractedBlock(Event.Result.DENY);
         player.sendMessage(FMessage.ERROR + "This chest will unlock in " + Time.convertToRemaining(unlockTime - Time.now()));
+    }
+
+    /**
+     * Disables block explosions inside active event claims
+     * @param event ExplosionPrimeEvent
+     */
+    @EventHandler
+    public void onExplosion(ExplosionPrimeEvent event) {
+        final BLocatable location = new BLocatable(event.getEntity().getLocation().getBlock());
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(location);
+
+        if (insideClaim == null) {
+            return;
+        }
+
+        final IFaction insideFaction = plugin.getFactionManager().getFactionById(insideClaim.getOwner());
+
+        if (!(insideFaction instanceof final ServerFaction sf)) {
+            return;
+        }
+
+        final Optional<IEvent> eventQuery = plugin.getEventManager().getEvent(sf);
+
+        if (eventQuery.isEmpty()) {
+            return;
+        }
+
+        final IEvent insideEvent = eventQuery.get();
+
+        if (insideEvent.isActive()) {
+            if (event.getEntity() instanceof MinecartTNT) {
+                event.getEntity().remove();
+            }
+
+            event.setCancelled(true);
+        }
     }
 }

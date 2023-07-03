@@ -27,6 +27,7 @@ import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.bukkit.AresPlugin;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
+import gg.hcfactions.libs.bukkit.services.impl.automod.AutomodService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
@@ -171,6 +172,7 @@ public final class Factions extends AresPlugin {
         final DeathbanService deathbanService = new DeathbanService(this, configuration.getDeathbanConfig());
         final SyncService syncService = new SyncService(this, configuration.getMongoDatabaseName());
         final PunishmentService punishmentService = new PunishmentService(this, configuration.getMongoDatabaseName());
+        final AutomodService automodService = new AutomodService(this);
 
         // register services
         registerService(accountService);
@@ -180,6 +182,7 @@ public final class Factions extends AresPlugin {
         registerService(rankService);
         registerService(syncService);
         registerService(punishmentService);
+        registerService(automodService);
         startServices();
 
         // declare managers

@@ -51,7 +51,7 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         final int count = plugin.getClassManager().getFactionClassCount(faction, playerClass);
 
         if (playerClass instanceof Archer) {
-            if (count > plugin.getConfiguration().getArcherClassLimit()) {
+            if (count >= plugin.getConfiguration().getArcherClassLimit()) {
                 playerClass.deactivate(player, false);
                 player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 event.setCancelled(true);
@@ -61,7 +61,7 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         }
 
         if (playerClass instanceof Rogue) {
-            if (count > plugin.getConfiguration().getRogueClassLimit()) {
+            if (count >= plugin.getConfiguration().getRogueClassLimit()) {
                 playerClass.deactivate(player, false);
                 player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 event.setCancelled(true);
@@ -71,7 +71,7 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         }
 
         if (playerClass instanceof Bard) {
-            if (count > plugin.getConfiguration().getBardClassLimit()) {
+            if (count >= plugin.getConfiguration().getBardClassLimit()) {
                 playerClass.deactivate(player, false);
                 player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 event.setCancelled(true);
@@ -81,7 +81,7 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         }
 
         if (playerClass instanceof Miner) {
-            if (count > plugin.getConfiguration().getMinerClassLimit()) {
+            if (count >= plugin.getConfiguration().getMinerClassLimit()) {
                 playerClass.deactivate(player, false);
                 player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 event.setCancelled(true);
@@ -89,7 +89,7 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         }
 
         if (playerClass instanceof Diver) {
-            if (count > plugin.getConfiguration().getDiverClassLimit()) {
+            if (count >= plugin.getConfiguration().getDiverClassLimit()) {
                 playerClass.deactivate(player, false);
                 player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 event.setCancelled(true);

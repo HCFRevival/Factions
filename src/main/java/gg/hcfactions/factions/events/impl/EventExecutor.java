@@ -78,6 +78,13 @@ public final class EventExecutor implements IEventExecutor {
         }
 
         koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, koth.getEventConfig().getMaxLifespan(), tokenReward));
+
+        if (koth.isActive()) {
+            koth.getSession().setTicketsNeededToWin(ticketsToWin);
+            koth.getSession().setTimerDuration(timerDuration);
+            koth.getSession().setTokenReward(tokenReward);
+        }
+
         promise.resolve();
     }
 
@@ -108,7 +115,23 @@ public final class EventExecutor implements IEventExecutor {
 
     @Override
     public void deleteEvent(Player player, String eventName, Promise promise) {
+        final Optional<IEvent> eventQuery = manager.getEvent(eventName);
 
+        if (eventQuery.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent event = eventQuery.get();
+
+        if (event.isActive()) {
+            promise.reject("Please stop the event before deleting it");
+            return;
+        }
+
+        manager.getEventRepository().remove(event);
+        manager.deleteEvent(event);
+        promise.resolve();
     }
 
     @Override
