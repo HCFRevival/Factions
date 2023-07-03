@@ -455,35 +455,35 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             final int count = manager.getPlugin().getClassManager().getFactionClassCount(faction, playerClass);
 
             if (playerClass instanceof Archer) {
-                if (count > manager.getPlugin().getConfiguration().getArcherClassLimit()) {
+                if (count >= manager.getPlugin().getConfiguration().getArcherClassLimit()) {
                     playerClass.deactivate(player, false);
                     player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
             }
 
             if (playerClass instanceof Rogue) {
-                if (count > manager.getPlugin().getConfiguration().getRogueClassLimit()) {
+                if (count >= manager.getPlugin().getConfiguration().getRogueClassLimit()) {
                     playerClass.deactivate(player, false);
                     player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
             }
 
             if (playerClass instanceof Bard) {
-                if (count > manager.getPlugin().getConfiguration().getBardClassLimit()) {
+                if (count >= manager.getPlugin().getConfiguration().getBardClassLimit()) {
                     playerClass.deactivate(player, false);
                     player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
             }
 
             if (playerClass instanceof Miner) {
-                if (count > manager.getPlugin().getConfiguration().getMinerClassLimit()) {
+                if (count >= manager.getPlugin().getConfiguration().getMinerClassLimit()) {
                     playerClass.deactivate(player, false);
                     player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
             }
 
             if (playerClass instanceof Diver) {
-                if (count > manager.getPlugin().getConfiguration().getDiverClassLimit()) {
+                if (count >= manager.getPlugin().getConfiguration().getDiverClassLimit()) {
                     playerClass.deactivate(player, false);
                     player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
