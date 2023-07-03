@@ -53,6 +53,7 @@ public enum FError {
     F_SUBCLAIM_NO_ACCESS("You do not have access to this subclaim"),
     F_SUBCLAIM_ELEVATED_PRIVS("This player has a permission level which will always grant them access to this subclaim"),
     F_NOT_STANDING_IN_CLAIM("You are not standing in your faction's land"),
+    F_CAN_NOT_PLACE_OUTSIDE_CLAIM("You can not place this block outside of your claim"),
     P_ALREADY_IN_FAC("You are already in a faction"),
     P_NOT_IN_FAC("You are not in a faction"),
     P_NOT_FOUND("Player not found"),

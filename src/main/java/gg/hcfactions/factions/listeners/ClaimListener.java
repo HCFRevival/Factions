@@ -1073,6 +1073,39 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         }
     }
 
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onSpawnerPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        final Block block = event.getBlock();
+
+        if (!(block.getType().equals(Material.SPAWNER))) {
+            return;
+        }
+
+        if (player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            return;
+        }
+
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(block));
+
+        if (insideClaim == null) {
+            player.sendMessage(FMessage.ERROR + FError.F_CAN_NOT_PLACE_OUTSIDE_CLAIM.getErrorDescription());
+            event.setCancelled(true);
+            return;
+        }
+
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionById(insideClaim.getOwner());
+
+        if (pf == null || !pf.isMember(player)) {
+            player.sendMessage(FMessage.ERROR + FError.F_CAN_NOT_PLACE_OUTSIDE_CLAIM.getErrorDescription());
+            event.setCancelled(true);
+        }
+    }
+
     /**
      * Listens for Portal Platform Generate and removes any blocks that are inside a claim
      *
