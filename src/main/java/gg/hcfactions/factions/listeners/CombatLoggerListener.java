@@ -28,6 +28,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -235,6 +236,23 @@ public final class CombatLoggerListener implements Listener {
                 plugin.getLoggerManager().getLoggerRepository().remove(inChunkLogger);
             }
         });
+    }
+
+    @EventHandler
+    public void onEntityTransform(EntityTransformEvent event) {
+        final Entity entity = event.getEntity();
+
+        if (!(entity instanceof final LivingEntity livingEntity)) {
+            return;
+        }
+
+        final net.minecraft.world.entity.LivingEntity asNms = ((CraftLivingEntity)livingEntity).getHandle();
+
+        if (!(asNms instanceof CombatLogger)) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 
     @EventHandler
