@@ -473,7 +473,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (!block.getType().isInteractable()) {
+        if (!FactionUtil.isInteractable(block.getType())) {
             return;
         }
 
@@ -521,7 +521,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 event.setUseInteractedBlock(Event.Result.DENY);
             }
         } else if (owner instanceof final PlayerFaction pf) {
-            if (!pf.isRaidable() && pf.getMember(player.getUniqueId()) == null) {
+            if (!pf.isRaidable() && !pf.isMember(player)) {
                 if (!action.equals(Action.PHYSICAL)) {
                     player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.YELLOW + pf.getName());
                 }

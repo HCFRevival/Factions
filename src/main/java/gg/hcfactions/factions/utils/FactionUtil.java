@@ -37,6 +37,18 @@ public final class FactionUtil {
             Material.PURPUR_PILLAR, Material.BLACKSTONE, Material.CRIMSON_PLANKS
     );
 
+    public static boolean isInteractable(Material material) {
+        if (material.isInteractable()) {
+            return true;
+        }
+
+        if (material.name().endsWith("PRESSURE_PLATE")) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static void cleanPlayer(Factions plugin, FactionPlayer factionPlayer) {
         final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
         final Player player = factionPlayer.getBukkit();
