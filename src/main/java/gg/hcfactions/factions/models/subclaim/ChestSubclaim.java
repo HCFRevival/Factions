@@ -6,14 +6,15 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Set;
 
 public final class ChestSubclaim {
-    @Getter public final Block chest;
+    @Getter public final List<Block> chests;
     @Getter public final Set<String> members;
 
-    public ChestSubclaim(Block chest, Sign sign) {
-        this.chest = chest;
+    public ChestSubclaim(List<Block> chests, Sign sign) {
+        this.chests = chests;
         this.members = Sets.newHashSet();
 
         for (int i = 1; i <= 3; i++) {
@@ -23,6 +24,10 @@ public final class ChestSubclaim {
                 members.add(username);
             }
         }
+    }
+
+    public boolean isBlock(Block block) {
+        return chests.stream().anyMatch(chest -> chest.getLocation().equals(block.getLocation()));
     }
 
     public boolean canAccess(Player player) {
