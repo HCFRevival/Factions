@@ -490,6 +490,10 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         }
 
         if (owner instanceof final ServerFaction sf) {
+            if (FactionUtil.isPressurePlate(block.getType())) {
+                return;
+            }
+
             if (sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
                 if (    block.getType().equals(Material.LEVER)
                         || block.getType().equals(Material.CHEST)
