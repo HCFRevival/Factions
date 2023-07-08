@@ -22,12 +22,17 @@ import java.util.Locale;
 public final class EventCommand extends BaseCommand {
     @Getter public final Factions plugin;
 
-    @Subcommand("create")
-    @Description("Create an event")
-    @Syntax("<name> <koth|palace>")
+    @Subcommand("create koth")
+    @Description("Create a King of the Hill event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onCreate(Player player, String eventName, @Values("koth|palace") String eventType) {
-        plugin.getEventManager().getBuilderManager().getExecutor().buildCaptureEvent(player, eventName, (eventType.equalsIgnoreCase("palace")), new Promise() {
+    @Syntax("<name> [palace]")
+    public void onCreateKOTH(Player player, String eventName, @Optional String palaceFlag) {
+        plugin.getEventManager().getBuilderManager().getExecutor().buildCaptureEvent(
+                player,
+                eventName,
+                (palaceFlag != null && palaceFlag.equalsIgnoreCase("palace")
+            ), new Promise() {
+
             @Override
             public void resolve() {}
 
@@ -36,6 +41,51 @@ public final class EventCommand extends BaseCommand {
                 player.sendMessage(ChatColor.RED + s);
             }
         });
+    }
+
+    @Subcommand("create conquest")
+    @Description("Create a new Conquest event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name> <display name> <server faction>")
+    public void onCreateConquest(Player player, String eventName, String displayName, String serverFactionName) {
+        plugin.getEventManager().getBuilderManager().getExecutor().buildConquestEvent(
+                player,
+                eventName,
+                displayName,
+                serverFactionName,
+                new Promise() {
+                    @Override
+                    public void resolve() {
+                        player.sendMessage(ChatColor.GREEN + "Conquest event has been created");
+                    }
+
+                    @Override
+                    public void reject(String s) {
+                        player.sendMessage(ChatColor.RED + "Failed to create Conquest event: " + s);
+                    }
+                }
+        );
+    }
+
+    @Subcommand("create zone")
+    @Description("Create a new Conquest Zone")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<event> <zone name>")
+    public void onCreateConquestZone(Player player, String eventName, String zoneName) {
+        plugin.getEventManager().getBuilderManager().getExecutor().buildConquestZone(
+                player,
+                eventName,
+                zoneName,
+                new Promise() {
+                    @Override
+                    public void resolve() {}
+
+                    @Override
+                    public void reject(String s) {
+                        player.sendMessage(ChatColor.RED + "Failed to create Conquest Zone: " + s);
+                    }
+                }
+        );
     }
 
     @Subcommand("start koth")
@@ -69,6 +119,24 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("start conquest")
+    @Description("Start a Conquest Event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name> <tickets> <timer> <tokens> <pertick>")
+    public void onStartConquest(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int ticketsPerTick) {
+        plugin.getEventManager().getExecutor().startConquestEvent(player, eventName, ticketsToWin, timerDuration, tokenReward, ticketsPerTick, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event started");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to start an event: " + s);
+            }
+        });
+    }
+
     @Subcommand("stop")
     @Description("Stop an event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
@@ -87,7 +155,7 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("delete|del")
+    @Subcommand("delete event")
     @Description("Delete an event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @Syntax("<name>")
@@ -102,6 +170,25 @@ public final class EventCommand extends BaseCommand {
             @Override
             public void reject(String s) {
                 player.sendMessage(ChatColor.RED + "Failed to delete event: " + s);
+            }
+        });
+    }
+
+    @Subcommand("delete zone")
+    @Description("Delete a Conquest Zone")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<event> <zone>")
+    @CommandCompletion("@events")
+    public void onDeleteZone(Player player, String eventName, String zoneName) {
+        plugin.getEventManager().getExecutor().deleteZone(player, eventName, zoneName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Zone deleted");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to delete zone: " + s);
             }
         });
     }

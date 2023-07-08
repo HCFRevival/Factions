@@ -3,6 +3,8 @@ package gg.hcfactions.factions.events.menu;
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.impl.ConquestZone;
+import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -42,6 +44,67 @@ public final class EventMenu extends GenericMenu {
             for (IEvent event : events) {
                 final ItemBuilder builder = new ItemBuilder().setName(event.getDisplayName());
                 final List<String> lore = Lists.newArrayList();
+
+                if (event instanceof final ConquestEvent conqEvent) {
+                    final boolean isActive = conqEvent.isActive();
+
+                    builder.setMaterial(isActive ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE);
+
+                    lore.add(FMessage.LAYER_2 + "Type" + FMessage.LAYER_1 + ": " + FMessage.INFO + "Conquest");
+                    lore.add(FMessage.LAYER_2 + "Status" + FMessage.LAYER_1 + ": " + (isActive ? ChatColor.GREEN + "Active" : ChatColor.RED + "Inactive"));
+
+                    if (!conqEvent.getZones().isEmpty()) {
+                        lore.add(FMessage.LAYER_2 + "Zones" + FMessage.LAYER_1 + ":");
+                        conqEvent.getZones().forEach(zone -> lore.add(ChatColor.RESET + " " + FMessage.LAYER_1 + " - " + zone.getDisplayName() + FMessage.LAYER_1 + ": " + FMessage.INFO + zone.getCaptureRegion().getCenter()));
+                    }
+
+                    if (isActive) {
+                        lore.add(ChatColor.RESET + " ");
+                        lore.add(FMessage.LAYER_2 + "Tickets Needed" + FMessage.LAYER_1 + ": " + conqEvent.getSession().getTicketsNeededToWin());
+                        lore.add(FMessage.LAYER_2 + "Tickets per Tick" + FMessage.LAYER_1 + ": " + conqEvent.getSession().getTicketsPerTick());
+                        lore.add(FMessage.LAYER_2 + "Timer Duration" + FMessage.LAYER_1 + ": " + conqEvent.getSession().getTimerDuration());
+                        lore.add(FMessage.LAYER_2 + "Token Reward" + FMessage.LAYER_1 + ": " + conqEvent.getSession().getTokenReward());
+                    }
+
+                    lore.add(ChatColor.RESET + " ");
+
+                    if (isActive) {
+                        for (ConquestZone zone : conqEvent.getZones()) {
+                            lore.add(zone.getDisplayName() + FMessage.LAYER_1 + ": " + Time.convertToRemaining(zone.getTimer().getRemaining()));
+                        }
+
+                        final Map<UUID, Integer> leaderboard = conqEvent.getSession().getLeaderboard();
+                        int position = 1;
+
+                        lore.add(ChatColor.RESET + " ");
+                        lore.add(FMessage.LAYER_2 + "Leaderboard");
+
+                        if (!leaderboard.isEmpty()) {
+                            for (UUID factionId : leaderboard.keySet()) {
+                                final int tickets = leaderboard.getOrDefault(factionId, -1);
+                                final PlayerFaction playerFaction = plugin.getFactionManager().getPlayerFactionById(factionId);
+
+                                if (playerFaction != null) {
+                                    lore.add(FMessage.LAYER_2 + "" + position + ". " + FMessage.LAYER_1 + playerFaction.getName() + FMessage.INFO + " (" + tickets + ")");
+                                    position += 1;
+                                }
+                            }
+                        } else {
+                            lore.add(FMessage.LAYER_1 + "No factions have earned a ticket yet");
+                        }
+                    } else {
+                        final PlayerFaction capturingFaction = plugin.getFactionManager().getPlayerFactionById(conqEvent.getCapturingFaction());
+
+                        if (capturingFaction != null) {
+                            lore.add(FMessage.LAYER_2 + "Captured By" + FMessage.LAYER_1 + ": " + capturingFaction.getName());
+                            lore.add(FMessage.LAYER_2 + "Next Restock" + FMessage.LAYER_1 + ": " + (conqEvent.getTimeUntilNextRestock() > 0 ? Time.convertToRemaining(conqEvent.getTimeUntilNextRestock()) : "Restocking..."));
+                            lore.add(ChatColor.RESET + " ");
+                        }
+
+                        lore.add(ChatColor.GRAY + "This event will activate:");
+                        lore.add(ChatColor.WHITE + ((conqEvent.getRemainingTimeUntilNextSchedule() != -1) ? Time.convertToRemaining(conqEvent.getRemainingTimeUntilNextSchedule()) : "Unscheduled"));
+                    }
+                }
 
                 if (event instanceof final KOTHEvent kothEvent) {
                     final boolean isActive = kothEvent.isActive();

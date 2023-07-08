@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.claims.subclaims.impl;
 
+import com.google.common.collect.Lists;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.claims.subclaims.ISubclaimExecutor;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
@@ -22,6 +23,7 @@ import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.block.data.type.WallSign;
@@ -416,8 +418,9 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
      */
     public ChestSubclaim findChestSubclaimAt(Block block) {
         final BlockFace[] faces = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
+        final List<Block> chests = Lists.newArrayList();
+
         Block chest = null;
-        Block otherChest = null;
 
         if (block.getType().name().endsWith("_WALL_SIGN")) {
             final WallSign sign = (WallSign)block.getState().getBlockData();
@@ -425,9 +428,11 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
 
             if (relative.getType().equals(Material.CHEST) || relative.getType().equals(Material.TRAPPED_CHEST)) {
                 chest = block.getRelative(sign.getFacing().getOppositeFace());
+                chests.add(chest);
             }
         } else if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)) {
             chest = block;
+            chests.add(chest);
         }
 
         if (chest == null) {
@@ -435,46 +440,26 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
         }
 
         if (chest.getState() instanceof final Chest chestBlock) {
-            if (chestBlock.getInventory() instanceof DoubleChestInventory) {
-                for (BlockFace face : faces) {
-                    final Block relative = chest.getRelative(face);
-                    if (relative.getType().equals(chest.getType())) {
-                        otherChest = relative;
-                        break;
-                    }
+            if (chestBlock.getInventory() instanceof final DoubleChestInventory doubleChestInventory) {
+                final Location leftSide = doubleChestInventory.getLeftSide().getLocation();
+                final Location rightSide = doubleChestInventory.getRightSide().getLocation();
+
+                if (leftSide != null && rightSide != null) {
+                    final Block otherChest = (leftSide.getBlock().equals(block) ? rightSide.getBlock() : leftSide.getBlock());
+                    chests.add(otherChest);
                 }
             }
         }
 
-        for (BlockFace face : faces) {
-            final Block relative = chest.getRelative(face);
-
-            if (relative.getType().name().endsWith("_WALL_SIGN")) {
-                if (!(relative.getBlockData() instanceof WallSign || relative.getBlockData() instanceof Sign)) {
-                    continue;
-                }
-
-                final Sign sign = (Sign) relative.getState();
-
-                if (sign.getLine(0).equals(ChatColor.AQUA + "[Subclaim]")) {
-                    return new ChestSubclaim(chest, sign);
-                }
-            }
-        }
-
-        if (otherChest != null) {
+        for (Block chestBlock : chests) {
             for (BlockFace face : faces) {
-                final Block relative = otherChest.getRelative(face);
+                final Block relative = chestBlock.getRelative(face);
 
                 if (relative.getType().name().endsWith("_WALL_SIGN")) {
-                    if (!(relative.getBlockData() instanceof WallSign || relative.getBlockData() instanceof Sign)) {
-                        continue;
-                    }
-
-                    final Sign sign = (Sign) relative.getState();
+                    final Sign sign = (Sign)relative.getState();
 
                     if (sign.getLine(0).equals(ChatColor.AQUA + "[Subclaim]")) {
-                        return new ChestSubclaim(chest, sign);
+                        return new ChestSubclaim(chests, sign);
                     }
                 }
             }

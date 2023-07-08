@@ -4,12 +4,12 @@ public interface ICaptureEventConfig {
     /**
      * @return Tickets needed to be considered the winner of the event
      */
-    int defaultTicketsNeededToWin();
+    int getDefaultTicketsNeededToWin();
 
     /**
      * @return Time between each tick
      */
-    int defaultTimerDuration();
+    int getDefaultTimerDuration();
 
     /**
      * @return Max time this event can be up for

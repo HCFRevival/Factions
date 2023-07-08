@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.lunarclient.bukkitapi.LunarClientAPI;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
+import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.waypoint.IWaypoint;
@@ -57,7 +58,9 @@ public final class WaypointManager implements IManager {
         // Spawn waypoints
         final GlobalWaypoint spawnWaypoint = new GlobalWaypoint("Spawn", plugin.getConfiguration().getOverworldSpawn(), Color.GREEN.getRGB());
         final GlobalWaypoint endSpawnWaypoint = new GlobalWaypoint("End Spawn", plugin.getConfiguration().getEndSpawn(), Color.MAGENTA.getRGB());
+        final GlobalWaypoint endExitWaypoint = new GlobalWaypoint("End Exit", plugin.getConfiguration().getEndExit(), Color.GREEN.getRGB());
         waypointRepository.add(spawnWaypoint);
+        waypointRepository.add(endExitWaypoint);
         waypointRepository.add(endSpawnWaypoint);
 
         // KOTH waypoints
@@ -83,7 +86,32 @@ public final class WaypointManager implements IManager {
             waypointRepository.add(kothWaypoint);
         });
 
+        // Conquest Zone waypoints
+        plugin.getEventManager().getEventRepository().stream().filter(event -> event instanceof ConquestEvent).forEach(conquest -> {
+            ((ConquestEvent) conquest).getZones().forEach(zone -> {
+                final Color color;
+
+                if (zone.getCaptureRegion().getCornerA().getBukkitBlock().getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
+                    color = Color.CYAN;
+                } else if (zone.getCaptureRegion().getCornerA().getBukkitBlock().getWorld().getEnvironment().equals(World.Environment.NETHER)) {
+                    color = Color.RED;
+                } else {
+                    color = Color.MAGENTA;
+                }
+
+                final GlobalWaypoint zoneWaypoint = new GlobalWaypoint(
+                        ChatColor.stripColor(zone.getDisplayName()),
+                        zone.getCaptureRegion().getCenter().getBukkitBlock().getLocation(),
+                        color.getRGB(),
+                        false
+                );
+
+                waypointRepository.add(zoneWaypoint);
+            });
+        });
+
         // Set waypoint for The Nether, since we don't track nether spawn in our own code
+        // TODO: Remove this once we implement Outposts
         for (World world : Bukkit.getWorlds()) {
             if (world.getEnvironment().equals(World.Environment.NETHER)) {
                 final GlobalWaypoint netherSpawn = new GlobalWaypoint("Nether Spawn", world.getSpawnLocation(), Color.RED.getRGB());

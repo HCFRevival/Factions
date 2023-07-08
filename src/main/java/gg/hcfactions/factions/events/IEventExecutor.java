@@ -22,6 +22,18 @@ public interface IEventExecutor {
     void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise);
 
     /**
+     * Start a Conquest Event with specified rules
+     * @param player Player
+     * @param eventName Event Name
+     * @param ticketsToWin Tickets to win
+     * @param timerDuration Timer duration
+     * @param tokenReward Token reward
+     * @param ticketsPerTick Tickets to send per tick
+     * @param promise Promise
+     */
+    void startConquestEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int ticketsPerTick, Promise promise);
+
+    /**
      * Alter a Capture Event that is already running
      * @param player Player
      * @param eventName Event Name
@@ -47,6 +59,15 @@ public interface IEventExecutor {
      * @param promise Promise
      */
     void deleteEvent(Player player, String eventName, Promise promise);
+
+    /**
+     * Delete a Conquest Capture Zone
+     * @param player Player
+     * @param eventName Conquest Event Name
+     * @param zoneName Conquest Zone Name
+     * @param promise Promise
+     */
+    void deleteZone(Player player, String eventName, String zoneName, Promise promise);
 
     /**
      * Add a scheduled start time to an event

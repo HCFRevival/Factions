@@ -10,9 +10,11 @@ import gg.hcfactions.factions.models.events.ICaptureEvent;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.IScheduledEvent;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
+import gg.hcfactions.factions.models.events.impl.ConquestZone;
 import gg.hcfactions.factions.models.events.impl.EventSchedule;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootable;
+import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.libs.base.consumer.Promise;
@@ -58,6 +60,31 @@ public final class EventExecutor implements IEventExecutor {
         }
 
         captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward);
+        promise.resolve();
+    }
+
+    @Override
+    public void startConquestEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int ticketsPerTick, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
+
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = event.get();
+
+        if (generic.isActive()) {
+            promise.reject("This event is already active");
+            return;
+        }
+
+        if (!(generic instanceof final ConquestEvent conquestEvent)) {
+            promise.reject("This is not a Conquest Event");
+            return;
+        }
+
+        conquestEvent.startEvent(ticketsToWin, timerDuration, tokenReward, ticketsPerTick);
         promise.resolve();
     }
 
@@ -135,6 +162,36 @@ public final class EventExecutor implements IEventExecutor {
     }
 
     @Override
+    public void deleteZone(Player player, String eventName, String zoneName, Promise promise) {
+        final Optional<IEvent> eventQuery = manager.getEvent(eventName);
+
+        if (eventQuery.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent event = eventQuery.get();
+
+        if (!(event instanceof final ConquestEvent conquestEvent)) {
+            promise.reject("This event is not a Conquest Event");
+            return;
+        }
+
+        final Optional<ConquestZone> zoneQuery = conquestEvent.getZones().stream().filter(z -> z.getName().equalsIgnoreCase(zoneName)).findFirst();
+
+        if (zoneQuery.isEmpty()) {
+            promise.reject("Zone not found");
+            return;
+        }
+
+        final ConquestZone zone = zoneQuery.get();
+
+        conquestEvent.getZones().remove(zone);
+        manager.saveConquestEvent(conquestEvent);
+        promise.resolve();
+    }
+
+    @Override
     public void addEventSchedule(Player player, String eventName, int day, int hour, int minute, boolean temp, Promise promise) {
         final Optional<IEvent> eventQuery = manager.getEvent(eventName);
 
@@ -161,7 +218,7 @@ public final class EventExecutor implements IEventExecutor {
         scheduledEvent.getSchedule().add(schedule);
 
         if (!temp) {
-            manager.saveEvent((IEvent) scheduledEvent);
+            manager.saveCaptureEvent((IEvent) scheduledEvent);
         }
 
         promise.resolve();
@@ -193,7 +250,7 @@ public final class EventExecutor implements IEventExecutor {
         scheduledEvent.getSchedule().remove(scheduleQuery.get());
 
         if (!temp) {
-            manager.saveEvent((IEvent) scheduledEvent);
+            manager.saveCaptureEvent((IEvent) scheduledEvent);
         }
 
         promise.resolve();
@@ -277,7 +334,7 @@ public final class EventExecutor implements IEventExecutor {
         final PalaceLootChest chest = new PalaceLootChest(manager, location, tier);
 
         palaceEvent.getLootChests().add(chest);
-        manager.saveEvent(palaceEvent);
+        manager.saveCaptureEvent(palaceEvent);
         promise.resolve();
     }
 

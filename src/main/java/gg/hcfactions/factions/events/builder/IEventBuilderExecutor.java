@@ -14,6 +14,24 @@ public interface IEventBuilderExecutor {
     void buildCaptureEvent(Player player, String eventName, boolean isPalace, Promise promise);
 
     /**
+     * Create a new Conquest event
+     * @param player Player
+     * @param eventName Event Name
+     * @param displayName Event Display Name
+     * @param serverFactionName Server Faction name
+     * @param promise Promise
+     */
+    void buildConquestEvent(Player player, String eventName, String displayName, String serverFactionName, Promise promise);
+
+    /**
+     * Start building a new conquest event
+     * @param player Player
+     * @param eventName Event Name
+     * @param promise Promise
+     */
+    void buildConquestZone(Player player, String eventName, String zoneName, Promise promise);
+
+    /**
      * Cancel the building process
      * @param player Player
      * @param promise Promise

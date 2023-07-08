@@ -66,7 +66,7 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
 
     @Override
     public void startEvent() {
-        startEvent(eventConfig.defaultTicketsNeededToWin(), eventConfig.defaultTimerDuration(), eventConfig.getTokenReward());
+        startEvent(eventConfig.getDefaultTicketsNeededToWin(), eventConfig.getDefaultTimerDuration(), eventConfig.getTokenReward());
     }
 
     @Override
