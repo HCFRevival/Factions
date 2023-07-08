@@ -45,6 +45,7 @@ public final class FMessage {
     public static final String KOTH_PREFIX = LAYER_2 + "[" + LAYER_1 + "KOTH" + LAYER_2 + "] " + LAYER_1;
     public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
     public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
+    public static final String CONQ_PREFIX = LAYER_2 + "[" + Colors.RED.toBukkit() + "Conquest" + LAYER_2 + "] " + LAYER_1;
 
     public static final String T_EPEARL_UNLOCKED = SUCCESS + "Your enderpearls have been unlocked";
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
@@ -77,6 +78,12 @@ public final class FMessage {
     public static void broadcastCaptureEventMessage(String message) {
         Bukkit.broadcastMessage(" ");
         Bukkit.broadcastMessage(KOTH_PREFIX + message);
+        Bukkit.broadcastMessage(" ");
+    }
+
+    public static void broadcastConquestMessage(String message) {
+        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcastMessage(CONQ_PREFIX + message);
         Bukkit.broadcastMessage(" ");
     }
 

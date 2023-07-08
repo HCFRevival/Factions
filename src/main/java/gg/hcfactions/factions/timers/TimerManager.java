@@ -5,6 +5,8 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.events.impl.ConquestZone;
+import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
@@ -21,6 +23,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class TimerManager implements IManager {
@@ -118,6 +122,10 @@ public final class TimerManager implements IManager {
 
         int eventCursor = 16;
         for (KOTHEvent kothEvent : plugin.getEventManager().getActiveKothEvents()) {
+            if (eventCursor >= 19) {
+                break;
+            }
+
             if (kothEvent.getSession() == null) {
                 continue;
             }
@@ -147,6 +155,35 @@ public final class TimerManager implements IManager {
             factionPlayer.getScoreboard().setLine(eventCursor, kothEvent.getDisplayName() + ChatColor.RED + ": " + displayed);
             eventCursor += 1;
             hasEntries = true;
+        }
+
+        final ConquestEvent conquestEvent = plugin.getEventManager().getActiveConquestEvent();
+        if (conquestEvent != null) {
+            final String indent = ChatColor.RESET + " " + ChatColor.RESET + " ";
+            factionPlayer.getScoreboard().setLine(23, conquestEvent.getDisplayName());
+
+            int conquestCursor = 19;
+
+            List<ConquestZone> zones = conquestEvent.getZonesByAlphabetical();
+            Collections.reverse(zones);
+
+            for (ConquestZone zone : zones) {
+                final long remainingMillis = zone.getTimer().getRemaining();
+                final long remainingSeconds = zone.getTimer().getRemainingSeconds();
+                String displayed = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
+
+                if (remainingMillis <= 0) {
+                    displayed = "Capturing...";
+                }
+
+                else if (zone.isContested()) {
+                    displayed = "Contested";
+                }
+
+                factionPlayer.getScoreboard().setLine(conquestCursor, indent + zone.getDisplayName() + ChatColor.RED + ": " + displayed);
+                conquestCursor += 1;
+                hasEntries = true;
+            }
         }
 
         if (commandXService != null) {

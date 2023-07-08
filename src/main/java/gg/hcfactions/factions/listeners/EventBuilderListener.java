@@ -57,7 +57,7 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
                         && lootChest.getLocation().getWorldName().equalsIgnoreCase(block.getWorld().getName())) {
                     player.sendMessage(ChatColor.YELLOW + "Palace chest deleted");
                     palaceEvent.getLootChests().remove(lootChest);
-                    plugin.getEventManager().saveEvent(palaceEvent);
+                    plugin.getEventManager().saveCaptureEvent(palaceEvent);
                     break;
                 }
             }

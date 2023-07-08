@@ -70,7 +70,7 @@ public final class PalaceEvent extends KOTHEvent implements ILootableEvent {
             lootUnlockTimes.put(EPalaceLootTier.T2, wednesday.atStartOfDay().toInstant(offset).toEpochMilli());
             lootUnlockTimes.put(EPalaceLootTier.T1, friday.atStartOfDay().toInstant(offset).toEpochMilli());
 
-            plugin.getEventManager().saveEvent(this);
+            plugin.getEventManager().saveCaptureEvent(this);
         }).run();
     }
 

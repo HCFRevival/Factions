@@ -85,7 +85,7 @@ public final class PalaceBuilder implements ICaptureEventBuilder<KOTHEvent> {
             public void resolve(KOTHEvent kothEvent) {
                 plugin.getEventManager().getEventRepository().add(kothEvent);
                 plugin.getEventManager().getBuilderManager().getBuilderRepository().removeIf(b -> b.getBuilderId().equals(builderId));
-                plugin.getEventManager().saveEvent(kothEvent);
+                plugin.getEventManager().saveCaptureEvent(kothEvent);
 
                 getBuilder().sendMessage(ChatColor.GREEN + "Event created");
             }
