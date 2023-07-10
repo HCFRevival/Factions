@@ -58,7 +58,7 @@ public final class ConquestSession implements IEventSession {
         zone.getTimer().setFrozen(true);
 
         if (nextNotificationTime <= Time.now()) {
-            FMessage.broadcastConquestMessage(event.getDisplayName() + FMessage.LAYER_1 + " is being contested by " + FMessage.LAYER_2 + Joiner.on(", ").join(names));
+            FMessage.broadcastConquestMessage(zone.getDisplayName() + FMessage.LAYER_1 + " is being contested by " + FMessage.LAYER_2 + Joiner.on(", ").join(names));
             nextNotificationTime = (Time.now() + 5000L);
         }
     }
@@ -70,11 +70,11 @@ public final class ConquestSession implements IEventSession {
             return;
         }
 
-        zone.getTimer().setFrozen(true);
+        zone.getTimer().setFrozen(false);
         zone.setContested(false);
 
         if (nextNotificationTime <= Time.now()) {
-            FMessage.broadcastConquestMessage(event.getDisplayName() + FMessage.LAYER_1 + " is being controlled by " + FMessage.LAYER_2 + zone.getCapturingFaction().getName());
+            FMessage.broadcastConquestMessage(zone.getDisplayName() + FMessage.LAYER_1 + " is being controlled by " + FMessage.LAYER_2 + zone.getCapturingFaction().getName());
             nextNotificationTime = (Time.now() + 5000L);
         }
     }
