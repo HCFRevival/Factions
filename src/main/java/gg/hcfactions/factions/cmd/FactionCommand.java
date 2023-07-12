@@ -373,7 +373,7 @@ public final class FactionCommand extends BaseCommand {
     @Syntax("<name> <flag>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@sfactions")
-    public void onFactionFlagSet(Player player, String factionName, String flagName) {
+    public void onFactionFlagSet(Player player, String factionName, @Values("safezone|outpost|landmark|event") String flagName) {
         ServerFaction.Flag flag = ServerFaction.Flag.getFlagByName(flagName);
 
         if (flag == null) {

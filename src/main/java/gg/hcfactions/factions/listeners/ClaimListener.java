@@ -3,6 +3,7 @@ package gg.hcfactions.factions.listeners;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.event.PortalPlatformGenerateEvent;
+import gg.hcfactions.cx.event.PreMobstackEvent;
 import gg.hcfactions.cx.event.ShulkerPlaceEvent;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
@@ -494,6 +495,28 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 return;
             }
 
+            if (sf.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
+                if (action.equals(Action.LEFT_CLICK_BLOCK)) {
+                    return;
+                }
+
+                if (    block.getType().equals(Material.LEVER)
+                        || block.getType().equals(Material.CHEST)
+                        || block.getType().equals(Material.TRAPPED_CHEST)
+                        || block.getType().name().endsWith("_DOOR")
+                        || block.getType().name().endsWith("_FENCE_GATE")
+                        || block.getType().name().endsWith("_BUTTON")
+                ) {
+                    return;
+                }
+
+                if (!action.equals(Action.PHYSICAL)) {
+                    player.sendMessage(ChatColor.RED + "This land is owned by " + ChatColor.RESET + sf.getDisplayName());
+                }
+
+                event.setUseInteractedBlock(Event.Result.DENY);
+            }
+
             if (sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
                 if (    block.getType().equals(Material.LEVER)
                         || block.getType().equals(Material.CHEST)
@@ -955,7 +978,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                     return;
                 }
 
-                if (profile.hasTimer(ETimerType.PROTECTION) && sf.getFlag().equals(ServerFaction.Flag.EVENT)) {
+                if (profile.hasTimer(ETimerType.PROTECTION) && (sf.getFlag().equals(ServerFaction.Flag.EVENT) || (sf.getFlag().equals(ServerFaction.Flag.OUTPOST)))) {
                     player.sendMessage(ChatColor.RED + "You can not enter this claim while you have PvP Protection");
 
                     if (player.isInsideVehicle() && player.getVehicle() != null) {
@@ -1077,6 +1100,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         }
     }
 
+    /**
+     * Prevents placing spawners outside a claim
+     *
+     * @param event BlockPlaceEvent
+     */
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onSpawnerPlace(BlockPlaceEvent event) {
         if (event.isCancelled()) {
@@ -1149,6 +1177,33 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         if (pf.isMember(player)) {
             event.setDuration(0);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.LOWEST)
+    public void onMobstackAttempt(PreMobstackEvent event) {
+        final LivingEntity originEntity = event.getOriginEntity();
+        final LivingEntity mergedEntity = event.getMergingEntity();
+
+        final Claim insideOrigin = plugin.getClaimManager().getClaimAt(new PLocatable(originEntity));
+
+        if (insideOrigin != null) {
+            final ServerFaction insideFaction = plugin.getFactionManager().getServerFactionById(insideOrigin.getOwner());
+
+            if (insideFaction != null && insideFaction.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        final Claim insideMerged = plugin.getClaimManager().getClaimAt(new PLocatable(mergedEntity));
+
+        if (insideMerged != null) {
+            final ServerFaction insideFaction = plugin.getFactionManager().getServerFactionById(insideMerged.getOwner());
+
+            if (insideFaction != null && insideFaction.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
+                event.setCancelled(true);
+            }
         }
     }
 }
