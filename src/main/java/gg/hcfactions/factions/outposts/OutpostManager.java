@@ -64,6 +64,10 @@ public final class OutpostManager implements IManager {
         blockRepository.forEach(OutpostBlock::reset);
     }
 
+    public Optional<OutpostBlock> getOutpostBlock(Material mat) {
+        return blockRepository.stream().filter(b -> b.getMaterial().equals(mat)).findFirst();
+    }
+
     public void loadBlocks() {
         final YamlConfiguration conf = plugin.loadConfiguration("outposts");
 
@@ -115,9 +119,5 @@ public final class OutpostManager implements IManager {
         existing.remove(block.getMaterial().name());
 
         conf.set("blocks", existing);
-    }
-
-    public Optional<OutpostBlock> getOutpostBlock(Material mat) {
-        return blockRepository.stream().filter(b -> b.getMaterial().equals(mat)).findFirst();
     }
 }
