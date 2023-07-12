@@ -6,9 +6,11 @@ import com.google.common.collect.Sets;
 import com.lunarclient.bukkitapi.LunarClientAPI;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
+import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.waypoint.IWaypoint;
 import gg.hcfactions.factions.models.waypoint.impl.FactionWaypoint;
 import gg.hcfactions.factions.models.waypoint.impl.GlobalWaypoint;
@@ -62,6 +64,16 @@ public final class WaypointManager implements IManager {
         waypointRepository.add(spawnWaypoint);
         waypointRepository.add(endExitWaypoint);
         waypointRepository.add(endSpawnWaypoint);
+
+        // Outpost waypoints
+        plugin.getFactionManager().getServerFactions().stream().filter(sf -> sf.getFlag().equals(ServerFaction.Flag.OUTPOST)).forEach(outpostFaction -> {
+            final List<Claim> claims = plugin.getClaimManager().getClaimsByOwner(outpostFaction);
+
+            if (!claims.isEmpty()) {
+                final GlobalWaypoint outpostWaypoint = new GlobalWaypoint("Outpost", claims.get(0).getCenter().getBukkitBlock().getLocation(), Color.ORANGE.getRGB());
+                waypointRepository.add(outpostWaypoint);
+            }
+        });
 
         // KOTH waypoints
         plugin.getEventManager().getEventRepository().stream().filter(event -> event instanceof KOTHEvent).forEach(koth -> {
