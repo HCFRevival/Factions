@@ -46,6 +46,7 @@ public final class FMessage {
     public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
     public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
     public static final String CONQ_PREFIX = LAYER_2 + "[" + Colors.RED.toBukkit() + "Conquest" + LAYER_2 + "] " + LAYER_1;
+    public static final String OUTPOST_PREFIX = LAYER_2 + "[" + Colors.GOLD.toBukkit() + "Outpost" + LAYER_2 + "] " + LAYER_1;
 
     public static final String T_EPEARL_UNLOCKED = SUCCESS + "Your enderpearls have been unlocked";
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
