@@ -81,8 +81,7 @@ public final class ServerStateExecutor implements IServerStateExecutor {
 
             FMessage.printEotwMessage("All claims have been removed. Claiming is now disabled for the remainder of the map.");
             FMessage.printEotwMessage("The world border will now begin shrinking for the next "
-                    + Time.convertToRemaining(manager.getPlugin().getConfiguration().getEotwBorderShrinkRate() * 1000L)
-                    + ". Good luck!");
+                    + Time.convertToRemaining(manager.getPlugin().getConfiguration().getEotwBorderShrinkRate() * 1000L));
 
             new Scheduler(manager.getPlugin()).async(() -> {
                 manager.getPlugin().getFactionManager().getPlayerFactions().forEach(playerFaction -> {
