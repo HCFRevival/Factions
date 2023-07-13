@@ -136,7 +136,10 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
         }
 
         if (faction instanceof final ServerFaction serverFaction && !bypass) {
-            player.sendMessage(ChatColor.RED + "This land is owned by " + serverFaction.getDisplayName());
+            if (!serverFaction.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
+                player.sendMessage(ChatColor.RED + "This land is owned by " + serverFaction.getDisplayName());
+            }
+
             cancellable.setCancelled(true);
             return false;
         } else if (faction instanceof final PlayerFaction playerFaction) {
