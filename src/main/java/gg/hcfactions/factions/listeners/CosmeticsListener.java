@@ -2,16 +2,18 @@ package gg.hcfactions.factions.listeners;
 
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.KOTHCaptureEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
+import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.EntityType;
@@ -27,15 +29,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class CosmeticsListener implements Listener {
     @Getter Factions plugin;
+    @Getter public Random random;
     @Getter public Set<UUID> recentlyPerformedHeadLookup;
 
     public CosmeticsListener(Factions plugin) {
         this.plugin = plugin;
+        this.random = new Random();
         this.recentlyPerformedHeadLookup = Sets.newConcurrentHashSet();
     }
 
@@ -119,6 +122,45 @@ public final class CosmeticsListener implements Listener {
                 player.sendMessage(" ");
                 player.sendMessage(ChatColor.DARK_PURPLE + "The " + ChatColor.LIGHT_PURPLE + "Ender Dragon" + ChatColor.DARK_PURPLE + " has been slain by " + displayName);
                 player.sendMessage(" ");
+            }
+        }
+    }
+
+    @EventHandler
+    public void onCaptureEvent(KOTHCaptureEvent event) {
+        final KOTHEvent koth = event.getEvent();
+        final PlayerFaction capturingFaction = event.getCapturingFaction();
+        final List<Claim> eventClaims = plugin.getClaimManager().getClaimsByOwner(koth.getOwner());
+
+        if (eventClaims.isEmpty()) {
+            return;
+        }
+
+        final List<FireworkEffect.Type> effectTypes = List.of(FireworkEffect.Type.values());
+        final List<Color> colors = List.of(Color.AQUA, Color.RED, Color.GREEN, Color.YELLOW, Color.PURPLE, Color.FUCHSIA);
+
+        long fireworkDelay = 0;
+
+        for (PlayerFaction.Member onlineMember : capturingFaction.getOnlineMembers()) {
+            final Player onlinePlayer = onlineMember.getBukkit();
+
+            for (Claim eventClaim : eventClaims) {
+                if (onlinePlayer == null || !eventClaim.isInside(new PLocatable(onlinePlayer), false)) {
+                    continue;
+                }
+
+                final FireworkEffect.Type fireworkType = effectTypes.get(Math.abs(random.nextInt(effectTypes.size())));
+                final Color fireworkColor = colors.get(Math.abs(random.nextInt(colors.size())));
+                final FireworkEffect effect = FireworkEffect.builder()
+                        .with(fireworkType)
+                        .withColor(fireworkColor)
+                        .withFade(Color.SILVER)
+                        .withTrail()
+                        .withFlicker()
+                        .build();
+
+                new Scheduler(plugin).sync(() -> Worlds.spawnFirework(plugin, onlinePlayer.getLocation(), 2, 40, effect)).delay(20L * fireworkDelay).run();
+                fireworkDelay += 2;
             }
         }
     }

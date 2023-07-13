@@ -150,6 +150,15 @@ public final class ClaimManager implements IManager {
     }
 
     /**
+     * Returns an Immutable Collection of Claims matching the provided Faction UUID
+     * @param ownerId UUID
+     * @return Immutable Collection of Claims
+     */
+    public ImmutableList<Claim> getClaimsByOwner(UUID ownerId) {
+        return ImmutableList.copyOf(claimRepository.stream().filter(claim -> claim.getOwner().equals(ownerId)).collect(Collectors.toList()));
+    }
+
+    /**
      * Returns an Immutable Collection of Claims matching the provided Faction
      * @param faction Faction
      * @return Immutable Collection of Claims
