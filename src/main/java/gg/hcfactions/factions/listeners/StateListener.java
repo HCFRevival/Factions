@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -85,6 +86,28 @@ public final class StateListener implements Listener {
         }
     }
 
+    @EventHandler (priority = EventPriority.HIGHEST) /* Handles teleporting players out of Nether/End during EOTW Phase #2 */
+    public void onPlayerJoinTeleport(PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
+
+        if (player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            return;
+        }
+
+        if (!plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2)) {
+            return;
+        }
+
+        if (player.getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
+            return;
+        }
+
+        new Scheduler(plugin).sync(() -> {
+            player.teleport(plugin.getConfiguration().getEndExit());
+            player.sendMessage(FMessage.EOTW_PREFIX + "You have been escorted back to the Overworld");
+        }).run();
+    }
+
     @EventHandler /* Handles kicking fresh accounts from the server during EOTW Phase #2 */
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
@@ -101,7 +124,7 @@ public final class StateListener implements Listener {
 
             final int playtimeSeconds = (int)(holder.getStatistic(EStatisticType.PLAYTIME)/1000L);
 
-            if (playtimeSeconds < 300 && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+            if (playtimeSeconds < 1800 && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
                 player.kickPlayer(FMessage.ERROR + FError.P_CAN_NOT_CONNECT_EOTW.getErrorDescription());
             }
         });

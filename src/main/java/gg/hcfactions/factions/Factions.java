@@ -16,6 +16,7 @@ import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
 import gg.hcfactions.factions.models.timer.ETimerType;
+import gg.hcfactions.factions.outposts.OutpostManager;
 import gg.hcfactions.factions.player.PlayerManager;
 import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
@@ -54,6 +55,7 @@ public final class Factions extends AresPlugin {
     @Getter public DisplayManager displayManager;
     @Getter public WaypointManager waypointManager;
     @Getter public CrowbarManager crowbarManager;
+    @Getter public OutpostManager outpostManager;
 
     @Override
     public void onEnable() {
@@ -200,6 +202,7 @@ public final class Factions extends AresPlugin {
         displayManager = new DisplayManager(this);
         waypointManager = new WaypointManager(this);
         crowbarManager = new CrowbarManager(this);
+        outpostManager = new OutpostManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -215,6 +218,7 @@ public final class Factions extends AresPlugin {
         displayManager.onEnable();
         waypointManager.onEnable();
         crowbarManager.onEnable();
+        outpostManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -242,6 +246,7 @@ public final class Factions extends AresPlugin {
         registerListener(new NameplateListener(this));
         registerListener(new CosmeticsListener(this));
         registerListener(new CrowbarListener(this));
+        registerListener(new OutpostListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();
@@ -274,6 +279,7 @@ public final class Factions extends AresPlugin {
         displayManager.onDisable();
         waypointManager.onDisable();
         crowbarManager.onDisable();
+        outpostManager.onDisable();
 
         playerManager = null;
         factionManager = null;
@@ -286,5 +292,6 @@ public final class Factions extends AresPlugin {
         eventManager = null;
         displayManager = null;
         waypointManager = null;
+        outpostManager = null;
     }
 }

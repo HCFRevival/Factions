@@ -11,6 +11,7 @@ import com.mongodb.client.result.DeleteResult;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.claims.subclaims.impl.SubclaimExecutor;
 import gg.hcfactions.factions.manager.IManager;
+import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
@@ -171,6 +172,15 @@ public final class SubclaimManager implements IManager {
                 .filter(subclaim -> subclaim.isInside(location))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Returns an Immutable List of Subclaims that belong to the provided Player Faction
+     * @param faction Player Faction
+     * @return Immutable List of Subclaims
+     */
+    public ImmutableList<Subclaim> getSubclaimsByOwner(IFaction faction) {
+        return getSubclaimsByOwner(faction.getUniqueId());
     }
 
     /**

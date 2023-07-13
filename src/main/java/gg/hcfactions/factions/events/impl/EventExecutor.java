@@ -137,6 +137,17 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
+        if (generic instanceof final ConquestEvent conquestEvent) {
+            if (!conquestEvent.isActive()) {
+                promise.reject("Event is not active");
+                return;
+            }
+
+            conquestEvent.stopEvent();
+            promise.resolve();
+            return;
+        }
+
         promise.reject("Unknown event type");
     }
 

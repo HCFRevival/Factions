@@ -72,7 +72,8 @@ public final class ServerFaction implements IFaction, MongoDocument<ServerFactio
     public enum Flag {
         SAFEZONE(ChatColor.GREEN + "Safezone"),
         EVENT(ChatColor.DARK_AQUA + "Event"),
-        LANDMARK(ChatColor.LIGHT_PURPLE + "Landmark");
+        LANDMARK(ChatColor.LIGHT_PURPLE + "Landmark"),
+        OUTPOST(ChatColor.GOLD + "Outpost");
 
         @Getter public final String displayName;
 

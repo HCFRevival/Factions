@@ -373,7 +373,7 @@ public final class FactionCommand extends BaseCommand {
     @Syntax("<name> <flag>")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@sfactions")
-    public void onFactionFlagSet(Player player, String factionName, String flagName) {
+    public void onFactionFlagSet(Player player, String factionName, @Values("safezone|outpost|landmark|event") String flagName) {
         ServerFaction.Flag flag = ServerFaction.Flag.getFlagByName(flagName);
 
         if (flag == null) {
@@ -873,6 +873,104 @@ public final class FactionCommand extends BaseCommand {
                 player.sendMessage(FMessage.ERROR + "Failed to update rallypoint: " + s);
             }
         });
+    }
+
+    @Subcommand("outpost schedule")
+    @Description("Update the schedule for the next Outpost Restock")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<time>")
+    public void onOutpostSchedule(Player player, String durationName) {
+        plugin.getOutpostManager().getExecutor().rescheduleReset(player, durationName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Outpost Restock has been rescheduled successfully");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to reschedule Outpost Restock: " + s);
+            }
+        });
+    }
+
+    @Subcommand("outpost reset")
+    @Description("Reset Outpost Blocks")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("[material]")
+    public void onOutpostReset(Player player, @Optional String materialName) {
+        if (materialName != null) {
+            plugin.getOutpostManager().getExecutor().resetBlock(materialName, new Promise() {
+                @Override
+                public void resolve() {
+                    player.sendMessage(ChatColor.GREEN + "Outpost Block has been reset");
+                }
+
+                @Override
+                public void reject(String s) {
+                    player.sendMessage(ChatColor.RED + "Failed to reset Outpost Block: " + s);
+                }
+            });
+
+            return;
+        }
+
+        plugin.getOutpostManager().getExecutor().resetAllBlocks(new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Outpost Blocks have been reset");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to reset Outpost Blocks: " + s);
+            }
+        });
+    }
+
+    @Subcommand("outpost block")
+    @Description("Outpost Blocks")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<add|remove|list> [material]")
+    public void onOutpostBlock(Player player, @Values("add|remove|list") String modifier, @Optional String materialName) {
+        if (modifier.equalsIgnoreCase("list")) {
+            plugin.getOutpostManager().getExecutor().listBlocks(player);
+            return;
+        }
+
+        if (materialName == null) {
+            player.sendMessage(FMessage.ERROR + "Material name is required");
+            return;
+        }
+
+        if (modifier.equalsIgnoreCase("add")) {
+            plugin.getOutpostManager().getExecutor().addBlock(materialName, new Promise() {
+                @Override
+                public void resolve() {
+                    player.sendMessage(ChatColor.GREEN + "Outpost Block has been added");
+                }
+
+                @Override
+                public void reject(String s) {
+                    player.sendMessage(ChatColor.RED + "Failed to add Outpost Block: " + s);
+                }
+            });
+
+            return;
+        }
+
+        if (modifier.equalsIgnoreCase("remove")) {
+            plugin.getOutpostManager().getExecutor().removeBlock(materialName, new Promise() {
+                @Override
+                public void resolve() {
+                    player.sendMessage(ChatColor.GREEN + "Outpost Block has been removed");
+                }
+
+                @Override
+                public void reject(String s) {
+                    player.sendMessage(ChatColor.RED + "Failed to remove Outpost Block: " + s);
+                }
+            });
+        }
     }
 
     @CommandAlias("tl|fl")

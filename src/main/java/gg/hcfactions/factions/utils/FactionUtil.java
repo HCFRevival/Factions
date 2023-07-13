@@ -49,6 +49,10 @@ public final class FactionUtil {
         return false;
     }
 
+    public static boolean isPressurePlate(Material material) {
+        return material.name().endsWith("PRESSURE_PLATE");
+    }
+
     public static void cleanPlayer(Factions plugin, FactionPlayer factionPlayer) {
         final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
         final Player player = factionPlayer.getBukkit();

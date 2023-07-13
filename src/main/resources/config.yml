@@ -93,6 +93,9 @@ factions:
     # Time to wait between rally settings
     rally: 3
 
+    # Time to wait between Outpost restocks
+    outpost: 3600
+
 # Map spawn locations
 spawns:
   overworld:

@@ -68,6 +68,7 @@ public final class FConfig {
     @Getter public int tridentDuration;
     @Getter public int stuckDuration;
     @Getter public int rallyDuration;
+    @Getter public int outpostRestockDuration;
     @Getter public int freezeDuration;
     @Getter public int homeDuration;
     @Getter public int logoutDuration;
@@ -238,8 +239,10 @@ public final class FConfig {
 
         freezeDuration = conf.getInt("factions.timers.freeze");
         rallyDuration = conf.getInt("factions.timers.rally");
+        outpostRestockDuration = conf.getInt("factions.timers.outpost");
         plugin.getAresLogger().info("Faction Freeze Timer Duration: " + freezeDuration);
         plugin.getAresLogger().info("Faction Rally Timer Duration: " + rallyDuration);
+        plugin.getAresLogger().info("Outpost Restock Duration: " + outpostRestockDuration);
 
         overworldSpawn = Configs.parsePlayerLocation(conf, "spawns.overworld").getBukkitLocation();
         endSpawn = Configs.parsePlayerLocation(conf, "spawns.end_spawn").getBukkitLocation();

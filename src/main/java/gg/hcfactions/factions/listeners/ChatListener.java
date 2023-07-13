@@ -3,6 +3,8 @@ package gg.hcfactions.factions.listeners;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.stats.EStatisticType;
+import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.libs.bukkit.events.impl.ProcessedChatEvent;
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -22,6 +24,8 @@ public record ChatListener(@Getter Factions plugin) implements Listener {
         }
 
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+        final PlayerStatHolder stats = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
+        final long kills = (stats != null) ? stats.getStatistic(EStatisticType.KILL) : 0L;
 
         event.setCancelled(true);
 
@@ -30,12 +34,12 @@ public record ChatListener(@Getter Factions plugin) implements Listener {
 
             if (member != null) {
                 if (member.getChannel().equals(PlayerFaction.ChatChannel.PUBLIC) && !message.startsWith("@")) {
-                    event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, message, p)));
+                    event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, kills, message, p)));
                     return;
                 }
 
                 if (message.startsWith("!") && !member.getChannel().equals(PlayerFaction.ChatChannel.PUBLIC)) {
-                    event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, message.replaceFirst("!", ""), p)));
+                    event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, kills, message.replaceFirst("!", ""), p)));
                     return;
                 }
 
@@ -51,6 +55,6 @@ public record ChatListener(@Getter Factions plugin) implements Listener {
             }
         }
 
-        event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, message, p)));
+        event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, kills, message, p)));
     }
 }

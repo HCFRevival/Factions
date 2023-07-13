@@ -71,6 +71,7 @@ public final class ConquestZoneBuilder implements ICaptureEventBuilder<ConquestZ
                 getBuilder().sendMessage(ChatColor.GREEN + "Zone created");
                 parentEvent.getZones().add(conquestZone);
                 plugin.getEventManager().saveConquestEvent(parentEvent);
+                plugin.getEventManager().getBuilderManager().getBuilderRepository().removeIf(b -> b.getBuilderId().equals(builderId));
             }
 
             @Override

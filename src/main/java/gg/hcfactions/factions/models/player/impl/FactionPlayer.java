@@ -410,7 +410,16 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
 
         if (document.containsKey("timers")) {
             final List<Document> timerDocs = document.getList("timers", Document.class);
-            timerDocs.forEach(td -> timers.add(new FTimer().fromDocument(td)));
+
+            for (Document td : timerDocs) {
+                final FTimer timer = new FTimer().fromDocument(td);
+
+                if (timer.getType().equals(ETimerType.PROTECTION) && playerManager.getPlugin().getServerStateManager().isEOTW()) {
+                    continue;
+                }
+
+                timers.add(timer);
+            }
         }
 
         return this;
