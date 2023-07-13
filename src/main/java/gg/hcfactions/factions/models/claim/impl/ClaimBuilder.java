@@ -9,6 +9,7 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -94,6 +95,8 @@ public final class ClaimBuilder implements IClaimBuilder {
     @Override
     public void build(FailablePromise<Claim> promise) {
         final boolean hasBypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+        final boolean isEOTW = (manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
+                || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2));
 
         if (cornerA == null) {
             promise.reject("Corner A is not set");
@@ -107,6 +110,11 @@ public final class ClaimBuilder implements IClaimBuilder {
 
         if (!cornerA.getWorldName().equals(cornerB.getWorldName())) {
             promise.reject("Claim corners are not in the same world");
+            return;
+        }
+
+        if (isEOTW && !hasBypass) {
+            promise.reject("You can not claim during End of the World");
             return;
         }
 

@@ -19,6 +19,7 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
@@ -110,6 +111,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     @Override
     public void disbandFaction(Player player, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+        final boolean eotw = (manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
+                || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2));
+
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
             return;
@@ -126,7 +130,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction.isRaidable() && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+        if (faction.isRaidable() && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN) && !eotw) {
             promise.reject(FError.F_NOT_ALLOWED_RAIDABLE.getErrorDescription());
             return;
         }
@@ -414,6 +418,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     public void joinFaction(Player player, String factionName, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+        final boolean eotw = (manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
+                || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2));
 
         if (manager.getPlayerFactionByPlayer(player) != null) {
             promise.reject(FError.P_ALREADY_IN_FAC.getErrorDescription());
@@ -430,12 +436,12 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction.isFrozen() && !bypass) {
+        if (faction.isFrozen() && !eotw && !bypass) {
             promise.reject(FError.P_CAN_NOT_JOIN_FROZEN.getErrorDescription());
             return;
         }
 
-        if (faction.isRaidable() && !bypass) {
+        if (faction.isRaidable() && !eotw && !bypass) {
             promise.reject(FError.P_CAN_NOT_JOIN_RAIDABLE.getErrorDescription());
             return;
         }
@@ -445,7 +451,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        if (faction.isReinvited(player.getUniqueId()) && faction.getReinvites() <= 0 && !bypass) {
+        if (faction.isReinvited(player.getUniqueId()) && faction.getReinvites() <= 0 && !eotw && !bypass) {
             promise.reject(FError.P_CAN_NOT_JOIN_NO_REINV.getErrorDescription());
             return;
         }
@@ -492,11 +498,13 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         faction.getPendingInvites().remove(player.getUniqueId());
 
-        if (faction.isReinvited(player.getUniqueId())) {
-            faction.setReinvites(faction.getReinvites() - 1);
-            FMessage.printReinviteConsumed(faction, faction.getReinvites());
-        } else {
-            faction.getMemberHistory().add(player.getUniqueId());
+        if (!eotw) {
+            if (faction.isReinvited(player.getUniqueId())) {
+                faction.setReinvites(faction.getReinvites() - 1);
+                FMessage.printReinviteConsumed(faction, faction.getReinvites());
+            } else {
+                faction.getMemberHistory().add(player.getUniqueId());
+            }
         }
 
         final FactionPlayer factionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(player);
@@ -531,18 +539,20 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
         final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new PLocatable(player));
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+        final boolean eotw = (manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
+                || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2));
 
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
             return;
         }
 
-        if (faction.isRaidable() && !bypass) {
+        if (faction.isRaidable() && !eotw && !bypass) {
             promise.reject(FError.F_NOT_ALLOWED_RAIDABLE.getErrorDescription());
             return;
         }
 
-        if (faction.isFrozen() && !bypass) {
+        if (faction.isFrozen() && !eotw && !bypass) {
             promise.reject(FError.F_NOT_ALLOWED_WHILE_FROZEN.getErrorDescription());
             return;
         }
@@ -589,6 +599,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         final AccountService acs = (AccountService)manager.getPlugin().getService(AccountService.class);
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player.getUniqueId());
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+        final boolean eotw = (manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
+                || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2));
 
         if (acs == null) {
             promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
@@ -632,12 +644,12 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     return;
                 }
 
-                if (faction.isRaidable() && !bypass) {
+                if (faction.isRaidable() && !bypass && !eotw) {
                     promise.reject(FError.F_NOT_ALLOWED_RAIDABLE.getErrorDescription());
                     return;
                 }
 
-                if (faction.isFrozen() && !bypass) {
+                if (faction.isFrozen() && !bypass && !eotw) {
                     promise.reject(FError.F_NOT_ALLOWED_WHILE_FROZEN.getErrorDescription());
                     return;
                 }

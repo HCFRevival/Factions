@@ -1,8 +1,11 @@
 package gg.hcfactions.factions.state.impl;
 
+import gg.hcfactions.factions.FPermissions;
+import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.state.EServerState;
+import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.state.IServerStateExecutor;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.libs.base.consumer.Promise;
@@ -15,6 +18,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.util.List;
 
 @AllArgsConstructor
 public final class ServerStateExecutor implements IServerStateExecutor {
@@ -43,7 +48,7 @@ public final class ServerStateExecutor implements IServerStateExecutor {
 
             new Scheduler(manager.getPlugin()).async(dbs::clearDeathbans).run();
             manager.setCurrentState(state);
-            FMessage.printEotwMessage("All deathbans have been cleared");
+            FMessage.printEotwMessage("Deathbans have been cleared");
             promise.resolve();
             return;
         }
@@ -60,6 +65,15 @@ public final class ServerStateExecutor implements IServerStateExecutor {
                 }
             }
 
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
+
+                if (!player.getWorld().getEnvironment().equals(World.Environment.NORMAL) && !bypass) {
+                    player.sendMessage(FMessage.EOTW_PREFIX + "You have been escorted back to the Overworld");
+                    player.teleport(manager.getPlugin().getConfiguration().getEndExit());
+                }
+            });
+
             manager.setCurrentState(state);
 
             FMessage.printEotwMessage("All claims have been removed. Claiming is now disabled for the remainder of the map.");
@@ -67,14 +81,21 @@ public final class ServerStateExecutor implements IServerStateExecutor {
                     + Time.convertToRemaining(manager.getPlugin().getConfiguration().getEotwBorderShrinkRate() * 1000L)
                     + ". Good luck!");
 
+            new Scheduler(manager.getPlugin()).async(() -> {
+                manager.getPlugin().getFactionManager().getPlayerFactions().forEach(playerFaction -> {
+                    final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(playerFaction);
+                    final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(playerFaction);
+
+                    claims.forEach(claim -> manager.getPlugin().getClaimManager().deleteClaim(claim));
+                    subclaims.forEach(subclaim -> manager.getPlugin().getSubclaimManager().deleteSubclaim(subclaim));
+                });
+
+                new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
+            }).run();
+
             final YamlConfiguration conf = manager.getPlugin().loadConfiguration("config");
             conf.set("server_state.current_state", state.getSimpleName());
             manager.getPlugin().saveConfiguration("config", conf);
-
-            new Scheduler(manager.getPlugin()).async(() -> {
-                // TODO: Wipe claims
-                new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
-            }).run();
         }
     }
 }
