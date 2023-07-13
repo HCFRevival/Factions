@@ -6,6 +6,7 @@ import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.models.subclaim.Subclaim;
+import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.state.IServerStateExecutor;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.libs.base.consumer.Promise;
@@ -39,16 +40,18 @@ public final class ServerStateExecutor implements IServerStateExecutor {
         }
 
         if (state.equals(EServerState.EOTW_PHASE_1)) {
+            // clear deathbans
             final DeathbanService dbs = (DeathbanService) manager.getPlugin().getService(DeathbanService.class);
-            if (dbs == null) {
-                manager.getPlugin().getAresLogger().error("failed to locate deathban service while performing state transition");
-                promise.reject(FError.G_GENERIC_ERROR.getErrorDescription());
-                return;
+            if (dbs != null) {
+                new Scheduler(manager.getPlugin()).async(dbs::clearDeathbans).run();
             }
 
-            new Scheduler(manager.getPlugin()).async(dbs::clearDeathbans).run();
+            // remove pvp protection
+            manager.getPlugin().getPlayerManager().getPlayerRepository().forEach(factionPlayer -> factionPlayer.finishTimer(ETimerType.PROTECTION));
+
+            // set state and print messages
             manager.setCurrentState(state);
-            FMessage.printEotwMessage("Deathbans have been cleared");
+            FMessage.printEotwMessage("Deathbans have been cleared and PvP Protection has been removed");
             promise.resolve();
             return;
         }

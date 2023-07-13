@@ -16,6 +16,10 @@ public final class ServerStateManager implements IManager {
         this.plugin = plugin;
     }
 
+    public boolean isEOTW() {
+        return (currentState.equals(EServerState.EOTW_PHASE_1) || currentState.equals(EServerState.EOTW_PHASE_2));
+    }
+
     @Override
     public void onEnable() {
         currentState = plugin.getConfiguration().getInitialServerState();
