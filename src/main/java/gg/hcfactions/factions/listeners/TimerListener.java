@@ -286,7 +286,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      *
      * @param event EntityDamageEvent
      */
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.MONITOR)
     public void onDamage(EntityDamageEvent event) {
         if (event.isCancelled()) {
             return;
