@@ -57,6 +57,8 @@ public final class ServerStateExecutor implements IServerStateExecutor {
         }
 
         if (state.equals(EServerState.EOTW_PHASE_2)) {
+            final YamlConfiguration conf = manager.getPlugin().loadConfiguration("config");
+
             for (World world : Bukkit.getWorlds()) {
                 if (world.getEnvironment().equals(World.Environment.NORMAL)) {
                     final WorldBorder border = world.getWorldBorder();
@@ -83,21 +85,21 @@ public final class ServerStateExecutor implements IServerStateExecutor {
             FMessage.printEotwMessage("The world border will now begin shrinking for the next "
                     + Time.convertToRemaining(manager.getPlugin().getConfiguration().getEotwBorderShrinkRate() * 1000L));
 
-            new Scheduler(manager.getPlugin()).async(() -> {
-                manager.getPlugin().getFactionManager().getPlayerFactions().forEach(playerFaction -> {
-                    final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(playerFaction);
-                    final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(playerFaction);
-
-                    claims.forEach(claim -> manager.getPlugin().getClaimManager().deleteClaim(claim));
-                    subclaims.forEach(subclaim -> manager.getPlugin().getSubclaimManager().deleteSubclaim(subclaim));
-                });
-
-                new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
-            }).run();
-
-            final YamlConfiguration conf = manager.getPlugin().loadConfiguration("config");
             conf.set("server_state.current_state", state.getSimpleName());
             manager.getPlugin().saveConfiguration("config", conf);
+
+            new Scheduler(manager.getPlugin()).async(() -> manager.getPlugin().getFactionManager().getPlayerFactions().forEach(playerFaction -> {
+                final List<Claim> claims = manager.getPlugin().getClaimManager().getClaimsByOwner(playerFaction);
+                final List<Subclaim> subclaims = manager.getPlugin().getSubclaimManager().getSubclaimsByOwner(playerFaction);
+
+                claims.forEach(claim -> manager.getPlugin().getClaimManager().deleteClaim(claim));
+                claims.forEach(manager.getPlugin().getClaimManager().getClaimRepository()::remove);
+
+                subclaims.forEach(subclaim -> manager.getPlugin().getSubclaimManager().deleteSubclaim(subclaim));
+                subclaims.forEach(manager.getPlugin().getSubclaimManager().getSubclaimRepository()::remove);
+
+                new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
+            })).run();
         }
     }
 }
