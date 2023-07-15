@@ -29,6 +29,7 @@ import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.connect.impl.redis.Redis;
 import gg.hcfactions.libs.bukkit.AresPlugin;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
+import gg.hcfactions.libs.bukkit.services.impl.alts.AltService;
 import gg.hcfactions.libs.bukkit.services.impl.automod.AutomodService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
@@ -183,6 +184,7 @@ public final class Factions extends AresPlugin {
         final PunishmentService punishmentService = new PunishmentService(this, configuration.getMongoDatabaseName());
         final AutomodService automodService = new AutomodService(this);
         final ReportService reportService = new ReportService(this);
+        final AltService altService = new AltService(this);
 
         // register services
         registerService(accountService);
@@ -194,6 +196,7 @@ public final class Factions extends AresPlugin {
         registerService(punishmentService);
         registerService(automodService);
         registerService(reportService);
+        registerService(altService);
         startServices();
 
         // initialize gson

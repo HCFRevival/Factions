@@ -32,6 +32,7 @@ public interface IFactionExecutor {
     void setFactionDisplayName(Player player, String factionName, String displayName, Promise promise);
     void setFactionBuffer(Player player, String factionName, EClaimBufferType bufferType, int size, Promise promise);
     void setFactionReinvites(Player player, String factionName, int reinvites, Promise promise);
+    void setFactionReinvitesBulk(Player player, int reinvites, Promise promise);
     void setFactionAnnouncement(Player player, String announcement, Promise promise);
     void setFactionRally(Player player, Promise promise);
     void promotePlayer(Player player, String username, Promise promise);

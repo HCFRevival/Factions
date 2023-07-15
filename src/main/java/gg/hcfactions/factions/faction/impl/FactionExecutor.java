@@ -1118,6 +1118,15 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
+    public void setFactionReinvitesBulk(Player player, int reinvites, Promise promise) {
+        manager.getPlayerFactions().forEach(pf -> {
+            pf.setReinvites(reinvites);
+            FMessage.printReinviteUpdate(pf, reinvites);
+            promise.resolve();
+        });
+    }
+
+    @Override
     public void setFactionAnnouncement(Player player, String announcement, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);

@@ -452,6 +452,23 @@ public final class FactionCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("setinv all")
+    @Description("Update re-invites for all Server Factions")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onFactionReinviteBulkUpdate(Player player, int reinviteAmount) {
+        plugin.getFactionManager().getExecutor().setFactionReinvitesBulk(player, reinviteAmount, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Re-invites have been bulk updated");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to bulk update re-invites: " + s);
+            }
+        });
+    }
+
     @Subcommand("setinv|setreinv")
     @Description("Update a faction's reinvites")
     @Syntax("<name> <amount>")
