@@ -26,6 +26,7 @@ import gg.hcfactions.factions.utils.FRecipes;
 import gg.hcfactions.factions.waypoints.WaypointManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
+import gg.hcfactions.libs.base.connect.impl.redis.Redis;
 import gg.hcfactions.libs.bukkit.AresPlugin;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.automod.AutomodService;
@@ -33,6 +34,7 @@ import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.services.impl.reports.ReportService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -160,8 +162,13 @@ public final class Factions extends AresPlugin {
 
         // db init
         final Mongo mdb = new Mongo(configuration.getMongoUri(), getAresLogger());
+        final Redis redis = new Redis(configuration.getRedisUri(), getAresLogger());
+
         mdb.openConnection();
+        redis.openConnection();
+
         registerConnectable(mdb);
+        registerConnectable(redis);
 
         // protocol lib init
         registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
@@ -175,6 +182,7 @@ public final class Factions extends AresPlugin {
         final SyncService syncService = new SyncService(this, configuration.getMongoDatabaseName());
         final PunishmentService punishmentService = new PunishmentService(this, configuration.getMongoDatabaseName());
         final AutomodService automodService = new AutomodService(this);
+        final ReportService reportService = new ReportService(this);
 
         // register services
         registerService(accountService);
@@ -185,7 +193,11 @@ public final class Factions extends AresPlugin {
         registerService(syncService);
         registerService(punishmentService);
         registerService(automodService);
+        registerService(reportService);
         startServices();
+
+        // initialize gson
+        registerGson();
 
         // declare managers
         playerManager = new PlayerManager(this);
