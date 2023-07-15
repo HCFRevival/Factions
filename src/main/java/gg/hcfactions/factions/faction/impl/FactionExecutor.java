@@ -1122,8 +1122,9 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         manager.getPlayerFactions().forEach(pf -> {
             pf.setReinvites(reinvites);
             FMessage.printReinviteUpdate(pf, reinvites);
-            promise.resolve();
         });
+
+        promise.resolve();
     }
 
     @Override
