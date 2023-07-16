@@ -818,7 +818,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         final IFaction owner = plugin.getFactionManager().getFactionById(inside.getOwner());
 
-        if (owner == null) {
+        if (owner == null || owner.getUniqueId() == null) {
             return;
         }
 
