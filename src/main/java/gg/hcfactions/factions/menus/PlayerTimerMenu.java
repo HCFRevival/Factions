@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
+import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.PaginatedMenu;
@@ -56,6 +57,11 @@ public final class PlayerTimerMenu extends PaginatedMenu<IFactionPlayer> {
         final ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
         final SkullMeta meta = (SkullMeta) item.getItemMeta();
         final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(factionPlayer.getUniqueId());
+        final FTimer timer = factionPlayer.getTimer(timerType);
+
+        if (timer == null) {
+            return null;
+        }
 
         if (meta != null) {
             final List<String> lore = Lists.newArrayList();

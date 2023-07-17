@@ -514,7 +514,7 @@ public final class EventManager implements IManager {
     }
 
     public Optional<IEvent> getEvent(ServerFaction owningFaction) {
-        return eventRepository.stream().filter(e -> e.getOwner().equals(owningFaction.getUniqueId())).findAny();
+        return eventRepository.stream().filter(e -> e.getOwner() != null && e.getOwner().equals(owningFaction.getUniqueId())).findAny();
     }
 
     public ImmutableList<IScheduledEvent> getEventsThatShouldStart() {
