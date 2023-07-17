@@ -98,6 +98,8 @@ public final class ServerStateExecutor implements IServerStateExecutor {
                 subclaims.forEach(subclaim -> manager.getPlugin().getSubclaimManager().deleteSubclaim(subclaim));
                 subclaims.forEach(manager.getPlugin().getSubclaimManager().getSubclaimRepository()::remove);
 
+                playerFaction.setHomeLocation(null);
+
                 new Scheduler(manager.getPlugin()).sync(promise::resolve).run();
             })).run();
         }
