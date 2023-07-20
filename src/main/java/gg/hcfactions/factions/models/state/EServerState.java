@@ -8,7 +8,8 @@ public enum EServerState {
     SOTW("Start of the World", "sotw"),
     NORMAL("Normal", "normal"),
     EOTW_PHASE_1("End of the World: Phase #1", "eotw1"),
-    EOTW_PHASE_2("End of the World: Phase #2", "eotw2");
+    EOTW_PHASE_2("End of the World: Phase #2", "eotw2"),
+    KITMAP("Kit Map", "kitmap");
 
     @Getter public final String displayName;
     @Getter public final String simpleName;
