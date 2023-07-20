@@ -202,6 +202,19 @@ lunar_api:
   # If set to true we will use the legacy Lunar API to send packets to Lunar Clients
   use_legacy: true
 
+# Lives configuration
+lives:
+  # If the rank is present in the Rank Service, players who have the listed ranks will receive the
+  # defined amount of lives when they connect to the server for the first time in a map
+  first_join_lives:
+    silver: 1
+    gold: 3
+    sapphire: 5
+    emerald: 10
+    ruby: 25
+    famous: 5
+    media: 2
+
 # Custom crafting recipes
 custom_recipes:
   saddle: true

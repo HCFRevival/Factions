@@ -8,11 +8,10 @@ import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.utils.FactionUtil;
-import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
-import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
+import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -119,6 +118,15 @@ public final class PlayerListener implements Listener {
         if (!player.hasPlayedBefore() || factionPlayer.isResetOnJoin()) {
             FactionUtil.cleanPlayer(plugin, factionPlayer);
             player.teleport(plugin.getConfiguration().getOverworldSpawn());
+
+            if (!player.hasPlayedBefore() && !plugin.getServerStateManager().getCurrentState().equals(EServerState.KITMAP)) {
+                // give first-time lives if they're connecting for the first time this map and it's not a kitmap
+                final DeathbanService deathbanService = (DeathbanService) plugin.getService(DeathbanService.class);
+
+                if (deathbanService != null) {
+                    deathbanService.giveFirstTimeLives(player);
+                }
+            }
 
             if (factionPlayer.isResetOnJoin()) {
                 factionPlayer.setResetOnJoin(false);

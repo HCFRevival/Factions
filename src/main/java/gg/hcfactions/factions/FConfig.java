@@ -1,5 +1,6 @@
 package gg.hcfactions.factions;
 
+import com.google.common.collect.Maps;
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.stats.StatsConfig;
 import gg.hcfactions.factions.utils.FRecipes;
@@ -12,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class FConfig {
@@ -120,6 +122,9 @@ public final class FConfig {
     // lunar
     @Getter public boolean useLegacyLunarAPI;
 
+    // lives
+    @Getter public Map<String, Integer> firstJoinLives;
+
     // custom crafting recipes
     @Getter public boolean saddleRecipeEnabled;
     @Getter public boolean heartOfTheSeaRecipeEnabled;
@@ -149,7 +154,8 @@ public final class FConfig {
                 normalMaxDeathbanDuration,
                 minDeathbanDuration,
                 lifeUseDelay,
-                shopUrl
+                shopUrl,
+                firstJoinLives
         );
     }
 
@@ -325,6 +331,18 @@ public final class FConfig {
 
         useLegacyLunarAPI = conf.getBoolean("lunar_api.use_legacy");
         plugin.getAresLogger().info("Use Legacy Lunar API: " + useLegacyLunarAPI);
+
+        if (conf.get("lives.first_join_lives") != null) {
+            final Map<String, Integer> res = Maps.newHashMap();
+
+            for (String rankName : Objects.requireNonNull(conf.getConfigurationSection("lives.first_join_lives")).getKeys(false)) {
+                final int amount = conf.getInt("lives.first_join_lives." + rankName);
+                res.put(rankName, amount);
+            }
+
+            firstJoinLives = res;
+            plugin.getAresLogger().info("First-join Lives Found: " + firstJoinLives.size());
+        }
 
         saddleRecipeEnabled = conf.getBoolean("custom_recipes.saddle");
         heartOfTheSeaRecipeEnabled = conf.getBoolean("custom_recipes.heart_of_the_sea");
