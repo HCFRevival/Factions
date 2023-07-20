@@ -109,7 +109,7 @@ public final class ConquestTickingTask {
                     });
                 }
             }
-        }).repeat(0L, 20L).run();
+        }).repeat(0L, 10L).run();
     }
 
     public void stop() {
