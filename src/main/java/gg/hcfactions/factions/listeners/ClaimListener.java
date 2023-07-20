@@ -526,6 +526,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 if (    block.getType().equals(Material.LEVER)
                         || block.getType().equals(Material.CHEST)
                         || block.getType().equals(Material.TRAPPED_CHEST)
+                        || block.getType().equals(Material.ENDER_CHEST)
                         || block.getType().equals(Material.COMPOSTER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
