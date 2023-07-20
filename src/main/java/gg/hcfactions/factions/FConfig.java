@@ -37,7 +37,8 @@ public final class FConfig {
 
     // faction power
     @Getter public double playerPowerValue;
-    @Getter public double powerCap;
+    @Getter public double powerMax;
+    @Getter public double powerMin;
     @Getter public int powerTickInterval;
     @Getter public double netherPowerLossReduction;
     @Getter public double endPowerLossReduction;
@@ -208,13 +209,15 @@ public final class FConfig {
         plugin.getAresLogger().info("Diver Class Limit: " + diverClassLimit);
         plugin.getAresLogger().info("Miner Class Limit: " + minerClassLimit);
 
-        powerCap = conf.getDouble("factions.power.max_power");
+        powerMax = conf.getDouble("factions.power.max_power");
+        powerMin = conf.getDouble("factions.power.min_power");
         playerPowerValue = conf.getDouble("factions.power.player_power_value");
         powerTickInterval = conf.getInt("factions.power.power_tick_interval");
         netherPowerLossReduction = conf.getDouble("factions.power.power_loss_reductions.nether");
         endPowerLossReduction = conf.getDouble("factions.power.power_loss_reductions.end");
         eventPowerLossReduction = conf.getDouble("factions.power.power_loss_reductions.event");
-        plugin.getAresLogger().info("Max Faction Power: " + powerCap);
+        plugin.getAresLogger().info("Min Faction Power: " + powerMin);
+        plugin.getAresLogger().info("Max Faction Power: " + powerMax);
         plugin.getAresLogger().info("Player Power Value: " + playerPowerValue);
         plugin.getAresLogger().info("Power Tick Interval (Base): " + powerTickInterval);
         plugin.getAresLogger().info("Nether Power Loss Reduction: " + netherPowerLossReduction);

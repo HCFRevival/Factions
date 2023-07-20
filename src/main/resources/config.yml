@@ -45,8 +45,9 @@ factions:
 
   # Faction power values
   power:
-    # Maximum amount of power a faction can have
+    # Min/max amount of power a faction can have
     max_power: 6.0
+    min_power: 1.10
 
     # Power per player (n * onlinePlayers) = max power
     player_power_value: 0.4
