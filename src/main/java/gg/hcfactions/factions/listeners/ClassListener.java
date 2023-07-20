@@ -258,6 +258,7 @@ public final class ClassListener implements Listener {
     @EventHandler
     public void onSeaCall(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
+        final UUID uniqueId = player.getUniqueId();
         final World world = player.getWorld();
 
         if (event.getItem() == null) {
@@ -338,6 +339,7 @@ public final class ClassListener implements Listener {
         });
 
         diver.getSeaCallCooldowns().put(player.getUniqueId(), (Time.now() + (diver.getSeaCallCooldown()*1000L)));
+        new Scheduler(plugin).sync(() -> diver.getSeaCallCooldowns().remove(uniqueId)).delay(diver.getSeaCallCooldown()*20L).run();
     }
 
     @EventHandler
