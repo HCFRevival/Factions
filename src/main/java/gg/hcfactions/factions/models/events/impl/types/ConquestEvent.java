@@ -78,7 +78,7 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
         // completely wipe scoreboard entries this event could be consuming
         plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
             if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                for (int i = 19; i < 23; i++) {
+                for (int i = 19; i < 24; i++) {
                     p.getScoreboard().removeLine(i);
                 }
             }
