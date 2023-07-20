@@ -50,7 +50,8 @@ public final class WaypointManager implements IManager {
 
     @Override
     public void onDisable() {
-        waypointRepository.forEach(wp -> wp.hideAll(plugin.getConfiguration().useLegacyLunarAPI));
+        // TODO: Triggers too late, causes an error on shutdown
+        // waypointRepository.forEach(wp -> wp.hideAll(plugin.getConfiguration().useLegacyLunarAPI));
     }
 
     /**
