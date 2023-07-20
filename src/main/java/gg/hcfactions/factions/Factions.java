@@ -12,6 +12,7 @@ import gg.hcfactions.factions.displays.DisplayManager;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.items.StarterRod;
+import gg.hcfactions.factions.items.Sugarcube;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
@@ -262,11 +263,14 @@ public final class Factions extends AresPlugin {
         registerListener(new CosmeticsListener(this));
         registerListener(new CrowbarListener(this));
         registerListener(new OutpostListener(this));
+        registerListener(new HorseListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();
 
         // starter kit
+        customItemService.registerNewItem(new Sugarcube());
+
         if (configuration.starterKitEnabled) {
             customItemService.registerNewItem(new StarterRod());
         }
