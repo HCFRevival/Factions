@@ -35,4 +35,9 @@ public final class Sugarcube implements ICustomItem {
     public Map<Enchantment, Integer> getEnchantments() {
         return Maps.newHashMap();
     }
+
+    @Override
+    public boolean isSoulbound() {
+        return false;
+    }
 }
