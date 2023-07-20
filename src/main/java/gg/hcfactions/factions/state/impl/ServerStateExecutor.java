@@ -85,7 +85,7 @@ public final class ServerStateExecutor implements IServerStateExecutor {
             FMessage.printEotwMessage("The world border will now begin shrinking for the next "
                     + Time.convertToRemaining(manager.getPlugin().getConfiguration().getEotwBorderShrinkRate() * 1000L));
 
-            conf.set("server_state.current_state", state.getSimpleName());
+            conf.set("state.current", state.getSimpleName());
             manager.getPlugin().saveConfiguration("config", conf);
 
             new Scheduler(manager.getPlugin()).async(() -> manager.getPlugin().getFactionManager().getPlayerFactions().forEach(playerFaction -> {
