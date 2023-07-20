@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * TODO: Migrate this to CommandX
+ */
 public final class HorseListener implements Listener {
     @Getter public final Factions plugin;
     private final Map<UUID, Long> sugarcubeCooldowns;
@@ -140,7 +143,7 @@ public final class HorseListener implements Listener {
         }
 
         if (horse.getJumpStrength() < 1.0) {
-            horse.setJumpStrength(Math.min(horse.getJumpStrength() + 0.2, 100.0));
+            horse.setJumpStrength(Math.min(horse.getJumpStrength() + 0.1, 1.0));
             player.sendMessage(ChatColor.GREEN + "Jump Strength Upgrade" + ChatColor.RESET + ": " + String.format("%.2f", horse.getJumpStrength()));
         }
 
