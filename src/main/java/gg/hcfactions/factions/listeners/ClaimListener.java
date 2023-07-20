@@ -506,9 +506,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 if (    block.getType().equals(Material.LEVER)
                         || block.getType().equals(Material.CHEST)
                         || block.getType().equals(Material.TRAPPED_CHEST)
+                        || block.getType().equals(Material.COMPOSTER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
+                        || block.getType().name().endsWith("_TRAPDOOR")
                 ) {
                     return;
                 }
@@ -524,9 +526,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 if (    block.getType().equals(Material.LEVER)
                         || block.getType().equals(Material.CHEST)
                         || block.getType().equals(Material.TRAPPED_CHEST)
+                        || block.getType().equals(Material.COMPOSTER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
+                        || block.getType().name().endsWith("_TRAPDOOR")
                 ) {
                     return;
                 }
@@ -539,8 +543,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             }
 
             if (sf.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                // allow players to interact w/ crafting benches inside safezone claims
-                if (action.equals(Action.RIGHT_CLICK_BLOCK) && block.getType().equals(Material.CRAFTING_TABLE)) {
+                if (
+                        action.equals(Action.RIGHT_CLICK_BLOCK)
+                        && (block.getType().equals(Material.CRAFTING_TABLE)
+                        || block.getType().equals(Material.ENDER_CHEST))) {
+
                     return;
                 }
 
@@ -814,7 +821,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         final IFaction owner = plugin.getFactionManager().getFactionById(inside.getOwner());
 
-        if (owner == null) {
+        if (owner == null || owner.getUniqueId() == null) {
             return;
         }
 

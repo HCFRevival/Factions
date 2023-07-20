@@ -144,7 +144,7 @@ public record ShieldListener(@Getter Factions plugin) implements Listener {
 
                     final ServerFaction serverFaction = (ServerFaction) faction;
 
-                    if (serverFaction.getFlag().equals(ServerFaction.Flag.EVENT)) {
+                    if (serverFaction.getFlag().equals(ServerFaction.Flag.EVENT) || serverFaction.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
                         combatZones.add(claim);
                     }
                 }

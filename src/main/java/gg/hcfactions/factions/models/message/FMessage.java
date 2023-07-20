@@ -284,10 +284,10 @@ public final class FMessage {
         }
 
         if (faction.getMember(receiver.getUniqueId()) != null) {
-            return ChatColor.DARK_GREEN + "[" + faction.getName() + "]" + " " + ChatColor.BLUE + "[" + kills + "]" + " " + ChatColor.RESET + displayName + ChatColor.RESET + ": " + message;
+            return ChatColor.DARK_GREEN + "[" + faction.getName() + "]" + ChatColor.BLUE + "[" + kills + "]" + ChatColor.RESET + displayName + ChatColor.RESET + ": " + message;
         }
 
-        return ChatColor.GOLD + "[" + ChatColor.YELLOW + faction.getName() + ChatColor.GOLD + "]" + " " + ChatColor.BLUE + "[" + kills + "]" + " " + ChatColor.RESET + displayName + ChatColor.RESET + ": " + message;
+        return ChatColor.RED + "[" + faction.getName() + "]" + ChatColor.BLUE + "[" + kills + "]" + ChatColor.RESET + displayName + ChatColor.RESET + ": " + message;
     }
 
     public static String getFactionFormat(String displayName, String message) {

@@ -62,7 +62,7 @@ public final class FactionUtil {
 
         factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType(), true));
 
-        if (protDuration > 0) {
+        if (protDuration > 0 && !plugin.getServerStateManager().isEOTW()) {
             factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
         }
 

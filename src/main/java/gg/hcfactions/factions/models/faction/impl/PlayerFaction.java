@@ -259,7 +259,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
      */
     public double getMaxDtr() {
         final double total = manager.getPlugin().getConfiguration().getPlayerPowerValue() * members.size();
-        return Math.min(total, manager.getPlugin().getConfiguration().getPowerCap());
+        return Math.min(Math.max(total, manager.getPlugin().getConfiguration().getPowerMin()), manager.getPlugin().getConfiguration().getPowerMax());
     }
 
     @Override

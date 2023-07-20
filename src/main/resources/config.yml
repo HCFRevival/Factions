@@ -45,8 +45,9 @@ factions:
 
   # Faction power values
   power:
-    # Maximum amount of power a faction can have
+    # Min/max amount of power a faction can have
     max_power: 6.0
+    min_power: 1.10
 
     # Power per player (n * onlinePlayers) = max power
     player_power_value: 0.4
@@ -200,6 +201,19 @@ starter_kit:
 lunar_api:
   # If set to true we will use the legacy Lunar API to send packets to Lunar Clients
   use_legacy: true
+
+# Lives configuration
+lives:
+  # If the rank is present in the Rank Service, players who have the listed ranks will receive the
+  # defined amount of lives when they connect to the server for the first time in a map
+  first_join_lives:
+    silver: 1
+    gold: 3
+    sapphire: 5
+    emerald: 10
+    ruby: 25
+    famous: 5
+    media: 2
 
 # Custom crafting recipes
 custom_recipes:

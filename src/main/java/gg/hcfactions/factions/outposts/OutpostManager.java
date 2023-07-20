@@ -269,6 +269,7 @@ public final class OutpostManager implements IManager {
         post.add(block.getMaterial().name());
 
         conf.set("blocks", post);
+        plugin.saveConfiguration("outposts", conf);
     }
 
     /**
@@ -286,5 +287,6 @@ public final class OutpostManager implements IManager {
         existing.remove(block.getMaterial().name());
 
         conf.set("blocks", existing);
+        plugin.saveConfiguration("outposts", conf);
     }
 }

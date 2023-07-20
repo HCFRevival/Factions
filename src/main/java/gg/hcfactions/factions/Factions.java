@@ -12,6 +12,7 @@ import gg.hcfactions.factions.displays.DisplayManager;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.items.StarterRod;
+import gg.hcfactions.factions.items.Sugarcube;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
@@ -26,13 +27,16 @@ import gg.hcfactions.factions.utils.FRecipes;
 import gg.hcfactions.factions.waypoints.WaypointManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
+import gg.hcfactions.libs.base.connect.impl.redis.Redis;
 import gg.hcfactions.libs.bukkit.AresPlugin;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
+import gg.hcfactions.libs.bukkit.services.impl.alts.AltService;
 import gg.hcfactions.libs.bukkit.services.impl.automod.AutomodService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.services.impl.reports.ReportService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -160,8 +164,13 @@ public final class Factions extends AresPlugin {
 
         // db init
         final Mongo mdb = new Mongo(configuration.getMongoUri(), getAresLogger());
+        final Redis redis = new Redis(configuration.getRedisUri(), getAresLogger());
+
         mdb.openConnection();
+        redis.openConnection();
+
         registerConnectable(mdb);
+        registerConnectable(redis);
 
         // protocol lib init
         registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
@@ -175,6 +184,8 @@ public final class Factions extends AresPlugin {
         final SyncService syncService = new SyncService(this, configuration.getMongoDatabaseName());
         final PunishmentService punishmentService = new PunishmentService(this, configuration.getMongoDatabaseName());
         final AutomodService automodService = new AutomodService(this);
+        final ReportService reportService = new ReportService(this);
+        final AltService altService = new AltService(this);
 
         // register services
         registerService(accountService);
@@ -185,7 +196,12 @@ public final class Factions extends AresPlugin {
         registerService(syncService);
         registerService(punishmentService);
         registerService(automodService);
+        registerService(reportService);
+        registerService(altService);
         startServices();
+
+        // initialize gson
+        registerGson();
 
         // declare managers
         playerManager = new PlayerManager(this);
@@ -247,11 +263,14 @@ public final class Factions extends AresPlugin {
         registerListener(new CosmeticsListener(this));
         registerListener(new CrowbarListener(this));
         registerListener(new OutpostListener(this));
+        registerListener(new HorseListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();
 
         // starter kit
+        customItemService.registerNewItem(new Sugarcube());
+
         if (configuration.starterKitEnabled) {
             customItemService.registerNewItem(new StarterRod());
         }
