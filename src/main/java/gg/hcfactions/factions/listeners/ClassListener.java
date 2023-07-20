@@ -326,7 +326,7 @@ public final class ClassListener implements Listener {
                 if (faction.isMember(worldPlayer)) {
                     displayName = ChatColor.DARK_GREEN + "[" + faction.getName() + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
                 } else {
-                    displayName = FMessage.LAYER_2 + "[" + FMessage.LAYER_1 + faction.getName() + FMessage.LAYER_2 + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
+                    displayName = ChatColor.RED + "[" + faction.getName() + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
                 }
             }
 
