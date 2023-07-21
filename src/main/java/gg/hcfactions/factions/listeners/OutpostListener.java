@@ -48,7 +48,7 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
 
             // set to placeholder block
             block.breakNaturally(player.getInventory().getItemInMainHand());
-            new Scheduler(plugin).sync(() -> block.setType(Material.COBBLESTONE)).run();
+            new Scheduler(plugin).sync(() -> block.setType(Material.COBBLED_DEEPSLATE)).run();
 
             // add to mined blocks so it can be reset shortly
             ob.getMinedBlocks().add(new BLocatable(block));
