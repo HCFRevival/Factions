@@ -70,16 +70,8 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        // special entities first, default values at the bottom
-        if (entity.getType().equals(EntityType.CREEPER)) {
-            final int roll = Math.abs(plugin.getOutpostManager().getRandom().nextInt(100));
-            final Creeper creeper = (Creeper)entity;
-
-            if (roll <= 10) {
-                creeper.setPowered(true);
-                creeper.setFuseTicks(10);
-                creeper.setExplosionRadius(3);
-            }
+        if (entity.getType().equals(EntityType.ENDERMAN)) {
+            return;
         }
 
         if (entity.getEquipment() != null) {
