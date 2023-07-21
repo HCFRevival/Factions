@@ -264,6 +264,7 @@ public final class Factions extends AresPlugin {
         registerListener(new CrowbarListener(this));
         registerListener(new OutpostListener(this));
         registerListener(new HorseListener(this));
+        registerListener(new ShopListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();

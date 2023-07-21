@@ -1,6 +1,5 @@
 package gg.hcfactions.factions.listeners;
 
-import com.google.common.collect.ImmutableList;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -11,10 +10,7 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
