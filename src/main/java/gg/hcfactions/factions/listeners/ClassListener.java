@@ -130,21 +130,21 @@ public final class ClassListener implements Listener {
         }
     }
 
-    @EventHandler (priority = EventPriority.MONITOR)
-    public void onArcherTag(ProjectileHitEvent event) {
-        if (!(event.getEntity() instanceof final SpectralArrow arrow)) {
-            return;
-        }
-
-        if (!(event.getEntity().getShooter() instanceof final Player shooter)) {
-            return;
-        }
-
-        if (!(event.getHitEntity() instanceof final LivingEntity damaged)) {
-            return;
-        }
-
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onArcherTag(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getDamager() instanceof final SpectralArrow arrow)) {
+            return;
+        }
+
+        if (!(arrow.getShooter() instanceof final Player shooter)) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final LivingEntity damaged)) {
             return;
         }
 
