@@ -369,70 +369,6 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
                 FMessage.printStaffDeathMessage(staff, event.getLogger().getOwnerUsername(), event.getLogger().getBukkitEntity().getLocation()));
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
-    public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
-
-        final CombatLogger logger = event.getLogger();
-        final Player killer = event.getKiller();
-        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(logger.getOwnerId());
-        final String prefix = ChatColor.RED + "RIP:" + ChatColor.RESET;
-        final String slainUsername = ChatColor.DARK_RED + "(Combat-Logger) " + ChatColor.GOLD + logger.getOwnerUsername() + ChatColor.RESET;
-        final ChatColor cA = ChatColor.RED;
-        final ChatColor cB = ChatColor.BLUE;
-        String deathMessage = prefix + " " + slainUsername + cA + " died";
-
-        if (event.getKiller() != null) {
-            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killer.getUniqueId());
-            final int killerKillCount = (int)(killerStats != null ? killerStats.getStatistic(EStatisticType.KILL) : 0);
-
-            String hand = ChatColor.RESET + "their fists";
-
-            if (!killer.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
-                if (killer.getInventory().getItemInMainHand().getItemMeta() != null && killer.getInventory().getItemInMainHand().getItemMeta().hasDisplayName()) {
-                    hand = ChatColor.GRAY + "[" + killer.getInventory().getItemInMainHand().getItemMeta().getDisplayName() + ChatColor.GRAY + "]";
-                } else {
-                    hand = ChatColor.RESET + StringUtils.capitalize(killer.getItemInHand().getType().name().replace("_", " ").toLowerCase());
-                }
-            }
-
-            deathMessage = prefix + " " + slainUsername + cA + " slain by " + ChatColor.GOLD + killer.getName() + ChatColor.BLUE + "[" + killerKillCount + "]" + cA + " while using " + hand;
-        }
-
-        Bukkit.broadcastMessage(deathMessage);
-        logger.getBukkitEntity().getWorld().strikeLightningEffect(logger.getBukkitEntity().getLocation());
-
-        if (faction != null) {
-            final FactionMemberDeathEvent memberDeathEvent = new FactionMemberDeathEvent(logger.getOwnerId(), logger.getOwnerUsername(), faction,
-                    new PLocatable(
-                            logger.getBukkitEntity().getLocation().getWorld().getName(),
-                            logger.getBukkitEntity().getLocation().getX(),
-                            logger.getBukkitEntity().getLocation().getY(),
-                            logger.getBukkitEntity().getLocation().getZ(),
-                            logger.getBukkitEntity().getLocation().getYaw(),
-                            logger.getBukkitEntity().getLocation().getPitch()),
-                    1.0, plugin.getConfiguration().getFreezeDuration());
-
-            Bukkit.getPluginManager().callEvent(memberDeathEvent);
-
-            if (!(plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1) || plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2))) {
-                faction.setDtr(Math.max((faction.getDtr() - memberDeathEvent.getSubtractedDTR()), -0.99));
-                faction.addTimer(new FTimer(ETimerType.FREEZE, memberDeathEvent.getFreezeDuration()));
-            }
-        }
-
-        new Scheduler(plugin).async(() -> {
-            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().loadPlayer(Filters.eq("uuid", logger.getOwnerId().toString()), false);
-
-            if (factionPlayer != null) {
-                factionPlayer.setResetOnJoin(true);
-                plugin.getPlayerManager().savePlayer(factionPlayer);
-            }
-        }).run();
-    }
-
     /**
      * Handles rendering display for Faction member deaths
      *
@@ -629,6 +565,75 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         }
 
         Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " died");
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onCombatLoggerDeath(CombatLoggerDeathEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player killerPlayer = event.getKiller();
+        final CombatLogger logger = event.getLogger();
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(logger.getOwnerId());
+        final ChatColor entityColor = ChatColor.RED;
+        final ChatColor detailColor = ChatColor.BLUE;
+        final ChatColor bodyColor = ChatColor.YELLOW;
+        final String prefix = ChatColor.DARK_RED + "RIP: " + ChatColor.RESET;
+        final String slainUsername = ChatColor.DARK_RED + "(Combat-Logger) " + entityColor + logger.getOwnerUsername() + ChatColor.RESET;
+        final ChatColor heldItemBracket = ChatColor.GRAY;
+        String killerUsername;
+        String killerItem;
+        String deathMessage = prefix + slainUsername + bodyColor + " died";
+
+        if (killerPlayer != null) {
+            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killerPlayer.getUniqueId());
+            final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) : 0;
+            final ItemStack hand = killerPlayer.getInventory().getItemInMainHand();
+            killerUsername = entityColor + killerPlayer.getName() + detailColor + "[" + killerKillCount + "]";
+            killerItem = "their firsts";
+
+            if (!hand.getType().equals(Material.AIR)) {
+                if (hand.hasItemMeta() && Objects.requireNonNull(hand.getItemMeta()).hasDisplayName()) {
+                    killerItem = heldItemBracket + "[" + hand.getItemMeta().getDisplayName() + heldItemBracket + "]";
+                } else {
+                    killerItem = ChatColor.RESET + StringUtils.capitalize(hand.getType().name().replace("_", " ").toLowerCase());
+                }
+            }
+
+            deathMessage = prefix + slainUsername + bodyColor + " slain by " + killerUsername + bodyColor + " while using " + killerItem;
+        }
+
+        Bukkit.broadcastMessage(deathMessage);
+        logger.getBukkitEntity().getWorld().strikeLightningEffect(logger.getBukkitEntity().getLocation());
+
+        if (faction != null) {
+            final FactionMemberDeathEvent memberDeathEvent = new FactionMemberDeathEvent(logger.getOwnerId(), logger.getOwnerUsername(), faction,
+                    new PLocatable(
+                            logger.getBukkitEntity().getLocation().getWorld().getName(),
+                            logger.getBukkitEntity().getLocation().getX(),
+                            logger.getBukkitEntity().getLocation().getY(),
+                            logger.getBukkitEntity().getLocation().getZ(),
+                            logger.getBukkitEntity().getLocation().getYaw(),
+                            logger.getBukkitEntity().getLocation().getPitch()),
+                    1.0, plugin.getConfiguration().getFreezeDuration());
+
+            Bukkit.getPluginManager().callEvent(memberDeathEvent);
+
+            if (!(plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1) || plugin.getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2))) {
+                faction.setDtr(Math.max((faction.getDtr() - memberDeathEvent.getSubtractedDTR()), -0.99));
+                faction.addTimer(new FTimer(ETimerType.FREEZE, memberDeathEvent.getFreezeDuration()));
+            }
+        }
+
+        new Scheduler(plugin).async(() -> {
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().loadPlayer(Filters.eq("uuid", logger.getOwnerId().toString()), false);
+
+            if (factionPlayer != null) {
+                factionPlayer.setResetOnJoin(true);
+                plugin.getPlayerManager().savePlayer(factionPlayer);
+            }
+        }).run();
     }
 
     /**
