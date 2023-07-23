@@ -508,7 +508,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         String killerUsername;
         String killerItem;
 
-        if (event.getKiller() instanceof final Player killerPlayer) {
+        if (event.getKiller() instanceof final Player killerPlayer && !killerPlayer.getUniqueId().equals(slain.getUniqueId())) {
             final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killerPlayer.getUniqueId());
             final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) : 0;
             final ItemStack hand = killerPlayer.getInventory().getItemInMainHand();
