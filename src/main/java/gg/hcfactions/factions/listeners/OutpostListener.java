@@ -1,6 +1,5 @@
 package gg.hcfactions.factions.listeners;
 
-import com.google.common.collect.ImmutableList;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -11,10 +10,7 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -52,7 +48,7 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
 
             // set to placeholder block
             block.breakNaturally(player.getInventory().getItemInMainHand());
-            new Scheduler(plugin).sync(() -> block.setType(Material.COBBLESTONE)).run();
+            new Scheduler(plugin).sync(() -> block.setType(Material.COBBLED_DEEPSLATE)).run();
 
             // add to mined blocks so it can be reset shortly
             ob.getMinedBlocks().add(new BLocatable(block));
@@ -74,16 +70,14 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        // special entities first, default values at the bottom
-        if (entity.getType().equals(EntityType.CREEPER)) {
-            final int roll = Math.abs(plugin.getOutpostManager().getRandom().nextInt(100));
-            final Creeper creeper = (Creeper)entity;
+        // prevent natural spawns inside outpost claims
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)) {
+            event.setCancelled(true);
+            return;
+        }
 
-            if (roll <= 10) {
-                creeper.setPowered(true);
-                creeper.setFuseTicks(10);
-                creeper.setExplosionRadius(3);
-            }
+        if (entity.getType().equals(EntityType.ENDERMAN)) {
+            return;
         }
 
         if (entity.getEquipment() != null) {
