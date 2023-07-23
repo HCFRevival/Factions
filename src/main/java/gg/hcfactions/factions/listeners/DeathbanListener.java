@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record DeathbanListener(@Getter Factions plugin) implements Listener {
-    @EventHandler (priority = EventPriority.MONITOR)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
         if (!plugin.getConfiguration().isDeathbansEnabled() || !plugin.getConfiguration().isDeathbansStandalone()) {
             return;
@@ -60,6 +60,8 @@ public record DeathbanListener(@Getter Factions plugin) implements Listener {
                 stateManager.getCurrentState().equals(EServerState.SOTW),
                 (stateManager.getCurrentState().equals(EServerState.EOTW_PHASE_1) || stateManager.getCurrentState().equals(EServerState.EOTW_PHASE_2))
         );
+
+        Bukkit.broadcastMessage("death message: " + event.getDeathMessage());
 
         Bukkit.getPluginManager().callEvent(de);
     }

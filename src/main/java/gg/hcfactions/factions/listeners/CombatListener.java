@@ -20,6 +20,7 @@ import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.state.ServerStateManager;
+import gg.hcfactions.libs.bukkit.events.impl.DetailedPlayerDeathEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerLingeringSplashEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
@@ -33,10 +34,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public record CombatListener(@Getter Factions plugin) implements Listener {
@@ -489,15 +492,153 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         }
     }
 
+    @EventHandler
+    public void onDetailedDeath(DetailedPlayerDeathEvent event) {
+        final Player slain = event.getPlayer();
+        final EntityDamageEvent.DamageCause cause = event.getCause();
+        final PlayerStatHolder slainStats = plugin.getStatsManager().getPlayerStatistics(slain.getUniqueId());
+        final int slainKillCount = slainStats != null ? (int)slainStats.getStatistic(EStatisticType.KILL) : 0;
+        final String prefix = ChatColor.DARK_RED + "RIP: " + ChatColor.RESET;
+        final ChatColor entityColor = ChatColor.RED;
+        final ChatColor detailColor = ChatColor.BLUE;
+        final ChatColor bodyColor = ChatColor.YELLOW;
+        final ChatColor heldItemBracket = ChatColor.GRAY;
+        final String slainUsername = entityColor + slain.getName() + detailColor + "[" + slainKillCount + "]";
+        String killerSuffix = null;
+        String killerUsername;
+        String killerItem;
+
+        if (event.getKiller() instanceof final Player killerPlayer) {
+            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killerPlayer.getUniqueId());
+            final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) : 0;
+            final ItemStack hand = killerPlayer.getInventory().getItemInMainHand();
+            killerUsername = entityColor + killerPlayer.getName() + detailColor + "[" + killerKillCount + "]";
+            killerItem = "their firsts";
+
+            if (!hand.getType().equals(Material.AIR)) {
+                if (hand.hasItemMeta() && Objects.requireNonNull(hand.getItemMeta()).hasDisplayName()) {
+                    killerItem = heldItemBracket + "[" + hand.getItemMeta().getDisplayName() + heldItemBracket + "]";
+                } else {
+                    killerItem = ChatColor.RESET + StringUtils.capitalize(hand.getType().name().replace("_", " ").toLowerCase());
+                }
+            }
+
+            // player specific ENTITY_ATTACK message
+            if (cause.equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
+                Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " has been slain by " + killerUsername + bodyColor + " using " + killerItem);
+                return;
+            }
+
+            // player specific PROJECTILE message
+            if (cause.equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
+                final String distance = String.format("%.2f", killerPlayer.getLocation().distance(slain.getLocation()));
+                Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " has been shot and killed by " + killerUsername + bodyColor + " from a distance of " + detailColor + distance + " blocks");
+                return;
+            }
+
+            killerSuffix = bodyColor + " while fighting " + killerUsername + bodyColor + " using " + killerItem;
+        } else if (event.getKiller() instanceof LivingEntity) {
+            killerSuffix = bodyColor + " while fighting a " + entityColor + StringUtils.capitalize(event.getKiller().getName().toLowerCase(Locale.ROOT).replaceAll("_", " "));
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
+            final String entityName = event.getKiller().getName();
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " has been slain" + ((event.getKiller() != null) ? " by a " + entityColor + entityName : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
+            final String entityName = event.getKiller().getName();
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " has been shot and killed" + ((event.getKiller() != null) ? " by a " + entityColor + entityName : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) || cause.equals(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " blew up" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.CONTACT)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " ran in to a sharp object" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.DROWNING)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " ran out of oxygen" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.FALL)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " fell " + detailColor + String.format("%.2f", event.getFallDistance()) + " blocks" + bodyColor + " to their death" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.FALLING_BLOCK)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " forgot to pack their umbrella" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.FIRE) || cause.equals(EntityDamageEvent.DamageCause.FIRE_TICK) || cause.equals(EntityDamageEvent.DamageCause.HOT_FLOOR)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " didn't stop, drop and roll" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.LAVA)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " didn't notice the LiveLeak logo" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.FLY_INTO_WALL)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " wrapped themselves around a tree" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.FREEZE)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " got iced out" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.LIGHTNING)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " was struck by lightning" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.SONIC_BOOM)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " was vaporized" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.STARVATION)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " starved to death" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.SUFFOCATION)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " suffocated" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.VOID)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " slipped and fell in to the void" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        if (cause.equals(EntityDamageEvent.DamageCause.WITHER)) {
+            Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " withered away" + ((killerSuffix != null) ? killerSuffix : ""));
+            return;
+        }
+
+        Bukkit.broadcastMessage(prefix + slainUsername + bodyColor + " died");
+    }
+
     /**
      * Handles player deaths
      *
      * @param event PlayerDeathEvent
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
         final Player slain = event.getEntity();
-        final Player killer = slain.getKiller();
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(slain.getUniqueId());
 
         // Apply member death if they're in a faction
@@ -513,163 +654,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             }
         }
 
-        if (slain.getLastDamageCause() == null) {
-            event.setDeathMessage(null);
-            return;
-        }
-
-        final PlayerStatHolder slainStats = plugin.getStatsManager().getPlayerStatistics(slain.getUniqueId());
-        final int slainKillCount = slainStats != null ? (int)slainStats.getStatistic(EStatisticType.KILL) : 0;
-        final EntityDamageEvent.DamageCause reason = slain.getLastDamageCause().getCause();
-        final String prefix = ChatColor.RED + "RIP:" + ChatColor.RESET;
-        final String slainUsername = ChatColor.GOLD + slain.getName() + ChatColor.BLUE + "[" + slainKillCount + "]" + ChatColor.RESET;
-        final ChatColor cA = ChatColor.RED;
-        final ChatColor cB = ChatColor.BLUE;
-
+        event.setDeathMessage(null);
         slain.getWorld().strikeLightningEffect(slain.getLocation());
-
-        if (killer != null && !killer.getUniqueId().equals(slain.getUniqueId())) {
-            final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killer.getUniqueId());
-            final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) + 1 : 0;
-            final String killerUsername = ChatColor.GOLD + killer.getName() + ChatColor.BLUE + "[" + killerKillCount + ChatColor.BLUE + "]" +  ChatColor.RESET;
-            String hand = ChatColor.RESET + "their fists";
-
-            if (!killer.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
-                if (killer.getInventory().getItemInMainHand().hasItemMeta() && Objects.requireNonNull(killer.getInventory().getItemInMainHand().getItemMeta()).hasDisplayName()) {
-                    hand = ChatColor.GRAY + "[" + killer.getInventory().getItemInMainHand().getItemMeta().getDisplayName() + ChatColor.GRAY + "]";
-                } else {
-                    hand = ChatColor.RESET + StringUtils.capitalize(killer.getInventory().getItemInMainHand().getType().name().replace("_", " ").toLowerCase());
-                }
-            }
-
-            final String defaultDeathMessage = prefix + " " + slainUsername + cA + " slain by " + killerUsername + cA + " while using " + hand;
-
-            if (reason.equals(EntityDamageEvent.DamageCause.FALL)) {
-                if (slain.getFallDistance() > 3.0) {
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " fell " + cB + String.format("%.2f", slain.getFallDistance()) + " blocks" + cA + " to their death while fighting " + killerUsername);
-                } else {
-                    event.setDeathMessage(defaultDeathMessage);
-                }
-
-                return;
-            }
-
-            if (reason.equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
-                event.setDeathMessage(defaultDeathMessage);
-                return;
-            }
-
-            if (reason.equals(EntityDamageEvent.DamageCause.PROJECTILE) && slain.getLastDamageCause() instanceof final EntityDamageByEntityEvent pveEvent) {
-                final Projectile projectile = (Projectile) pveEvent.getDamager();
-
-                if (projectile.getShooter() instanceof final LivingEntity shooter) {
-                    final String distance = String.format("%.2f", shooter.getLocation().distance(slain.getLocation()));
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " was shot and killed by " + killerUsername + cA + " from a distance of " + cB + distance + " blocks");
-                    return;
-                }
-            }
-
-            switch (reason) {
-                case FIRE:
-                case FIRE_TICK:
-                case LAVA:
-                case MELTING:
-                case DRAGON_BREATH:
-                case HOT_FLOOR:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " burned to death while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case MAGIC:
-                case CUSTOM:
-                case SUICIDE:
-                case POISON:
-                case LIGHTNING:
-                case THORNS:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " died by magic while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case DROWNING:
-                case SUFFOCATION:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " suffocated while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case ENTITY_EXPLOSION:
-                case BLOCK_EXPLOSION:
-                case SONIC_BOOM:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " blew up while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case VOID:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " fell in to the void while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case WITHER:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " withered away while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case STARVATION:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death while fighting " + killerUsername + cA + " while using " + hand);
-                    break;
-                case FLY_INTO_WALL:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " slammed in to a wall while fight " + killerUsername + cA + " while using " + hand);
-                case FREEZE:
-                    event.setDeathMessage(prefix + " " + slainUsername + cA + " froze to death while fighting " + killerUsername + cA + " while using " + hand);
-                default:
-                    event.setDeathMessage(defaultDeathMessage);
-                    break;
-            }
-
-            return;
-        }
-
-        if (reason.equals(EntityDamageEvent.DamageCause.FALL)) {
-            if (slain.getFallDistance() >= 3.0) {
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " fell " + cB + String.format("%.2f", slain.getFallDistance()) + " blocks" + cA + " to their death");
-            } else {
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " died");
-            }
-
-            return;
-        }
-
-        switch (reason) {
-            case FIRE:
-            case FIRE_TICK:
-            case LAVA:
-            case MELTING:
-            case DRAGON_BREATH:
-            case HOT_FLOOR:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " burned to death");
-                break;
-            case MAGIC:
-            case CUSTOM:
-            case POISON:
-            case LIGHTNING:
-            case THORNS:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " died by magic");
-                break;
-            case DROWNING:
-            case SUFFOCATION:
-            case CRAMMING:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " suffocated");
-                break;
-            case CONTACT:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " hugged a cactus");
-            case ENTITY_EXPLOSION:
-            case BLOCK_EXPLOSION:
-            case SONIC_BOOM:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " blew up");
-                break;
-            case VOID:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " fell in to the void");
-                break;
-            case WITHER:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " withered away");
-                break;
-            case STARVATION:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " starved to death");
-                break;
-            case FLY_INTO_WALL:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " slammed in to a wall");
-            case FREEZE:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " froze to death");
-            default:
-                event.setDeathMessage(prefix + " " + slainUsername + cA + " died");
-                break;
-        }
     }
 }
