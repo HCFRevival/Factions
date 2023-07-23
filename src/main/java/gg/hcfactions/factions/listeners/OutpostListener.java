@@ -70,6 +70,12 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        // prevent natural spawns inside outpost claims
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)) {
+            event.setCancelled(true);
+            return;
+        }
+
         if (entity.getType().equals(EntityType.ENDERMAN)) {
             return;
         }
