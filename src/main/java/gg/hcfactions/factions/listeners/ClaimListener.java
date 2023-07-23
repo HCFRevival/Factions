@@ -445,12 +445,37 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 final ServerFaction serverFaction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
                 if (serverFaction != null) {
+                    if (event.getEntity() instanceof final Player player) {
+                        player.sendMessage(ChatColor.RED + "Failed to create portal: Conflicts with " + serverFaction.getDisplayName() + ChatColor.RED + "'s claims and was unable to find any other nearby portals. Please try building a Portal in a different location.");
+                    }
+
                     plugin.getAresLogger().error(event.getEventName() + " failed! Reason: inside a claim (" + serverFaction.getName() + ")");
                     event.setCancelled(true);
                     return;
                 }
             }
         }
+    }
+
+    /**
+     * Expands portal search radius
+     * @param event PlayerPortalEvent
+     */
+    @EventHandler
+    public void onPlayerPortal(PlayerPortalEvent event) {
+        if (event.isCancelled() || event.getTo() == null) {
+            return;
+        }
+
+        final Location origin = event.getTo();
+        final BLocatable originLocatable = new BLocatable(origin.getBlock());
+        final List<Claim> claims = plugin.getClaimManager().getServerClaimsNearby(originLocatable, 4);
+
+        if (claims.isEmpty()) {
+            return;
+        }
+
+        event.setSearchRadius(300);
     }
 
     /**

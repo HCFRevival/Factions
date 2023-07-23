@@ -178,6 +178,28 @@ public final class ClaimManager implements IManager {
     }
 
     /**
+     * Returns an Immutable Collection of Claims that belong to Server Factions nearby
+     * the provided location
+     *
+     * @param location Location
+     * @param distance Distance to check for
+     * @return Collection of Claims
+     */
+    public ImmutableList<Claim> getServerClaimsNearby(ILocatable location, double distance) {
+        final List<Claim> res = Lists.newArrayList();
+
+        claimRepository.forEach(claim -> {
+            final ServerFaction sf = plugin.getFactionManager().getServerFactionById(claim.getOwner());
+
+            if (sf != null && claim.isInsideBuffer(location, distance)) {
+                res.add(claim);
+            }
+        });
+
+        return ImmutableList.copyOf(res);
+    }
+
+    /**
      * Returns an Immutable Collection of Claims that are nearby the provided location
      * @param location Location
      * @param buildBuffer Enabling this will search for claims the location is within the build buffer of
