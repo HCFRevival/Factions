@@ -415,14 +415,21 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             final ServerFaction owner = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
 
             if (owner != null) {
-                final IEvent activeEvent = plugin.getEventManager().getActiveEvents()
-                        .stream()
-                        .filter(e -> e.getOwner() != null && e.getOwner().equals(owner.getUniqueId()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (activeEvent != null && plugin.getConfiguration().getEventPowerLossReduction() < event.getSubtractedDTR()) {
+                if (owner.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
+                    // TODO: Make this customizable, currently uses values for events
                     event.setSubtractedDTR(plugin.getConfiguration().getEventPowerLossReduction());
+                }
+
+                if (owner.getFlag().equals(ServerFaction.Flag.EVENT)) {
+                    final IEvent activeEvent = plugin.getEventManager().getActiveEvents()
+                            .stream()
+                            .filter(e -> e.getOwner() != null && e.getOwner().equals(owner.getUniqueId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (activeEvent != null && plugin.getConfiguration().getEventPowerLossReduction() < event.getSubtractedDTR()) {
+                        event.setSubtractedDTR(plugin.getConfiguration().getEventPowerLossReduction());
+                    }
                 }
             }
         }
