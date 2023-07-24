@@ -536,7 +536,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
-                        || block.getType().name().endsWith("_TRAPDOOR")
                 ) {
                     return;
                 }
@@ -556,7 +555,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
-                        || block.getType().name().endsWith("_TRAPDOOR")
                 ) {
                     return;
                 }
