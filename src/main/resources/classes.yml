@@ -1,4 +1,11 @@
 data:
+  tank:
+    warmup: 5
+    shield_warmup: 2
+    passive:
+      HEALTH_BOOST: 3
+      SLOW: 2
+      DAMAGE_RESISTANCE: 2
   miner:
     warmup: 5
     passive:

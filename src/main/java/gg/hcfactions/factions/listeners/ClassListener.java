@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
@@ -12,6 +13,7 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerShieldEvent;
 import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
@@ -28,21 +30,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityResurrectEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class ClassListener implements Listener {
     @Getter public final Factions plugin;
@@ -768,20 +766,22 @@ public final class ClassListener implements Listener {
         if (factionPlayer.hasTimer(ETimerType.GUARD)) {
             factionPlayer.removeTimer(ETimerType.GUARD, true);
         }
+    }
 
-        /*
-            check if player class is a tank class
+    @EventHandler
+    public void onTankMove(PlayerBigMoveEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
-            if raised:
-                check if they have the stamina to raise
-                    if not: cancel the event
+        if (!(playerClass instanceof final Tank tankClass)) {
+            return;
+        }
 
-                start the raise warmup
+        if (!tankClass.isGuarding(player)) {
+            return;
+        }
 
-            if dropped:
-                remove current tank point
-                start stamina regen cooldown
-         */
+        tankClass.setGuardPoint(player);
     }
 
     @EventHandler
@@ -791,6 +791,68 @@ public final class ClassListener implements Listener {
 
     @EventHandler
     public void onTankShieldUnready(TankShieldUnreadyEvent event) {
-        Bukkit.broadcastMessage(event.getEventName());
+        final Player player = event.getPlayer();
+        final Tank tankClass = event.getTankClass();
+
+        tankClass.removeGuardPoint(player);
+    }
+
+    @EventHandler
+    public void onTankGuardApply(AreaEffectCloudApplyEvent event) {
+        final AreaEffectCloud cloud = event.getEntity();
+        final List<LivingEntity> affectedEntities = Lists.newArrayList(event.getAffectedEntities());
+
+        if (!(cloud.getSource() instanceof final Player player)) {
+            return;
+        }
+
+        if (!(plugin.getClassManager().getCurrentClass(player) instanceof final Tank tankClass)) {
+            return;
+        }
+
+        if (!cloud.getBasePotionData().getType().equals(PotionType.TURTLE_MASTER)) {
+            return;
+        }
+
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        event.setCancelled(true);
+        event.getAffectedEntities().clear();
+
+        for (LivingEntity entity : affectedEntities) {
+            if (entity.getUniqueId().equals(player.getUniqueId())) {
+                //entity.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20, 2));
+                continue;
+            }
+
+            if (pf != null && entity instanceof final Player otherPlayer && pf.isMember(otherPlayer)) {
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 20, 1));
+                continue;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onTankShieldDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof final Player player)) {
+            return;
+        }
+
+        if (!player.isHandRaised()) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            return;
+        }
+
+        if (!tankClass.isGuarding(player)) {
+            return;
+        }
+
+        Bukkit.broadcastMessage("pre: " + event.getDamage());
+        Bukkit.broadcastMessage("post: " + event.getFinalDamage());
     }
 }

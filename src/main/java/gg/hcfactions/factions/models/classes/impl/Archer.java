@@ -25,6 +25,7 @@ public final class Archer implements IClass {
     @Getter public final String name = "Archer";
     @Getter public final String description = "Grants you bonus damage with a bow based on distance. Hit consecutive shots on the same player to deal bonus damage";
     @Getter public final int warmup;
+    @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.LEATHER_HELMET;
     @Getter public final Material chestplate = Material.LEATHER_CHESTPLATE;
     @Getter public final Material leggings = Material.LEATHER_LEGGINGS;

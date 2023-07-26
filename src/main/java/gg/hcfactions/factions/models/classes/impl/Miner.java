@@ -20,6 +20,7 @@ public final class Miner implements IClass {
     @Getter public final String name = "Miner";
     @Getter public final String description = "Grants the ability to mine easily";
     @Getter public final int warmup;
+    @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.IRON_HELMET;
     @Getter public final Material chestplate = Material.IRON_CHESTPLATE;
     @Getter public final Material leggings = Material.IRON_LEGGINGS;

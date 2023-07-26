@@ -34,6 +34,11 @@ public interface IClass {
     int getWarmup();
 
     /**
+     * @return If true null values will be enforced as AIR materials
+     */
+    boolean isEmptyArmorEnforced();
+
+    /**
      * @return Helmet material type
      */
     Material getHelmet();
@@ -156,6 +161,24 @@ public interface IClass {
             return false;
         }
 
+        if (isEmptyArmorEnforced()) {
+            if (getHelmet() == null && player.getEquipment().getHelmet() != null) {
+                return false;
+            }
+
+            if (getChestplate() == null && player.getEquipment().getChestplate() != null) {
+                return false;
+            }
+
+            if (getLeggings() == null && player.getEquipment().getLeggings() != null) {
+                return false;
+            }
+
+            if (getBoots() == null && player.getEquipment().getBoots() != null) {
+                return false;
+            }
+        }
+
         if (getHelmet() != null) {
             if (player.getEquipment().getHelmet() == null || !player.getEquipment().getHelmet().getType().equals(getHelmet())) {
                 return false;
@@ -181,9 +204,7 @@ public interface IClass {
         }
 
         if (getOffhand() != null) {
-            if (!player.getEquipment().getItemInOffHand().getType().equals(getOffhand())) {
-                return false;
-            }
+            return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
         }
 
         return true;

@@ -20,6 +20,7 @@ public final class Bard implements IClass, IHoldableClass {
     @Getter public final String name = "Bard";
     @Getter public final String description = "Grant effects to nearby faction members and enemies";
     @Getter public final int warmup;
+    @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.GOLDEN_HELMET;
     @Getter public final Material chestplate = Material.GOLDEN_CHESTPLATE;
     @Getter public final Material leggings = Material.GOLDEN_LEGGINGS;
