@@ -24,6 +24,7 @@ public final class Bard implements IClass, IHoldableClass {
     @Getter public final Material chestplate = Material.GOLDEN_CHESTPLATE;
     @Getter public final Material leggings = Material.GOLDEN_LEGGINGS;
     @Getter public final Material boots = Material.GOLDEN_BOOTS;
+    @Getter public final Material offhand = null;
     @Getter public Set<UUID> activePlayers;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;
     @Getter public List<IConsumeable> consumables;

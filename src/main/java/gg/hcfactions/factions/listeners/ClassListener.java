@@ -5,10 +5,7 @@ import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
 import gg.hcfactions.factions.models.classes.*;
-import gg.hcfactions.factions.models.classes.impl.Archer;
-import gg.hcfactions.factions.models.classes.impl.Bard;
-import gg.hcfactions.factions.models.classes.impl.Diver;
-import gg.hcfactions.factions.models.classes.impl.Rogue;
+import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
@@ -16,6 +13,7 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
+import gg.hcfactions.libs.bukkit.events.impl.PlayerShieldEvent;
 import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
@@ -735,5 +733,64 @@ public final class ClassListener implements Listener {
 
         final double range = (playerClass instanceof final Bard bard) ? bard.getBardRange() : 16.0;
         holdable.apply(player, holdableClass.getHoldableUpdateRate(), range, true);
+    }
+
+    @EventHandler
+    public void onPlayerShield(PlayerShieldEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            if (event.isRaised()) {
+                player.sendMessage(ChatColor.RED + "Shields can only be used by the Tank class");
+                event.setCancelled(true);
+            }
+
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (factionPlayer == null) {
+            player.sendMessage(ChatColor.RED + "Failed to load your player profile: CLNP");
+            event.setCancelled(true);
+            return;
+        }
+
+        if (event.isRaised()) {
+            factionPlayer.addTimer(new FTimer(ETimerType.GUARD, tankClass.getShieldWarmup()));
+            return;
+        }
+
+        final TankShieldUnreadyEvent unreadyEvent = new TankShieldUnreadyEvent(player, tankClass);
+        Bukkit.getPluginManager().callEvent(unreadyEvent);
+
+        if (factionPlayer.hasTimer(ETimerType.GUARD)) {
+            factionPlayer.removeTimer(ETimerType.GUARD, true);
+        }
+
+        /*
+            check if player class is a tank class
+
+            if raised:
+                check if they have the stamina to raise
+                    if not: cancel the event
+
+                start the raise warmup
+
+            if dropped:
+                remove current tank point
+                start stamina regen cooldown
+         */
+    }
+
+    @EventHandler
+    public void onTankShieldReady(TankShieldReadyEvent event) {
+        Bukkit.broadcastMessage(event.getEventName());
+    }
+
+    @EventHandler
+    public void onTankShieldUnready(TankShieldUnreadyEvent event) {
+        Bukkit.broadcastMessage(event.getEventName());
     }
 }

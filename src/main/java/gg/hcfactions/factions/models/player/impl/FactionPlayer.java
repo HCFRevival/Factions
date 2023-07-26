@@ -8,6 +8,7 @@ import gg.hcfactions.factions.models.claim.IPillar;
 import gg.hcfactions.factions.models.claim.IShield;
 import gg.hcfactions.factions.models.claim.impl.*;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.classes.impl.Tank;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -388,6 +389,17 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             if (playerClass != null) {
                 playerClass.activate(getBukkit());
             }
+        }
+
+        if (type.equals(ETimerType.GUARD)) {
+            final IClass playerClass = playerManager.getPlugin().getClassManager().getClassByArmor(getBukkit());
+
+            if (!(playerClass instanceof final Tank tankClass)) {
+                sendMessage(FMessage.ERROR + FError.C_CLASS_MISMATCH.getErrorDescription());
+                return;
+            }
+
+            tankClass.activateShield(getBukkit());
         }
 
         if (type.equals(ETimerType.PROTECTION)) {

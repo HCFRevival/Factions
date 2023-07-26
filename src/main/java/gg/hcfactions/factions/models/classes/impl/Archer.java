@@ -29,6 +29,7 @@ public final class Archer implements IClass {
     @Getter public final Material chestplate = Material.LEATHER_CHESTPLATE;
     @Getter public final Material leggings = Material.LEATHER_LEGGINGS;
     @Getter public final Material boots = Material.LEATHER_BOOTS;
+    @Getter public final Material offhand = null;
     @Getter public Set<UUID> activePlayers;
     @Getter public Set<UUID> markedEntities;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;

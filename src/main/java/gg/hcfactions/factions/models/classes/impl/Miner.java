@@ -24,6 +24,7 @@ public final class Miner implements IClass {
     @Getter public final Material chestplate = Material.IRON_CHESTPLATE;
     @Getter public final Material leggings = Material.IRON_LEGGINGS;
     @Getter public final Material boots = Material.IRON_BOOTS;
+    @Getter public final Material offhand = null;
     @Getter public Set<UUID> activePlayers;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;
     @Getter public List<IConsumeable> consumables;

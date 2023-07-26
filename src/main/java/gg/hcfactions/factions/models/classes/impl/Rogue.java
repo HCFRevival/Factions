@@ -26,6 +26,7 @@ public final class Rogue implements IClass {
     @Getter public final Material chestplate = Material.CHAINMAIL_CHESTPLATE;
     @Getter public final Material leggings = Material.CHAINMAIL_LEGGINGS;
     @Getter public final Material boots = Material.CHAINMAIL_BOOTS;
+    @Getter public final Material offhand = null;
     @Getter public Set<UUID> activePlayers;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;
     @Getter public List<IConsumeable> consumables;

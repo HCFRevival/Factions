@@ -7,6 +7,14 @@ import net.md_5.bungee.api.ChatColor;
 
 @AllArgsConstructor
 public enum ETimerType {
+    GUARD(
+            Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Guard",
+            Colors.GOLD.toBukkit() + "Guard",
+            15,
+            true,
+            true,
+            false
+    ),
     TRIDENT(
       Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Riptide",
       Colors.AQUA.toBukkit() + "Riptide",

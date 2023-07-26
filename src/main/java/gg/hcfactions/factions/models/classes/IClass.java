@@ -54,6 +54,11 @@ public interface IClass {
     Material getBoots();
 
     /**
+     * @return Off-hand material type
+     */
+    Material getOffhand();
+
+    /**
      * @return Set containing Bukkit UUIDs for players actively using this class instance
      */
     Set<UUID> getActivePlayers();
@@ -151,20 +156,34 @@ public interface IClass {
             return false;
         }
 
-        if (player.getEquipment().getHelmet() == null || !player.getEquipment().getHelmet().getType().equals(getHelmet())) {
-            return false;
+        if (getHelmet() != null) {
+            if (player.getEquipment().getHelmet() == null || !player.getEquipment().getHelmet().getType().equals(getHelmet())) {
+                return false;
+            }
         }
 
-        if (player.getEquipment().getChestplate() == null || !player.getEquipment().getChestplate().getType().equals(getChestplate())) {
-            return false;
+        if (getChestplate() != null) {
+            if (player.getEquipment().getChestplate() == null || !player.getEquipment().getChestplate().getType().equals(getChestplate())) {
+                return false;
+            }
         }
 
-        if (player.getEquipment().getLeggings() == null || !player.getEquipment().getLeggings().getType().equals(getLeggings())) {
-            return false;
+        if (getLeggings() != null) {
+            if (player.getEquipment().getLeggings() == null || !player.getEquipment().getLeggings().getType().equals(getLeggings())) {
+                return false;
+            }
         }
 
-        if (player.getEquipment().getBoots() == null || !player.getEquipment().getBoots().getType().equals(getBoots())) {
-            return false;
+        if (getBoots() != null) {
+            if (player.getEquipment().getBoots() == null || !player.getEquipment().getBoots().getType().equals(getBoots())) {
+                return false;
+            }
+        }
+
+        if (getOffhand() != null) {
+            if (!player.getEquipment().getItemInOffHand().getType().equals(getOffhand())) {
+                return false;
+            }
         }
 
         return true;

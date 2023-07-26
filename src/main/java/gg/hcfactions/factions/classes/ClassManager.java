@@ -52,6 +52,8 @@ public final class ClassManager implements IManager {
             classes.clear();
         }
 
+        classes.add(new Tank(this));
+
         for (String className : Objects.requireNonNull(conf.getConfigurationSection("data")).getKeys(false)) {
             final String path = "data." + className + ".";
             final int warmup = conf.getInt(path + "warmup");
@@ -87,6 +89,11 @@ public final class ClassManager implements IManager {
                 final int seaCallCooldown = conf.getInt(path + "sea_call_cooldown");
                 final int seaCallDuration = conf.getInt(path + "sea_call_duration");
                 playerClass = new Diver(this, warmup, damageMultiplier, minimumDistance, seaCallCooldown, seaCallDuration);
+            }
+
+            else if (className.equalsIgnoreCase("tank")) {
+                final int shieldWarmup = conf.getInt(path + "shield_warmup");
+
             }
 
             else if (className.equalsIgnoreCase("miner")) {
