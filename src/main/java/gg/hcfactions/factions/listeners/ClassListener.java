@@ -677,6 +677,7 @@ public final class ClassListener implements Listener {
 
         factionPlayer.getScoreboard().removeLine(29);
         factionPlayer.getScoreboard().removeLine(52);
+        factionPlayer.getScoreboard().removeLine(53);
 
         for (EEffectScoreboardMapping mapping : EEffectScoreboardMapping.values()) {
             factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
@@ -733,8 +734,12 @@ public final class ClassListener implements Listener {
         holdable.apply(player, holdableClass.getHoldableUpdateRate(), range, true);
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerShield(PlayerShieldEvent event) {
+        if (event.isRaised() && event.isCancelled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
@@ -769,6 +774,21 @@ public final class ClassListener implements Listener {
     }
 
     @EventHandler
+    public void onTankUseShield(PlayerShieldEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            return;
+        }
+
+        if (!tankClass.canUseStamina(player)) {
+            player.sendMessage(ChatColor.RED + "You're out of stamina. Please wait a moment and try again.");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onTankMove(PlayerBigMoveEvent event) {
         final Player player = event.getPlayer();
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
@@ -785,16 +805,11 @@ public final class ClassListener implements Listener {
     }
 
     @EventHandler
-    public void onTankShieldReady(TankShieldReadyEvent event) {
-        Bukkit.broadcastMessage(event.getEventName());
-    }
-
-    @EventHandler
     public void onTankShieldUnready(TankShieldUnreadyEvent event) {
         final Player player = event.getPlayer();
         final Tank tankClass = event.getTankClass();
 
-        tankClass.removeGuardPoint(player);
+        tankClass.deactivateShield(player);
     }
 
     @EventHandler
@@ -852,7 +867,30 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        Bukkit.broadcastMessage("pre: " + event.getDamage());
-        Bukkit.broadcastMessage("post: " + event.getFinalDamage());
+        if (event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)
+                || event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)
+                || event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)
+                || event.getCause().equals(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION)) {
+
+            final double damage = event.getDamage();
+
+            tankClass.damageStamina(player, damage * tankClass.getStaminaDamageDivider());
+            event.setCancelled(true);
+            player.damage(damage * tankClass.getShieldDamageReduction());
+        }
+    }
+
+    @EventHandler
+    public void onTankStaminaChange(TankStaminaChangeEvent event) {
+        final Player player = event.getPlayer();
+        final Tank tankClass = (Tank) plugin.getClassManager().getClassByName("Guardian"); // TODO: Probably make this safer
+        final ItemStack oldBanner = tankClass.getBanner(event.getFrom());
+        final ItemStack newBanner = tankClass.getBanner(event.getTo());
+
+        if (!oldBanner.getType().equals(newBanner.getType())) {
+            Objects.requireNonNull(player.getEquipment()).setHelmet(newBanner);
+            Worlds.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT);
+            player.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, player.getLocation().add(0, 2.0, 0), 8);
+        }
     }
 }

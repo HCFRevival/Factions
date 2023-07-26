@@ -5,6 +5,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.classes.impl.Tank;
 import gg.hcfactions.factions.models.events.impl.ConquestZone;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
@@ -64,6 +65,10 @@ public final class TimerManager implements IManager {
                 final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
                 if (playerClass.getConsumables().stream().anyMatch(c -> c.hasCooldown(player))) {
+                    hasUI = true;
+                }
+
+                if (playerClass instanceof Tank) {
                     hasUI = true;
                 }
             }
@@ -204,6 +209,10 @@ public final class TimerManager implements IManager {
 
         if (plugin.getClassManager().getCurrentClass(player) != null) {
             final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+            if (playerClass instanceof final Tank tankClass) {
+                factionPlayer.getScoreboard().setLine(53, ChatColor.AQUA + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + String.format("%.2f", tankClass.getStamina(player)));
+            }
 
             if (playerClass.getConsumables().stream().anyMatch(c -> c.getCooldowns().containsKey(player.getUniqueId()))) {
                 factionPlayer.getScoreboard().setLine(52, ChatColor.GOLD + "" + ChatColor.BOLD + playerClass.getName() + " Effects" + ChatColor.YELLOW + ":");

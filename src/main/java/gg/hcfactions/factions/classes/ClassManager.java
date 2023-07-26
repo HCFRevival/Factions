@@ -90,8 +90,14 @@ public final class ClassManager implements IManager {
             }
 
             else if (className.equalsIgnoreCase("tank")) {
-                final int shieldWarmup = conf.getInt(path + "shield_warmup");
-                playerClass = new Tank(this, warmup, shieldWarmup);
+                final int shieldWarmup = conf.getInt(path + "shield.warmup");
+                final double shieldDamageReduction = conf.getDouble(path + "shield.damage_reduction");
+                final double staminaDamageDivider = conf.getDouble(path + "stamina.damage_divider");
+                final int staminaRegenDelay = conf.getInt(path + "stamina.regen.delay");
+                final int staminaHardRegenDelay = conf.getInt(path + "stamina.regen.hard_delay");
+                final int staminaRegenInterval = conf.getInt(path + "stamina.regen.interval");
+
+                playerClass = new Tank(this, warmup, shieldWarmup, shieldDamageReduction, staminaDamageDivider, staminaRegenInterval, staminaRegenDelay, staminaHardRegenDelay);
             }
 
             else if (className.equalsIgnoreCase("miner")) {
@@ -184,6 +190,10 @@ public final class ClassManager implements IManager {
     public void validateClass(Player player) {
         final IClass actualClass = getPlugin().getClassManager().getCurrentClass(player);
         final IClass expectedClass = getPlugin().getClassManager().getClassByArmor(player);
+
+        if (expectedClass != null && expectedClass == actualClass) {
+            return;
+        }
 
         if (expectedClass != null) {
             if (actualClass != null) {

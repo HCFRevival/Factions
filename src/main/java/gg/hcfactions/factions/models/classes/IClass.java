@@ -180,24 +180,40 @@ public interface IClass {
         }
 
         if (getHelmet() != null) {
+            if (player.getEquipment().getHelmet() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
             if (player.getEquipment().getHelmet() == null || !player.getEquipment().getHelmet().getType().equals(getHelmet())) {
                 return false;
             }
         }
 
         if (getChestplate() != null) {
+            if (player.getEquipment().getChestplate() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
             if (player.getEquipment().getChestplate() == null || !player.getEquipment().getChestplate().getType().equals(getChestplate())) {
                 return false;
             }
         }
 
         if (getLeggings() != null) {
+            if (player.getEquipment().getLeggings() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
             if (player.getEquipment().getLeggings() == null || !player.getEquipment().getLeggings().getType().equals(getLeggings())) {
                 return false;
             }
         }
 
         if (getBoots() != null) {
+            if (player.getEquipment().getBoots() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
             if (player.getEquipment().getBoots() == null || !player.getEquipment().getBoots().getType().equals(getBoots())) {
                 return false;
             }

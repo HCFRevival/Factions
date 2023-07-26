@@ -1,7 +1,15 @@
 data:
   tank:
     warmup: 5
-    shield_warmup: 2
+    shield:
+      warmup: 2
+      damage_reduction: 0.9
+    stamina:
+      damage_divider: 0.25
+      regen:
+        delay: 5
+        hard_delay: 15
+        interval: 1
     passive:
       HEALTH_BOOST: 3
       SLOW: 2

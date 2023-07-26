@@ -7,6 +7,7 @@ import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.listeners.events.player.TankStaminaChangeEvent;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IConsumeable;
+import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -15,9 +16,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffectType;
@@ -25,6 +28,17 @@ import org.bukkit.potion.PotionType;
 
 import java.util.*;
 import java.util.List;
+
+/**
+ * TODO:
+ * - Handle player disconnect
+ * - Handle shield/armor breaking causing desync class message spam
+ * - Fix particles on banner change to not look ugly
+ * - Store effects given in Guard mode in the config and load them in
+ * - Ensure infinite potion effects are removed upon login
+ * - Ensure banner is removed using a PersistentDataContainer and checking on login
+ * - Print message when stamina is at 50% and 100%
+ */
 
 public final class Tank implements IClass {
     @Getter public ClassManager manager;
@@ -42,9 +56,15 @@ public final class Tank implements IClass {
     @Getter public final Set<UUID> activePlayers;
 
     @Getter public final int shieldWarmup;
+    @Getter public final double shieldDamageReduction;
+    @Getter public final double staminaDamageDivider;
+    @Getter public final int staminaRegenInterval;
+    @Getter public final int staminaRegenDelay;
+    @Getter public final int staminaHardRegenDelay;
     @Getter public final Set<UUID> guardingPlayers;
     @Getter public final Map<UUID, Double> stamina;
     @Getter public final Map<UUID, PLocatable> guardPoints;
+    @Getter public final Map<UUID, Long> nextStaminaRegen;
 
     public Tank(ClassManager manager) {
         this.manager = manager;
@@ -54,14 +74,25 @@ public final class Tank implements IClass {
         this.activePlayers = Sets.newConcurrentHashSet();
         this.guardingPlayers = Sets.newConcurrentHashSet();
         this.shieldWarmup = 2;
+        this.shieldDamageReduction = 0.5;
+        this.staminaDamageDivider = 3.0;
+        this.staminaRegenInterval = 1;
+        this.staminaRegenDelay = 5;
+        this.staminaHardRegenDelay = 15;
         this.stamina = Maps.newConcurrentMap();
         this.guardPoints = Maps.newConcurrentMap();
+        this.nextStaminaRegen = Maps.newConcurrentMap();
     }
 
     public Tank(
             ClassManager manager,
             int warmup,
-            int shieldWarmup
+            int shieldWarmup,
+            double shieldDamageReduction,
+            double staminaDamageDivider,
+            int staminaRegenInterval,
+            int staminaRegenDelay,
+            int staminaHardRegenDelay
     ) {
         this.manager = manager;
         this.warmup = warmup;
@@ -70,10 +101,17 @@ public final class Tank implements IClass {
         this.activePlayers = Sets.newConcurrentHashSet();
         this.guardingPlayers = Sets.newConcurrentHashSet();
         this.shieldWarmup = shieldWarmup;
+        this.shieldDamageReduction = shieldDamageReduction;
+        this.staminaDamageDivider = staminaDamageDivider;
+        this.staminaRegenDelay = staminaRegenDelay;
+        this.staminaRegenInterval = staminaRegenInterval;
+        this.staminaHardRegenDelay = staminaHardRegenDelay;
         this.stamina = Maps.newConcurrentMap();
         this.guardPoints = Maps.newConcurrentMap();
+        this.nextStaminaRegen = Maps.newConcurrentMap();
 
         new Scheduler(manager.getPlugin()).sync(this::renderGuardPoints).repeat(0L, 5L).run();
+        new Scheduler(manager.getPlugin()).sync(this::regenerateStamina).repeat(0L, 20L).run();
     }
 
     private void renderGuardPoints() {
@@ -90,6 +128,37 @@ public final class Tank implements IClass {
         });
     }
 
+    private void regenerateStamina() {
+        final List<UUID> toRemove = Lists.newArrayList();
+
+        for (UUID uuid : nextStaminaRegen.keySet()) {
+            final Player player = Bukkit.getPlayer(uuid);
+            final long nextTick = nextStaminaRegen.get(uuid);
+
+            if (nextTick > Time.now()) {
+                continue;
+            }
+
+            final double currentStamina = getStamina(uuid);
+            final double newStamina = Math.min((currentStamina + 1.0), 100.0);
+
+            if (player == null || newStamina >= 100.0) {
+                toRemove.add(uuid);
+            }
+
+            final TankStaminaChangeEvent changeEvent = new TankStaminaChangeEvent(player, currentStamina, newStamina);
+            Bukkit.getPluginManager().callEvent(changeEvent);
+
+            if (changeEvent.isCancelled()) {
+                continue;
+            }
+
+            stamina.put(uuid, changeEvent.getTo());
+        }
+
+        toRemove.forEach(nextStaminaRegen::remove);
+    }
+
     @Override
     public void activate(Player player, boolean printMessage) {
         IClass.super.activate(player, printMessage);
@@ -100,7 +169,8 @@ public final class Tank implements IClass {
         }
 
         stamina.put(player.getUniqueId(), 100.0);
-        player.getEquipment().setHelmet(getBanner(player));
+
+        new Scheduler(manager.getPlugin()).sync(() -> player.getEquipment().setHelmet(getBanner(player))).delay(1L).run();
     }
 
     @Override
@@ -115,11 +185,13 @@ public final class Tank implements IClass {
         guardPoints.remove(player.getUniqueId());
         guardingPlayers.remove(player.getUniqueId());
         stamina.remove(player.getUniqueId());
+        nextStaminaRegen.remove(player.getUniqueId());
     }
 
     public void activateShield(Player player) {
         guardingPlayers.add(player.getUniqueId());
         guardPoints.put(player.getUniqueId(), new PLocatable(player));
+        nextStaminaRegen.remove(player.getUniqueId());
     }
 
     public void deactivateShield(Player player) {
@@ -127,19 +199,33 @@ public final class Tank implements IClass {
     }
 
     public void deactivateShield(UUID uniqueId) {
+        final double currentStamina = getStamina(uniqueId);
+
         guardingPlayers.remove(uniqueId);
         guardPoints.remove(uniqueId);
+
+        if (currentStamina < 100.0) {
+            final int delay = (currentStamina <= 0.0) ? staminaHardRegenDelay : staminaRegenDelay;
+            nextStaminaRegen.put(uniqueId, (Time.now() + (delay * 1000L)));
+        }
     }
 
     public ItemStack getBanner(Player player) {
         final double stamina = getStamina(player);
+        return getBanner(stamina);
+    }
+
+    public ItemStack getBanner(double stamina) {
         final ItemBuilder builder = new ItemBuilder();
 
-        if (stamina > 75.0) {
+        builder.addEnchant(Enchantment.BINDING_CURSE, 1);
+        builder.addFlag(ItemFlag.HIDE_ENCHANTS);
+
+        if (stamina > 50.0) {
             builder.setMaterial(Material.GREEN_BANNER);
-        } else if (stamina > 50.0) {
-            builder.setMaterial(Material.YELLOW_BANNER);
         } else if (stamina > 25.0) {
+            builder.setMaterial(Material.YELLOW_BANNER);
+        } else {
             builder.setMaterial(Material.RED_BANNER);
         }
 
@@ -156,6 +242,10 @@ public final class Tank implements IClass {
         return getStamina(player.getUniqueId());
     }
 
+    public boolean canUseStamina(Player player) {
+        return getStamina(player) > 50.0;
+    }
+
     public void damageStamina(Player player, double amount) {
         if (!stamina.containsKey(player.getUniqueId())) {
             manager.getPlugin().getAresLogger().error("attempted to adjust stamina for a player not in Tank class");
@@ -163,7 +253,7 @@ public final class Tank implements IClass {
         }
 
         final double current = getStamina(player);
-        final double updated = Math.min((current - amount), 0.0);
+        final double updated = Math.max((current - amount), 0.0);
 
         final TankStaminaChangeEvent event = new TankStaminaChangeEvent(player, current, updated);
         Bukkit.getPluginManager().callEvent(event);
@@ -173,6 +263,18 @@ public final class Tank implements IClass {
         }
 
         stamina.put(player.getUniqueId(), updated);
+
+        if (updated <= 0.0) {
+            final ItemStack shield = Objects.requireNonNull(player.getEquipment()).getItemInOffHand();
+            player.getEquipment().setItemInOffHand(new ItemStack(Material.AIR));
+
+            deactivateShield(player);
+
+            new Scheduler(manager.getPlugin()).sync(() -> {
+                player.getInventory().setItemInOffHand(shield);
+                player.setCooldown(Material.SHIELD, 20);
+            }).delay(10L).run();
+        }
     }
 
     public PLocatable getGuardPoint(Player player) {
