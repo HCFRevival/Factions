@@ -207,8 +207,13 @@ public final class HelpMenu extends GenericMenu {
             for (IClass playerClass : plugin.getClassManager().getClasses()) {
                 final ItemBuilder builder = new ItemBuilder()
                         .setName(ChatColor.GOLD + playerClass.getName())
-                        .addFlag(ItemFlag.HIDE_ATTRIBUTES)
-                        .setMaterial(playerClass.getHelmet());
+                        .addFlag(ItemFlag.HIDE_ATTRIBUTES);
+
+                if (playerClass.getHelmet() != null) {
+                    builder.setMaterial(playerClass.getHelmet());
+                } else {
+                    builder.setMaterial(playerClass.getChestplate());
+                }
 
                 final List<String> lore = Lists.newArrayList();
 

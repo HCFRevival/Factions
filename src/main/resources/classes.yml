@@ -3,7 +3,11 @@ data:
     warmup: 5
     shield:
       warmup: 2
-      damage_reduction: 0.9
+      damage_reduction: 0.25
+      effects:
+        REGENERATION: 1
+        DAMAGE_RESISTANCE: 1
+        ABSORPTION: 2
     stamina:
       damage_divider: 0.25
       regen:

@@ -12,16 +12,16 @@ import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
@@ -33,17 +33,16 @@ import java.util.List;
  * TODO:
  * - Handle player disconnect
  * - Handle shield/armor breaking causing desync class message spam
- * - Fix particles on banner change to not look ugly
- * - Store effects given in Guard mode in the config and load them in
- * - Ensure infinite potion effects are removed upon login
+ * - Fix particles on banner change to not look ugly (DONE)
+ * - Store effects given in Guard mode in the config and load them in (DONE)
+ * - Ensure infinite potion effects are removed upon login (DONE)
  * - Ensure banner is removed using a PersistentDataContainer and checking on login
- * - Print message when stamina is at 50% and 100%
  */
 
 public final class Tank implements IClass {
     @Getter public ClassManager manager;
     @Getter public final String name = "Guardian";
-    @Getter public final String description = "";
+    @Getter public final String description = "Use your shield to protect nearby allies";
     @Getter public final boolean emptyArmorEnforced = false;
     @Getter public final int warmup;
     @Getter public final Material helmet = null;
@@ -65,6 +64,7 @@ public final class Tank implements IClass {
     @Getter public final Map<UUID, Double> stamina;
     @Getter public final Map<UUID, PLocatable> guardPoints;
     @Getter public final Map<UUID, Long> nextStaminaRegen;
+    @Getter public final Map<PotionEffectType, Integer> guardEffects;
 
     public Tank(ClassManager manager) {
         this.manager = manager;
@@ -82,6 +82,7 @@ public final class Tank implements IClass {
         this.stamina = Maps.newConcurrentMap();
         this.guardPoints = Maps.newConcurrentMap();
         this.nextStaminaRegen = Maps.newConcurrentMap();
+        this.guardEffects = Maps.newHashMap();
     }
 
     public Tank(
@@ -109,6 +110,7 @@ public final class Tank implements IClass {
         this.stamina = Maps.newConcurrentMap();
         this.guardPoints = Maps.newConcurrentMap();
         this.nextStaminaRegen = Maps.newConcurrentMap();
+        this.guardEffects = Maps.newHashMap();
 
         new Scheduler(manager.getPlugin()).sync(this::renderGuardPoints).repeat(0L, 5L).run();
         new Scheduler(manager.getPlugin()).sync(this::regenerateStamina).repeat(0L, 20L).run();
@@ -121,9 +123,10 @@ public final class Tank implements IClass {
                     .spawnEntity(point.getBukkitLocation(), EntityType.AREA_EFFECT_CLOUD);
 
             cloud.setSource(source);
-            cloud.setParticle(Particle.SNEEZE, Particle.SNEEZE.getDataType());
+            cloud.setParticle(Particle.SNEEZE, Particle.SMOKE_LARGE);
             cloud.setRadius(4.0f);
             cloud.setDuration(5);
+            cloud.setReapplicationDelay(1);
             cloud.setBasePotionData(new PotionData(PotionType.TURTLE_MASTER));
         });
     }
@@ -218,20 +221,32 @@ public final class Tank implements IClass {
     public ItemStack getBanner(double stamina) {
         final ItemBuilder builder = new ItemBuilder();
 
+        builder.setName(ChatColor.AQUA + "Stamina");
         builder.addEnchant(Enchantment.BINDING_CURSE, 1);
         builder.addFlag(ItemFlag.HIDE_ENCHANTS);
 
-        if (stamina > 50.0) {
+        if (stamina > 80.0) {
             builder.setMaterial(Material.GREEN_BANNER);
-        } else if (stamina > 25.0) {
+        } else if (stamina > 60.0) {
+            builder.setMaterial(Material.LIME_BANNER);
+        } else if (stamina > 40.0) {
             builder.setMaterial(Material.YELLOW_BANNER);
-        } else {
+        } else if (stamina > 20.0) {
+            builder.setMaterial(Material.ORANGE_BANNER);
+        } else if (stamina > 0.0) {
             builder.setMaterial(Material.RED_BANNER);
+        } else {
+            builder.setMaterial(Material.BLACK_BANNER);
         }
 
-        builder.setName(ChatColor.AQUA + "Stamina");
+        final ItemStack bannerItem = builder.build();
+        final ItemMeta meta = bannerItem.getItemMeta();
+        final PersistentDataContainer container = Objects.requireNonNull(meta).getPersistentDataContainer();
 
-        return builder.build();
+        container.set(manager.getPlugin().getNamespacedKey(), PersistentDataType.STRING, "removeOnLogin");
+        bannerItem.setItemMeta(meta);
+
+        return bannerItem;
     }
 
     public double getStamina(UUID uniqueId) {
@@ -243,7 +258,7 @@ public final class Tank implements IClass {
     }
 
     public boolean canUseStamina(Player player) {
-        return getStamina(player) > 50.0;
+        return getStamina(player) > 40.0;
     }
 
     public void damageStamina(Player player, double amount) {

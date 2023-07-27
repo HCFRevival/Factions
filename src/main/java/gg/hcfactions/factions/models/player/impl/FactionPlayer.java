@@ -397,17 +397,14 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
 
             if (!(playerClass instanceof final Tank tankClass)) {
                 sendMessage(FMessage.ERROR + FError.C_CLASS_MISMATCH.getErrorDescription());
-                return;
+            } else {
+                final TankShieldReadyEvent readyEvent = new TankShieldReadyEvent(getBukkit(), tankClass);
+                Bukkit.getPluginManager().callEvent(readyEvent);
+
+                if (!readyEvent.isCancelled()) {
+                    tankClass.activateShield(getBukkit());
+                }
             }
-
-            final TankShieldReadyEvent readyEvent = new TankShieldReadyEvent(getBukkit(), tankClass);
-            Bukkit.getPluginManager().callEvent(readyEvent);
-
-            if (readyEvent.isCancelled()) {
-                return;
-            }
-
-            tankClass.activateShield(getBukkit());
         }
 
         if (type.equals(ETimerType.PROTECTION)) {

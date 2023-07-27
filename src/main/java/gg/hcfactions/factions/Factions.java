@@ -40,10 +40,12 @@ import gg.hcfactions.libs.bukkit.services.impl.reports.ReportService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 
 import java.util.List;
 
 public final class Factions extends AresPlugin {
+    @Getter public final NamespacedKey namespacedKey = new NamespacedKey(this, "FACTIONS");
     @Getter public FConfig configuration;
     @Getter public PlayerManager playerManager;
     @Getter public FactionManager factionManager;

@@ -31,13 +31,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -57,6 +59,30 @@ public final class ClassListener implements Listener {
 
         recentlyLoggedIn.add(player.getUniqueId());
 
+        for (ItemStack armor : player.getInventory().getArmorContents()) {
+            if (armor == null) {
+                continue;
+            }
+
+            final ItemMeta meta = armor.getItemMeta();
+
+            if (meta == null) {
+                continue;
+            }
+
+            if (!meta.getPersistentDataContainer().has(plugin.getNamespacedKey(), PersistentDataType.STRING)) {
+                continue;
+            }
+
+            final String value = meta.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING);
+
+            if (value == null || !value.equalsIgnoreCase("removeOnLogin")) {
+                continue;
+            }
+
+            armor.setType(Material.AIR);
+        }
+
         new Scheduler(plugin).sync(() -> {
             final IClass playerClass = plugin.getClassManager().getClassByArmor(player);
 
@@ -67,12 +93,32 @@ public final class ClassListener implements Listener {
             }
 
             recentlyLoggedIn.remove(player.getUniqueId());
+
+            player.getActivePotionEffects()
+                    .stream()
+                    .filter(e -> e.getDuration() >= 10000 || e.getDuration() == -1)
+                    .forEach(infE -> player.removePotionEffect(infE.getType()));
         }).delay(3L).run();
+    }
+
+    @EventHandler /* Removes player from class upon disconnect */
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
         player.getActivePotionEffects()
                 .stream()
-                .filter(e -> e.getDuration() > 25000)
+                .filter(e -> e.getDuration() >= 10000 || e.getDuration() == -1)
                 .forEach(infE -> player.removePotionEffect(infE.getType()));
+
+        if (playerClass == null) {
+            return;
+        }
+
+        final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, playerClass);
+        Bukkit.getPluginManager().callEvent(deactivateEvent);
+
+        playerClass.deactivate(player);
     }
 
     @EventHandler
@@ -88,21 +134,6 @@ public final class ClassListener implements Listener {
         }
 
         plugin.getClassManager().validateClass(player);
-    }
-
-    @EventHandler /* Removes player from class upon disconnect */
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        final Player player = event.getPlayer();
-        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
-
-        if (playerClass == null) {
-            return;
-        }
-
-        final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, playerClass);
-        Bukkit.getPluginManager().callEvent(deactivateEvent);
-
-        playerClass.deactivate(player);
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
@@ -817,15 +848,15 @@ public final class ClassListener implements Listener {
         final AreaEffectCloud cloud = event.getEntity();
         final List<LivingEntity> affectedEntities = Lists.newArrayList(event.getAffectedEntities());
 
+        if (!cloud.getBasePotionData().getType().equals(PotionType.TURTLE_MASTER)) {
+            return;
+        }
+
         if (!(cloud.getSource() instanceof final Player player)) {
             return;
         }
 
         if (!(plugin.getClassManager().getCurrentClass(player) instanceof final Tank tankClass)) {
-            return;
-        }
-
-        if (!cloud.getBasePotionData().getType().equals(PotionType.TURTLE_MASTER)) {
             return;
         }
 
@@ -835,14 +866,32 @@ public final class ClassListener implements Listener {
         event.getAffectedEntities().clear();
 
         for (LivingEntity entity : affectedEntities) {
-            if (entity.getUniqueId().equals(player.getUniqueId())) {
-                //entity.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20, 2));
+            if (!(entity instanceof final Player otherPlayer)) {
                 continue;
             }
 
-            if (pf != null && entity instanceof final Player otherPlayer && pf.isMember(otherPlayer)) {
-                entity.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 20, 1));
+            // prevent applying to anyone but self if not in fac
+            if (pf == null && !entity.getUniqueId().equals(player.getUniqueId())) {
                 continue;
+            }
+
+            // prevent applying to enemies when in fac
+            if (pf != null && !pf.isMember(otherPlayer)) {
+                continue;
+            }
+
+            for (PotionEffectType effectType : tankClass.getGuardEffects().keySet()) {
+                final int amplifier = tankClass.getGuardEffects().get(effectType);
+
+                if (effectType.equals(PotionEffectType.ABSORPTION) && entity.hasPotionEffect(PotionEffectType.ABSORPTION)) {
+                    continue;
+                }
+
+                if (effectType.equals(PotionEffectType.HEALTH_BOOST) && entity.hasPotionEffect(PotionEffectType.HEALTH_BOOST)) {
+                    continue;
+                }
+
+                entity.addPotionEffect(new PotionEffect(effectType, 40, amplifier));
             }
         }
     }
@@ -890,7 +939,53 @@ public final class ClassListener implements Listener {
         if (!oldBanner.getType().equals(newBanner.getType())) {
             Objects.requireNonNull(player.getEquipment()).setHelmet(newBanner);
             Worlds.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT);
-            player.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, player.getLocation().add(0, 2.0, 0), 8);
+            player.getWorld().spawnParticle(Particle.VILLAGER_ANGRY, player.getLocation().add(0, 1.5, 0), 8, 0.5, 2.0, 0.5);
         }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        final Player player = (Player)event.getWhoClicked();
+        final ItemStack pre = player.getInventory().getItemInOffHand();
+
+        new Scheduler(plugin).sync(() -> {
+            final ItemStack post = player.getInventory().getItemInOffHand();
+
+            if (!pre.getType().equals(post.getType())) {
+                plugin.getClassManager().validateClass(player);
+            }
+        }).delay(1L).run();
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerHeldSwap(PlayerSwapHandItemsEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        new Scheduler(plugin).sync(() -> plugin.getClassManager().validateClass(player)).delay(1L).run();
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        final List<ItemStack> drops = event.getDrops();
+        final List<ItemStack> toRemove = Lists.newArrayList();
+
+        drops.forEach(drop -> {
+            if (drop.getType().name().endsWith("_BANNER")) {
+                final ItemMeta meta = drop.getItemMeta();
+
+                if (meta != null && meta.getPersistentDataContainer().has(plugin.getNamespacedKey(), PersistentDataType.STRING)) {
+                    final String value = meta.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING);
+
+                    if (value != null && value.equalsIgnoreCase("removeOnLogin")) {
+                        toRemove.add(drop);
+                    }
+                }
+            }
+        });
+
+        toRemove.forEach(drops::remove);
     }
 }
