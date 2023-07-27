@@ -137,6 +137,45 @@ public final class ClassListener implements Listener {
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
+    public void onEffectExpire(EntityPotionEffectEvent event) {
+        final PotionEffect effect = event.getOldEffect();
+
+        if (effect == null) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final Player player)) {
+            return;
+        }
+
+        final EntityPotionEffectEvent.Action action = event.getAction();
+
+        if (!action.equals(EntityPotionEffectEvent.Action.REMOVED) && !action.equals(EntityPotionEffectEvent.Action.CLEARED)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (playerClass == null) {
+            return;
+        }
+
+        if (!playerClass.getPassiveEffects().containsKey(effect.getType())) {
+            return;
+        }
+
+        final int amplifier = playerClass.getPassiveEffects().get(effect.getType());
+
+        new Scheduler(plugin).sync(() -> {
+            final IClass futurePlayerClass = plugin.getClassManager().getCurrentClass(player);
+
+            if (playerClass == futurePlayerClass) {
+                player.addPotionEffect(new PotionEffect(effect.getType(), PotionEffect.INFINITE_DURATION, amplifier));
+            }
+        }).delay(1L).run();
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onArcherTagDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof final Player damaged)) {
             return;
