@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.factions.models.events.impl.EventSchedule;
 import gg.hcfactions.libs.base.util.Time;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 public interface IScheduledEvent {
@@ -19,9 +21,12 @@ public interface IScheduledEvent {
         }
 
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
-        final int day = calendar.get(Calendar.DAY_OF_WEEK);
-        final int hour = calendar.get(Calendar.HOUR_OF_DAY) - 1;
-        final int min = calendar.get(Calendar.MINUTE);
+        final ZoneId tz = ZoneId.of("America/New_York");
+        final LocalDateTime now = LocalDateTime.now(tz);
+
+        final int day = now.getDayOfWeek().getValue();
+        final int hour = now.getHour();
+        final int min = now.getMinute();
 
         return getSchedule().stream().anyMatch(s -> s.getDay() == day && s.getHour() == hour && s.getMinute() == min);
     }
@@ -32,7 +37,7 @@ public interface IScheduledEvent {
         }
 
         final List<Long> times = Lists.newArrayList();
-        getSchedule().forEach(s -> times.add(Time.getTimeUntil(s.getDay(), s.getHour(), s.getMinute())));
+        getSchedule().forEach(s -> times.add(Time.getExperimentalTimeUntil(s.getDay(), s.getHour(), s.getMinute())));
 
         if (times.isEmpty()) {
             return -1L;
