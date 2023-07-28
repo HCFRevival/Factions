@@ -6,6 +6,16 @@ databases:
   mongo:
     uri: 'mongodb://0.0.0.0:27017'
     database: 'dev'
+    collections:
+      player_factions: 'player_factions'
+      server_factions: 'server_factions'
+      claims: 'claims'
+      subclaims: 'subclaims'
+      faction_players: 'players'
+      stats_kills: 'stats_kills'
+      stats_deaths: 'stats_deaths'
+      stats_events: 'stats_events'
+      stats_players: 'stats_players'
   redis:
     uri: 'redis://0.0.0.0:6379'
 

@@ -29,9 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class FactionManager implements IManager {
-    public static final String PLAYER_FACTION_DB_COLL_NAME = "player_factions";
-    public static final String SERVER_FACTION_DB_COLL_NAME = "server_factions";
-
     @Getter public Factions plugin;
     @Getter public FactionValidator validator;
     @Getter public FactionExecutor executor;
@@ -87,8 +84,8 @@ public final class FactionManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> playerFactionColl = db.getCollection(PLAYER_FACTION_DB_COLL_NAME);
-        final MongoCollection<Document> serverFactionColl = db.getCollection(SERVER_FACTION_DB_COLL_NAME);
+        final MongoCollection<Document> playerFactionColl = db.getCollection(plugin.getConfiguration().getPlayerFactionCollection());
+        final MongoCollection<Document> serverFactionColl = db.getCollection(plugin.getConfiguration().getServerFactionCollection());
 
         factionRepository.forEach(f -> {
             if (f instanceof PlayerFaction) {
@@ -129,8 +126,8 @@ public final class FactionManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> playerFactionColl = db.getCollection(PLAYER_FACTION_DB_COLL_NAME);
-        final MongoCollection<Document> serverFactionColl = db.getCollection(SERVER_FACTION_DB_COLL_NAME);
+        final MongoCollection<Document> playerFactionColl = db.getCollection(plugin.getConfiguration().getPlayerFactionCollection());
+        final MongoCollection<Document> serverFactionColl = db.getCollection(plugin.getConfiguration().getServerFactionCollection());
         final FindIterable<Document> playerFactionDocs = playerFactionColl.find();
         final FindIterable<Document> serverFactionDocs = serverFactionColl.find();
 
@@ -168,7 +165,7 @@ public final class FactionManager implements IManager {
             return null;
         }
 
-        final MongoCollection<Document> coll = db.getCollection((faction instanceof PlayerFaction) ? PLAYER_FACTION_DB_COLL_NAME : SERVER_FACTION_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection((faction instanceof PlayerFaction) ? plugin.getConfiguration().getPlayerFactionCollection() : plugin.getConfiguration().getServerFactionCollection());
         return coll.deleteOne(Filters.eq("uuid", faction.getUniqueId().toString()));
     }
 

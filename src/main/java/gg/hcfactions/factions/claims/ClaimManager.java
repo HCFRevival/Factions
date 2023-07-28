@@ -26,8 +26,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class ClaimManager implements IManager {
-    public static final String CLAIM_DB_COLL_NAME = "claims";
-
     @Getter public final Factions plugin;
     @Getter public ClaimBuilderManager claimBuilderManager;
     @Getter public Set<Claim> claimRepository;
@@ -69,7 +67,7 @@ public final class ClaimManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(CLAIM_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getClaimCollection());
 
         claimRepository.forEach(c -> {
             final Document existing = coll.find(Filters.eq("uuid", c.getUniqueId().toString())).first();
@@ -98,7 +96,7 @@ public final class ClaimManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(CLAIM_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getClaimCollection());
         final FindIterable<Document> docs = coll.find();
 
         try (MongoCursor<Document> cursor = docs.cursor()) {
@@ -127,7 +125,7 @@ public final class ClaimManager implements IManager {
             return null;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(CLAIM_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getClaimCollection());
         return coll.deleteOne(Filters.eq("uuid", claim.getUniqueId().toString()));
     }
 

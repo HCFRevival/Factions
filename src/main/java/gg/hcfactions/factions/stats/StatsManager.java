@@ -29,12 +29,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public final class StatsManager implements IManager {
-    public static final String STATS_DB_PLAYER_COLL_NAME = "stats_players";
-    public static final String STATS_DB_FACTION_COLL_NAME = "stats_factions";
-    public static final String STATS_DB_KILL_COLL_NAME = "stats_kills";
-    public static final String STATS_DB_DEATH_COLL_NAME = "stats_deaths";
-    public static final String STATS_DB_EVENT_COLL_NAME = "stats_events";
-
     @Getter public final Factions plugin;
     @Getter public StatsExecutor executor;
     @Getter public StatsConfig config;
@@ -83,7 +77,7 @@ public final class StatsManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> pColl = db.getCollection(STATS_DB_PLAYER_COLL_NAME);
+        final MongoCollection<Document> pColl = db.getCollection(plugin.getConfiguration().getPlayerStatsCollection());
         // TODO: Faction stats here
 
         trackerRepository.stream().filter(h -> h instanceof PlayerStatHolder).forEach(ph -> {
@@ -155,7 +149,7 @@ public final class StatsManager implements IManager {
                     return;
                 }
 
-                final MongoCollection<Document> coll = db.getCollection(STATS_DB_PLAYER_COLL_NAME);
+                final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getPlayerStatsCollection());
                 final Document document = coll.find(Filters.and(Filters.eq("uuid", uniqueId.toString()), Filters.eq("map", config.getMapNumber()))).first();
 
                 if (document == null) {
@@ -198,7 +192,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoCollection<Document> coll = db.getCollection(STATS_DB_PLAYER_COLL_NAME);
+            final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getPlayerStatsCollection());
             try (MongoCursor<Document> cursor = coll.find(Filters.eq("map", plugin.getConfiguration().getMapNumber())).cursor()) {
                 while (cursor.hasNext()) {
                     result.add(new PlayerStatHolder().fromDocument(cursor.next()));
@@ -242,7 +236,7 @@ public final class StatsManager implements IManager {
                 return;
             }
 
-            final MongoCollection<Document> coll = db.getCollection(STATS_DB_PLAYER_COLL_NAME);
+            final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getPlayerStatsCollection());
             final Document existing = coll.find(
                     Filters.and(
                             Filters.eq("uuid", holder.getUniqueId().toString()),
@@ -277,7 +271,7 @@ public final class StatsManager implements IManager {
             }
 
             final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
-            final MongoCollection<Document> killColl = db.getCollection(STATS_DB_KILL_COLL_NAME);
+            final MongoCollection<Document> killColl = db.getCollection(plugin.getConfiguration().getKillStatsCollection());
             // TODO: Faction tracking here
 
             killColl.insertOne(kill.toDocument());
@@ -301,7 +295,7 @@ public final class StatsManager implements IManager {
             }
 
             final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
-            final MongoCollection<Document> deathColl = db.getCollection(STATS_DB_DEATH_COLL_NAME);
+            final MongoCollection<Document> deathColl = db.getCollection(plugin.getConfiguration().getDeathStatsCollection());
             // TODO: Faction tracking here
 
             deathColl.insertOne(death.toDocument());
@@ -326,7 +320,7 @@ public final class StatsManager implements IManager {
             }
 
             final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
-            final MongoCollection<Document> eventColl = db.getCollection(STATS_DB_EVENT_COLL_NAME);
+            final MongoCollection<Document> eventColl = db.getCollection(plugin.getConfiguration().getEventStatsCollection());
             // TODO: Faction tracking here
 
             eventColl.insertOne(eventCapture.toDocument());

@@ -50,7 +50,7 @@ public final class PlayerManager implements IManager {
             return null;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(PLAYER_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getFactionPlayerCollection());
         final Document doc = coll.find(filter).first();
         if (doc == null) {
             return null;
@@ -78,7 +78,7 @@ public final class PlayerManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(PLAYER_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getFactionPlayerCollection());
         final Document existing = coll.find(Filters.eq("uuid", fp.getUniqueId().toString())).first();
 
         if (existing != null) {
