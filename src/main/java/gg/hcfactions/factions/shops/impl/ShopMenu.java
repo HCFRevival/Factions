@@ -13,6 +13,7 @@ import gg.hcfactions.factions.models.shop.impl.events.EventMerchant;
 import gg.hcfactions.factions.models.shop.impl.events.EventShopItem;
 import gg.hcfactions.factions.utils.PlayerUtil;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.base.util.Strings;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
@@ -128,7 +129,7 @@ public final class ShopMenu extends GenericMenu {
             return;
         }
 
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
+        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
 
         faction.subtractTokens(item.getTokenPrice());
         player.getInventory().addItem(item.getItem(false));
@@ -137,7 +138,7 @@ public final class ShopMenu extends GenericMenu {
                 + FMessage.SUCCESS + "purchased" + ChatColor.AQUA + " x" + item.getAmount() + ChatColor.RESET + " "
                 + itemName + FMessage.LAYER_1 + " for " + ChatColor.DARK_AQUA + item.getTokenPrice() + " tokens");
 
-        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + itemName + " with " + item.getTokenPrice() + " tokens");
+        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + " " + itemName + " with " + item.getTokenPrice() + " tokens");
 
         promise.resolve();
     }
@@ -165,7 +166,7 @@ public final class ShopMenu extends GenericMenu {
             return;
         }
 
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
+        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
 
         factionPlayer.subtractFromBalance(item.getBuyPrice());
 
@@ -174,7 +175,7 @@ public final class ShopMenu extends GenericMenu {
                 + ChatColor.RESET + " " + itemName + FMessage.LAYER_1 + " for " + ChatColor.DARK_GREEN
                 + String.format("%.2f", item.getBuyPrice()));
 
-        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
+        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + " " + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
 
         promise.resolve();
     }
@@ -193,7 +194,7 @@ public final class ShopMenu extends GenericMenu {
         }
 
         final ItemStack found = PlayerUtil.getFirstItemStackByMaterial(player, item.getMaterial());
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : StringUtils.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
+        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
 
         if (found == null) {
             promise.reject("You do not have any " + itemName + " in your inventory");
@@ -226,6 +227,6 @@ public final class ShopMenu extends GenericMenu {
                 + FMessage.LAYER_1 + " for " + ChatColor.DARK_GREEN
                 + "$" + String.format("%.2f", soldPrice));
 
-        plugin.getAresLogger().info(player.getName() + " sold x" + item.getAmount() + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
+        plugin.getAresLogger().info(player.getName() + " sold x" + item.getAmount() + " " + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
     }
 }

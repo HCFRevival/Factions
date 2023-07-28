@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,7 @@ public interface IShopItem {
             builder.setName(getDisplayName());
         }
 
-        if (getEnchantments() != null && !getEnchantments().isEmpty()) {
+        if (!getMaterial().equals(Material.ENCHANTED_BOOK) && getEnchantments() != null && !getEnchantments().isEmpty()) {
             builder.addEnchant(getEnchantments());
         }
 
@@ -125,6 +126,19 @@ public interface IShopItem {
         }
 
         builder.addLore(lore);
-        return builder.build();
+
+        final ItemStack item = builder.build();
+
+        if (getMaterial().equals(Material.ENCHANTED_BOOK) && !getEnchantments().isEmpty()) {
+            final EnchantmentStorageMeta encMeta = (EnchantmentStorageMeta) item.getItemMeta();
+
+            if (encMeta != null) {
+                getEnchantments().forEach((enchantment, level) -> encMeta.addStoredEnchant(enchantment, level, true));
+            }
+
+            item.setItemMeta(encMeta);
+        }
+
+        return item;
     }
 }
