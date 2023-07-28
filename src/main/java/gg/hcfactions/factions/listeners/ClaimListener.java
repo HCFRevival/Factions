@@ -298,7 +298,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         for (Block affected : event.getBlocks()) {
             final Claim affectedClaim = plugin.getClaimManager().getClaimAt(new BLocatable(affected));
-            final List<Claim> affectedBuildBuffers = plugin.getClaimManager().getClaimsNearby(new BLocatable(affected), true);
 
             if (pistonClaim == null && affectedClaim != null) {
                 event.setCancelled(true);
@@ -306,10 +305,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             } else if (pistonClaim != null && affectedClaim == null) {
                 event.setCancelled(true);
                 return;
-            } else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
-                event.setCancelled(true);
-                return;
-            } else if (!affectedBuildBuffers.isEmpty()) {
+            } else if (pistonClaim != null && !pistonClaim.getOwner().equals(affectedClaim.getOwner())) {
                 event.setCancelled(true);
                 return;
             }
@@ -328,7 +324,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         for (Block affected : event.getBlocks()) {
             final Claim affectedClaim = plugin.getClaimManager().getClaimAt(new BLocatable(affected));
-            final List<Claim> affectedBuildBuffers = plugin.getClaimManager().getClaimsNearby(new BLocatable(affected), true);
 
             if (pistonClaim == null && affectedClaim != null) {
                 event.setCancelled(true);
@@ -337,9 +332,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 event.setCancelled(true);
                 return;
             } else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
-                event.setCancelled(true);
-                return;
-            } else if (!affectedBuildBuffers.isEmpty()) {
                 event.setCancelled(true);
                 return;
             }
