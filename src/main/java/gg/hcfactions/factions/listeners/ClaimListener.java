@@ -525,6 +525,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                         || block.getType().equals(Material.TRAPPED_CHEST)
                         || block.getType().equals(Material.COMPOSTER)
                         || block.getType().equals(Material.ENCHANTING_TABLE)
+                        || block.getType().equals(Material.LEVER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
@@ -544,6 +545,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                         || block.getType().equals(Material.CHEST)
                         || block.getType().equals(Material.TRAPPED_CHEST)
                         || block.getType().equals(Material.COMPOSTER)
+                        || block.getType().equals(Material.LEVER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
@@ -562,7 +564,9 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 if (
                         action.equals(Action.RIGHT_CLICK_BLOCK)
                         && (block.getType().equals(Material.CRAFTING_TABLE)
-                        || block.getType().equals(Material.ENDER_CHEST))) {
+                        || block.getType().equals(Material.ENDER_CHEST)
+                        || block.getType().equals(Material.LEVER)
+                        || block.getType().name().endsWith("_BUTTON"))) {
 
                     return;
                 }
