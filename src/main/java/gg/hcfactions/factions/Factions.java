@@ -302,18 +302,5 @@ public final class Factions extends AresPlugin {
         waypointManager.onDisable();
         crowbarManager.onDisable();
         outpostManager.onDisable();
-
-        playerManager = null;
-        factionManager = null;
-        claimManager = null;
-        timerManager = null;
-        statsManager = null;
-        loggerManager = null;
-        serverStateManager = null;
-        classManager = null;
-        eventManager = null;
-        displayManager = null;
-        waypointManager = null;
-        outpostManager = null;
     }
 }
