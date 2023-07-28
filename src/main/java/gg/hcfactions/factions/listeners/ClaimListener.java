@@ -298,7 +298,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         for (Block affected : event.getBlocks()) {
             final Claim affectedClaim = plugin.getClaimManager().getClaimAt(new BLocatable(affected));
-            final List<Claim> affectedBuildBuffers = plugin.getClaimManager().getClaimsNearby(new BLocatable(affected), true);
 
             if (pistonClaim == null && affectedClaim != null) {
                 event.setCancelled(true);
@@ -306,10 +305,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             } else if (pistonClaim != null && affectedClaim == null) {
                 event.setCancelled(true);
                 return;
-            } else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
-                event.setCancelled(true);
-                return;
-            } else if (!affectedBuildBuffers.isEmpty()) {
+            } else if (pistonClaim != null && !pistonClaim.getOwner().equals(affectedClaim.getOwner())) {
                 event.setCancelled(true);
                 return;
             }
@@ -328,7 +324,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
 
         for (Block affected : event.getBlocks()) {
             final Claim affectedClaim = plugin.getClaimManager().getClaimAt(new BLocatable(affected));
-            final List<Claim> affectedBuildBuffers = plugin.getClaimManager().getClaimsNearby(new BLocatable(affected), true);
 
             if (pistonClaim == null && affectedClaim != null) {
                 event.setCancelled(true);
@@ -337,9 +332,6 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 event.setCancelled(true);
                 return;
             } else if (pistonClaim != null && !pistonClaim.getUniqueId().equals(affectedClaim.getUniqueId())) {
-                event.setCancelled(true);
-                return;
-            } else if (!affectedBuildBuffers.isEmpty()) {
                 event.setCancelled(true);
                 return;
             }
@@ -445,12 +437,37 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 final ServerFaction serverFaction = plugin.getFactionManager().getServerFactionById(inside.getOwner());
 
                 if (serverFaction != null) {
+                    if (event.getEntity() instanceof final Player player) {
+                        player.sendMessage(ChatColor.RED + "Failed to create portal: Conflicts with " + serverFaction.getDisplayName() + ChatColor.RED + "'s claims and was unable to find any other nearby portals. Please try building a Portal in a different location.");
+                    }
+
                     plugin.getAresLogger().error(event.getEventName() + " failed! Reason: inside a claim (" + serverFaction.getName() + ")");
                     event.setCancelled(true);
                     return;
                 }
             }
         }
+    }
+
+    /**
+     * Expands portal search radius
+     * @param event PlayerPortalEvent
+     */
+    @EventHandler
+    public void onPlayerPortal(PlayerPortalEvent event) {
+        if (event.isCancelled() || event.getTo() == null) {
+            return;
+        }
+
+        final Location origin = event.getTo();
+        final BLocatable originLocatable = new BLocatable(origin.getBlock());
+        final List<Claim> claims = plugin.getClaimManager().getServerClaimsNearby(originLocatable, 4);
+
+        if (claims.isEmpty()) {
+            return;
+        }
+
+        event.setSearchRadius(300);
     }
 
     /**
@@ -508,10 +525,10 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                         || block.getType().equals(Material.TRAPPED_CHEST)
                         || block.getType().equals(Material.COMPOSTER)
                         || block.getType().equals(Material.ENCHANTING_TABLE)
+                        || block.getType().equals(Material.LEVER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
-                        || block.getType().name().endsWith("_TRAPDOOR")
                 ) {
                     return;
                 }
@@ -528,10 +545,10 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                         || block.getType().equals(Material.CHEST)
                         || block.getType().equals(Material.TRAPPED_CHEST)
                         || block.getType().equals(Material.COMPOSTER)
+                        || block.getType().equals(Material.LEVER)
                         || block.getType().name().endsWith("_DOOR")
                         || block.getType().name().endsWith("_FENCE_GATE")
                         || block.getType().name().endsWith("_BUTTON")
-                        || block.getType().name().endsWith("_TRAPDOOR")
                 ) {
                     return;
                 }
@@ -547,7 +564,9 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 if (
                         action.equals(Action.RIGHT_CLICK_BLOCK)
                         && (block.getType().equals(Material.CRAFTING_TABLE)
-                        || block.getType().equals(Material.ENDER_CHEST))) {
+                        || block.getType().equals(Material.ENDER_CHEST)
+                        || block.getType().equals(Material.LEVER)
+                        || block.getType().name().endsWith("_BUTTON"))) {
 
                     return;
                 }

@@ -9,6 +9,7 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -16,8 +17,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-
-import java.util.Objects;
 
 public record OutpostListener(@Getter Factions plugin) implements Listener {
     /**
@@ -70,13 +69,13 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        // prevent natural spawns inside outpost claims
-        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)) {
-            event.setCancelled(true);
+        if (entity.getType().equals(EntityType.ENDERMAN)) {
             return;
         }
 
-        if (entity.getType().equals(EntityType.ENDERMAN)) {
+        // prevent natural spawns inside outpost claims
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)) {
+            event.setCancelled(true);
             return;
         }
 
@@ -105,11 +104,26 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             }
         }
 
-        Objects.requireNonNull(entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)).setBaseValue(2.5);
-        Objects.requireNonNull(entity.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).setBaseValue(0.4);
-        Objects.requireNonNull(entity.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(0.5);
+        final AttributeInstance attackDamageInst = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        final AttributeInstance moveSpeedInst = entity.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        final AttributeInstance knockbackResInst = entity.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+        final AttributeInstance maxHealthInst = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 
-        Objects.requireNonNull(entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(32.0);
-        entity.setHealth(32.0);
+        if (attackDamageInst != null) {
+            attackDamageInst.setBaseValue(2.5);
+        }
+
+        if (moveSpeedInst != null) {
+            moveSpeedInst.setBaseValue(0.4);
+        }
+
+        if (knockbackResInst != null) {
+            knockbackResInst.setBaseValue(0.5);
+        }
+
+        if (maxHealthInst != null) {
+            maxHealthInst.setBaseValue(32.0);
+            entity.setHealth(32.0);
+        }
     }
 }

@@ -25,8 +25,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class SubclaimManager implements IManager {
-    public static final String SUBCLAIM_DB_COLL_NAME = "subclaims";
-
     @Getter public final Factions plugin;
     @Getter public SubclaimExecutor executor;
     @Getter public SubclaimBuilderManager builderManager;
@@ -72,7 +70,7 @@ public final class SubclaimManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(SUBCLAIM_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getSubclaimCollection());
         final FindIterable<Document> docs = coll.find();
 
         try (MongoCursor<Document> cursor = docs.cursor()) {
@@ -101,7 +99,7 @@ public final class SubclaimManager implements IManager {
             return;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(SUBCLAIM_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getSubclaimCollection());
 
         subclaimRepository.forEach(c -> {
             final Document existing = coll.find(Filters.eq("uuid", c.getUniqueId().toString())).first();
@@ -129,7 +127,7 @@ public final class SubclaimManager implements IManager {
             return null;
         }
 
-        final MongoCollection<Document> coll = db.getCollection(SUBCLAIM_DB_COLL_NAME);
+        final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getSubclaimCollection());
         return coll.deleteOne(Filters.eq("uuid", claim.getUniqueId().toString()));
     }
 

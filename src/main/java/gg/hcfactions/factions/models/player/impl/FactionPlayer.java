@@ -2,12 +2,14 @@ package gg.hcfactions.factions.models.player.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gg.hcfactions.factions.listeners.events.player.TankShieldReadyEvent;
 import gg.hcfactions.factions.models.claim.EClaimPillarType;
 import gg.hcfactions.factions.models.claim.EShieldType;
 import gg.hcfactions.factions.models.claim.IPillar;
 import gg.hcfactions.factions.models.claim.IShield;
 import gg.hcfactions.factions.models.claim.impl.*;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.classes.impl.Tank;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -387,6 +389,21 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
 
             if (playerClass != null) {
                 playerClass.activate(getBukkit());
+            }
+        }
+
+        if (type.equals(ETimerType.GUARD)) {
+            final IClass playerClass = playerManager.getPlugin().getClassManager().getClassByArmor(getBukkit());
+
+            if (!(playerClass instanceof final Tank tankClass)) {
+                sendMessage(FMessage.ERROR + FError.C_CLASS_MISMATCH.getErrorDescription());
+            } else {
+                final TankShieldReadyEvent readyEvent = new TankShieldReadyEvent(getBukkit(), tankClass);
+                Bukkit.getPluginManager().callEvent(readyEvent);
+
+                if (!readyEvent.isCancelled()) {
+                    tankClass.activateShield(getBukkit());
+                }
             }
         }
 

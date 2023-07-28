@@ -1,4 +1,23 @@
 data:
+  tank:
+    warmup: 5
+    shield:
+      warmup: 2
+      damage_reduction: 0.25
+      effects:
+        REGENERATION: 1
+        DAMAGE_RESISTANCE: 1
+        ABSORPTION: 2
+    stamina:
+      damage_divider: 0.25
+      regen:
+        delay: 5
+        hard_delay: 15
+        interval: 1
+    passive:
+      HEALTH_BOOST: 3
+      SLOW: 2
+      DAMAGE_RESISTANCE: 2
   miner:
     warmup: 5
     passive:

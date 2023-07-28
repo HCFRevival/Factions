@@ -10,6 +10,7 @@ public enum FError {
     G_PAGE_NOT_FOUND("Page not found"),
     C_DOES_NOT_MEET_ARMOR_REQ("You do not meet the armor requirements for this class"),
     C_CLASS_LIMIT_MET("Your faction is at the limit for this class"),
+    C_CLASS_MISMATCH("Failed to synchronize your class data"),
     P_CANT_PERFORM_SELF("You can not perform this action to yourself"),
     P_CANT_PERFORM_WHILE_COMBAT_TAGGED("You can not perform this action while combat-tagged"),
     P_CAN_NOT_CHANGE_WORLDS_CTAG("You can not change worlds while you are combat-tagged"), /* deprecated, use P_CANT_PERFORM_WHILE_COMBAT_TAGGED */

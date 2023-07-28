@@ -34,6 +34,11 @@ public interface IClass {
     int getWarmup();
 
     /**
+     * @return If true null values will be enforced as AIR materials
+     */
+    boolean isEmptyArmorEnforced();
+
+    /**
      * @return Helmet material type
      */
     Material getHelmet();
@@ -52,6 +57,11 @@ public interface IClass {
      * @return Boots material type
      */
     Material getBoots();
+
+    /**
+     * @return Off-hand material type
+     */
+    Material getOffhand();
 
     /**
      * @return Set containing Bukkit UUIDs for players actively using this class instance
@@ -151,20 +161,66 @@ public interface IClass {
             return false;
         }
 
-        if (player.getEquipment().getHelmet() == null || !player.getEquipment().getHelmet().getType().equals(getHelmet())) {
-            return false;
+        if (isEmptyArmorEnforced()) {
+            if (getHelmet() == null && player.getEquipment().getHelmet() != null) {
+                return false;
+            }
+
+            if (getChestplate() == null && player.getEquipment().getChestplate() != null) {
+                return false;
+            }
+
+            if (getLeggings() == null && player.getEquipment().getLeggings() != null) {
+                return false;
+            }
+
+            if (getBoots() == null && player.getEquipment().getBoots() != null) {
+                return false;
+            }
         }
 
-        if (player.getEquipment().getChestplate() == null || !player.getEquipment().getChestplate().getType().equals(getChestplate())) {
-            return false;
+        if (getHelmet() != null) {
+            if (player.getEquipment().getHelmet() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
+            if (player.getEquipment().getHelmet() == null || !player.getEquipment().getHelmet().getType().equals(getHelmet())) {
+                return false;
+            }
         }
 
-        if (player.getEquipment().getLeggings() == null || !player.getEquipment().getLeggings().getType().equals(getLeggings())) {
-            return false;
+        if (getChestplate() != null) {
+            if (player.getEquipment().getChestplate() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
+            if (player.getEquipment().getChestplate() == null || !player.getEquipment().getChestplate().getType().equals(getChestplate())) {
+                return false;
+            }
         }
 
-        if (player.getEquipment().getBoots() == null || !player.getEquipment().getBoots().getType().equals(getBoots())) {
-            return false;
+        if (getLeggings() != null) {
+            if (player.getEquipment().getLeggings() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
+            if (player.getEquipment().getLeggings() == null || !player.getEquipment().getLeggings().getType().equals(getLeggings())) {
+                return false;
+            }
+        }
+
+        if (getBoots() != null) {
+            if (player.getEquipment().getBoots() == null && isEmptyArmorEnforced()) {
+                return false;
+            }
+
+            if (player.getEquipment().getBoots() == null || !player.getEquipment().getBoots().getType().equals(getBoots())) {
+                return false;
+            }
+        }
+
+        if (getOffhand() != null) {
+            return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
         }
 
         return true;

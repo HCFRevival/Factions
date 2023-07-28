@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.classes;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ClassDeactivateEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ClassManager implements IManager {
@@ -87,6 +89,33 @@ public final class ClassManager implements IManager {
                 final int seaCallCooldown = conf.getInt(path + "sea_call_cooldown");
                 final int seaCallDuration = conf.getInt(path + "sea_call_duration");
                 playerClass = new Diver(this, warmup, damageMultiplier, minimumDistance, seaCallCooldown, seaCallDuration);
+            }
+
+            else if (className.equalsIgnoreCase("tank")) {
+                final int shieldWarmup = conf.getInt(path + "shield.warmup");
+                final double shieldDamageReduction = conf.getDouble(path + "shield.damage_reduction");
+                final double staminaDamageDivider = conf.getDouble(path + "stamina.damage_divider");
+                final int staminaRegenDelay = conf.getInt(path + "stamina.regen.delay");
+                final int staminaHardRegenDelay = conf.getInt(path + "stamina.regen.hard_delay");
+                final int staminaRegenInterval = conf.getInt(path + "stamina.regen.interval");
+                final Map<PotionEffectType, Integer> guardEffects = Maps.newHashMap();
+
+                if (conf.get(path + "shield.effects") != null) {
+                    for (String effectName : Objects.requireNonNull(conf.getConfigurationSection(path + "shield.effects")).getKeys(false)) {
+                        final PotionEffectType effectType = PotionEffectType.getByName(effectName);
+                        final int amplifier = conf.getInt(path + "shield.effects." + effectName);
+
+                        if (effectType == null) {
+                            plugin.getAresLogger().error("invalid guard effect for " + className + ": " + effectName);
+                            continue;
+                        }
+
+                        guardEffects.put(effectType, amplifier);
+                    }
+                }
+
+                playerClass = new Tank(this, warmup, shieldWarmup, shieldDamageReduction, staminaDamageDivider, staminaRegenInterval, staminaRegenDelay, staminaHardRegenDelay);
+                ((Tank)playerClass).getGuardEffects().putAll(guardEffects);
             }
 
             else if (className.equalsIgnoreCase("miner")) {
@@ -179,6 +208,10 @@ public final class ClassManager implements IManager {
     public void validateClass(Player player) {
         final IClass actualClass = getPlugin().getClassManager().getCurrentClass(player);
         final IClass expectedClass = getPlugin().getClassManager().getClassByArmor(player);
+
+        if (expectedClass != null && expectedClass == actualClass) {
+            return;
+        }
 
         if (expectedClass != null) {
             if (actualClass != null) {

@@ -22,10 +22,12 @@ public final class Diver implements IClass {
     @Getter public final String name = "Diver";
     @Getter public final String description = "Grants the ability to navigate water easily";
     @Getter public final int warmup;
+    @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.TURTLE_HELMET;
     @Getter public final Material chestplate = Material.DIAMOND_CHESTPLATE;
     @Getter public final Material leggings = Material.DIAMOND_LEGGINGS;
     @Getter public final Material boots = Material.DIAMOND_BOOTS;
+    @Getter public final Material offhand = null;
     @Getter public Set<UUID> activePlayers;
     @Getter public Map<PotionEffectType, Integer> passiveEffects;
     @Getter public Map<UUID, Long> seaCallCooldowns;

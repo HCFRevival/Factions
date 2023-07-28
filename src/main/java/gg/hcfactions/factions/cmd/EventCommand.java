@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.DayOfWeek;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -363,13 +364,13 @@ public final class EventCommand extends BaseCommand {
         int dayOfWeek = -1;
 
         switch (dayOfWeekName.toLowerCase()) {
-            case "sunday" -> dayOfWeek = 1;
-            case "monday" -> dayOfWeek = 2;
-            case "tuesday" -> dayOfWeek = 3;
-            case "wednesday" -> dayOfWeek = 4;
-            case "thursday" -> dayOfWeek = 5;
-            case "friday" -> dayOfWeek = 6;
-            case "saturday" -> dayOfWeek = 7;
+            case "sunday" -> dayOfWeek = 7;
+            case "monday" -> dayOfWeek = 1;
+            case "tuesday" -> dayOfWeek = 2;
+            case "wednesday" -> dayOfWeek = 3;
+            case "thursday" -> dayOfWeek = 4;
+            case "friday" -> dayOfWeek = 5;
+            case "saturday" -> dayOfWeek = 6;
         }
 
         if (dayOfWeek == -1) {

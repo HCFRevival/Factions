@@ -22,6 +22,16 @@ public final class FConfig {
     // databases
     @Getter public String mongoUri;
     @Getter public String mongoDatabaseName;
+    @Getter public String playerFactionCollection;
+    @Getter public String serverFactionCollection;
+    @Getter public String claimCollection;
+    @Getter public String subclaimCollection;
+    @Getter public String factionPlayerCollection;
+    @Getter public String killStatsCollection;
+    @Getter public String deathStatsCollection;
+    @Getter public String eventStatsCollection;
+    @Getter public String playerStatsCollection;
+
     @Getter public String redisUri;
 
     // world
@@ -190,6 +200,16 @@ public final class FConfig {
 
         mongoUri = conf.getString("databases.mongo.uri");
         mongoDatabaseName = conf.getString("databases.mongo.database");
+        playerFactionCollection = conf.getString("databases.mongo.collections.player_factions");
+        serverFactionCollection = conf.getString("databases.mongo.collections.server_factions");
+        claimCollection = conf.getString("databases.mongo.collections.claims");
+        subclaimCollection = conf.getString("databases.mongo.collections.subclaims");
+        factionPlayerCollection = conf.getString("databases.mongo.collections.faction_players");
+        killStatsCollection = conf.getString("databases.mongo.collections.stats_kills");
+        deathStatsCollection = conf.getString("databases.mongo.collections.stats_deaths");
+        eventStatsCollection = conf.getString("databases.mongo.collections.stats_events");
+        playerStatsCollection = conf.getString("databases.mongo.collections.stats_players");
+
         redisUri = conf.getString("databases.redis.uri");
         plugin.getAresLogger().info("Using MongoDB Database: " + mongoDatabaseName);
 

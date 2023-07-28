@@ -130,42 +130,48 @@ public interface IConsumeable {
         // end uuid gathering
 
         // apply effects to all gathered uuids
-        affected.forEach(affectedId -> {
+        for (UUID affectedId : affected) {
             final Player affectedPlayer = Bukkit.getPlayer(affectedId);
 
-            if (affectedPlayer != null) {
-                final IClass affectedPlayerClass = getPlugin().getClassManager().getCurrentClass(affectedPlayer);
-                final PotionEffect existingPotionEffect = (affectedPlayer.hasPotionEffect(getEffectType()) ? Players.getPotionEffect(affectedPlayer, getEffectType()) : null);
-                final boolean hasExistingClassPassive = (affectedPlayerClass != null && affectedPlayerClass.getPassiveEffects().containsKey(getEffectType()));
-
-                if (affectedPlayer.hasPotionEffect(getEffectType())) {
-                    affectedPlayer.removePotionEffect(getEffectType());
-                }
-
-                affectedPlayer.addPotionEffect(new PotionEffect(getEffectType(), (getDuration() * 20), getAmplifier()));
-
-                switch (getApplicationType()) {
-                    case ALL ->
-                            affectedPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "You now have " + ChatColor.AQUA + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " " +
-                                    (getAmplifier() + 1) + ChatColor.LIGHT_PURPLE + " for " + ChatColor.AQUA + getDuration() + " seconds");
-                    case FRIEND_ONLY ->
-                            affectedPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "You now have " + ChatColor.AQUA + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " " +
-                                    (getAmplifier() + 1) + ChatColor.LIGHT_PURPLE + " for " + ChatColor.AQUA + getDuration() + " seconds " + ChatColor.LIGHT_PURPLE + "thanks to " + ChatColor.AQUA + player.getName());
-                    case ENEMY_ONLY ->
-                            affectedPlayer.sendMessage(ChatColor.RED + "You now have " + ChatColor.BLUE + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " " +
-                                    (getAmplifier() + 1) + ChatColor.RED + " for " + ChatColor.BLUE + getDuration() + " seconds");
-                }
-
-                if (existingPotionEffect != null) {
-                    new Scheduler(getPlugin()).sync(() -> {
-                        if (hasExistingClassPassive && !affectedPlayerClass.getActivePlayers().contains(affectedId)) {
-                            return;
-                        }
-
-                        affectedPlayer.addPotionEffect(existingPotionEffect);
-                    }).delay((getDuration() * 20L) + 1L).run();
-                }
+            if (affectedPlayer == null) {
+                continue;
             }
+
+            final IClass affectedPlayerClass = getPlugin().getClassManager().getCurrentClass(affectedPlayer);
+            final PotionEffect existingPotionEffect = (affectedPlayer.hasPotionEffect(getEffectType()) ? Players.getPotionEffect(affectedPlayer, getEffectType()) : null);
+            final boolean hasExistingClassPassive = (affectedPlayerClass != null && affectedPlayerClass.getPassiveEffects().containsKey(getEffectType()));
+
+            if (affectedPlayer.hasPotionEffect(getEffectType())) {
+                affectedPlayer.removePotionEffect(getEffectType());
+            }
+
+            affectedPlayer.addPotionEffect(new PotionEffect(getEffectType(), (getDuration() * 20), getAmplifier()));
+
+            switch (getApplicationType()) {
+                case ALL ->
+                        affectedPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "You now have " + ChatColor.AQUA + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " " +
+                                (getAmplifier() + 1) + ChatColor.LIGHT_PURPLE + " for " + ChatColor.AQUA + getDuration() + " seconds");
+                case FRIEND_ONLY ->
+                        affectedPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "You now have " + ChatColor.AQUA + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " " +
+                                (getAmplifier() + 1) + ChatColor.LIGHT_PURPLE + " for " + ChatColor.AQUA + getDuration() + " seconds " + ChatColor.LIGHT_PURPLE + "thanks to " + ChatColor.AQUA + player.getName());
+                case ENEMY_ONLY ->
+                        affectedPlayer.sendMessage(ChatColor.RED + "You now have " + ChatColor.BLUE + WordUtils.capitalize(getEffectType().getName().toLowerCase().replace("_", " ")) + " " +
+                                (getAmplifier() + 1) + ChatColor.RED + " for " + ChatColor.BLUE + getDuration() + " seconds");
+            }
+
+            if (existingPotionEffect != null) {
+                new Scheduler(getPlugin()).sync(() -> {
+                    if (hasExistingClassPassive && !affectedPlayerClass.getActivePlayers().contains(affectedId)) {
+                        return;
+                    }
+
+                    affectedPlayer.addPotionEffect(existingPotionEffect);
+                }).delay((getDuration() * 20L) + 1L).run();
+            }
+        }
+
+        affected.forEach(affectedId -> {
+
         });
         // end applying effect to all uuids
 

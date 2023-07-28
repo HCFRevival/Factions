@@ -1,21 +1,21 @@
 package gg.hcfactions.factions.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
 import gg.hcfactions.factions.models.classes.*;
-import gg.hcfactions.factions.models.classes.impl.Archer;
-import gg.hcfactions.factions.models.classes.impl.Bard;
-import gg.hcfactions.factions.models.classes.impl.Diver;
-import gg.hcfactions.factions.models.classes.impl.Rogue;
+import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
+import gg.hcfactions.libs.bukkit.events.impl.PlayerShieldEvent;
 import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
@@ -30,21 +30,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityResurrectEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class ClassListener implements Listener {
     @Getter public final Factions plugin;
@@ -61,6 +59,30 @@ public final class ClassListener implements Listener {
 
         recentlyLoggedIn.add(player.getUniqueId());
 
+        for (ItemStack armor : player.getInventory().getArmorContents()) {
+            if (armor == null) {
+                continue;
+            }
+
+            final ItemMeta meta = armor.getItemMeta();
+
+            if (meta == null) {
+                continue;
+            }
+
+            if (!meta.getPersistentDataContainer().has(plugin.getNamespacedKey(), PersistentDataType.STRING)) {
+                continue;
+            }
+
+            final String value = meta.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING);
+
+            if (value == null || !value.equalsIgnoreCase("removeOnLogin")) {
+                continue;
+            }
+
+            armor.setType(Material.AIR);
+        }
+
         new Scheduler(plugin).sync(() -> {
             final IClass playerClass = plugin.getClassManager().getClassByArmor(player);
 
@@ -71,12 +93,32 @@ public final class ClassListener implements Listener {
             }
 
             recentlyLoggedIn.remove(player.getUniqueId());
+
+            player.getActivePotionEffects()
+                    .stream()
+                    .filter(e -> e.getDuration() >= 10000 || e.getDuration() == -1)
+                    .forEach(infE -> player.removePotionEffect(infE.getType()));
         }).delay(3L).run();
+    }
+
+    @EventHandler /* Removes player from class upon disconnect */
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
         player.getActivePotionEffects()
                 .stream()
-                .filter(e -> e.getDuration() > 25000)
+                .filter(e -> e.getDuration() >= 10000 || e.getDuration() == -1)
                 .forEach(infE -> player.removePotionEffect(infE.getType()));
+
+        if (playerClass == null) {
+            return;
+        }
+
+        final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, playerClass);
+        Bukkit.getPluginManager().callEvent(deactivateEvent);
+
+        playerClass.deactivate(player);
     }
 
     @EventHandler
@@ -94,19 +136,43 @@ public final class ClassListener implements Listener {
         plugin.getClassManager().validateClass(player);
     }
 
-    @EventHandler /* Removes player from class upon disconnect */
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        final Player player = event.getPlayer();
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onEffectExpire(EntityPotionEffectEvent event) {
+        final PotionEffect effect = event.getOldEffect();
+
+        if (effect == null) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final Player player)) {
+            return;
+        }
+
+        final EntityPotionEffectEvent.Action action = event.getAction();
+
+        if (!action.equals(EntityPotionEffectEvent.Action.REMOVED) && !action.equals(EntityPotionEffectEvent.Action.CLEARED)) {
+            return;
+        }
+
         final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
         if (playerClass == null) {
             return;
         }
 
-        final ClassDeactivateEvent deactivateEvent = new ClassDeactivateEvent(player, playerClass);
-        Bukkit.getPluginManager().callEvent(deactivateEvent);
+        if (!playerClass.getPassiveEffects().containsKey(effect.getType())) {
+            return;
+        }
 
-        playerClass.deactivate(player);
+        final int amplifier = playerClass.getPassiveEffects().get(effect.getType());
+
+        new Scheduler(plugin).sync(() -> {
+            final IClass futurePlayerClass = plugin.getClassManager().getCurrentClass(player);
+
+            if (playerClass == futurePlayerClass) {
+                player.addPotionEffect(new PotionEffect(effect.getType(), PotionEffect.INFINITE_DURATION, amplifier));
+            }
+        }).delay(1L).run();
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
@@ -681,6 +747,7 @@ public final class ClassListener implements Listener {
 
         factionPlayer.getScoreboard().removeLine(29);
         factionPlayer.getScoreboard().removeLine(52);
+        factionPlayer.getScoreboard().removeLine(53);
 
         for (EEffectScoreboardMapping mapping : EEffectScoreboardMapping.values()) {
             factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
@@ -735,5 +802,229 @@ public final class ClassListener implements Listener {
 
         final double range = (playerClass instanceof final Bard bard) ? bard.getBardRange() : 16.0;
         holdable.apply(player, holdableClass.getHoldableUpdateRate(), range, true);
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerShield(PlayerShieldEvent event) {
+        if (event.isRaised() && event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            if (event.isRaised()) {
+                player.sendMessage(ChatColor.RED + "Shields can only be used by the Tank class");
+                event.setCancelled(true);
+            }
+
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (factionPlayer == null) {
+            player.sendMessage(ChatColor.RED + "Failed to load your player profile: CLNP");
+            event.setCancelled(true);
+            return;
+        }
+
+        if (event.isRaised()) {
+            factionPlayer.addTimer(new FTimer(ETimerType.GUARD, tankClass.getShieldWarmup()));
+            return;
+        }
+
+        final TankShieldUnreadyEvent unreadyEvent = new TankShieldUnreadyEvent(player, tankClass);
+        Bukkit.getPluginManager().callEvent(unreadyEvent);
+
+        if (factionPlayer.hasTimer(ETimerType.GUARD)) {
+            factionPlayer.removeTimer(ETimerType.GUARD, true);
+        }
+    }
+
+    @EventHandler
+    public void onTankUseShield(PlayerShieldEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            return;
+        }
+
+        if (!tankClass.canUseStamina(player)) {
+            player.sendMessage(ChatColor.RED + "You're out of stamina. Please wait a moment and try again.");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onTankMove(PlayerBigMoveEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            return;
+        }
+
+        if (!tankClass.isGuarding(player)) {
+            return;
+        }
+
+        tankClass.setGuardPoint(player);
+    }
+
+    @EventHandler
+    public void onTankShieldUnready(TankShieldUnreadyEvent event) {
+        final Player player = event.getPlayer();
+        final Tank tankClass = event.getTankClass();
+
+        tankClass.deactivateShield(player);
+    }
+
+    @EventHandler
+    public void onTankGuardApply(AreaEffectCloudApplyEvent event) {
+        final AreaEffectCloud cloud = event.getEntity();
+        final List<LivingEntity> affectedEntities = Lists.newArrayList(event.getAffectedEntities());
+
+        if (!cloud.getBasePotionData().getType().equals(PotionType.TURTLE_MASTER)) {
+            return;
+        }
+
+        if (!(cloud.getSource() instanceof final Player player)) {
+            return;
+        }
+
+        if (!(plugin.getClassManager().getCurrentClass(player) instanceof final Tank tankClass)) {
+            return;
+        }
+
+        final PlayerFaction pf = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        event.setCancelled(true);
+        event.getAffectedEntities().clear();
+
+        for (LivingEntity entity : affectedEntities) {
+            if (!(entity instanceof final Player otherPlayer)) {
+                continue;
+            }
+
+            // prevent applying to anyone but self if not in fac
+            if (pf == null && !entity.getUniqueId().equals(player.getUniqueId())) {
+                continue;
+            }
+
+            // prevent applying to enemies when in fac
+            if (pf != null && !pf.isMember(otherPlayer)) {
+                continue;
+            }
+
+            for (PotionEffectType effectType : tankClass.getGuardEffects().keySet()) {
+                final int amplifier = tankClass.getGuardEffects().get(effectType);
+
+                if (effectType.equals(PotionEffectType.ABSORPTION) && entity.hasPotionEffect(PotionEffectType.ABSORPTION)) {
+                    continue;
+                }
+
+                if (effectType.equals(PotionEffectType.HEALTH_BOOST) && entity.hasPotionEffect(PotionEffectType.HEALTH_BOOST)) {
+                    continue;
+                }
+
+                entity.addPotionEffect(new PotionEffect(effectType, 40, amplifier));
+            }
+        }
+    }
+
+    @EventHandler
+    public void onTankShieldDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof final Player player)) {
+            return;
+        }
+
+        if (!player.isHandRaised()) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Tank tankClass)) {
+            return;
+        }
+
+        if (!tankClass.isGuarding(player)) {
+            return;
+        }
+
+        if (event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)
+                || event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)
+                || event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)
+                || event.getCause().equals(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION)) {
+
+            final double damage = event.getDamage();
+
+            tankClass.damageStamina(player, damage * tankClass.getStaminaDamageDivider());
+            event.setCancelled(true);
+            player.damage(damage * tankClass.getShieldDamageReduction());
+        }
+    }
+
+    @EventHandler
+    public void onTankStaminaChange(TankStaminaChangeEvent event) {
+        final Player player = event.getPlayer();
+        final Tank tankClass = (Tank) plugin.getClassManager().getClassByName("Guardian"); // TODO: Probably make this safer
+        final ItemStack oldBanner = tankClass.getBanner(event.getFrom());
+        final ItemStack newBanner = tankClass.getBanner(event.getTo());
+
+        if (!oldBanner.getType().equals(newBanner.getType())) {
+            Objects.requireNonNull(player.getEquipment()).setHelmet(newBanner);
+            Worlds.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT);
+            player.getWorld().spawnParticle(Particle.VILLAGER_ANGRY, player.getLocation().add(0, 1.5, 0), 8, 0.5, 2.0, 0.5);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        final Player player = (Player)event.getWhoClicked();
+        final ItemStack pre = player.getInventory().getItemInOffHand();
+
+        new Scheduler(plugin).sync(() -> {
+            final ItemStack post = player.getInventory().getItemInOffHand();
+
+            if (!pre.getType().equals(post.getType())) {
+                plugin.getClassManager().validateClass(player);
+            }
+        }).delay(1L).run();
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerHeldSwap(PlayerSwapHandItemsEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        new Scheduler(plugin).sync(() -> plugin.getClassManager().validateClass(player)).delay(1L).run();
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        final List<ItemStack> drops = event.getDrops();
+        final List<ItemStack> toRemove = Lists.newArrayList();
+
+        drops.forEach(drop -> {
+            if (drop.getType().name().endsWith("_BANNER")) {
+                final ItemMeta meta = drop.getItemMeta();
+
+                if (meta != null && meta.getPersistentDataContainer().has(plugin.getNamespacedKey(), PersistentDataType.STRING)) {
+                    final String value = meta.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING);
+
+                    if (value != null && value.equalsIgnoreCase("removeOnLogin")) {
+                        toRemove.add(drop);
+                    }
+                }
+            }
+        });
+
+        toRemove.forEach(drops::remove);
     }
 }
