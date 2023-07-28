@@ -1,7 +1,7 @@
 package gg.hcfactions.factions.models.shop;
 
 import gg.hcfactions.factions.Factions;
-import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 
 import java.util.UUID;
 
@@ -19,7 +19,7 @@ public interface IMerchantVillager {
     /**
      * @return Location to spawn merchant
      */
-    BLocatable getPosition();
+    PLocatable getPosition();
 
     /**
      * Spawn the merchant in the world

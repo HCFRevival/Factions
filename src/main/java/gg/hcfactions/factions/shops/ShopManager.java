@@ -14,6 +14,7 @@ import gg.hcfactions.factions.models.shop.impl.events.EventShop;
 import gg.hcfactions.factions.models.shop.impl.events.EventShopItem;
 import gg.hcfactions.factions.shops.impl.ShopExecutor;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.remap.ERemappedEnchantment;
 import lombok.Getter;
 import net.minecraft.world.entity.Entity;
@@ -78,7 +79,7 @@ public final class ShopManager implements IManager {
             final double merchantZ = conf.getDouble(merchantPath + "location.z");
             final String merchantWorld = conf.getString(merchantPath + "location.world");
             final boolean isEventShop = conf.get(merchantPath + "variant") != null && Objects.requireNonNull(conf.getString(merchantPath + "variant")).equalsIgnoreCase("event");
-            final BLocatable merchantPosition = new BLocatable(merchantWorld, merchantX, merchantY, merchantZ);
+            final PLocatable merchantPosition = new PLocatable(merchantWorld, merchantX, merchantY, merchantZ, 0.0f, 0.0f);
             final List<GenericShop<?>> shops = Lists.newArrayList();
             final List<EventShop> eventShops = Lists.newArrayList();
 

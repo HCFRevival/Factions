@@ -13,6 +13,7 @@ import gg.hcfactions.factions.shops.IShopExecutor;
 import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.ChatColor;
@@ -34,7 +35,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             final EventMerchant merchant = new EventMerchant(
                     UUID.randomUUID(),
                     ChatColor.translateAlternateColorCodes('&', merchantName),
-                    new BLocatable(player.getLocation().getBlock()),
+                    new PLocatable(player),
                     Lists.newArrayList()
             );
 
@@ -51,7 +52,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = new GenericMerchant<>(
                 UUID.randomUUID(),
                 ChatColor.translateAlternateColorCodes('&', merchantName),
-                new BLocatable(player.getLocation().getBlock()),
+                new PLocatable(player),
                 Lists.newArrayList()
         );
 

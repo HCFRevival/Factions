@@ -3,11 +3,12 @@ package gg.hcfactions.factions.models.shop.impl;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.shop.IMerchantVillager;
 
-import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -26,10 +27,10 @@ import java.util.UUID;
 public final class MerchantVillager extends Villager implements IMerchantVillager {
     @Getter public final Factions plugin;
     @Getter public final UUID merchantId;
-    @Getter public final BLocatable position;
+    @Getter public final PLocatable position;
 
     public MerchantVillager(Factions plugin, GenericMerchant merchant) {
-        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitBlock().getWorld()).getHandle(), VillagerType.SWAMP);
+        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.DESERT);
         this.plugin = plugin;
         this.merchantId = merchant.getId();
         this.position = merchant.getMerchantLocation();
@@ -37,7 +38,7 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
         final CraftLivingEntity livingEntity = (CraftLivingEntity) getBukkitEntity();
         livingEntity.setCustomName(merchant.getMerchantName());
         livingEntity.setCustomNameVisible(true);
-        livingEntity.teleport(merchant.getMerchantLocation().getBukkitBlock().getLocation());
+        livingEntity.teleport(merchant.getMerchantLocation().getBukkitLocation());
 
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, net.minecraft.world.entity.player.Player.class, 8.0f));
     }
@@ -84,6 +85,11 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
     @Override
     public void knockback(double d0, double d1, double d2) {
         super.knockback(0.0, 0.0, 0.0);
+    }
+
+    @Override
+    protected boolean damageEntity0(DamageSource damagesource, float f) {
+        return false;
     }
 
     @Override
