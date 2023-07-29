@@ -20,7 +20,6 @@ public interface IScheduledEvent {
             return false;
         }
 
-        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         final ZoneId tz = ZoneId.of("America/New_York");
         final LocalDateTime now = LocalDateTime.now(tz);
 
