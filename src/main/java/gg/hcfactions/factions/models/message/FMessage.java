@@ -488,18 +488,18 @@ public final class FMessage {
                 }
 
                 if (formattedNames.containsKey(PlayerFaction.Rank.LEADER)) {
-                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Leaders: " : "Leader: "
-                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.LEADER))));
+                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Leaders: " : "Leader: ")
+                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.LEADER)));
                 }
 
                 if (formattedNames.containsKey(PlayerFaction.Rank.OFFICER) && formattedNames.get(PlayerFaction.Rank.OFFICER).size() > 0) {
-                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.OFFICER).size() > 1 ? "Officers: " : "Officer: "
-                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.OFFICER))));
+                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Officers: " : "Officer: ")
+                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.OFFICER)));
                 }
 
                 if (formattedNames.containsKey(PlayerFaction.Rank.MEMBER) && formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 0) {
-                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 1 ? "Members: " : "Member: "
-                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.MEMBER))));
+                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 1 ? "Members: " : "Member: ")
+                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.MEMBER)));
                 }
 
                 message.add(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + Strings.repeat("-", 10));
