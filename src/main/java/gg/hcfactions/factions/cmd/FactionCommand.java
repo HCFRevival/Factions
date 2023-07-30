@@ -231,7 +231,7 @@ public final class FactionCommand extends BaseCommand {
         plugin.getFactionManager().getExecutor().unsetFactionHome(player, promise);
     }
 
-    @Subcommand("show|who")
+    @Subcommand("show|who|i|info")
     @Description("Fetch details about a faction")
     @Syntax("[name]")
     @CommandCompletion("@pfactionsmixed")

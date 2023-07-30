@@ -20,8 +20,10 @@ import lombok.Getter;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Villager;
 
 import java.util.*;
 
@@ -41,17 +43,12 @@ public final class ShopManager implements IManager {
     @Override
     public void onEnable() {
         loadMerchants();
+        spawnMerchants();
 
         plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("merchants", ctx -> {
             final List<String> merchantNames = Lists.newArrayList();
             merchantRepository.forEach(m -> merchantNames.add(ChatColor.stripColor(m.getMerchantName())));
             return merchantNames;
-        });
-
-        merchantRepository.forEach(merchant -> {
-            final MerchantVillager villager = new MerchantVillager(plugin, (GenericMerchant<?>) merchant);
-            villager.spawn();
-            merchantVillagers.add(villager);
         });
     }
 
@@ -266,12 +263,40 @@ public final class ShopManager implements IManager {
         plugin.saveConfiguration("shops", conf);
     }
 
+    public void spawnMerchants() {
+        if (merchantRepository.isEmpty()) {
+            plugin.getAresLogger().warn("no merchants found in the repository, skipping spawn merchants...");
+            return;
+        }
+
+        merchantRepository.forEach(merchant -> {
+            final PLocatable loc = merchant.getMerchantLocation();
+            final World world = loc.getBukkitLocation().getWorld();
+
+            if (world != null) {
+                world.getNearbyEntities(loc.getBukkitLocation(), 1, 1, 1).forEach(entity -> {
+                    if (entity instanceof final Villager villager) {
+                        if (villager.getCustomName() != null) {
+                            villager.remove();
+                        }
+                    }
+                });
+            }
+
+            final MerchantVillager villager = new MerchantVillager(plugin, (GenericMerchant<?>) merchant);
+            merchantVillagers.add(villager);
+            villager.spawn();
+            villager.setNoAi(true);
+        });
+    }
+
     public Optional<IMerchant> getMerchantById(UUID uniqueId) {
         return merchantRepository.stream().filter(m -> m.getId().equals(uniqueId)).findFirst();
     }
 
     public Optional<IMerchant> getMerchantByLocation(BLocatable location) {
-        return merchantRepository.stream().filter(m -> m.getMerchantLocation().getDistance(location) < 3.0).findFirst();
+        return merchantRepository.stream().filter(m ->
+                m.getMerchantLocation().getWorldName().equals(location.getWorldName()) && m.getMerchantLocation().getDistance(location) < 1.0).findFirst();
     }
 
     public Optional<IMerchant> getMerchantByName(String name) {

@@ -17,7 +17,6 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -49,7 +48,9 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
     }
 
     @Override
-    public void setUnhappy() {}
+    public void setUnhappy() {
+        this.setUnhappyCounter(0);
+    }
 
     @Override
     public boolean canBreed() {
@@ -99,14 +100,16 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
 
     @Override
     public boolean alwaysAccepts() {
-        return false;
+        return true;
     }
 
     @Override
     public InteractionResult mobInteract(Player entityhuman, InteractionHand enumhand) {
-        plugin.getShopManager().getMerchantById(merchantId).ifPresent(merchant ->
-                plugin.getShopManager().getExecutor().openMerchant(Bukkit.getPlayer(entityhuman.getUUID()), (GenericMerchant) merchant));
-
         return InteractionResult.FAIL;
+    }
+
+    @Override
+    public int getPlayerReputation(Player entityhuman) {
+        return 0;
     }
 }

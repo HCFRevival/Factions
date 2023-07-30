@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.shops.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import gg.hcfactions.factions.models.shop.IMerchant;
 import gg.hcfactions.factions.models.shop.impl.GenericMerchant;
 import gg.hcfactions.factions.models.shop.impl.GenericShop;
@@ -12,18 +13,30 @@ import gg.hcfactions.factions.models.shop.impl.events.EventShopItem;
 import gg.hcfactions.factions.shops.IShopExecutor;
 import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.libs.base.consumer.Promise;
-import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor {
+    @Override
+    public void reloadMerchants() {
+        manager.getMerchantVillagers().forEach(villager -> villager.remove(Entity.RemovalReason.DISCARDED));
+        manager.getMerchantVillagers().clear();
+
+        manager.loadMerchants();
+        manager.spawnMerchants();
+    }
+
     @Override
     public void createMerchant(Player player, String merchantName, boolean isEventMerchant, Promise promise) {
         if (manager.getMerchantByName(ChatColor.stripColor(merchantName)).isPresent()) {
@@ -205,13 +218,20 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             return;
         }
 
+        if (shop.getItems().stream().anyMatch(i -> i.getPosition() == position)) {
+            promise.reject("Inventory position is already in use");
+            return;
+        }
+
         final String itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
                 ? item.getItemMeta().getDisplayName()
                 : null;
 
-        if (shop.getItems().stream().anyMatch(i -> i.getPosition() == position)) {
-            promise.reject("Inventory position is already in use");
-            return;
+        final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
+        enchantments.putAll(item.getItemMeta().getEnchants());
+        if (item.getType().equals(Material.ENCHANTED_BOOK)) {
+            final EnchantmentStorageMeta encMeta = (EnchantmentStorageMeta) item.getItemMeta();
+            enchantments.putAll(encMeta.getStoredEnchants());
         }
 
         final GenericShopItem shopItem = new GenericShopItem(
@@ -220,7 +240,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 item.getType(),
                 item.getAmount(),
                 item.getItemMeta().getLore(),
-                item.getItemMeta().getEnchants(),
+                enchantments,
                 position,
                 false,
                 buyAmount,
@@ -259,13 +279,20 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             return;
         }
 
+        if (shop.getItems().stream().anyMatch(i -> i.getPosition() == position)) {
+            promise.reject("Inventory position is already in use");
+            return;
+        }
+
         final String itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
                 ? item.getItemMeta().getDisplayName()
                 : null;
 
-        if (shop.getItems().stream().anyMatch(i -> i.getPosition() == position)) {
-            promise.reject("Inventory position is already in use");
-            return;
+        final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
+        enchantments.putAll(item.getItemMeta().getEnchants());
+        if (item.getType().equals(Material.ENCHANTED_BOOK)) {
+            final EnchantmentStorageMeta encMeta = (EnchantmentStorageMeta) item.getItemMeta();
+            enchantments.putAll(encMeta.getStoredEnchants());
         }
 
         final EventShopItem shopItem = new EventShopItem(
@@ -274,7 +301,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 item.getType(),
                 item.getAmount(),
                 item.getItemMeta().getLore(),
-                item.getItemMeta().getEnchants(),
+                enchantments,
                 false,
                 position,
                 tokenAmount

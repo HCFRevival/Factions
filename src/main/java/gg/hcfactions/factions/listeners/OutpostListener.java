@@ -69,7 +69,12 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (entity.getType().equals(EntityType.ENDERMAN)) {
+        if (
+                entity.getType().equals(EntityType.ENDERMAN)
+                        || entity.getType().equals(EntityType.CREEPER)
+                        || entity.getType().equals(EntityType.ARMOR_STAND)
+                        || entity.getType().equals(EntityType.VILLAGER)) {
+
             return;
         }
 
@@ -79,7 +84,7 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        if (entity.getEquipment() != null) {
+        if (entity instanceof Mob && entity.getEquipment() != null) {
             entity.getEquipment().setHelmet(plugin.getOutpostManager().getRandomHelmet());
             entity.getEquipment().setChestplate(plugin.getOutpostManager().getRandomChestplate());
             entity.getEquipment().setLeggings(plugin.getOutpostManager().getRandomLeggings());
