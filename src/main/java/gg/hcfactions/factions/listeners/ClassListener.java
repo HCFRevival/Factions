@@ -935,8 +935,12 @@ public final class ClassListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onTankShieldDamage(EntityDamageEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
         if (!(event.getEntity() instanceof final Player player)) {
             return;
         }
