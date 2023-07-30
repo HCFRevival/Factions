@@ -190,6 +190,23 @@ public final class ShopCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("reload")
+    @Description("Reload shops")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onReload(Player player) {
+        plugin.getShopManager().getExecutor().reloadMerchants();
+        player.sendMessage(ChatColor.GREEN + "Merchants have been reloaded");
+    }
+
+    @Subcommand("dump")
+    @Description("Dump internal shop data for debugging")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onDebugDump(Player player) {
+        player.sendMessage(ChatColor.GOLD + "Merchant Dump" + ChatColor.YELLOW + ":");
+        player.sendMessage(ChatColor.YELLOW + "Merchant Repository: " + ChatColor.AQUA + plugin.getShopManager().getMerchantRepository().size());
+        player.sendMessage(ChatColor.YELLOW + "Merchant Villager Repository: " + ChatColor.AQUA + plugin.getShopManager().getMerchantVillagers().size());
+    }
+
     @HelpCommand
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     public void onHelp(CommandIssuer issuer, CommandHelp help) {

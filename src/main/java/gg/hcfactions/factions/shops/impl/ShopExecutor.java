@@ -29,6 +29,15 @@ import java.util.UUID;
 
 public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor {
     @Override
+    public void reloadMerchants() {
+        manager.getMerchantVillagers().forEach(villager -> villager.remove(Entity.RemovalReason.DISCARDED));
+        manager.getMerchantVillagers().clear();
+
+        manager.loadMerchants();
+        manager.spawnMerchants();
+    }
+
+    @Override
     public void createMerchant(Player player, String merchantName, boolean isEventMerchant, Promise promise) {
         if (manager.getMerchantByName(ChatColor.stripColor(merchantName)).isPresent()) {
             promise.reject("Merchant name is already in use");

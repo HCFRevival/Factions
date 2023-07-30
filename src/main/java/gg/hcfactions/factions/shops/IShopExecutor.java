@@ -13,6 +13,11 @@ public interface IShopExecutor {
     ShopManager manager();
 
     /**
+     * Trigger onDisable and onEnable for Shops
+     */
+    void reloadMerchants();
+
+    /**
      * Creates a new merchant
      * @param player Player
      * @param merchantName Merchant name
