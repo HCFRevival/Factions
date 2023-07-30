@@ -61,8 +61,6 @@ public record DeathbanListener(@Getter Factions plugin) implements Listener {
                 (stateManager.getCurrentState().equals(EServerState.EOTW_PHASE_1) || stateManager.getCurrentState().equals(EServerState.EOTW_PHASE_2))
         );
 
-        Bukkit.broadcastMessage("death message: " + event.getDeathMessage());
-
         Bukkit.getPluginManager().callEvent(de);
     }
 
