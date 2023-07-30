@@ -71,6 +71,7 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
 
         if (
                 entity.getType().equals(EntityType.ENDERMAN)
+                        || entity.getType().equals(EntityType.CREEPER)
                         || entity.getType().equals(EntityType.ARMOR_STAND)
                         || entity.getType().equals(EntityType.VILLAGER)) {
 
