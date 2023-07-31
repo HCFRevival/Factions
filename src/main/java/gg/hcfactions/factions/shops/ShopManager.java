@@ -276,9 +276,7 @@ public final class ShopManager implements IManager {
             if (world != null) {
                 world.getNearbyEntities(loc.getBukkitLocation(), 1, 1, 1).forEach(entity -> {
                     if (entity instanceof final Villager villager) {
-                        if (villager.getCustomName() != null) {
-                            villager.remove();
-                        }
+                        villager.remove();
                     }
                 });
             }
