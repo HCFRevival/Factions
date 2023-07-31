@@ -459,6 +459,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (event.getTo().getWorld() == null || !event.getTo().getWorld().getEnvironment().equals(World.Environment.NETHER)) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
         final Location origin = event.getTo();
         final BLocatable originLocatable = new BLocatable(origin.getBlock());
         final List<Claim> claims = plugin.getClaimManager().getServerClaimsNearby(originLocatable, 4);
@@ -467,7 +472,8 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        event.setSearchRadius(300);
+        player.sendMessage(ChatColor.DARK_PURPLE + "Your Nether Portal conflicts with a claim and your search radius was expanded");
+        event.setSearchRadius(128);
     }
 
     /**
