@@ -40,6 +40,10 @@ public final class SpawnListener implements Listener {
         final Location from = event.getFrom();
         final Location to = event.getTo();
 
+        if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.PLUGIN)) {
+            return;
+        }
+
         if (from.getWorld() != null && to != null && to.getWorld() != null) {
             if (!from.getWorld().getEnvironment().equals(to.getWorld().getEnvironment())) {
                 final UUID uniqueId = player.getUniqueId();
