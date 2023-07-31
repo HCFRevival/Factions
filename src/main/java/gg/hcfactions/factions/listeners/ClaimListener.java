@@ -477,6 +477,41 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Handles preventing blocks from igniting inside Server Claims
+     * exclusively from non-Player entities
+     *
+     * @param event BlockIgniteEvent
+     */
+    @EventHandler
+    public void onBlockIgnite(BlockIgniteEvent event) {
+        final Entity ignitingEntity = event.getIgnitingEntity();
+
+        if (ignitingEntity == null || ignitingEntity instanceof Player) {
+            return;
+        }
+
+        final Block block = event.getIgnitingBlock();
+
+        if (block == null) {
+            return;
+        }
+
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(block));
+
+        if (insideClaim == null) {
+            return;
+        }
+
+        final ServerFaction sf = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
+
+        if (sf == null) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    /**
      * Handles preventing interacting in claims
      *
      * @param event PlayerInteractEvent
