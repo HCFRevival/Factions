@@ -52,6 +52,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     @Getter public Set<UUID> memberHistory;
     @Getter public Set<UUID> pendingInvites;
     @Getter public Set<FTimer> timers;
+    @Getter public List<Long> reinviteRestockTimes;
 
     public PlayerFaction(FactionManager manager) {
         this.manager = manager;
@@ -72,6 +73,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
         this.timers = Sets.newConcurrentHashSet();
+        this.reinviteRestockTimes = Lists.newArrayList();
     }
 
     public PlayerFaction(FactionManager manager, String name) {
@@ -93,6 +95,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
         this.timers = Sets.newConcurrentHashSet();
+        this.reinviteRestockTimes = Lists.newArrayList();
     }
 
     /**
@@ -221,6 +224,23 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     }
 
     /**
+     * Add a re-invite restock timestamp using the
+     * default values defined in config.yml
+     */
+    public void addReinviteTimestamp() {
+        addReinviteTimestamp(manager.getPlugin().getConfiguration().getReinviteRestockDuration());
+    }
+
+    /**
+     * Add a re-invite restock timestamp with a set delay
+     * @param delay Restock delay
+     */
+    public void addReinviteTimestamp(int delay) {
+        final long timestamp = Time.now() + (delay * 1000L);
+        reinviteRestockTimes.add(timestamp);
+    }
+
+    /**
      * Returns an optional containing the player this faction
      * is currently focusing.
      *
@@ -273,15 +293,26 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
             setRallyLocation(null);
         }
 
-        if (isFrozen() || getDtr() == getMaxDtr()) {
-            return;
+        // restock re-invites
+        final List<Long> reinviteRestocks = reinviteRestockTimes.stream().filter(timestamp -> timestamp <= Time.now()).collect(Collectors.toList());
+
+        if (!reinviteRestocks.isEmpty()) {
+            setReinvites(getReinvites() + reinviteRestocks.size());
+            reinviteRestocks.forEach(reinviteRestockTimes::remove);
+
+            if (!getOnlineMembers().isEmpty()) {
+                FMessage.printReinviteUpdate(this, getReinvites());
+            }
         }
 
-        double newDtr = getDtr() + 0.01;
-        setDtr(Math.min(newDtr, getMaxDtr()));
+        // update faction DTR if they are not frozen
+        if (!isFrozen() && getDtr() != getMaxDtr()) {
+            final double newDtr = getDtr() + 0.01;
+            setDtr(Math.min(newDtr, getMaxDtr()));
 
-        if (newDtr >= getMaxDtr()) {
-            new Scheduler(manager.getPlugin()).sync(() -> FMessage.printNowAtMaxDTR(this)).run();
+            if (newDtr >= getMaxDtr()) {
+                new Scheduler(manager.getPlugin()).sync(() -> FMessage.printNowAtMaxDTR(this)).run();
+            }
         }
     }
 
@@ -336,6 +367,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
                 "\npendingInvites: " + pendingInvites.toString() +
                 "\nmemberHistory: " + memberHistory.toString() +
                 "\ntimers: " + timers.toString() +
+                "\nreinviteRestockTimes: " + reinviteRestockTimes.toString() +
                 "\n}";
     }
 
@@ -368,6 +400,10 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
 
         if (document.containsKey("tokens")) {
             this.tokens = document.getInteger("tokens");
+        }
+
+        if (document.containsKey("reinvite_restocks")) {
+            this.reinviteRestockTimes = ((List<Long>)document.get("reinvite_restocks", List.class));
         }
 
         this.rating = document.getInteger("rating");
@@ -415,6 +451,7 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         doc.append("member_history", memberHistory);
         doc.append("pending_invites", pendingInvites);
         doc.append("timers", timerDocs);
+        doc.append("reinvite_restocks", reinviteRestockTimes);
 
         return doc;
     }

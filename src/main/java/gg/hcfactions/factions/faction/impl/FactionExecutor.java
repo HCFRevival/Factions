@@ -504,6 +504,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         if (!modeExempt) {
             if (faction.isReinvited(player.getUniqueId())) {
                 faction.setReinvites(faction.getReinvites() - 1);
+                faction.addReinviteTimestamp();
                 FMessage.printReinviteConsumed(faction, faction.getReinvites());
             } else {
                 faction.getMemberHistory().add(player.getUniqueId());
@@ -1108,12 +1109,16 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
-    public void setFactionReinvites(Player player, String factionName, int reinvites, Promise promise) {
+    public void setFactionReinvites(Player player, String factionName, int reinvites, boolean reset, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
 
         if (faction == null) {
             promise.reject(FError.F_NOT_FOUND.getErrorDescription());
             return;
+        }
+
+        if (reset) {
+            faction.getReinviteRestockTimes().clear();
         }
 
         faction.setReinvites(reinvites);
@@ -1122,8 +1127,12 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     }
 
     @Override
-    public void setFactionReinvitesBulk(Player player, int reinvites, Promise promise) {
+    public void setFactionReinvitesBulk(Player player, int reinvites, boolean reset, Promise promise) {
         manager.getPlayerFactions().forEach(pf -> {
+            if (reset) {
+                pf.getReinviteRestockTimes().clear();
+            }
+
             pf.setReinvites(reinvites);
             FMessage.printReinviteUpdate(pf, reinvites);
         });

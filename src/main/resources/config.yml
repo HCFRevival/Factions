@@ -107,6 +107,9 @@ factions:
     # Time to wait between Outpost restocks
     outpost: 3600
 
+    # Time to wait between reinvite restocks
+    reinvite: 30
+
 # Map spawn locations
 spawns:
   overworld:

@@ -83,6 +83,7 @@ public final class FConfig {
     @Getter public int rallyDuration;
     @Getter public int outpostRestockDuration;
     @Getter public int freezeDuration;
+    @Getter public int reinviteRestockDuration;
     @Getter public int homeDuration;
     @Getter public int logoutDuration;
     @Getter public int sotwProtectionDuration;
@@ -269,9 +270,11 @@ public final class FConfig {
         freezeDuration = conf.getInt("factions.timers.freeze");
         rallyDuration = conf.getInt("factions.timers.rally");
         outpostRestockDuration = conf.getInt("factions.timers.outpost");
+        reinviteRestockDuration = conf.getInt("factions.timers.reinvite");
         plugin.getAresLogger().info("Faction Freeze Timer Duration: " + freezeDuration);
         plugin.getAresLogger().info("Faction Rally Timer Duration: " + rallyDuration);
         plugin.getAresLogger().info("Outpost Restock Duration: " + outpostRestockDuration);
+        plugin.getAresLogger().info("Reinvite Restock Duration: " + reinviteRestockDuration);
 
         overworldSpawn = Configs.parsePlayerLocation(conf, "spawns.overworld").getBukkitLocation();
         endSpawn = Configs.parsePlayerLocation(conf, "spawns.end_spawn").getBukkitLocation();
