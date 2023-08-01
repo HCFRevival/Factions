@@ -19,6 +19,13 @@ databases:
   redis:
     uri: 'redis://0.0.0.0:6379'
 
+# Autosave to Database intervals
+autosave:
+  factions: 1800
+  claims: 1800
+  subclaims: 3600
+  players: 3600
+
 factions:
   # Maximum amount of players allowed in a single faction
   max_faction_size: 30

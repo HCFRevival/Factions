@@ -34,6 +34,12 @@ public final class FConfig {
 
     @Getter public String redisUri;
 
+    // autosave
+    @Getter public int factionAutosaveDelay;
+    @Getter public int claimAutosaveDelay;
+    @Getter public int subclaimAutosaveDelay;
+    @Getter public int playerAutosaveDelay;
+
     // world
     @Getter @Setter public Location overworldSpawn;
     @Getter @Setter public Location endSpawn;
@@ -213,6 +219,11 @@ public final class FConfig {
 
         redisUri = conf.getString("databases.redis.uri");
         plugin.getAresLogger().info("Using MongoDB Database: " + mongoDatabaseName);
+
+        factionAutosaveDelay = conf.getInt("autosave.factions");
+        playerAutosaveDelay = conf.getInt("autosave.players");
+        claimAutosaveDelay = conf.getInt("autosave.claims");
+        subclaimAutosaveDelay = conf.getInt("autosave.subclaims");
 
         maxFactionSize = conf.getInt("factions.max_faction_size");
         defaultFactionReinvites = conf.getInt("factions.reinvites");
