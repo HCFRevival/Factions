@@ -586,6 +586,26 @@ public final class ClassListener implements Listener {
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
+    public void onTippedArrowLaunch(EntityShootBowEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final Player player)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+        final ItemStack item = event.getConsumable();
+
+        if (item != null && item.getType().equals(Material.TIPPED_ARROW) && !(playerClass instanceof Archer)) {
+            player.sendMessage(ChatColor.RED + "Tipped Arrows can only be used by the Archer class");
+            event.setConsumeItem(false);
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onTridentLaunch(ProjectileLaunchEvent event) {
         if (event.isCancelled()) {
             return;
