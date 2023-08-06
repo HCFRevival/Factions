@@ -78,6 +78,7 @@ public final class Factions extends AresPlugin {
         final PaperCommandManager cmdMng = new PaperCommandManager(this);
         cmdMng.enableUnstableAPI("help");
         registerCommandManager(cmdMng);
+
         registerCommand(new FactionCommand(this));
         registerCommand(new StatsCommand(this));
         registerCommand(new StateCommand(this));
@@ -92,6 +93,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new FactionHelpCommand(this));
         registerCommand(new FocusCommand(this));
         registerCommand(new LogoutCommand(this));
+        registerCommand(new ClassCommand(this));
         registerCommand(new DebugCommand(this));
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {

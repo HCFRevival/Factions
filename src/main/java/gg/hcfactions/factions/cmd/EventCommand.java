@@ -344,9 +344,6 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
-    /*
-        /event schedule <eventName> <add|rem> <day> <hr:min>
-     */
     @Subcommand("schedule")
     @Description("Modify event schedules")
     @Syntax("<event> <add|rem> <day> <hr:min> [temp]")
@@ -432,6 +429,19 @@ public final class EventCommand extends BaseCommand {
                 player.sendMessage(FMessage.ERROR + "Failed to update event schedule: " + s);
             }
         });
+    }
+
+    @Subcommand("reload")
+    @Description("Reload all event data")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onReload(Player player) {
+        if (!plugin.getEventManager().getActiveEvents().isEmpty()) {
+            player.sendMessage(ChatColor.RED + "Please stop all active events before reloading");
+            return;
+        }
+
+        plugin.getEventManager().getEventRepository().clear();
+        plugin.getEventManager().loadEvents();
     }
 
     @HelpCommand
