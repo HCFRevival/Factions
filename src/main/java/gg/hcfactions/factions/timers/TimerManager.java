@@ -41,8 +41,7 @@ public final class TimerManager implements IManager {
     public void onEnable() {
         final CXService commandXService = (CXService)plugin.getService(CXService.class);
 
-        uiTask = new Scheduler(plugin).sync(() -> Bukkit.getOnlinePlayers().forEach(player -> {
-            final FactionPlayer fp = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+        uiTask = new Scheduler(plugin).async(() -> plugin.getPlayerManager().getPlayerRepository().forEach(fp -> {
             boolean hasUI = false;
 
             if (!fp.getTimers().isEmpty()) {
@@ -53,7 +52,7 @@ public final class TimerManager implements IManager {
                 hasUI = true;
             }
 
-            else if (commandXService.getVanishManager().isVanished(player)) {
+            else if (commandXService.getVanishManager().isVanished(fp.getUniqueId())) {
                 hasUI = true;
             }
 
@@ -61,10 +60,10 @@ public final class TimerManager implements IManager {
                 hasUI = true;
             }
 
-            else if (plugin.getClassManager().getCurrentClass(player) != null) {
-                final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+            else if (plugin.getClassManager().getCurrentClass(fp.getUniqueId()) != null) {
+                final IClass playerClass = plugin.getClassManager().getCurrentClass(fp.getUniqueId());
 
-                if (playerClass.getConsumables().stream().anyMatch(c -> c.hasCooldown(player))) {
+                if (playerClass.getConsumables().stream().anyMatch(c -> c.hasCooldown(fp.getUniqueId()))) {
                     hasUI = true;
                 }
 
@@ -78,7 +77,7 @@ public final class TimerManager implements IManager {
                     fp.getScoreboard().hide();
                 }
             } else {
-                renderSidebar(player, fp);
+                renderSidebar((FactionPlayer) fp);
             }
         })).repeat(0L, 1L).run();
 
@@ -107,7 +106,13 @@ public final class TimerManager implements IManager {
         updateTask = null;
     }
 
-    private void renderSidebar(Player player, FactionPlayer factionPlayer) {
+    private void renderSidebar(FactionPlayer factionPlayer) {
+        final Player player = Bukkit.getPlayer(factionPlayer.getUniqueId());
+
+        if (player == null || factionPlayer.getScoreboard() == null) {
+            return;
+        }
+
         final CXService commandXService = (CXService)plugin.getService(CXService.class);
         final String SPACER = ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + StringUtils.repeat('-', 24);
         boolean hasEntries = false;
@@ -192,7 +197,7 @@ public final class TimerManager implements IManager {
         }
 
         if (commandXService != null) {
-            if (commandXService.getVanishManager().isVanished(player)) {
+            if (commandXService.getVanishManager().isVanished(factionPlayer.getUniqueId())) {
                 factionPlayer.getScoreboard().setLine(24, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
                 hasEntries = true;
             } else {
@@ -211,10 +216,10 @@ public final class TimerManager implements IManager {
             final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
             if (playerClass instanceof final Tank tankClass) {
-                factionPlayer.getScoreboard().setLine(53, ChatColor.AQUA + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + String.format("%.2f", tankClass.getStamina(player)));
+                factionPlayer.getScoreboard().setLine(53, ChatColor.AQUA + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + String.format("%.2f", tankClass.getStamina(factionPlayer.getUniqueId())));
             }
 
-            if (playerClass.getConsumables().stream().anyMatch(c -> c.getCooldowns().containsKey(player.getUniqueId()))) {
+            if (playerClass.getConsumables().stream().anyMatch(c -> c.getCooldowns().containsKey(factionPlayer.getUniqueId()))) {
                 factionPlayer.getScoreboard().setLine(52, ChatColor.GOLD + "" + ChatColor.BOLD + playerClass.getName() + " Effects" + ChatColor.YELLOW + ":");
 
                 if (hasEntries) {
@@ -224,11 +229,11 @@ public final class TimerManager implements IManager {
                 }
             }
 
-            playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(player.getUniqueId())).forEach(cd -> {
+            playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(factionPlayer.getUniqueId())).forEach(cd -> {
                 final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(cd.getEffectType());
                 final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
                 final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
-                final long remainingTime = cd.getCooldowns().get(player.getUniqueId()) - Time.now();
+                final long remainingTime = cd.getCooldowns().get(factionPlayer.getUniqueId()) - Time.now();
                 final int remainingSeconds = (int)remainingTime / 1000;
 
                 // we do not set hasEntries here
