@@ -17,6 +17,8 @@ import gg.hcfactions.factions.models.events.impl.loot.PalaceLootable;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.loot.impl.LootTableMenu;
@@ -112,6 +114,49 @@ public final class EventExecutor implements IEventExecutor {
             koth.getSession().setTokenReward(tokenReward);
         }
 
+        promise.resolve();
+    }
+
+    @Override
+    public void setCaptureLeaderboard(Player player, String eventName, String factionName, int tickets, Promise promise) {
+        final Optional<IEvent> eventQuery = manager.getEvent(eventName);
+
+        if (eventQuery.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = eventQuery.get();
+
+        if (!(generic instanceof final KOTHEvent koth)) {
+            promise.reject("Not a capture event");
+            return;
+        }
+
+        if (!koth.isActive() || koth.getSession() == null) {
+            promise.reject("This event is not active");
+            return;
+        }
+
+        if (tickets < 0) {
+            promise.reject("Negative values are not supported");
+            return;
+        }
+
+        if (koth.getSession().getTicketsNeededToWin() >= tickets) {
+            promise.reject("You are trying to update this factions ticket count higher than the win condition");
+            return;
+        }
+
+        final PlayerFaction faction = manager.getPlugin().getFactionManager().getPlayerFactionByName(factionName);
+
+        if (faction == null) {
+            promise.reject("Faction not found");
+            return;
+        }
+
+        faction.sendMessage(FMessage.KOTH_PREFIX + "Your faction's tickets for " + koth.getDisplayName() + FMessage.LAYER_1 + " has been updated to " + FMessage.LAYER_2 + tickets);
+        koth.getSession().getLeaderboard().put(faction.getUniqueId(), tickets);
         promise.resolve();
     }
 

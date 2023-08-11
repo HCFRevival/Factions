@@ -225,6 +225,25 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("koth leaderboard|koth lb")
+    @Description("Update capture event leaderboard for KOTH events")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<event> <faction> <tickets>")
+    @CommandCompletion("@events @pfactions")
+    public void onUpdateCaptureLeaderboard(Player player, String eventName, String factionName, int tickets) {
+        plugin.getEventManager().getExecutor().setCaptureLeaderboard(player, eventName, factionName, tickets, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Leaderboard updated");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to update leaderboard: " + s);
+            }
+        });
+    }
+
     @Subcommand("list")
     @Description("View all events and their information")
     public void onList(Player player) {
