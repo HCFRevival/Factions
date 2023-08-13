@@ -92,4 +92,9 @@ public record RetreatBattleHorn(@Getter Factions plugin) implements ICustomItem,
 
         return item;
     }
+
+    @Override
+    public boolean isSoulbound() {
+        return false;
+    }
 }
