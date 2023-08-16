@@ -116,6 +116,7 @@ public final class FConfig {
 
     // events
     @Getter public int eventTicketLossPerDeath;
+    @Getter public int conquestTicketLossPerDeath;
 
     // display
     @Getter public String scoreboardTitle;
@@ -343,6 +344,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Shop URL: " + shopUrl);
 
         eventTicketLossPerDeath = conf.getInt("events.koth.ticket_loss_per_death");
+        conquestTicketLossPerDeath = conf.getInt("events.conquest.ticket_loss_per_death");
         plugin.getAresLogger().info("KOTH Ticket Loss Per Death: " + eventTicketLossPerDeath);
 
         mapNumber = conf.getInt("stats.map");

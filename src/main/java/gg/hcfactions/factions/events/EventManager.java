@@ -484,10 +484,10 @@ public final class EventManager implements IManager {
             conf.set(zoneKey + "region.a.z", zone.getCaptureRegion().getCornerA().getZ());
             conf.set(zoneKey + "region.a.world", zone.getCaptureRegion().getCornerA().getWorldName());
 
-            conf.set(zoneKey + "region.b.x", zone.getCaptureRegion().getCornerA().getX());
-            conf.set(zoneKey + "region.b.y", zone.getCaptureRegion().getCornerA().getY());
-            conf.set(zoneKey + "region.b.z", zone.getCaptureRegion().getCornerA().getZ());
-            conf.set(zoneKey + "region.b.world", zone.getCaptureRegion().getCornerA().getWorldName());
+            conf.set(zoneKey + "region.b.x", zone.getCaptureRegion().getCornerB().getX());
+            conf.set(zoneKey + "region.b.y", zone.getCaptureRegion().getCornerB().getY());
+            conf.set(zoneKey + "region.b.z", zone.getCaptureRegion().getCornerB().getZ());
+            conf.set(zoneKey + "region.b.world", zone.getCaptureRegion().getCornerB().getWorldName());
         }
 
         plugin.saveConfiguration("events", conf);
@@ -541,8 +541,14 @@ public final class EventManager implements IManager {
         return ImmutableList.copyOf(koths);
     }
 
-    public ConquestEvent getActiveConquestEvent() {
-        return (ConquestEvent) eventRepository.stream().filter(e -> e.isActive() && e instanceof ConquestEvent).findFirst().orElse(null);
+    public Optional<ConquestEvent> getActiveConquestEvent() {
+        final IEvent event = eventRepository.stream().filter(e -> e.isActive() && e instanceof ConquestEvent).findFirst().orElse(null);
+
+        if (event == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(((ConquestEvent) event));
     }
 
     public ImmutableList<PalaceEvent> getPalaceEvents() {

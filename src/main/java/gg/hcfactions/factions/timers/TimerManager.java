@@ -167,7 +167,8 @@ public final class TimerManager implements IManager {
             hasEntries = true;
         }
 
-        final ConquestEvent conquestEvent = plugin.getEventManager().getActiveConquestEvent();
+        final ConquestEvent conquestEvent = plugin.getEventManager().getActiveConquestEvent().stream().findFirst().orElse(null);
+
         if (conquestEvent != null) {
             final String indent = ChatColor.RESET + " " + ChatColor.RESET + " ";
             factionPlayer.getScoreboard().setLine(23, conquestEvent.getDisplayName());

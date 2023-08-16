@@ -190,6 +190,9 @@ events:
   koth:
     # Amount of tickets a faction should lose if a member of their faction dies
     ticket_loss_per_death: 5
+  conquest:
+    # Amount of tickets a faction should lose if a member of their faction dies during a Conquest event
+    ticket_loss_per_death: 100
 
 # Stat tracking configuration
 stats:
