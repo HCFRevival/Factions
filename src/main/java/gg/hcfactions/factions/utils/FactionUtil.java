@@ -78,7 +78,7 @@ public final class FactionUtil {
         final World.Environment env = player.getWorld().getEnvironment();
 
         if (env.equals(World.Environment.THE_END)) {
-            Players.teleportWithVehicle(plugin, player, plugin.getConfiguration().getEndExit());
+            Players.teleportWithVehicle(plugin, player, plugin.getConfiguration().getEndSpawn());
             return;
         }
 

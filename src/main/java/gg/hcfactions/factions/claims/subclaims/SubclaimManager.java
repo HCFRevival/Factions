@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.claims.subclaims.impl.SubclaimExecutor;
 import gg.hcfactions.factions.manager.IManager;
@@ -17,8 +18,12 @@ import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.ILocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bson.Document;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +33,7 @@ public final class SubclaimManager implements IManager {
     @Getter public final Factions plugin;
     @Getter public SubclaimExecutor executor;
     @Getter public SubclaimBuilderManager builderManager;
+    @Getter public BukkitTask subclaimAutosaveTask;
     @Getter public Set<Subclaim> subclaimRepository;
 
     public SubclaimManager(Factions plugin) {
@@ -43,17 +49,37 @@ public final class SubclaimManager implements IManager {
         loadSubclaims();
 
         builderManager.onEnable();
+
+        // subclaim auto-save task
+        this.subclaimAutosaveTask = new Scheduler(plugin).sync(() -> {
+            final long start = Time.now();
+
+            Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                    staff.sendMessage(ChatColor.GRAY + "Preparing to auto-save Subclaim Data..."));
+
+            new Scheduler(plugin).async(() -> {
+                saveSubclaims();
+
+                new Scheduler(plugin).sync(() -> {
+                    final long finish = Time.now();
+
+                    Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                            staff.sendMessage(ChatColor.GRAY + "Finished auto-saving Subclaim data (took " + (finish - start) + "ms)"));
+                }).run();
+            }).run();
+        }).repeat(plugin.getConfiguration().getSubclaimAutosaveDelay() * 20L, plugin.getConfiguration().getSubclaimAutosaveDelay() * 20L).run();
     }
 
     @Override
     public void onDisable() {
+        if (subclaimAutosaveTask != null) {
+            subclaimAutosaveTask.cancel();
+            subclaimAutosaveTask = null;
+        }
+
         builderManager.onDisable();
 
         saveSubclaims();
-
-        executor = null;
-        subclaimRepository = null;
-        builderManager = null;
     }
 
     private void loadSubclaims() {

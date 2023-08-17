@@ -306,6 +306,10 @@ public final class FMessage {
         player.sendMessage(LAYER_1 + "You are no longer being " + ERROR + "focused" + LAYER_1 + " by " + INFO + faction.getName());
     }
 
+    public static void printBattleHornConsumed(Player hornUser, Player receiver, String hornName) {
+        receiver.sendMessage(ChatColor.DARK_GREEN + hornUser.getName() + LAYER_1 + " has sounded the " + hornName + LAYER_1 + " horn!");
+    }
+
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Death Location]")

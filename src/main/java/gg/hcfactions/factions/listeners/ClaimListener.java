@@ -459,6 +459,11 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (event.getTo().getWorld() == null || !event.getTo().getWorld().getEnvironment().equals(World.Environment.NETHER)) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
         final Location origin = event.getTo();
         final BLocatable originLocatable = new BLocatable(origin.getBlock());
         final List<Claim> claims = plugin.getClaimManager().getServerClaimsNearby(originLocatable, 4);
@@ -467,7 +472,43 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        event.setSearchRadius(300);
+        player.sendMessage(ChatColor.DARK_PURPLE + "Your Nether Portal conflicts with a claim and your search radius was expanded");
+        event.setSearchRadius(128);
+    }
+
+    /**
+     * Handles preventing blocks from igniting inside Server Claims
+     * exclusively from non-Player entities
+     *
+     * @param event BlockIgniteEvent
+     */
+    @EventHandler
+    public void onBlockIgnite(BlockIgniteEvent event) {
+        final Entity ignitingEntity = event.getIgnitingEntity();
+
+        if (ignitingEntity == null || ignitingEntity instanceof Player) {
+            return;
+        }
+
+        final Block block = event.getIgnitingBlock();
+
+        if (block == null) {
+            return;
+        }
+
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(block));
+
+        if (insideClaim == null) {
+            return;
+        }
+
+        final ServerFaction sf = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
+
+        if (sf == null) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 
     /**

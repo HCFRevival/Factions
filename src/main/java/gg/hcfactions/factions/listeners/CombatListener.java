@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.listeners;
 
+import com.google.common.collect.Sets;
 import com.mongodb.client.model.Filters;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
@@ -41,8 +42,18 @@ import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
-public record CombatListener(@Getter Factions plugin) implements Listener {
+public final class CombatListener implements Listener {
+    @Getter Factions plugin;
+    @Getter public final Set<UUID> recentlyPrintedDeathMessage;
+
+    public CombatListener(Factions plugin) {
+        this.plugin = plugin;
+        this.recentlyPrintedDeathMessage = Sets.newConcurrentHashSet();
+    }
+
     /**
      * Handles enforcing physical combat restrictions
      *
@@ -438,6 +449,12 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
     @EventHandler
     public void onDetailedDeath(DetailedPlayerDeathEvent event) {
         final Player slain = event.getPlayer();
+        final UUID uniqueId = slain.getUniqueId();
+
+        if (recentlyPrintedDeathMessage.contains(uniqueId)) {
+            return;
+        }
+
         final EntityDamageEvent.DamageCause cause = event.getCause();
         final PlayerStatHolder slainStats = plugin.getStatsManager().getPlayerStatistics(slain.getUniqueId());
         final int slainKillCount = slainStats != null ? (int)slainStats.getStatistic(EStatisticType.KILL) : 0;
@@ -450,6 +467,9 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
         String killerSuffix = null;
         String killerUsername;
         String killerItem;
+
+        recentlyPrintedDeathMessage.add(uniqueId);
+        new Scheduler(plugin).sync(() -> recentlyPrintedDeathMessage.remove(uniqueId)).delay(100L).run();
 
         if (event.getKiller() instanceof final Player killerPlayer && !killerPlayer.getUniqueId().equals(slain.getUniqueId())) {
             final PlayerStatHolder killerStats = plugin.getStatsManager().getPlayerStatistics(killerPlayer.getUniqueId());
@@ -480,7 +500,7 @@ public record CombatListener(@Getter Factions plugin) implements Listener {
             }
 
             killerSuffix = bodyColor + " while fighting " + killerUsername + bodyColor + " using " + killerItem;
-        } else if (event.getKiller() instanceof LivingEntity) {
+        } else if (event.getKiller() instanceof LivingEntity && !event.getKiller().getUniqueId().equals(slain.getUniqueId())) {
             killerSuffix = bodyColor + " while fighting a " + entityColor + StringUtils.capitalize(event.getKiller().getName().toLowerCase(Locale.ROOT).replaceAll("_", " "));
         }
 

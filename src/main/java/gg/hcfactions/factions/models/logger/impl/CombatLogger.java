@@ -20,6 +20,7 @@ import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +55,7 @@ public final class CombatLogger extends Villager implements ICombatLogger {
         livingEntity.setFallDistance(player.getFallDistance());
         livingEntity.setFireTicks(player.getFireTicks());
         livingEntity.setRemainingAir(player.getRemainingAir());
-        player.getActivePotionEffects().forEach(livingEntity::addPotionEffect);
+        player.getActivePotionEffects().stream().filter(eff -> !eff.getType().equals(PotionEffectType.INVISIBILITY) && !eff.isInfinite()).forEach(livingEntity::addPotionEffect);
 
         if (livingEntity.getEquipment() != null && player.getEquipment() != null) {
             livingEntity.getEquipment().setHelmet(player.getEquipment().getHelmet());

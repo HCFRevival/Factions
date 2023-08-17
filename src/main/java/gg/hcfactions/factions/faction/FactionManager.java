@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.faction.impl.FactionExecutor;
 import gg.hcfactions.factions.faction.impl.FactionValidator;
@@ -21,6 +22,8 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bson.Document;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -33,6 +36,7 @@ public final class FactionManager implements IManager {
     @Getter public FactionValidator validator;
     @Getter public FactionExecutor executor;
     @Getter public BukkitTask factionTickingTask;
+    @Getter public BukkitTask factionAutosaveTask;
     @Getter public Set<IFaction> factionRepository;
 
     public FactionManager(Factions plugin) {
@@ -55,10 +59,30 @@ public final class FactionManager implements IManager {
                         .filter(f -> f instanceof PlayerFaction)
                         .filter(pf -> ((PlayerFaction)pf).canTick())
                         .forEach(playerFaction -> ((PlayerFaction) playerFaction).tick())).repeat(0L, 20L).run();
+
+        // faction auto-save task
+        this.factionAutosaveTask = new Scheduler(plugin).sync(() -> {
+            final long start = Time.now();
+
+            Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                    staff.sendMessage(ChatColor.GRAY + "Preparing to auto-save Faction Data..."));
+
+            new Scheduler(plugin).async(() -> {
+                saveFactions();
+
+                new Scheduler(plugin).sync(() -> {
+                    final long finish = Time.now();
+
+                    Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                            staff.sendMessage(ChatColor.GRAY + "Finished auto-saving Faction data (took " + (finish - start) + "ms)"));
+                }).run();
+            }).run();
+        }).repeat(plugin.getConfiguration().getFactionAutosaveDelay() * 20L, plugin.getConfiguration().getFactionAutosaveDelay() * 20L).run();
     }
 
     @Override
     public void onDisable() {
+        this.factionAutosaveTask.cancel();
         this.factionTickingTask.cancel();
 
         // called on the main thread to lock process

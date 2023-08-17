@@ -34,6 +34,12 @@ public final class FConfig {
 
     @Getter public String redisUri;
 
+    // autosave
+    @Getter public int factionAutosaveDelay;
+    @Getter public int claimAutosaveDelay;
+    @Getter public int subclaimAutosaveDelay;
+    @Getter public int playerAutosaveDelay;
+
     // world
     @Getter @Setter public Location overworldSpawn;
     @Getter @Setter public Location endSpawn;
@@ -83,6 +89,7 @@ public final class FConfig {
     @Getter public int rallyDuration;
     @Getter public int outpostRestockDuration;
     @Getter public int freezeDuration;
+    @Getter public int reinviteRestockDuration;
     @Getter public int homeDuration;
     @Getter public int logoutDuration;
     @Getter public int sotwProtectionDuration;
@@ -109,6 +116,7 @@ public final class FConfig {
 
     // events
     @Getter public int eventTicketLossPerDeath;
+    @Getter public int conquestTicketLossPerDeath;
 
     // display
     @Getter public String scoreboardTitle;
@@ -213,6 +221,11 @@ public final class FConfig {
         redisUri = conf.getString("databases.redis.uri");
         plugin.getAresLogger().info("Using MongoDB Database: " + mongoDatabaseName);
 
+        factionAutosaveDelay = conf.getInt("autosave.factions");
+        playerAutosaveDelay = conf.getInt("autosave.players");
+        claimAutosaveDelay = conf.getInt("autosave.claims");
+        subclaimAutosaveDelay = conf.getInt("autosave.subclaims");
+
         maxFactionSize = conf.getInt("factions.max_faction_size");
         defaultFactionReinvites = conf.getInt("factions.reinvites");
         minFactionNameLength = conf.getInt("factions.name.min_length");
@@ -269,9 +282,11 @@ public final class FConfig {
         freezeDuration = conf.getInt("factions.timers.freeze");
         rallyDuration = conf.getInt("factions.timers.rally");
         outpostRestockDuration = conf.getInt("factions.timers.outpost");
+        reinviteRestockDuration = conf.getInt("factions.timers.reinvite");
         plugin.getAresLogger().info("Faction Freeze Timer Duration: " + freezeDuration);
         plugin.getAresLogger().info("Faction Rally Timer Duration: " + rallyDuration);
         plugin.getAresLogger().info("Outpost Restock Duration: " + outpostRestockDuration);
+        plugin.getAresLogger().info("Reinvite Restock Duration: " + reinviteRestockDuration);
 
         overworldSpawn = Configs.parsePlayerLocation(conf, "spawns.overworld").getBukkitLocation();
         endSpawn = Configs.parsePlayerLocation(conf, "spawns.end_spawn").getBukkitLocation();
@@ -329,6 +344,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Shop URL: " + shopUrl);
 
         eventTicketLossPerDeath = conf.getInt("events.koth.ticket_loss_per_death");
+        conquestTicketLossPerDeath = conf.getInt("events.conquest.ticket_loss_per_death");
         plugin.getAresLogger().info("KOTH Ticket Loss Per Death: " + eventTicketLossPerDeath);
 
         mapNumber = conf.getInt("stats.map");

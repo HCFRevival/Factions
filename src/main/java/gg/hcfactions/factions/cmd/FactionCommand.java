@@ -454,9 +454,12 @@ public final class FactionCommand extends BaseCommand {
 
     @Subcommand("setinv all")
     @Description("Update re-invites for all Server Factions")
+    @Syntax("[-reset]")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onFactionReinviteBulkUpdate(Player player, int reinviteAmount) {
-        plugin.getFactionManager().getExecutor().setFactionReinvitesBulk(player, reinviteAmount, new Promise() {
+    public void onFactionReinviteBulkUpdate(Player player, int reinviteAmount, @Optional String reset) {
+        final boolean shouldReset = (reset != null && reset.equalsIgnoreCase("-reset"));
+
+        plugin.getFactionManager().getExecutor().setFactionReinvitesBulk(player, reinviteAmount, shouldReset, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Re-invites have been bulk updated");
@@ -471,10 +474,12 @@ public final class FactionCommand extends BaseCommand {
 
     @Subcommand("setinv|setreinv")
     @Description("Update a faction's reinvites")
-    @Syntax("<name> <amount>")
+    @Syntax("<name> <amount> [-reset]")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @CommandCompletion("@pfactions")
-    public void onFactionReinviteUpdate(Player player, String factionName, String reinviteAmount) {
+    public void onFactionReinviteUpdate(Player player, String factionName, String reinviteAmount, @Optional String reset) {
+        final boolean shouldReset = (reset != null && reset.equalsIgnoreCase("-reset"));
+
         int v;
         try {
             v = Integer.parseInt(reinviteAmount);
@@ -483,7 +488,7 @@ public final class FactionCommand extends BaseCommand {
             return;
         }
 
-        plugin.getFactionManager().getExecutor().setFactionReinvites(player, factionName, v, new Promise() {
+        plugin.getFactionManager().getExecutor().setFactionReinvites(player, factionName, v, shouldReset, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Faction reinvites has been updated to: " + v);

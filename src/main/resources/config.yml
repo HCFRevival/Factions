@@ -19,6 +19,13 @@ databases:
   redis:
     uri: 'redis://0.0.0.0:6379'
 
+# Autosave to Database intervals
+autosave:
+  factions: 1800
+  claims: 1800
+  subclaims: 3600
+  players: 3600
+
 factions:
   # Maximum amount of players allowed in a single faction
   max_faction_size: 30
@@ -107,6 +114,9 @@ factions:
     # Time to wait between Outpost restocks
     outpost: 3600
 
+    # Time to wait between reinvite restocks
+    reinvite: 30
+
 # Map spawn locations
 spawns:
   overworld:
@@ -180,6 +190,9 @@ events:
   koth:
     # Amount of tickets a faction should lose if a member of their faction dies
     ticket_loss_per_death: 5
+  conquest:
+    # Amount of tickets a faction should lose if a member of their faction dies during a Conquest event
+    ticket_loss_per_death: 100
 
 # Stat tracking configuration
 stats:

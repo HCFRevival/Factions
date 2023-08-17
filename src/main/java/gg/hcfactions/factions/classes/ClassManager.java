@@ -22,6 +22,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public final class ClassManager implements IManager {
     @Getter public final Factions plugin;
@@ -243,6 +244,14 @@ public final class ClassManager implements IManager {
      */
     public IClass getCurrentClass(Player player) {
         return classes.stream().filter(c -> c.getActivePlayers().contains(player.getUniqueId())).findFirst().orElse(null);
+    }
+
+    /**
+     * @param uuid Bukkit UUID
+     * @return Currently active class
+     */
+    public IClass getCurrentClass(UUID uuid) {
+        return classes.stream().filter(c -> c.getActivePlayers().contains(uuid)).findFirst().orElse(null);
     }
 
     /**

@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.claim.impl.Claim;
@@ -17,8 +18,12 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.ILocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bson.Document;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.Set;
@@ -28,6 +33,7 @@ import java.util.stream.Collectors;
 public final class ClaimManager implements IManager {
     @Getter public final Factions plugin;
     @Getter public ClaimBuilderManager claimBuilderManager;
+    @Getter public BukkitTask claimAutosaveTask;
     @Getter public Set<Claim> claimRepository;
 
     public ClaimManager(Factions plugin) {
@@ -42,10 +48,34 @@ public final class ClaimManager implements IManager {
         claimBuilderManager.onEnable();
 
         loadClaims();
+
+        // claim auto-save task
+        this.claimAutosaveTask = new Scheduler(plugin).sync(() -> {
+            final long start = Time.now();
+
+            Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                    staff.sendMessage(ChatColor.GRAY + "Preparing to auto-save Claim Data..."));
+
+            new Scheduler(plugin).async(() -> {
+                saveClaims();
+
+                new Scheduler(plugin).sync(() -> {
+                    final long finish = Time.now();
+
+                    Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                            staff.sendMessage(ChatColor.GRAY + "Finished auto-saving Claim data (took " + (finish - start) + "ms)"));
+                }).run();
+            }).run();
+        }).repeat(plugin.getConfiguration().getClaimAutosaveDelay() * 20L, plugin.getConfiguration().getClaimAutosaveDelay() * 20L).run();
     }
 
     @Override
     public void onDisable() {
+        if (claimAutosaveTask != null) {
+            claimAutosaveTask.cancel();
+            claimAutosaveTask = null;
+        }
+
         claimBuilderManager.onDisable();
 
         saveClaims();

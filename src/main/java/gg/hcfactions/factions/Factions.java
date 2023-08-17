@@ -13,6 +13,9 @@ import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.items.Sugarcube;
+import gg.hcfactions.factions.items.horn.ChargeBattleHorn;
+import gg.hcfactions.factions.items.horn.CleanseBattleHorn;
+import gg.hcfactions.factions.items.horn.RetreatBattleHorn;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
@@ -78,6 +81,7 @@ public final class Factions extends AresPlugin {
         final PaperCommandManager cmdMng = new PaperCommandManager(this);
         cmdMng.enableUnstableAPI("help");
         registerCommandManager(cmdMng);
+
         registerCommand(new FactionCommand(this));
         registerCommand(new StatsCommand(this));
         registerCommand(new StateCommand(this));
@@ -92,6 +96,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new FactionHelpCommand(this));
         registerCommand(new FocusCommand(this));
         registerCommand(new LogoutCommand(this));
+        registerCommand(new ClassCommand(this));
         registerCommand(new DebugCommand(this));
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
@@ -267,12 +272,16 @@ public final class Factions extends AresPlugin {
         registerListener(new OutpostListener(this));
         registerListener(new HorseListener(this));
         registerListener(new ShopListener(this));
+        registerListener(new HornListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();
 
-        // starter kit
+        // custom items
         customItemService.registerNewItem(new Sugarcube());
+        customItemService.registerNewItem(new RetreatBattleHorn(this));
+        customItemService.registerNewItem(new CleanseBattleHorn(this));
+        customItemService.registerNewItem(new ChargeBattleHorn(this));
 
         if (configuration.starterKitEnabled) {
             customItemService.registerNewItem(new StarterRod());

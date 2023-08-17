@@ -43,6 +43,29 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        plugin.getEventManager().getActiveConquestEvent().ifPresent(conquest -> {
+            final int currentTickets = conquest.getSession().getTickets(playerFaction);
+
+            if (currentTickets <= 0) {
+                return;
+            }
+
+            final int newTickets = currentTickets - plugin.getConfiguration().getConquestTicketLossPerDeath();
+
+            if (newTickets <= 0) {
+                conquest.getSession().getLeaderboard().remove(playerFaction.getUniqueId());
+                playerFaction.sendMessage(" ");
+                playerFaction.sendMessage(FMessage.CONQ_PREFIX + "Your faction is no longer on the leaderboard for " + conquest.getDisplayName());
+                playerFaction.sendMessage(" ");
+                return;
+            }
+
+            conquest.getSession().getLeaderboard().put(playerFaction.getUniqueId(), newTickets);
+            playerFaction.sendMessage(" ");
+            playerFaction.sendMessage(FMessage.CONQ_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + conquest.getDisplayName());
+            playerFaction.sendMessage(" ");
+        });
+
         for (KOTHEvent koth : plugin.getEventManager().getActiveKothEvents()) {
             final int currentTickets = koth.getSession().getTickets(playerFaction);
 
@@ -76,6 +99,7 @@ public record EventListener(@Getter Factions plugin) implements Listener {
     @EventHandler
     public void onFactionDisband(FactionDisbandEvent event) {
         plugin.getEventManager().getActiveKothEvents().forEach(kothEvent -> kothEvent.getSession().getLeaderboard().remove(event.getFaction().getUniqueId()));
+        plugin.getEventManager().getActiveConquestEvent().ifPresent(conquestEvent -> conquestEvent.getSession().getLeaderboard().remove(event.getFaction().getUniqueId()));
     }
 
     /**

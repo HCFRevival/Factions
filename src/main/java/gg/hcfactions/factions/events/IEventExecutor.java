@@ -45,6 +45,16 @@ public interface IEventExecutor {
     void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise);
 
     /**
+     * Alter a Capture Event's leaderboard
+     * @param player Player
+     * @param eventName Event Name
+     * @param factionName Player Faction name
+     * @param tickets Tickets to update to
+     * @param promise Promise
+     */
+    void setCaptureLeaderboard(Player player, String eventName, String factionName, int tickets, Promise promise);
+
+    /**
      * Stop an event
      * @param player Player
      * @param eventName Event name
