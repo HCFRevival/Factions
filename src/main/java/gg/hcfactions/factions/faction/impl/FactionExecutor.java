@@ -322,7 +322,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     FMessage.printCanNotJoinWhileFrozen(playerFaction, aresAccount.getUsername());
                 }
 
-                if (playerFaction.getMemberHistory().contains(aresAccount.getUniqueId())) {
+                if (playerFaction.getMemberHistory().contains(aresAccount.getUniqueId()) && manager.getPlugin().getEventManager().isMajorEventActive()) {
                     FMessage.printReinviteWillBeConsumed(playerFaction, aresAccount.getUsername());
                 }
 
@@ -420,7 +420,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     public void joinFaction(Player player, String factionName, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByName(factionName);
         final boolean bypass = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
-        final boolean modeExempt = (manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
+        final boolean modeExempt = (!manager.getPlugin().getEventManager().isMajorEventActive()
+                || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_1)
                 || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.EOTW_PHASE_2)
                 || manager.getPlugin().getServerStateManager().getCurrentState().equals(EServerState.KITMAP));
 
@@ -1119,6 +1120,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
         if (reset) {
             faction.getReinviteRestockTimes().clear();
+            faction.getMemberHistory().clear();
         }
 
         faction.setReinvites(reinvites);
@@ -1131,6 +1133,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         manager.getPlayerFactions().forEach(pf -> {
             if (reset) {
                 pf.getReinviteRestockTimes().clear();
+                pf.getMemberHistory().clear();
             }
 
             pf.setReinvites(reinvites);

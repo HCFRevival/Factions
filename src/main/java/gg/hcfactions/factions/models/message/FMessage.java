@@ -443,7 +443,9 @@ public final class FMessage {
             message.add(ChatColor.YELLOW + "Frozen: " + ChatColor.BLUE + Time.convertToRemaining(timer.getRemaining()));
         }
 
-        message.add(ChatColor.YELLOW + "Re-invites: " + ChatColor.BLUE + playerFaction.getReinvites());
+        if (plugin.getEventManager().isMajorEventActive()) {
+            message.add(ChatColor.YELLOW + "Re-invites: " + ChatColor.BLUE + playerFaction.getReinvites());
+        }
 
         new Scheduler(plugin).async(() -> {
             final Map<PlayerFaction.Rank, List<String>> namesByRank = Maps.newHashMap();

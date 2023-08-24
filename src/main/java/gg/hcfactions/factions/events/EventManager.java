@@ -568,4 +568,8 @@ public final class EventManager implements IManager {
         events.sort(Comparator.comparing(IEvent::getName));
         return ImmutableList.copyOf(events);
     }
+
+    public boolean isMajorEventActive() {
+        return getActiveEvents().stream().anyMatch(e -> e instanceof PalaceEvent || e instanceof ConquestEvent);
+    }
 }
