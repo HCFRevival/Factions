@@ -13,6 +13,7 @@ import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.items.Sugarcube;
+import gg.hcfactions.factions.items.horn.BerserkBattleHorn;
 import gg.hcfactions.factions.items.horn.ChargeBattleHorn;
 import gg.hcfactions.factions.items.horn.CleanseBattleHorn;
 import gg.hcfactions.factions.items.horn.RetreatBattleHorn;
@@ -281,6 +282,7 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new RetreatBattleHorn(this));
         customItemService.registerNewItem(new CleanseBattleHorn(this));
         customItemService.registerNewItem(new ChargeBattleHorn(this));
+        customItemService.registerNewItem(new BerserkBattleHorn(this));
 
         if (configuration.starterKitEnabled) {
             customItemService.registerNewItem(new StarterRod());

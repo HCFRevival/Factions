@@ -19,6 +19,7 @@ public interface IBattleHorn {
     Factions getPlugin();
     EBattleHornType getType();
     List<PotionEffect> getActiveEffects();
+    Map<PotionEffect, Integer> getPostEffects();
 
     default void apply(Player who, Collection<UUID> affectedIds) {
         if (getType().equals(EBattleHornType.CLEANSE)) {
@@ -69,7 +70,6 @@ public interface IBattleHorn {
                 });
 
                 existingPotionEffects.put(affectedId, prevEffects);
-
                 FMessage.printBattleHornConsumed(who, affectedPlayer, getType().getDisplayName());
              }
         });
@@ -87,5 +87,16 @@ public interface IBattleHorn {
                 }
             });
         }).delay(active.getDuration() + 1).run());
+
+        // apply post effects if they exist
+        getPostEffects().forEach((postEffect, delay) -> new Scheduler(getPlugin()).sync(() -> {
+            affectedIds.forEach(uuid -> {
+                final Player affectedPlayer = Bukkit.getPlayer(uuid);
+
+                if (affectedPlayer != null && !affectedPlayer.hasPotionEffect(postEffect.getType())) {
+                    affectedPlayer.addPotionEffect(postEffect);
+                }
+            });
+        }).delay(delay * 20).run());
     }
 }

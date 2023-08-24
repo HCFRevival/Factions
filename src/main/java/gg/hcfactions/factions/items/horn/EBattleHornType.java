@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 
 @AllArgsConstructor
 public enum EBattleHornType {
+    BERSERK(ChatColor.RED + "Berserk"),
     RETREAT(ChatColor.DARK_RED + "Retreat"),
     CHARGE(ChatColor.GREEN + "Charge"),
     FRENZY(ChatColor.GOLD + "Frenzy"),

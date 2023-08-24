@@ -30,6 +30,11 @@ public record CleanseBattleHorn(@Getter Factions plugin) implements ICustomItem,
     }
 
     @Override
+    public Map<PotionEffect, Integer> getPostEffects() {
+        return Maps.newHashMap();
+    }
+
+    @Override
     public Material getMaterial() {
         return Material.GOAT_HORN;
     }
