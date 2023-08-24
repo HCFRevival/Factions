@@ -19,6 +19,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.List;
 
+/**
+ * @deprecated
+ * This class was used to implement Faction nameplates
+ * using Lunar's Legacy API. For balancing purposes,
+ * this feature was removed. To re-enable this functionality
+ * register this NameplateListener in the Factions class.
+ * @param plugin Factions Plugin
+ */
 public record NameplateListener(@Getter Factions plugin) implements Listener {
     private void sendNameplates(Player viewer) {
         final AccountService acs = (AccountService) plugin.getService(AccountService.class);
