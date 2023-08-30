@@ -55,7 +55,9 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
 
         plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
             if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                p.getScoreboard().removeLineByQuery(ChatColor.stripColor(displayName));
+                final int index = p.getScoreboard().findIndex(ChatColor.stripColor(displayName));
+                p.getScoreboard().removeLine(index);
+                p.getScoreboard().removeLine(index - 1);
             }
         });
 
@@ -66,12 +68,12 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
 
     @Override
     public void startEvent() {
-        startEvent(eventConfig.getDefaultTicketsNeededToWin(), eventConfig.getDefaultTimerDuration(), eventConfig.getTokenReward());
+        startEvent(eventConfig.getDefaultTicketsNeededToWin(), eventConfig.getDefaultTimerDuration(), eventConfig.getTokenReward(), eventConfig.getTickCheckpointInterval());
     }
 
     @Override
-    public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward) {
-        session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward);
+    public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval) {
+        session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward, tickCheckpointInterval);
         session.setActive(true);
 
         Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
@@ -85,7 +87,9 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
 
         plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
             if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                p.getScoreboard().removeLineByQuery(ChatColor.stripColor(displayName));
+                final int index = p.getScoreboard().findIndex(ChatColor.stripColor(displayName));
+                p.getScoreboard().removeLine(index);
+                p.getScoreboard().removeLine(index - 1);
             }
         });
 

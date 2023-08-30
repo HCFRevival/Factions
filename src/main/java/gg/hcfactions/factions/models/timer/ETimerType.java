@@ -24,8 +24,8 @@ public enum ETimerType {
       false
     ),
     ENDERPEARL(
-            Colors.PURPLE.toBukkit() + "" + ChatColor.BOLD + "Enderpearl",
-            Colors.PURPLE.toBukkit() + "Enderpearl",
+            Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Enderpearl",
+            Colors.DARK_AQUA.toBukkit() + "Enderpearl",
             12,
             true,
             true,

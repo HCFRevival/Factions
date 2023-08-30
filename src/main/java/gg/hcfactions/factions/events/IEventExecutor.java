@@ -17,9 +17,10 @@ public interface IEventExecutor {
      * @param ticketsToWin Tickets to win
      * @param timerDuration Timer duration
      * @param tokenReward Token reward
+     * @param tickCheckpointInterval Tick checkpoint interval
      * @param promise Promise
      */
-    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise);
+    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise);
 
     /**
      * Start a Conquest Event with specified rules
@@ -40,9 +41,10 @@ public interface IEventExecutor {
      * @param ticketsToWin Tickets to win
      * @param timerDuration Timer duration
      * @param tokenReward Token reward
+     * @param tickCheckpointInterval Tick checkpoint interval
      * @param promise Promise
      */
-    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise);
+    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise);
 
     /**
      * Alter a Capture Event's leaderboard
