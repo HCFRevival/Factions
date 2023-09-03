@@ -42,6 +42,7 @@ import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.services.impl.reports.ReportService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
+import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -194,6 +195,7 @@ public final class Factions extends AresPlugin {
         final AutomodService automodService = new AutomodService(this);
         final ReportService reportService = new ReportService(this);
         final AltService altService = new AltService(this);
+        final XPService xpService = new XPService(this, "dev", "xp_players", "xp_transactions");
 
         // register services
         registerService(accountService);
@@ -206,6 +208,7 @@ public final class Factions extends AresPlugin {
         registerService(automodService);
         registerService(reportService);
         registerService(altService);
+        registerService(xpService);
         startServices();
 
         // initialize gson

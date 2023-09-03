@@ -15,6 +15,14 @@ public enum ETimerType {
             true,
             false
     ),
+    CHORUS_FRUIT(
+            Colors.LAVENDAR.toBukkit() + "" + ChatColor.BOLD + "Chorus Fruit",
+            Colors.LAVENDAR.toBukkit() + "Chorus Fruit",
+            14,
+            true,
+            true,
+            false
+    ),
     TRIDENT(
       Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Riptide",
       Colors.AQUA.toBukkit() + "Riptide",

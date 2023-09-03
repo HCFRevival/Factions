@@ -150,6 +150,7 @@ player:
     enderpearl: 16
     crapple: 5
     gapple: 300
+    chorus: 30
     totem: 3600
     trident: 3
     stuck: 60

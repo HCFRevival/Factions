@@ -432,6 +432,16 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.addTimer(new FTimer(ETimerType.GAPPLE, plugin.getConfiguration().getGappleDuration()));
+        } else if (item.getType().equals(Material.CHORUS_FRUIT)) {
+            final FTimer existing = factionPlayer.getTimer(ETimerType.CHORUS_FRUIT);
+
+            if (existing != null && !existing.isExpired()) {
+                FMessage.printLockedTimer(player, "chorus fruit", existing.getRemaining());
+                event.setCancelled(true);
+                return;
+            }
+
+            factionPlayer.addTimer(new FTimer(ETimerType.CHORUS_FRUIT, plugin.getConfiguration().getChorusDuration()));
         }
     }
 

@@ -83,6 +83,7 @@ public final class FConfig {
     @Getter public int enderpearlDuration;
     @Getter public int crappleDuration;
     @Getter public int gappleDuration;
+    @Getter public int chorusDuration;
     @Getter public int totemDuration;
     @Getter public int tridentDuration;
     @Getter public int stuckDuration;
@@ -302,6 +303,7 @@ public final class FConfig {
         enderpearlDuration = conf.getInt("player.timers.enderpearl");
         crappleDuration = conf.getInt("player.timers.crapple");
         gappleDuration = conf.getInt("player.timers.gapple");
+        chorusDuration = conf.getInt("player.timers.chorus");
         totemDuration = conf.getInt("player.timers.totem");
         tridentDuration = conf.getInt("player.timers.trident");
         stuckDuration = conf.getInt("player.timers.stuck");
@@ -316,6 +318,7 @@ public final class FConfig {
         plugin.getAresLogger().info("Enderpearl Duration: " + enderpearlDuration);
         plugin.getAresLogger().info("Crapple Duration: " + crappleDuration);
         plugin.getAresLogger().info("Gapple Duration: " + gappleDuration);
+        plugin.getAresLogger().info("Chorus Duration: " + chorusDuration);
         plugin.getAresLogger().info("Totem Duration: " + totemDuration);
         plugin.getAresLogger().info("Trident Duration: " + tridentDuration);
         plugin.getAresLogger().info("Stuck Duration: " + stuckDuration);
