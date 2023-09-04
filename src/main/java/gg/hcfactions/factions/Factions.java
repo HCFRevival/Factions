@@ -13,6 +13,7 @@ import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.items.Sugarcube;
+import gg.hcfactions.factions.items.horn.BerserkBattleHorn;
 import gg.hcfactions.factions.items.horn.ChargeBattleHorn;
 import gg.hcfactions.factions.items.horn.CleanseBattleHorn;
 import gg.hcfactions.factions.items.horn.RetreatBattleHorn;
@@ -41,6 +42,7 @@ import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.services.impl.reports.ReportService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
+import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -193,6 +195,7 @@ public final class Factions extends AresPlugin {
         final AutomodService automodService = new AutomodService(this);
         final ReportService reportService = new ReportService(this);
         final AltService altService = new AltService(this);
+        final XPService xpService = new XPService(this, "dev", "xp_players", "xp_transactions");
 
         // register services
         registerService(accountService);
@@ -205,6 +208,7 @@ public final class Factions extends AresPlugin {
         registerService(automodService);
         registerService(reportService);
         registerService(altService);
+        registerService(xpService);
         startServices();
 
         // initialize gson
@@ -266,7 +270,6 @@ public final class Factions extends AresPlugin {
         registerListener(new FoundOreListener(this));
         registerListener(new SpawnListener(this));
         registerListener(new WaypointListener(this));
-        registerListener(new NameplateListener(this));
         registerListener(new CosmeticsListener(this));
         registerListener(new CrowbarListener(this));
         registerListener(new OutpostListener(this));
@@ -282,6 +285,7 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new RetreatBattleHorn(this));
         customItemService.registerNewItem(new CleanseBattleHorn(this));
         customItemService.registerNewItem(new ChargeBattleHorn(this));
+        customItemService.registerNewItem(new BerserkBattleHorn(this));
 
         if (configuration.starterKitEnabled) {
             customItemService.registerNewItem(new StarterRod());

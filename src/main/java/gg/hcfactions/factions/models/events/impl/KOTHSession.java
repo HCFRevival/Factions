@@ -23,17 +23,19 @@ public final class KOTHSession implements IEventSession {
     @Getter @Setter public int ticketsNeededToWin;
     @Getter @Setter public int timerDuration;
     @Getter @Setter public int tokenReward;
+    @Getter @Setter public int tickCheckpointInterval;
     @Getter @Setter public long nextNotificationTime;
     @Getter @Setter public PlayerFaction capturingFaction;
     @Getter public final Map<UUID, Integer> leaderboard;
     @Getter public final KOTHTimer timer;
 
-    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward) {
+    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval) {
         this.event = event;
         this.active = false;
         this.ticketsNeededToWin = ticketsNeededToWin;
         this.timerDuration = timerDuration;
         this.tokenReward = tokenReward;
+        this.tickCheckpointInterval = tickCheckpointInterval;
         this.nextNotificationTime = Time.now();
         this.capturingFaction = null;
         this.leaderboard = Maps.newConcurrentMap();
@@ -58,6 +60,56 @@ public final class KOTHSession implements IEventSession {
         collected.forEach(entry -> sorted.put(entry.getKey(), entry.getValue()));
 
         return ImmutableMap.copyOf(sorted);
+    }
+
+    /**
+     * Calculates each ticket checkpoint and stores them
+     * an in array. This list can be used to determine if
+     * a faction has exceeded a set checkpoint
+     * @return List of Ints
+     */
+    public List<Integer> getTickCheckpoints() {
+        final List<Integer> res = Lists.newArrayList();
+
+        if (getTickCheckpointInterval() <= 0) {
+            return res;
+        }
+
+        final int rounded = (int)Math.ceil((double)ticketsNeededToWin / tickCheckpointInterval);
+        int cursor = rounded;
+
+        while (cursor <= ticketsNeededToWin) {
+            res.add(cursor);
+            cursor += rounded;
+        }
+
+        return res;
+    }
+
+    /**
+     * Calculates the closest ticket checkpoint
+     * for the provided tickets to determine the
+     * 'true zero'
+     *
+     * @param currentTickets Current ticket count before subtraction
+     * @return Max ticket loss
+     */
+    public int getTicketLossFloor(int currentTickets) {
+        final List<Integer> checkpoints = getTickCheckpoints();
+
+        if (checkpoints.isEmpty()) {
+            return 0;
+        }
+
+        for (int i = checkpoints.size() - 1; i >= 0; i--) {
+            final int floorValue = checkpoints.get(i);
+
+            if (currentTickets >= floorValue) {
+                return floorValue;
+            }
+        }
+
+        return 0;
     }
 
     public void setContested(Set<PlayerFaction> factions) {
@@ -115,20 +167,25 @@ public final class KOTHSession implements IEventSession {
 
         for (UUID otherFactionId : leaderboard.keySet().stream().filter(f -> !f.equals(faction.getUniqueId())).collect(Collectors.toList())) {
             final PlayerFaction otherFaction = event.getPlugin().getFactionManager().getPlayerFactionById(otherFactionId);
-            final int tickets = getTickets(otherFaction) - 1;
+            final int currentTickets = getTickets(otherFaction);
+            final int subtractedTickets = Math.max(currentTickets - 1, getTicketLossFloor(currentTickets));
 
-            if (tickets <= 0) {
+            if (subtractedTickets <= 0) {
                 leaderboard.remove(otherFactionId);
+
                 otherFaction.sendMessage(" ");
                 otherFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction is no longer on the leaderboard for " + event.getDisplayName());
                 otherFaction.sendMessage(" ");
                 continue;
             }
 
-            leaderboard.put(otherFactionId, tickets);
-            otherFaction.sendMessage(" ");
-            otherFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + tickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + event.getDisplayName());
-            otherFaction.sendMessage(" ");
+            if (subtractedTickets != currentTickets) {
+                leaderboard.put(otherFactionId, subtractedTickets);
+
+                otherFaction.sendMessage(" ");
+                otherFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + subtractedTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + event.getDisplayName());
+                otherFaction.sendMessage(" ");
+            }
         }
 
         timer.setExpire(Time.now() + (timerDuration * 1000L));

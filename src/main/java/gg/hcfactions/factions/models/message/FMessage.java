@@ -52,6 +52,7 @@ public final class FMessage {
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
     public static final String T_CRAPPLE_UNLOCKED = SUCCESS + "Your crapples have been unlocked";
     public static final String T_GAPPLE_UNLOCKED = SUCCESS + "Your gapples have been unlocked";
+    public static final String T_CHORUS_UNLOCKED = SUCCESS + "Your chorus fruit have been unlocked";
     public static final String T_TRIDENT_UNLOCKED = SUCCESS + "Your riptide has been unlocked";
     public static final String T_HOME_EXPIRE = SUCCESS + "You have been returned to your faction home";
     public static final String T_STUCK_EXPIRE = SUCCESS + "You have been teleported to safety";
@@ -443,7 +444,9 @@ public final class FMessage {
             message.add(ChatColor.YELLOW + "Frozen: " + ChatColor.BLUE + Time.convertToRemaining(timer.getRemaining()));
         }
 
-        message.add(ChatColor.YELLOW + "Re-invites: " + ChatColor.BLUE + playerFaction.getReinvites());
+        if (plugin.getEventManager().isMajorEventActive()) {
+            message.add(ChatColor.YELLOW + "Re-invites: " + ChatColor.BLUE + playerFaction.getReinvites());
+        }
 
         new Scheduler(plugin).async(() -> {
             final Map<PlayerFaction.Rank, List<String>> namesByRank = Maps.newHashMap();

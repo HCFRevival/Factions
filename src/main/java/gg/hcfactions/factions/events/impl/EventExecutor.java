@@ -41,7 +41,7 @@ public final class EventExecutor implements IEventExecutor {
     @Getter public EventManager manager;
 
     @Override
-    public void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise) {
+    public void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -61,7 +61,7 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward);
+        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval);
         promise.resolve();
     }
 
@@ -91,7 +91,7 @@ public final class EventExecutor implements IEventExecutor {
     }
 
     @Override
-    public void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, Promise promise) {
+    public void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -106,12 +106,13 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, koth.getEventConfig().getMaxLifespan(), tokenReward));
+        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval));
 
         if (koth.isActive()) {
             koth.getSession().setTicketsNeededToWin(ticketsToWin);
             koth.getSession().setTimerDuration(timerDuration);
             koth.getSession().setTokenReward(tokenReward);
+            koth.getSession().setTickCheckpointInterval(tickCheckpointInterval);
         }
 
         promise.resolve();

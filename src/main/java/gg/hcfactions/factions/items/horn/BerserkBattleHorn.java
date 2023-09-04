@@ -19,23 +19,31 @@ import org.bukkit.potion.PotionType;
 import java.util.List;
 import java.util.Map;
 
-public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, IBattleHorn {
+public record BerserkBattleHorn(@Getter Factions plugin) implements ICustomItem, IBattleHorn {
     @Override
     public EBattleHornType getType() {
-        return EBattleHornType.CHARGE;
+        return EBattleHornType.BERSERK;
     }
 
     @Override
     public List<PotionEffect> getActiveEffects() {
         final List<PotionEffect> res = Lists.newArrayList();
-        res.add(new PotionEffect(PotionEffectType.SPEED, 180 * 20, 1));
-        res.add(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 900 * 20, 0));
+        res.add(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 30 * 20, 0));
+        res.add(new PotionEffect(PotionEffectType.SPEED, 30 * 20, 2));
+        res.add(new PotionEffect(PotionEffectType.FAST_DIGGING, 30 * 20, 1));
         return res;
     }
 
     @Override
     public Map<PotionEffect, Integer> getPostEffects() {
-        return Maps.newHashMap();
+        final PotionEffect slow = new PotionEffect(PotionEffectType.SLOW, 20 * 20, 1);
+        final PotionEffect weak = new PotionEffect(PotionEffectType.WEAKNESS, 15 * 20, 0);
+        final Map<PotionEffect, Integer> res = Maps.newHashMap();
+
+        res.put(slow, 30);
+        res.put(weak, 30);
+
+        return res;
     }
 
     @Override
@@ -45,7 +53,7 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
 
     @Override
     public String getName() {
-        return ChatColor.GOLD + "Charge!";
+        return ChatColor.RED + "Berserk";
     }
 
     @Override
@@ -59,14 +67,34 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
                 PotionType.SPEED.getEffectType().getColor().getBlue())
         );
 
-        final ChatColor fresColor = ChatColor.of(String.format("#%02x%02x%02x",
-                PotionType.FIRE_RESISTANCE.getEffectType().getColor().getRed(),
-                PotionType.FIRE_RESISTANCE.getEffectType().getColor().getGreen(),
-                PotionType.FIRE_RESISTANCE.getEffectType().getColor().getBlue())
+        final ChatColor strColor = ChatColor.of(String.format("#%02x%02x%02x",
+                PotionType.STRENGTH.getEffectType().getColor().getRed(),
+                PotionType.STRENGTH.getEffectType().getColor().getGreen(),
+                PotionType.STRENGTH.getEffectType().getColor().getBlue())
         );
 
-        res.add(speedColor + "Speed II for 3:00");
-        res.add(fresColor + "Fire Resistance for 15:00");
+        final ChatColor slowColor = ChatColor.of(String.format("#%02x%02x%02x",
+                PotionType.SLOWNESS.getEffectType().getColor().getRed(),
+                PotionType.SLOWNESS.getEffectType().getColor().getGreen(),
+                PotionType.SLOWNESS.getEffectType().getColor().getBlue())
+        );
+
+        final ChatColor weakColor = ChatColor.of(String.format("#%02x%02x%02x",
+                PotionType.WEAKNESS.getEffectType().getColor().getRed(),
+                PotionType.WEAKNESS.getEffectType().getColor().getGreen(),
+                PotionType.WEAKNESS.getEffectType().getColor().getBlue())
+        );
+
+        final ChatColor hasteColor = ChatColor.YELLOW;
+
+        res.add(speedColor + "Speed III for 0:30");
+        res.add(strColor + "Strength I for 0:30");
+        res.add(hasteColor + "Haste II for 0:30");
+
+        res.add(ChatColor.RESET + " ");
+        res.add(ChatColor.RED + "Side-effects");
+        res.add(slowColor + "Slowness II for 0:20");
+        res.add(weakColor + "Weakness I for 0:15");
 
         return res;
     }
@@ -83,7 +111,7 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
 
         if (meta != null) {
             final MusicInstrumentMeta instrumentMeta = (MusicInstrumentMeta) meta;
-            instrumentMeta.setInstrument(MusicInstrument.PONDER);
+            instrumentMeta.setInstrument(MusicInstrument.CALL);
             item.setItemMeta(instrumentMeta);
         }
 

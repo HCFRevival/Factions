@@ -20,4 +20,13 @@ public interface ICaptureEventConfig {
      * @return Tokens that will be rewarded for capturing the event
      */
     int getTokenReward();
+
+    /**
+     * @return The amount of tick intervals to use as a 'checkpoint'
+     * for factions that exceed the number.
+     *
+     * Example: If ticks is set to 4, there will be stop places
+     * at each 25% mark of the total tickets needed to win.
+     */
+    int getTickCheckpointInterval();
 }

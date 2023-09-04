@@ -14,8 +14,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.time.DayOfWeek;
-import java.util.Calendar;
 import java.util.Locale;
 
 @CommandAlias("event")
@@ -92,22 +90,9 @@ public final class EventCommand extends BaseCommand {
     @Subcommand("start koth")
     @Description("Start a King of the Hill Event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    @Syntax("<name> <tickets> <timer> <tokens>")
-    public void onStart(Player player, String eventName, String ticketsToWinNamed, String timerIntervalNamed, String tokenRewardName) {
-        int ticketsToWin;
-        int timerInterval;
-        int tokenReward;
-
-        try {
-            ticketsToWin = Integer.parseInt(ticketsToWinNamed);
-            timerInterval = Integer.parseInt(timerIntervalNamed);
-            tokenReward = Integer.parseInt(tokenRewardName);
-        } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid Capture Event Config");
-            return;
-        }
-
-        plugin.getEventManager().getExecutor().startCaptureEvent(player, eventName, ticketsToWin, timerInterval, tokenReward, new Promise() {
+    @Syntax("<name> <tickets> <timer> <tokens> <tick interval>")
+    public void onStart(Player player, String eventName, int ticketsToWin, int timerInterval, int tokenReward, int tickCheckpointInterval) {
+        plugin.getEventManager().getExecutor().startCaptureEvent(player, eventName, ticketsToWin, timerInterval, tokenReward, tickCheckpointInterval, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Event started");
@@ -197,22 +182,9 @@ public final class EventCommand extends BaseCommand {
     @Subcommand("koth config")
     @Description("Update capture event config for KOTH events")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    @Syntax("<event> <tickets> <timer> <tokens>")
-    public void onUpdateCaptureConfig(Player player, String eventName, String ticketName, String timerName, String tokenName) {
-        int tickets = 0;
-        int timerDuration = 0;
-        int tokens = 0;
-
-        try {
-            tickets = Integer.parseInt(ticketName);
-            timerDuration = Integer.parseInt(timerName);
-            tokens = Integer.parseInt(tokenName);
-        } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid integer amounts");
-            return;
-        }
-
-        plugin.getEventManager().getExecutor().setCaptureEventConfig(player, eventName, tickets, timerDuration, tokens, new Promise() {
+    @Syntax("<event> <tickets> <timer> <tokens> <tick interval>")
+    public void onUpdateCaptureConfig(Player player, String eventName, int tickets, int timerDuration, int tokens, int tickCheckpointInterval) {
+        plugin.getEventManager().getExecutor().setCaptureEventConfig(player, eventName, tickets, timerDuration, tokens, tickCheckpointInterval, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Event configuration updated");

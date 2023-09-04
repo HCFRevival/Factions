@@ -35,8 +35,9 @@ public interface ICaptureEvent {
      * @param ticketsNeededToWin Tickets needed for the event to be considered captured
      * @param timerDuration Timer between each ticket capture
      * @param tokenReward Tokens that will be rewarded to the capturing faction
+     * @param tickCheckpointInterval Tick checkpoint interval
      */
-    void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward);
+    void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval);
 
     /**
      * Stop the event without rewarding any player

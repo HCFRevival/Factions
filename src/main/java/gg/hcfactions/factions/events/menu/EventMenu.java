@@ -125,6 +125,8 @@ public final class EventMenu extends GenericMenu {
                     lore.add(ChatColor.RESET + " ");
 
                     if (isActive) {
+                        final List<Integer> tickCheckpoints = kothEvent.getSession().getTickCheckpoints();
+
                         if (kothEvent.getSession().getCapturingFaction() != null) {
                             final PlayerFaction playerFaction = kothEvent.getSession().getCapturingFaction();
                             lore.add(FMessage.LAYER_2 + "Controlled By" + FMessage.LAYER_1 + ": " + playerFaction.getName());
@@ -145,12 +147,46 @@ public final class EventMenu extends GenericMenu {
                                     final PlayerFaction playerFaction = plugin.getFactionManager().getPlayerFactionById(factionId);
 
                                     if (playerFaction != null) {
-                                        lore.add(FMessage.LAYER_2 + "" + position + ". " + FMessage.LAYER_1 + playerFaction.getName() + FMessage.INFO + " (" + tickets + ")");
+                                        if (!tickCheckpoints.isEmpty()) {
+                                            final StringBuilder progressDisplay = new StringBuilder();
+
+                                            for (int i = 0; i < tickCheckpoints.size(); i++) {
+                                                final int currentCheckpoint = tickCheckpoints.get(i);
+                                                final int nextCheckpoint = (tickCheckpoints.size() > (i + 1)) ? tickCheckpoints.get(i + 1) : kothEvent.getSession().getTicketsNeededToWin();
+                                                final boolean firstCheckpoint = (i == 0);
+                                                final boolean greaterThanCurrent = currentCheckpoint <= tickets;
+                                                final boolean greaterThanNext = nextCheckpoint <= tickets;
+
+                                                if (!firstCheckpoint) {
+                                                    progressDisplay.append(ChatColor.GRAY + "/");
+                                                }
+
+                                                // greater than current, but not the next
+                                                if (greaterThanCurrent && !greaterThanNext) {
+                                                    progressDisplay.append(ChatColor.WHITE + "" + tickets);
+                                                    continue;
+                                                }
+
+                                                // greater than current AND next
+                                                if (greaterThanCurrent) {
+                                                    progressDisplay.append(ChatColor.WHITE + "" + currentCheckpoint);
+                                                    continue;
+                                                }
+
+                                                // not greater than current or next
+                                                progressDisplay.append(ChatColor.GRAY + "" + (firstCheckpoint ? tickets : currentCheckpoint));
+                                            }
+
+                                            lore.add(FMessage.LAYER_2 + "" + position + ". " + FMessage.LAYER_1 + playerFaction.getName() + " - " + progressDisplay);
+                                        } else {
+                                            lore.add(FMessage.LAYER_2 + "" + position + ". " + FMessage.LAYER_1 + playerFaction.getName() + " - " + FMessage.INFO + tickets);
+                                        }
+
                                         position += 1;
                                     }
                                 }
                             } else {
-                                lore.add(FMessage.LAYER_1 + "No factions have earned a ticket yet");
+                                lore.add(FMessage.LAYER_1 + "There are no entries on the scoreboard.");
                             }
                         }
                     } else {

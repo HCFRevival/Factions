@@ -1,5 +1,7 @@
 package gg.hcfactions.factions.timers;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
@@ -130,7 +132,7 @@ public final class TimerManager implements IManager {
             hasEntries = true;
         }
 
-        int eventCursor = 16;
+        int eventCursor = 17;
         for (KOTHEvent kothEvent : plugin.getEventManager().getActiveKothEvents()) {
             if (eventCursor >= 19) {
                 break;
@@ -142,28 +144,47 @@ public final class TimerManager implements IManager {
 
             final long remainingMillis = kothEvent.getSession().getTimer().getRemaining();
             final int remainingSeconds = (int)(remainingMillis/1000L);
-            int capturingFactionsTickets = 0;
-
-            if (kothEvent.getSession().getCapturingFaction() != null) {
-                capturingFactionsTickets = kothEvent.getSession().getLeaderboard().getOrDefault(kothEvent.getSession().getCapturingFaction().getUniqueId(), 0);
-            }
-
-            String displayed = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
-
-            if (kothEvent.getSession().getTicketsNeededToWin() > 1 && capturingFactionsTickets > 0) {
-                displayed = displayed + ChatColor.BLUE + " [" + capturingFactionsTickets + "]";
-            }
+            String timerDisplay = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
+            String factionDisplay = null;
 
             if (remainingMillis <= 0) {
-                displayed = "Capturing...";
+                timerDisplay = "Capturing...";
             }
 
             else if (kothEvent.getSession().isContested()) {
-                displayed = "Contested";
+                timerDisplay = "Contested";
             }
 
-            factionPlayer.getScoreboard().setLine(eventCursor, kothEvent.getDisplayName() + ChatColor.RED + ": " + displayed);
-            eventCursor += 1;
+            if (kothEvent.getSession().getCapturingFaction() != null) {
+                final PlayerFaction capturingFaction = kothEvent.getSession().getCapturingFaction();
+                final int tickets = kothEvent.getSession().getTickets(capturingFaction);
+                final List<Integer> tickCheckpoints = kothEvent.getSession().getTickCheckpoints();
+                final boolean isFriendly = capturingFaction.isMember(factionPlayer.getUniqueId());
+                final String factionName = capturingFaction.getName().length() > 10 ? capturingFaction.getName().substring(0, 10) + "..." : capturingFaction.getName();
+                final List<String> tickDisplay = Lists.newArrayList();
+
+                for (int checkpoint : tickCheckpoints) {
+                    if (tickets >= checkpoint) {
+                        tickDisplay.add(ChatColor.GREEN + "[✔]");
+                        continue;
+                    }
+
+                    tickDisplay.add(ChatColor.GRAY + "[■]");
+                }
+
+                factionDisplay = (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " "
+                        + (tickDisplay.isEmpty() ? "" : Joiner.on(ChatColor.RESET + "").join(tickDisplay) + " ") + ChatColor.BLUE + "(" + tickets + ")";
+            }
+
+            factionPlayer.getScoreboard().setLine(eventCursor, kothEvent.getDisplayName() + ChatColor.RED + ": " + timerDisplay);
+
+            if (factionDisplay != null) {
+                factionPlayer.getScoreboard().setLine((eventCursor - 1), factionDisplay);
+            } else {
+                factionPlayer.getScoreboard().removeLine((eventCursor - 1));
+            }
+
+            eventCursor += 2;
             hasEntries = true;
         }
 

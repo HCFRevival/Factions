@@ -73,7 +73,7 @@ public record EventListener(@Getter Factions plugin) implements Listener {
                 continue;
             }
 
-            final int newTickets = currentTickets - plugin.getConfiguration().getEventTicketLossPerDeath();
+            final int newTickets = Math.max(currentTickets - plugin.getConfiguration().getEventTicketLossPerDeath(), koth.getSession().getTicketLossFloor(currentTickets));
 
             if (newTickets <= 0) {
                 koth.getSession().getLeaderboard().remove(playerFaction.getUniqueId());
@@ -83,10 +83,12 @@ public record EventListener(@Getter Factions plugin) implements Listener {
                 continue;
             }
 
-            koth.getSession().getLeaderboard().put(playerFaction.getUniqueId(), newTickets);
-            playerFaction.sendMessage(" ");
-            playerFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + koth.getDisplayName());
-            playerFaction.sendMessage(" ");
+            if (newTickets != currentTickets) {
+                koth.getSession().getLeaderboard().put(playerFaction.getUniqueId(), newTickets);
+                playerFaction.sendMessage(" ");
+                playerFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + koth.getDisplayName());
+                playerFaction.sendMessage(" ");
+            }
         }
     }
 

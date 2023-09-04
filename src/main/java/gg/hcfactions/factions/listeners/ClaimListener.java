@@ -22,6 +22,7 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
+import gg.hcfactions.libs.bukkit.events.impl.PlayerChorusFruitTeleportEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
@@ -1273,6 +1274,57 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
             final ServerFaction insideFaction = plugin.getFactionManager().getServerFactionById(insideMerged.getOwner());
 
             if (insideFaction != null && insideFaction.getFlag().equals(ServerFaction.Flag.OUTPOST)) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onChorusAttempt(PlayerChorusFruitTeleportEvent event) {
+        final Player player = event.getPlayer();
+        final Location from = event.getFrom();
+        final Location to = event.getTo();
+
+        if (event.isCancelled() || to == null) {
+            return;
+        }
+
+        final Claim fromClaim = plugin.getClaimManager().getClaimAt(new BLocatable(from.getBlock()));
+        final Claim toClaim = plugin.getClaimManager().getClaimAt(new BLocatable(to.getBlock()));
+
+        if (fromClaim != null) {
+            final IFaction owner = plugin.getFactionManager().getFactionById(fromClaim.getOwner());
+
+            if (owner instanceof final PlayerFaction playerFaction) {
+                if (!playerFaction.isMember(player) && !playerFaction.isRaidable()) {
+                    player.sendMessage(ChatColor.RED + "You can not teleport inside " + ChatColor.YELLOW + playerFaction.getName() + ChatColor.RED + "'s claim");
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
+            // attempting to warp inside a server claim
+            else if (owner instanceof final ServerFaction serverFaction) {
+                player.sendMessage(ChatColor.RED + "You can not teleport inside " + serverFaction.getDisplayName() + ChatColor.RED + "'s claim");
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        if (toClaim != null) {
+            final IFaction owner = plugin.getFactionManager().getFactionById(toClaim.getOwner());
+
+            // attempting to enter a player claim they are not a member of
+            if (owner instanceof final PlayerFaction playerFaction) {
+                if (!playerFaction.isMember(player) && !playerFaction.isRaidable()) {
+                    player.sendMessage(ChatColor.RED + "You can not teleport inside " + ChatColor.YELLOW + playerFaction.getName() + ChatColor.RED + "'s claim");
+                    event.setCancelled(true);
+                }
+            }
+
+            // attempting to enter a server claim
+            else if (owner instanceof final ServerFaction serverFaction) {
+                player.sendMessage(ChatColor.RED + "You can not teleport inside " + serverFaction.getDisplayName() + ChatColor.RED + "'s claim");
                 event.setCancelled(true);
             }
         }
