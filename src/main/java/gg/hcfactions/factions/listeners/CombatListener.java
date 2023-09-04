@@ -476,7 +476,7 @@ public final class CombatListener implements Listener {
             final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) : 0;
             final ItemStack hand = killerPlayer.getInventory().getItemInMainHand();
             killerUsername = entityColor + killerPlayer.getName() + detailColor + "[" + killerKillCount + "]";
-            killerItem = "their firsts";
+            killerItem = "their fists";
 
             if (!hand.getType().equals(Material.AIR)) {
                 if (hand.hasItemMeta() && Objects.requireNonNull(hand.getItemMeta()).hasDisplayName()) {
@@ -618,7 +618,7 @@ public final class CombatListener implements Listener {
             final int killerKillCount = killerStats != null ? (int)killerStats.getStatistic(EStatisticType.KILL) : 0;
             final ItemStack hand = killerPlayer.getInventory().getItemInMainHand();
             killerUsername = entityColor + killerPlayer.getName() + detailColor + "[" + killerKillCount + "]";
-            killerItem = "their firsts";
+            killerItem = "their fists";
 
             if (!hand.getType().equals(Material.AIR)) {
                 if (hand.hasItemMeta() && Objects.requireNonNull(hand.getItemMeta()).hasDisplayName()) {
