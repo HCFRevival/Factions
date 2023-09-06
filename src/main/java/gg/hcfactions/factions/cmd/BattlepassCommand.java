@@ -18,8 +18,7 @@ public final class BattlepassCommand extends BaseCommand {
     @Default
     @Description("View active objectives in the Battlepass")
     public void onDefaultCommand(Player player) {
-        final BattlepassMenu menu = new BattlepassMenu(plugin, player);
-        menu.open();
+        new BattlepassMenu(plugin, player).open();
     }
 
     @Subcommand("reset")

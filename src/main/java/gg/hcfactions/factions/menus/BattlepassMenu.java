@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.menus;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.battlepass.EBPState;
 import gg.hcfactions.factions.models.battlepass.impl.BPObjective;
 import gg.hcfactions.factions.models.battlepass.impl.BPTracker;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class BattlepassMenu extends GenericMenu {
     @Getter public Factions plugin;
@@ -38,11 +40,17 @@ public final class BattlepassMenu extends GenericMenu {
 
             clear();
 
-            int cursor = 10;
+            int dailyCursor = 10;
+            int weeklyCursor = 37;
 
-            for (final BPObjective obj : activeObjectives) {
-                addItem(new Clickable(obj.getMenuItem(tracker), cursor, click -> player.sendMessage(ChatColor.RESET + "You selected: " + obj.getIcon().getDisplayName())));
-                cursor += 3;
+            for (final BPObjective obj : activeObjectives.stream().filter(obj -> obj.getState().equals(EBPState.DAILY)).collect(Collectors.toList())) {
+                addItem(new Clickable(obj.getMenuItem(tracker), dailyCursor, click -> player.sendMessage(ChatColor.RESET + "You selected: " + obj.getIcon().getDisplayName())));
+                dailyCursor += 3;
+            }
+
+            for (final BPObjective obj : activeObjectives.stream().filter(obj -> obj.getState().equals(EBPState.WEEKLY)).collect(Collectors.toList())) {
+                addItem(new Clickable(obj.getMenuItem(tracker), weeklyCursor, click -> player.sendMessage(ChatColor.RESET + "You selected: " + obj.getIcon().getDisplayName())));
+                weeklyCursor += 3;
             }
 
             fill(new ItemBuilder().setMaterial(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.RESET + "").build());

@@ -1,7 +1,9 @@
 package gg.hcfactions.factions.models.battlepass.impl;
 
+import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.battlepass.EBPObjectiveType;
+import gg.hcfactions.factions.models.battlepass.EBPState;
 import gg.hcfactions.factions.models.battlepass.IBPObjective;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.libs.base.util.Strings;
@@ -28,7 +30,7 @@ import java.util.UUID;
 public class BPObjective implements IBPObjective {
     @Getter public final Factions plugin;
     @Getter public final String identifier;
-    @Getter @Setter public boolean active;
+    @Getter @Setter public EBPState state;
     @Getter @Setter public Icon icon;
     @Getter @Setter public EBPObjectiveType objectiveType;
     @Getter @Setter public Material blockRequirement;
@@ -42,6 +44,7 @@ public class BPObjective implements IBPObjective {
     public BPObjective(Factions plugin, String id) {
         this.plugin = plugin;
         this.identifier = id;
+        this.state = EBPState.INACTIVE;
     }
 
     public ItemStack getMenuItem(BPTracker viewer) {
@@ -50,16 +53,14 @@ public class BPObjective implements IBPObjective {
         final ItemStack item = icon.getItemStack();
         final ItemMeta meta = item.getItemMeta();
 
-        if (meta == null || meta.getLore() == null) {
+        if (meta == null) {
             return item;
         }
 
-        final List<String> lore = meta.getLore();
+        final String oldDisplayName = meta.getDisplayName();
+        meta.setDisplayName(state.getDisplayName() + ChatColor.RESET + " " + oldDisplayName);
 
-        if (!lore.isEmpty()) {
-            lore.add(ChatColor.RESET + " ");
-        }
-
+        final List<String> lore = meta.getLore() != null ? meta.getLore() : Lists.newArrayList();
         lore.add(ChatColor.GOLD + "Amount" + ChatColor.WHITE + ": " + amountRequirement);
 
         if (hasEntityRequirement()) {
@@ -110,8 +111,13 @@ public class BPObjective implements IBPObjective {
         }
 
         lore.add(ChatColor.RESET + " ");
+
+        final long expire = (state.equals(EBPState.DAILY))
+                ? plugin.getBattlepassManager().getDailyExpireTimestamp()
+                : plugin.getBattlepassManager().getWeeklyExpireTimestamp();
+
         lore.add(ChatColor.GRAY + "Ends in" + ChatColor.WHITE + ": " + Colors.GREEN.toBukkit()
-                + Time.convertToRemaining(plugin.getBattlepassManager().getDailyExpireTimestamp() - Time.now()));
+                + Time.convertToRemaining(expire - Time.now()));
 
         meta.setLore(lore);
         item.setItemMeta(meta);

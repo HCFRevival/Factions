@@ -7,6 +7,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.battlepass.factory.BPObjectiveBuilder;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.battlepass.EBPObjectiveType;
+import gg.hcfactions.factions.models.battlepass.EBPState;
 import gg.hcfactions.factions.models.battlepass.impl.BPObjective;
 import gg.hcfactions.factions.models.battlepass.impl.BPTracker;
 import gg.hcfactions.factions.models.classes.IClass;
@@ -36,15 +37,18 @@ import java.util.stream.Collectors;
 public class BattlepassManager implements IManager {
     @Getter public final Factions plugin;
     @Getter @Setter public long dailyExpireTimestamp;
+    @Getter @Setter public long weeklyExpireTimestamp;
     @Getter public BukkitTask expireCheckTask;
-    @Getter public final List<BPObjective> objectiveRepository;
+    @Getter public final List<BPObjective> dailyObjectiveRepository;
+    @Getter public final List<BPObjective> weeklyObjectiveRepository;
     @Getter public final Set<BPTracker> trackerRepository;
     @Getter public final Map<AresRank, Double> rankMultipliers;
 
     public BattlepassManager(Factions plugin) {
         this.plugin = plugin;
         this.trackerRepository = Sets.newConcurrentHashSet();
-        this.objectiveRepository = Lists.newArrayList();
+        this.dailyObjectiveRepository = Lists.newArrayList();
+        this.weeklyObjectiveRepository = Lists.newArrayList();
         this.rankMultipliers = Maps.newHashMap();
     }
 
@@ -52,6 +56,8 @@ public class BattlepassManager implements IManager {
     public void onEnable() {
         loadTrackers();
         loadConfiguration();
+        loadObjectives(true);
+        loadObjectives(false);
 
         // TODO: This is for testing, remove
         final RankService rankService = (RankService) plugin.getService(RankService.class);
@@ -63,20 +69,37 @@ public class BattlepassManager implements IManager {
                 return;
             }
 
-            final ZonedDateTime followingMidnight = ZonedDateTime.now()
-                    .withHour(0)
-                    .withMinute(0)
-                    .withSecond(0)
-                    .plusDays(1);
+            if (dailyExpireTimestamp <= Time.now()) {
+                final ZonedDateTime followingMidnight = ZonedDateTime.now()
+                        .withHour(0)
+                        .withMinute(0)
+                        .withSecond(0)
+                        .plusDays(1);
 
-            final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
-            dailyExpireTimestamp = followingMidnight.toInstant().toEpochMilli();
-            conf.set("expire.daily", dailyExpireTimestamp);
-            plugin.saveConfiguration("battlepass", conf);
+                final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
+                dailyExpireTimestamp = followingMidnight.toInstant().toEpochMilli();
+                conf.set("expire.daily", dailyExpireTimestamp);
+                plugin.saveConfiguration("battlepass", conf);
 
-            getNewObjectives();
+                resetTrackers(false);
+                getNewObjectives(false);
+            }
 
-            resetTrackers();
+            if (weeklyExpireTimestamp <= Time.now()) {
+                final ZonedDateTime followingWeek = ZonedDateTime.now()
+                        .withHour(0)
+                        .withMinute(0)
+                        .withSecond(0)
+                        .plusWeeks(1);
+
+                final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
+                weeklyExpireTimestamp = followingWeek.toInstant().toEpochMilli();
+                conf.set("expire.weekly", weeklyExpireTimestamp);
+                plugin.saveConfiguration("battlepass", conf);
+
+                resetTrackers(true);
+                getNewObjectives(true);
+            }
         }).repeat(30 * 20L, 30 * 20L).run();
     }
 
@@ -90,8 +113,15 @@ public class BattlepassManager implements IManager {
         saveTrackers();
     }
 
+    public List<BPObjective> getObjectiveRepository() {
+        final List<BPObjective> res = Lists.newArrayList();
+        res.addAll(dailyObjectiveRepository);
+        res.addAll(weeklyObjectiveRepository);
+        return res;
+    }
+
     public Optional<BPObjective> getObjective(String objId) {
-        return objectiveRepository.stream().filter(obj -> obj.getIdentifier().equalsIgnoreCase(objId)).findFirst();
+        return getObjectiveRepository().stream().filter(obj -> obj.getIdentifier().equalsIgnoreCase(objId)).findFirst();
     }
 
     public BPTracker getTracker(Player player) {
@@ -103,26 +133,38 @@ public class BattlepassManager implements IManager {
     }
 
     public List<BPObjective> getActiveObjectives() {
-        return objectiveRepository.stream().filter(BPObjective::isActive).collect(Collectors.toList());
+        return getObjectiveRepository().stream().filter(obj -> !obj.getState().equals(EBPState.INACTIVE)).collect(Collectors.toList());
+    }
+
+    public List<BPObjective> getDailyObjectives() {
+        return getDailyObjectiveRepository().stream().filter(obj -> !obj.getState().equals(EBPState.INACTIVE)).collect(Collectors.toList());
+    }
+
+    public List<BPObjective> getWeeklyObjectives() {
+        return getWeeklyObjectiveRepository().stream().filter(obj -> !obj.getState().equals(EBPState.INACTIVE)).collect(Collectors.toList());
     }
 
     public List<BPObjective> getMetRequirementObjectives(Player player, Location location) {
-        return objectiveRepository.stream().filter(obj -> obj.meetsRequirement(player, location)).collect(Collectors.toList());
+        return getActiveObjectives().stream().filter(obj -> obj.meetsRequirement(player, location)).collect(Collectors.toList());
     }
 
     public List<BPObjective> getMetRequirementObjectives(Player player, Entity entity) {
-        return objectiveRepository.stream().filter(obj -> obj.meetsRequirement(player, entity)).collect(Collectors.toList());
+        return getActiveObjectives().stream().filter(obj -> obj.meetsRequirement(player, entity)).collect(Collectors.toList());
     }
 
-    public void getNewObjectives() {
+    public void getNewObjectives(boolean weekly) {
+        // TODO: When we activate these new objectives the IDs need to be stored in the battlepass.yml
+        // config so we can retrieve them and re-active them after a server restart
+
         final List<BPObjective> newObjectives = Lists.newArrayList();
-        final int objectiveSize = Math.min(objectiveRepository.size(), 3);
+        final List<BPObjective> objPool = (weekly ? weeklyObjectiveRepository : dailyObjectiveRepository);
+        final int objectiveSize = Math.min(objPool.size(), 3);
         Random random = new Random();
 
-        objectiveRepository.stream().filter(BPObjective::isActive).forEach(activeObj -> activeObj.setActive(false));
+        objPool.stream().filter(obj -> !obj.getState().equals(EBPState.INACTIVE)).forEach(activeObj -> activeObj.setState(EBPState.INACTIVE));
 
         while (newObjectives.size() != objectiveSize) {
-            final BPObjective draw = objectiveRepository.get(random.nextInt(objectiveRepository.size()));
+            final BPObjective draw = objPool.get(random.nextInt(objPool.size()));
 
             if (newObjectives.contains(draw)) {
                 continue;
@@ -131,8 +173,8 @@ public class BattlepassManager implements IManager {
             newObjectives.add(draw);
         }
 
-        newObjectives.forEach(obj -> obj.setActive(true));
-        plugin.getAresLogger().info("Activated " + newObjectives.size() + " Objectives");
+        newObjectives.forEach(obj -> obj.setState((weekly ? EBPState.WEEKLY : EBPState.DAILY)));
+        plugin.getAresLogger().info("Activated " + newObjectives.size() + (weekly ? " Weekly" : " Daily") + " Objectives");
     }
 
     private void loadConfiguration() {
@@ -140,10 +182,14 @@ public class BattlepassManager implements IManager {
 
         // configurable values
         dailyExpireTimestamp = conf.getLong("expire.daily");
+        weeklyExpireTimestamp = conf.getLong("expire.weekly");
+    }
 
-        // objectives
-        for (String objId : Objects.requireNonNull(conf.getConfigurationSection("objectives")).getKeys(false)) {
-            final String path = "objectives." + objId + ".";
+    private void loadObjectives(boolean weekly) {
+        final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
+
+        for (String objId : Objects.requireNonNull(conf.getConfigurationSection("objectives." + (weekly ? "weekly" : "daily"))).getKeys(false)) {
+            final String path = "objectives." + (weekly ? "weekly." : "daily.") + objId + ".";
             final String reqPath = path + "requirements.";
             final String typeName = conf.getString(path + "type");
             final String iconMaterialName = conf.getString(path + "icon.material");
@@ -158,6 +204,11 @@ public class BattlepassManager implements IManager {
             List<String> iconLore = Lists.newArrayList();
 
             try {
+                if (typeName == null) {
+                    plugin.getAresLogger().error("Invalid objective type (null), obj-id: " + objId);
+                    continue;
+                }
+
                 objectiveType = EBPObjectiveType.valueOf(typeName);
             } catch (IllegalArgumentException e) {
                 plugin.getAresLogger().error("Invalid objective type: " + typeName);
@@ -251,7 +302,12 @@ public class BattlepassManager implements IManager {
             builder.build(new FailablePromise<>() {
                 @Override
                 public void resolve(BPObjective bpObjective) {
-                    objectiveRepository.add(bpObjective);
+                    if (weekly) {
+                        weeklyObjectiveRepository.add(bpObjective);
+                        return;
+                    }
+
+                    dailyObjectiveRepository.add(bpObjective);
                 }
 
                 @Override
@@ -261,7 +317,7 @@ public class BattlepassManager implements IManager {
             });
         }
 
-        plugin.getAresLogger().info("Loaded " + objectiveRepository.size() + " Battlepass Objectives");
+        plugin.getAresLogger().info("Loaded " + getObjectiveRepository().size() + " Battlepass Objectives");
     }
 
     private void loadTrackers() {
@@ -306,11 +362,15 @@ public class BattlepassManager implements IManager {
         plugin.saveConfiguration("bp-progress", file);
     }
 
-    private void resetTrackers() {
+    private void resetTrackers(boolean weekly) {
         final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
-        file.set("data", null);
-        plugin.saveConfiguration("bp-progress", file);
+        final List<BPObjective> toClear = (weekly ? getWeeklyObjectives() : getDailyObjectives());
 
-        trackerRepository.clear();
+        toClear.forEach(obj -> trackerRepository.forEach(tracker -> {
+            tracker.getProgression().remove(obj.getIdentifier());
+            file.set("data." + tracker.getOwnerId() + "." + obj.getIdentifier(), null);
+        }));
+
+        plugin.saveConfiguration("bp-progress", file);
     }
 }
