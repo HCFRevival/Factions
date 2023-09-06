@@ -17,14 +17,18 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BattlepassManager implements IManager {
     @Getter public final Factions plugin;
@@ -42,6 +46,7 @@ public class BattlepassManager implements IManager {
     @Override
     public void onEnable() {
         loadTrackers();
+        loadConfiguration();
 
         expireCheckTask = new Scheduler(plugin).async(() -> {
             if (dailyExpireTimestamp >= Time.now()) {
@@ -72,12 +77,19 @@ public class BattlepassManager implements IManager {
         return objectiveRepository.stream().filter(obj -> obj.getIdentifier().equalsIgnoreCase(objId)).findFirst();
     }
 
+    public List<BPObjective> getMetRequirementObjectives(Player player, Location location) {
+        return objectiveRepository.stream().filter(obj -> obj.meetsRequirement(player, location)).collect(Collectors.toList());
+    }
+
+    public List<BPObjective> getMetRequirementObjectives(Player player, Entity entity) {
+        return objectiveRepository.stream().filter(obj -> obj.meetsRequirement(player, entity)).collect(Collectors.toList());
+    }
+
     private void loadConfiguration() {
         final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
 
         // configurable values
         dailyExpireTimestamp = conf.getLong("expire.daily");
-
 
         // objectives
         for (String objId : Objects.requireNonNull(conf.getConfigurationSection("objectives")).getKeys(false)) {
@@ -201,6 +213,11 @@ public class BattlepassManager implements IManager {
 
     private void loadTrackers() {
         final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
+
+        if (!file.contains("data")) {
+            plugin.getAresLogger().warn("Skipped loading Battlepass Trackers");
+            return;
+        }
 
         for (String uid : Objects.requireNonNull(file.getConfigurationSection("data")).getKeys(false)) {
             final UUID ownerId = UUID.fromString(uid);

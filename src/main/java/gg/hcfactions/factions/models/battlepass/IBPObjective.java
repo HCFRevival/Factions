@@ -123,7 +123,7 @@ public interface IBPObjective {
      * @param location Location the event occurred at, like a block broken position
      * @return True if all requirements are met
      */
-    default boolean meetsRequirements(Player player, Location location) {
+    default boolean meetsRequirement(Player player, Location location) {
         if (hasBlockRequirement()) {
             final Block block = location.getBlock();
 
