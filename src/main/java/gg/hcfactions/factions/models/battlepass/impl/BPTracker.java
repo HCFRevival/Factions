@@ -23,6 +23,14 @@ public final class BPTracker {
         return progression.containsKey(objId);
     }
 
+    public int getProgress(BPObjective objective) {
+        return progression.getOrDefault(objective.getIdentifier(), 0);
+    }
+
+    public int getProgress(String objId) {
+        return progression.getOrDefault(objId, 0);
+    }
+
     public boolean hasCompleted(BPObjective objective) {
         final int progress = progression.getOrDefault(objective.getIdentifier(), 0);
         return progress >= objective.getAmountRequirement();

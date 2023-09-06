@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.battlepass;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.battlepass.factory.BPObjectiveBuilder;
@@ -14,6 +15,8 @@ import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.menu.impl.Icon;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
+import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.services.impl.ranks.model.impl.AresRank;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
@@ -36,17 +39,24 @@ public class BattlepassManager implements IManager {
     @Getter public BukkitTask expireCheckTask;
     @Getter public final List<BPObjective> objectiveRepository;
     @Getter public final Set<BPTracker> trackerRepository;
+    @Getter public final Map<AresRank, Double> rankMultipliers;
 
     public BattlepassManager(Factions plugin) {
         this.plugin = plugin;
         this.trackerRepository = Sets.newConcurrentHashSet();
         this.objectiveRepository = Lists.newArrayList();
+        this.rankMultipliers = Maps.newHashMap();
     }
 
     @Override
     public void onEnable() {
         loadTrackers();
         loadConfiguration();
+
+        // TODO: This is for testing, remove
+        final RankService rankService = (RankService) plugin.getService(RankService.class);
+        rankService.getRankRepository().forEach(rank -> rankMultipliers.put(rank, 1.5));
+        // end test
 
         expireCheckTask = new Scheduler(plugin).async(() -> {
             if (dailyExpireTimestamp >= Time.now()) {
@@ -64,17 +74,36 @@ public class BattlepassManager implements IManager {
             conf.set("expire.daily", dailyExpireTimestamp);
             plugin.saveConfiguration("battlepass", conf);
 
+            getNewObjectives();
+
             resetTrackers();
         }).repeat(30 * 20L, 30 * 20L).run();
     }
 
     @Override
     public void onDisable() {
+        if (expireCheckTask != null) {
+            expireCheckTask.cancel();
+            expireCheckTask = null;
+        }
+
         saveTrackers();
     }
 
     public Optional<BPObjective> getObjective(String objId) {
         return objectiveRepository.stream().filter(obj -> obj.getIdentifier().equalsIgnoreCase(objId)).findFirst();
+    }
+
+    public BPTracker getTracker(Player player) {
+        return trackerRepository.stream().filter(t -> t.getOwnerId().equals(player.getUniqueId())).findFirst().orElse(new BPTracker(player.getUniqueId()));
+    }
+
+    public BPTracker getTracker(UUID uid) {
+        return trackerRepository.stream().filter(t -> t.getOwnerId().equals(uid)).findFirst().orElse(new BPTracker(uid));
+    }
+
+    public List<BPObjective> getActiveObjectives() {
+        return objectiveRepository.stream().filter(BPObjective::isActive).collect(Collectors.toList());
     }
 
     public List<BPObjective> getMetRequirementObjectives(Player player, Location location) {
@@ -83,6 +112,27 @@ public class BattlepassManager implements IManager {
 
     public List<BPObjective> getMetRequirementObjectives(Player player, Entity entity) {
         return objectiveRepository.stream().filter(obj -> obj.meetsRequirement(player, entity)).collect(Collectors.toList());
+    }
+
+    public void getNewObjectives() {
+        final List<BPObjective> newObjectives = Lists.newArrayList();
+        final int objectiveSize = Math.min(objectiveRepository.size(), 3);
+        Random random = new Random();
+
+        objectiveRepository.stream().filter(BPObjective::isActive).forEach(activeObj -> activeObj.setActive(false));
+
+        while (newObjectives.size() != objectiveSize) {
+            final BPObjective draw = objectiveRepository.get(random.nextInt(objectiveRepository.size()));
+
+            if (newObjectives.contains(draw)) {
+                continue;
+            }
+
+            newObjectives.add(draw);
+        }
+
+        newObjectives.forEach(obj -> obj.setActive(true));
+        plugin.getAresLogger().info("Activated " + newObjectives.size() + " Objectives");
     }
 
     private void loadConfiguration() {
@@ -117,7 +167,10 @@ public class BattlepassManager implements IManager {
             try {
                 iconMaterial = Material.valueOf(iconMaterialName);
                 iconDisplayName = ChatColor.translateAlternateColorCodes('&', iconName);
-                iconLoreUnformatted.forEach(unformattedLine -> iconLore.add(ChatColor.translateAlternateColorCodes('&', unformattedLine)));
+
+                if (!iconLoreUnformatted.isEmpty()) {
+                    iconLoreUnformatted.forEach(unformattedLine -> iconLore.add(ChatColor.translateAlternateColorCodes('&', unformattedLine)));
+                }
             } catch (IllegalArgumentException e) {
                 plugin.getAresLogger().error("Invalid icon data", e);
                 continue;

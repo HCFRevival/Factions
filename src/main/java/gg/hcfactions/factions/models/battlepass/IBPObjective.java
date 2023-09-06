@@ -65,6 +65,10 @@ public interface IBPObjective {
      */
     int getAmountRequirement();
 
+    default boolean hasEntityRequirement() {
+        return getEntityRequirement() != null;
+    }
+
     default boolean hasBlockRequirement() {
         return getBlockRequirement() != null;
     }

@@ -102,6 +102,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new LogoutCommand(this));
         registerCommand(new ClassCommand(this));
         registerCommand(new DebugCommand(this));
+        registerCommand(new BattlepassCommand(this));
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
             final List<String> res = Lists.newArrayList();
