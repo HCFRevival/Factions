@@ -3,6 +3,7 @@ package gg.hcfactions.factions;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
+import gg.hcfactions.factions.battlepass.BattlepassManager;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
@@ -67,6 +68,7 @@ public final class Factions extends AresPlugin {
     @Getter public WaypointManager waypointManager;
     @Getter public CrowbarManager crowbarManager;
     @Getter public OutpostManager outpostManager;
+    @Getter public BattlepassManager battlepassManager;
 
     @Override
     public void onEnable() {
@@ -230,6 +232,7 @@ public final class Factions extends AresPlugin {
         waypointManager = new WaypointManager(this);
         crowbarManager = new CrowbarManager(this);
         outpostManager = new OutpostManager(this);
+        battlepassManager = new BattlepassManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -246,6 +249,7 @@ public final class Factions extends AresPlugin {
         waypointManager.onEnable();
         crowbarManager.onEnable();
         outpostManager.onEnable();
+        battlepassManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -315,5 +319,6 @@ public final class Factions extends AresPlugin {
         waypointManager.onDisable();
         crowbarManager.onDisable();
         outpostManager.onDisable();
+        battlepassManager.onDisable();
     }
 }

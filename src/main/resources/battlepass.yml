@@ -1,0 +1,39 @@
+expire:
+  daily: 0
+
+objectives:
+  obj1:
+    icon:
+      material: 'ZOMBIE_SKULL'
+      display_name: ''
+      lore:
+        - 'Line 1'
+        - 'Line 2'
+        - 'Line 3'
+    type: 'ENTITY_SLAIN'
+    requirements:
+      entity: 'ZOMBIE'
+      world: 'NORMAL'
+      amount: 25
+    base_exp: 50
+  obj2:
+    icon:
+      material: 'NETHERRACK'
+      display_name: ''
+      lore:
+        - 'Line 3'
+        - 'Line 4'
+        - 'Line 5'
+      type: 'BLOCK_BREAK'
+      requirements:
+        world: 'NETHER'
+        block: 'NETHERRACK'
+    base_exp: 100
+
+rank_exp_multipliers:
+  silver: 1.05
+  gold: 1.1
+  sapphire: 1.15
+  emerald: 1.25
+  partner: 2.0
+  ruby: 2.0

@@ -24,6 +24,11 @@ public interface IBPObjective {
     String getIdentifier();
 
     /**
+     * @return True if this objective is currently active
+     */
+    boolean isActive();
+
+    /**
      * @return Objective Type
      */
     EBPObjectiveType getObjectiveType();
