@@ -145,6 +145,7 @@ public final class FConfig {
     @Getter public Map<String, Integer> firstJoinLives;
 
     // xp
+    @Getter public boolean xpEnabled;
     @Getter public int loginBonusRequiredTime;
     @Getter public int loginRewardXp;
     @Getter public int dragonKillRewardXp;
@@ -393,6 +394,7 @@ public final class FConfig {
             plugin.getAresLogger().info("First-join Lives Found: " + firstJoinLives.size());
         }
 
+        xpEnabled = conf.getBoolean("xp.enabled");
         loginBonusRequiredTime = conf.getInt("xp.login.time");
         loginRewardXp = conf.getInt("xp.login.bonus");
         dragonKillRewardXp = conf.getInt("xp.dragon_kill");
@@ -401,6 +403,7 @@ public final class FConfig {
         playerKillRewardXp = conf.getInt("xp.player_kill");
         diamondMinedRewardXp = conf.getInt("xp.diamond_mined");
         netheriteMinedRewardXp = conf.getInt("xp.netherite_mined");
+        plugin.getAresLogger().info("XP Enabled: " + xpEnabled);
         plugin.getAresLogger().info("Login Bonus Time: " + loginBonusRequiredTime);
         plugin.getAresLogger().info("Login Bonus Amount: " + loginRewardXp);
         plugin.getAresLogger().info("Dragon Kill Bonus Amount: " + dragonKillRewardXp);

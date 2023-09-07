@@ -35,6 +35,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final Block block = event.getBlock();
         final Player player = event.getPlayer();
 
@@ -58,6 +62,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final LivingEntity entity = event.getEntity();
         final Player killer = entity.getKiller();
 
@@ -85,6 +93,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onEntityFish(PlayerFishEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final Entity fish = event.getCaught();
 
@@ -107,6 +119,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onKothTick(KOTHTickEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final KOTHEvent kothEvent = event.getEvent();
         final PlayerFaction capturingFaction = event.getCapturingFaction();
 
@@ -133,6 +149,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         plugin.getBattlepassManager().loadTracker(player).ifPresent(tracker -> plugin.getBattlepassManager().getTrackerRepository().add(tracker));
     }
@@ -164,6 +184,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onBattlepassIncrement(BattlepassIncrementEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final BPObjective obj = event.getObjective();
         final BPTracker tracker = plugin.getBattlepassManager().getTracker(player);
@@ -185,6 +209,10 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler
     public void onBattlepassComplete(BattlepassCompleteEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final BPObjective obj = event.getObjective();
         final RankService rankService = (RankService) plugin.getService(RankService.class);

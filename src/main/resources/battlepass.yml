@@ -1,3 +1,5 @@
+enabled: true
+
 expire:
   daily: 0
   weekly: 0

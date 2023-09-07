@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 public final class BattlepassManager implements IManager {
     @Getter public final Factions plugin;
+    @Getter @Setter public boolean enabled;
     @Getter @Setter public long dailyExpireTimestamp;
     @Getter @Setter public long weeklyExpireTimestamp;
     @Getter public BukkitTask expireCheckTask;
@@ -46,6 +47,7 @@ public final class BattlepassManager implements IManager {
 
     public BattlepassManager(Factions plugin) {
         this.plugin = plugin;
+        this.enabled = false;
         this.trackerRepository = Sets.newConcurrentHashSet();
         this.dailyObjectiveRepository = Lists.newArrayList();
         this.weeklyObjectiveRepository = Lists.newArrayList();
@@ -191,15 +193,16 @@ public final class BattlepassManager implements IManager {
         plugin.getAresLogger().info("Activated " + newObjectives.size() + (weekly ? " Weekly" : " Daily") + " Objectives");
     }
 
-    private void loadConfiguration() {
+    public void loadConfiguration() {
         final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
 
         // configurable values
+        enabled = conf.getBoolean("enabled");
         dailyExpireTimestamp = conf.getLong("expire.daily");
         weeklyExpireTimestamp = conf.getLong("expire.weekly");
     }
 
-    private void loadObjectives(boolean weekly) {
+    public void loadObjectives(boolean weekly) {
         final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
 
         final List<String> activeDailyIds = conf.getStringList("active.daily");
@@ -397,7 +400,7 @@ public final class BattlepassManager implements IManager {
         plugin.saveConfiguration("bp-progress", file);
     }
 
-    private void resetTrackers(boolean weekly) {
+    public void resetTrackers(boolean weekly) {
         final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
         final List<BPObjective> toClear = (weekly ? getWeeklyObjectives() : getDailyObjectives());
 

@@ -242,6 +242,7 @@ lives:
 # XP configuration
 # 1 xp = 0.10
 xp:
+  enabled: true
   login:
     time: 30
     bonus: 25

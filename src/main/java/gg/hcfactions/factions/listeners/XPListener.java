@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.event.KOTHCaptureEvent;
 import gg.hcfactions.factions.listeners.events.player.BattlepassCompleteEvent;
-import gg.hcfactions.factions.listeners.events.player.FoundOreEvent;
 import gg.hcfactions.factions.models.battlepass.impl.BPObjective;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
@@ -44,6 +43,10 @@ public final class XPListener implements Listener {
         this.loginBonusTimestamps = Maps.newConcurrentMap();
 
         this.loginBonusTickingTask = new Scheduler(plugin).sync(() -> {
+            if (!plugin.getConfiguration().isXpEnabled()) {
+                return;
+            }
+
             final List<UUID> toRemove = Lists.newArrayList();
 
             loginBonusTimestamps.forEach((uid, timestamp) -> {
@@ -84,18 +87,30 @@ public final class XPListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!plugin.getConfiguration().isXpEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         loginBonusTimestamps.put(player.getUniqueId(), Time.now());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        if (!plugin.getConfiguration().isXpEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         loginBonusTimestamps.remove(player.getUniqueId());
     }
 
     @EventHandler
     public void onEventCapture(KOTHCaptureEvent event) {
+        if (!plugin.getConfiguration().isXpEnabled()) {
+            return;
+        }
+
         final KOTHEvent koth = event.getEvent();
         final XPService xpService = (XPService) plugin.getService(XPService.class);
         final PlayerFaction capturingFaction = event.getCapturingFaction();
@@ -125,6 +140,10 @@ public final class XPListener implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
+        if (!plugin.getConfiguration().isXpEnabled()) {
+            return;
+        }
+
         final Player player = event.getEntity();
         final Player killer = player.getKiller();
 
@@ -152,6 +171,10 @@ public final class XPListener implements Listener {
 
     @EventHandler
     public void onDragonSlain(EntityDeathEvent event) {
+        if (!plugin.getConfiguration().isXpEnabled()) {
+            return;
+        }
+
         final LivingEntity entity = event.getEntity();
 
         if (!(entity instanceof EnderDragon)) {
@@ -184,6 +207,10 @@ public final class XPListener implements Listener {
 
     @EventHandler
     public void onBattleplassComplete(BattlepassCompleteEvent event) {
+        if (!plugin.getConfiguration().isXpEnabled()) {
+            return;
+        }
+
         final Player player = event.getPlayer();
         final BPObjective obj = event.getObjective();
         final RankService rankService = (RankService) plugin.getService(RankService.class);
