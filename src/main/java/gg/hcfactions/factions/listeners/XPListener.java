@@ -19,10 +19,13 @@ import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitTask;
@@ -118,6 +121,65 @@ public final class XPListener implements Listener {
                                 plugin.getAresLogger().error("Failed to grant Palace capture EXP for " + onlineMember.getUniqueId().toString() + ": " + s);
                             }
                         }));
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        final Player player = event.getEntity();
+        final Player killer = player.getKiller();
+
+        if (killer == null) {
+            return;
+        }
+
+        final XPService xpService = (XPService) plugin.getService(XPService.class);
+
+        if (xpService == null) {
+            plugin.getAresLogger().error("Failed to grant Player Kill EXP for " + killer.getUniqueId() + ": XP Service not found");
+            return;
+        }
+
+        xpService.getExecutor().addExperience(killer.getUniqueId(), plugin.getConfiguration().getPlayerKillRewardXp(), "Killed " + player.getName(), new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                plugin.getAresLogger().error("Failed to grant Player Kill EXP for " + killer.getUniqueId() + ": " + s);
+            }
+        });
+    }
+
+    @EventHandler
+    public void onDragonSlain(EntityDeathEvent event) {
+        final LivingEntity entity = event.getEntity();
+
+        if (!(entity instanceof EnderDragon)) {
+            return;
+        }
+
+        final Player killer = entity.getKiller();
+
+        if (killer == null) {
+            return;
+        }
+
+        final XPService xpService = (XPService) plugin.getService(XPService.class);
+
+        if (xpService == null) {
+            plugin.getAresLogger().error("Failed to grant Player Kill EXP for " + killer.getUniqueId() + ": XP Service not found");
+            return;
+        }
+
+        xpService.getExecutor().addExperience(killer.getUniqueId(), plugin.getConfiguration().getDragonKillRewardXp(), "Killed the Ender Dragon", new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                plugin.getAresLogger().error("Failed to grant Dragon Kill EXP for " + killer.getUniqueId() + ": " + s);
+            }
+        });
     }
 
     @EventHandler
