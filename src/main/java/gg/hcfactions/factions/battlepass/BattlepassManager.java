@@ -113,6 +113,14 @@ public class BattlepassManager implements IManager {
         saveTrackers();
     }
 
+    public boolean isObjectiveActive(BPObjective objective) {
+        return isObjectiveActive(objective.getIdentifier());
+    }
+
+    public boolean isObjectiveActive(String objId) {
+        return getActiveObjectives().stream().anyMatch(obj -> obj.getIdentifier().equalsIgnoreCase(objId));
+    }
+
     public List<BPObjective> getObjectiveRepository() {
         final List<BPObjective> res = Lists.newArrayList();
         res.addAll(dailyObjectiveRepository);
@@ -153,9 +161,6 @@ public class BattlepassManager implements IManager {
     }
 
     public void getNewObjectives(boolean weekly) {
-        // TODO: When we activate these new objectives the IDs need to be stored in the battlepass.yml
-        // config so we can retrieve them and re-active them after a server restart
-
         final List<BPObjective> newObjectives = Lists.newArrayList();
         final List<BPObjective> objPool = (weekly ? weeklyObjectiveRepository : dailyObjectiveRepository);
         final int objectiveSize = Math.min(objPool.size(), 3);
@@ -174,6 +179,8 @@ public class BattlepassManager implements IManager {
         }
 
         newObjectives.forEach(obj -> obj.setState((weekly ? EBPState.WEEKLY : EBPState.DAILY)));
+        saveActiveObjectives();
+
         plugin.getAresLogger().info("Activated " + newObjectives.size() + (weekly ? " Weekly" : " Daily") + " Objectives");
     }
 
@@ -187,6 +194,9 @@ public class BattlepassManager implements IManager {
 
     private void loadObjectives(boolean weekly) {
         final YamlConfiguration conf = plugin.loadConfiguration("battlepass");
+
+        final List<String> activeDailyIds = conf.getStringList("active.daily");
+        final List<String> activeWeeklyIds = conf.getStringList("active.weekly");
 
         for (String objId : Objects.requireNonNull(conf.getConfigurationSection("objectives." + (weekly ? "weekly" : "daily"))).getKeys(false)) {
             final String path = "objectives." + (weekly ? "weekly." : "daily.") + objId + ".";
@@ -303,8 +313,16 @@ public class BattlepassManager implements IManager {
                 @Override
                 public void resolve(BPObjective bpObjective) {
                     if (weekly) {
+                        if (activeWeeklyIds.contains(bpObjective.getIdentifier())) {
+                            bpObjective.setState(EBPState.WEEKLY);
+                        }
+
                         weeklyObjectiveRepository.add(bpObjective);
                         return;
+                    }
+
+                    if (activeDailyIds.contains(bpObjective.getIdentifier())) {
+                        bpObjective.setState(EBPState.DAILY);
                     }
 
                     dailyObjectiveRepository.add(bpObjective);
@@ -339,6 +357,11 @@ public class BattlepassManager implements IManager {
             final BPTracker tracker = new BPTracker(ownerId);
 
             for (String objId : Objects.requireNonNull(file.getConfigurationSection("data." + uid)).getKeys(false)) {
+                if (!isObjectiveActive(objId)) {
+                    plugin.getAresLogger().warn("Skipped loading tracker objective: " + objId + " was not active at the time of loading");
+                    continue;
+                }
+
                 final int currentValue = file.getInt("data." + uid + "." + objId);
 
                 getObjective(objId).ifPresentOrElse(obj ->
@@ -372,5 +395,27 @@ public class BattlepassManager implements IManager {
         }));
 
         plugin.saveConfiguration("bp-progress", file);
+    }
+
+    private void saveActiveObjectives() {
+        final YamlConfiguration file = plugin.loadConfiguration("battlepass");
+        final List<BPObjective> active = getActiveObjectives();
+        final List<String> activeWeeklyIds = Lists.newArrayList();
+        final List<String> activeDailyIds = Lists.newArrayList();
+
+        active.forEach(obj -> {
+            if (obj.getState().equals(EBPState.DAILY)) {
+                activeDailyIds.add(obj.getIdentifier());
+            }
+
+            else {
+                activeWeeklyIds.add(obj.getIdentifier());
+            }
+        });
+
+        file.set("active.daily", activeDailyIds);
+        file.set("active.weekly", activeWeeklyIds);
+
+        plugin.saveConfiguration("battlepass", file);
     }
 }

@@ -10,8 +10,9 @@ import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemFlag;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +54,12 @@ public final class BattlepassMenu extends GenericMenu {
                 weeklyCursor += 3;
             }
 
-            fill(new ItemBuilder().setMaterial(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.RESET + "").build());
+            fill(new ItemBuilder()
+                    .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
+                    .setName(ChatColor.RESET + "")
+                    .addEnchant(Enchantment.LUCK, 1)
+                    .addFlag(ItemFlag.HIDE_ENCHANTS)
+                    .build());
         }, 20L);
     }
 }

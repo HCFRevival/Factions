@@ -2,6 +2,10 @@ expire:
   daily: 0
   weekly: 0
 
+active:
+  daily:
+  weekly:
+
 objectives:
   daily:
     obj1:
