@@ -34,7 +34,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class BattlepassManager implements IManager {
+public final class BattlepassManager implements IManager {
     @Getter public final Factions plugin;
     @Getter @Setter public long dailyExpireTimestamp;
     @Getter @Setter public long weeklyExpireTimestamp;
@@ -54,7 +54,6 @@ public class BattlepassManager implements IManager {
 
     @Override
     public void onEnable() {
-        loadTrackers();
         loadConfiguration();
         loadObjectives(true);
         loadObjectives(false);
@@ -121,6 +120,14 @@ public class BattlepassManager implements IManager {
         return getActiveObjectives().stream().anyMatch(obj -> obj.getIdentifier().equalsIgnoreCase(objId));
     }
 
+    public boolean isBeingTracked(Player player) {
+        return trackerRepository.stream().anyMatch(t -> t.getOwnerId().equals(player.getUniqueId()));
+    }
+
+    public boolean isBeingTracked(UUID uid) {
+        return trackerRepository.stream().anyMatch(t -> t.getOwnerId().equals(uid));
+    }
+
     public List<BPObjective> getObjectiveRepository() {
         final List<BPObjective> res = Lists.newArrayList();
         res.addAll(dailyObjectiveRepository);
@@ -164,7 +171,7 @@ public class BattlepassManager implements IManager {
         final List<BPObjective> newObjectives = Lists.newArrayList();
         final List<BPObjective> objPool = (weekly ? weeklyObjectiveRepository : dailyObjectiveRepository);
         final int objectiveSize = Math.min(objPool.size(), 3);
-        Random random = new Random();
+        final Random random = new Random();
 
         objPool.stream().filter(obj -> !obj.getState().equals(EBPState.INACTIVE)).forEach(activeObj -> activeObj.setState(EBPState.INACTIVE));
 
@@ -338,41 +345,40 @@ public class BattlepassManager implements IManager {
         plugin.getAresLogger().info("Loaded " + getObjectiveRepository().size() + " Battlepass Objectives");
     }
 
-    private void loadTrackers() {
+    public Optional<BPTracker> loadTracker(Player player) {
+        return loadTracker(player.getUniqueId());
+    }
+
+    public Optional<BPTracker> loadTracker(UUID uid) {
         final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
 
-        if (!file.contains("data")) {
-            plugin.getAresLogger().warn("Skipped loading Battlepass Trackers");
-            return;
+        if (!file.contains("data") || !file.contains("data." + uid)) {
+            return Optional.empty();
         }
 
-        for (String uid : Objects.requireNonNull(file.getConfigurationSection("data")).getKeys(false)) {
-            final UUID ownerId = UUID.fromString(uid);
+        final BPTracker tracker = new BPTracker(uid);
 
-            if (!file.contains("data." + uid)) {
-                plugin.getAresLogger().error("Invalid tracker data for " + uid);
+        for (String objId : Objects.requireNonNull(file.getConfigurationSection("data." + uid)).getKeys(false)) {
+            if (!isObjectiveActive(objId)) {
+                plugin.getAresLogger().warn("Skipped loading tracker objective: " + objId + " was not active at the time of loading");
                 continue;
             }
 
-            final BPTracker tracker = new BPTracker(ownerId);
+            final int currentValue = file.getInt("data." + uid + "." + objId);
 
-            for (String objId : Objects.requireNonNull(file.getConfigurationSection("data." + uid)).getKeys(false)) {
-                if (!isObjectiveActive(objId)) {
-                    plugin.getAresLogger().warn("Skipped loading tracker objective: " + objId + " was not active at the time of loading");
-                    continue;
-                }
-
-                final int currentValue = file.getInt("data." + uid + "." + objId);
-
-                getObjective(objId).ifPresentOrElse(obj ->
-                        tracker.getProgression().put(objId, currentValue),
-                        () -> plugin.getAresLogger().error("Attempted to load an objective that does not exist: " + objId));
-            }
-
-            trackerRepository.add(tracker);
+            getObjective(objId).ifPresentOrElse(obj ->
+                            tracker.getProgression().put(objId, currentValue),
+                    () -> plugin.getAresLogger().error("Attempted to load an objective that does not exist: " + objId));
         }
 
-        plugin.getAresLogger().info("Loaded " + trackerRepository.size() + " Battlepass Trackers");
+        return Optional.of(tracker);
+    }
+
+    public void saveTracker(BPTracker tracker) {
+        final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
+        file.set("data." + tracker.getOwnerId().toString(), null);
+        tracker.getProgression().forEach((objId, value) -> file.set("data." + tracker.getOwnerId().toString() + "." + objId, value));
+        plugin.saveConfiguration("bp-progress", file);
     }
 
     private void saveTrackers() {
@@ -382,6 +388,12 @@ public class BattlepassManager implements IManager {
                 tracker.getProgression().forEach((objId, value) ->
                         file.set("data." + tracker.getOwnerId().toString() + "." + objId, value)));
 
+        plugin.saveConfiguration("bp-progress", file);
+    }
+
+    public void resetTracker(BPTracker tracker) {
+        final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
+        file.set("data." + tracker.getOwnerId().toString(), null);
         plugin.saveConfiguration("bp-progress", file);
     }
 

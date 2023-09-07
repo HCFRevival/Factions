@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.battlepass.impl.BPObjective;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -20,6 +21,7 @@ import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.impl.Deathban;
+import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -309,6 +311,32 @@ public final class FMessage {
 
     public static void printBattleHornConsumed(Player hornUser, Player receiver, String hornName) {
         receiver.sendMessage(ChatColor.DARK_GREEN + hornUser.getName() + LAYER_1 + " has sounded the " + hornName + LAYER_1 + " horn!");
+    }
+
+    public static void printBattlepassProgress(Player player, BPObjective objective, int newValue) {
+        player.sendMessage(ChatColor.RESET + " ");
+
+        player.sendMessage(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Battlepass Progress" + ChatColor.RESET + ": "
+                + objective.getIcon().getDisplayName());
+
+        player.sendMessage(Colors.YELLOW.toBukkit() + "Current Status" + ChatColor.RESET + ": "
+                + newValue + Colors.YELLOW.toBukkit() + "/" + ChatColor.RESET + objective.getAmountRequirement());
+
+        player.sendMessage(ChatColor.RESET + " ");
+    }
+
+    public static void printBattlepassComplete(Player player, BPObjective objective, double expMultiplier) {
+        final int multipliedExp = (int)Math.round(objective.getBaseExp() * expMultiplier);
+        final int diff = (multipliedExp - objective.getBaseExp());
+
+        player.sendMessage(ChatColor.RESET + " ");
+        player.sendMessage(Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Battlepass Completion" + ChatColor.RESET + ": "
+                + objective.getIcon().getDisplayName());
+
+        player.sendMessage(XPService.XP_COLOR_ACCENT_INFO + "Reward" + ChatColor.RESET + ": "
+                + objective.getBaseExp() + " EXP" + (expMultiplier > 0.0 ? ChatColor.GRAY + " (+" + diff + " Bonus)" : ""));
+
+        player.sendMessage(ChatColor.RESET + " ");
     }
 
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {

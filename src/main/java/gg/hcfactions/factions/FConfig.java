@@ -144,6 +144,16 @@ public final class FConfig {
     // lives
     @Getter public Map<String, Integer> firstJoinLives;
 
+    // xp
+    @Getter public int loginBonusRequiredTime;
+    @Getter public int loginRewardXp;
+    @Getter public int dragonKillRewardXp;
+    @Getter public int kothCaptureRewardXp;
+    @Getter public int palaceCaptureRewardXp;
+    @Getter public int playerKillRewardXp;
+    @Getter public int diamondMinedRewardXp;
+    @Getter public int netheriteMinedRewardXp;
+
     // custom crafting recipes
     @Getter public boolean saddleRecipeEnabled;
     @Getter public boolean heartOfTheSeaRecipeEnabled;
@@ -382,6 +392,23 @@ public final class FConfig {
             firstJoinLives = res;
             plugin.getAresLogger().info("First-join Lives Found: " + firstJoinLives.size());
         }
+
+        loginBonusRequiredTime = conf.getInt("xp.login.time");
+        loginRewardXp = conf.getInt("xp.login.bonus");
+        dragonKillRewardXp = conf.getInt("xp.dragon_kill");
+        kothCaptureRewardXp = conf.getInt("xp.koth_capture");
+        palaceCaptureRewardXp = conf.getInt("xp.palace_capture");
+        playerKillRewardXp = conf.getInt("xp.player_kill");
+        diamondMinedRewardXp = conf.getInt("xp.diamond_mined");
+        netheriteMinedRewardXp = conf.getInt("xp.netherite_mined");
+        plugin.getAresLogger().info("Login Bonus Time: " + loginBonusRequiredTime);
+        plugin.getAresLogger().info("Login Bonus Amount: " + loginRewardXp);
+        plugin.getAresLogger().info("Dragon Kill Bonus Amount: " + dragonKillRewardXp);
+        plugin.getAresLogger().info("KOTH Capture Bonus Amount: " + kothCaptureRewardXp);
+        plugin.getAresLogger().info("Palace Capture Bonus Amount: " + palaceCaptureRewardXp);
+        plugin.getAresLogger().info("Player Kill Bonus Amount: " + playerKillRewardXp);
+        plugin.getAresLogger().info("Diamond Mined Bonus Amount: " + diamondMinedRewardXp);
+        plugin.getAresLogger().info("Netherite Mined Bonus Amount: " + netheriteMinedRewardXp);
 
         saddleRecipeEnabled = conf.getBoolean("custom_recipes.saddle");
         heartOfTheSeaRecipeEnabled = conf.getBoolean("custom_recipes.heart_of_the_sea");

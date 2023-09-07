@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.FoundOreEvent;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -59,11 +60,17 @@ public final class FoundOreListener implements Listener {
         final int found = countOres(Lists.newArrayList(), block, 0);
 
         if (block.getType().equals(Material.DIAMOND_ORE) || block.getType().equals(Material.DEEPSLATE_DIAMOND_ORE)) {
+            final FoundOreEvent foundOreEvent = new FoundOreEvent(player, Material.DIAMOND_ORE, found);
+            Bukkit.getPluginManager().callEvent(foundOreEvent);
+
             Bukkit.broadcastMessage(FD_PREFIX + ChatColor.AQUA + player.getName() + " found " + found + " Diamond Ore");
             return;
         }
 
         if (block.getType().equals(Material.ANCIENT_DEBRIS)) {
+            final FoundOreEvent foundOreEvent = new FoundOreEvent(player, Material.ANCIENT_DEBRIS, found);
+            Bukkit.getPluginManager().callEvent(foundOreEvent);
+
             Bukkit.broadcastMessage(FD_PREFIX + net.md_5.bungee.api.ChatColor.of("#654641") + player.getName() + " found " + found + " Ancient Debris");
         }
 

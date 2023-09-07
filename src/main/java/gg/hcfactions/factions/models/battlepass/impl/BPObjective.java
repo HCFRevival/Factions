@@ -6,6 +6,9 @@ import gg.hcfactions.factions.models.battlepass.EBPObjectiveType;
 import gg.hcfactions.factions.models.battlepass.EBPState;
 import gg.hcfactions.factions.models.battlepass.IBPObjective;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.faction.IFaction;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.libs.base.util.Strings;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.menu.impl.Icon;
@@ -58,24 +61,40 @@ public class BPObjective implements IBPObjective {
         }
 
         final String oldDisplayName = meta.getDisplayName();
+        final List<String> lore = meta.getLore() != null ? meta.getLore() : Lists.newArrayList();
+
         meta.setDisplayName(state.getDisplayName() + ChatColor.RESET + " " + oldDisplayName);
 
-        final List<String> lore = meta.getLore() != null ? meta.getLore() : Lists.newArrayList();
-        lore.add(ChatColor.GOLD + "Amount" + ChatColor.WHITE + ": " + amountRequirement);
-
         if (hasEntityRequirement()) {
-            final String prettyEntityName = Strings.capitalize(getEntityRequirement().name().toLowerCase().replaceAll("_", " "));
-            lore.add(ChatColor.GOLD + "Creature" + ChatColor.WHITE + ": " + prettyEntityName);
+            final String prettyEntityName = Strings.capitalize(getEntityRequirement().name().toLowerCase().replaceAll("_", " ")) + (amountRequirement > 1 ? "s" : "");
+            lore.add(ChatColor.GRAY + "Slay " + ChatColor.WHITE + "" + amountRequirement + " " + prettyEntityName);
         }
 
         if (hasBlockRequirement()) {
-            final String prettyBlockName = Strings.capitalize(getBlockRequirement().name().toLowerCase().replaceAll("_", " "));
-            lore.add(ChatColor.GOLD + "Block" + ChatColor.WHITE + ": " + prettyBlockName);
+            final String prettyBlockName = Strings.capitalize(getBlockRequirement().name().toLowerCase().replaceAll("_", " ") + (amountRequirement > 1 ? "s" : ""));
+            lore.add(ChatColor.GRAY + "Gather " + ChatColor.WHITE + "" + amountRequirement + " " + prettyBlockName);
         }
+
+        if (objectiveType.equals(EBPObjectiveType.CAPTURE_KOTH_TICKET)) {
+            lore.add(ChatColor.GRAY + "Earn " + ChatColor.WHITE + "" + amountRequirement + " Tickets" + ChatColor.GRAY + " during " + ChatColor.WHITE + "King of the Hill");
+        }
+
+        lore.add(ChatColor.RESET + " ");
+        lore.add(ChatColor.RED + "Additional Requirements:");
 
         if (hasWorldRequirement()) {
             final String prettyWorldName = Strings.capitalize(getWorldRequirement().name().toLowerCase().replaceAll("_", " "));
             lore.add(ChatColor.GOLD + "World" + ChatColor.WHITE + ": " + prettyWorldName);
+        }
+
+        if (hasClaimRequirement()) {
+            final IFaction faction = plugin.getFactionManager().getFactionById(getClaimRequirement());
+
+            if (faction instanceof final PlayerFaction playerFaction) {
+                lore.add(ChatColor.GOLD + "Claim" + ChatColor.WHITE + ": " + playerFaction.getName());
+            } else if (faction instanceof final ServerFaction serverFaction) {
+                lore.add(ChatColor.GOLD + "Claim" + ChatColor.WHITE + ": " + serverFaction.getDisplayName());
+            }
         }
 
         if (hasClassRequirement()) {
@@ -87,7 +106,7 @@ public class BPObjective implements IBPObjective {
         if (viewer.hasCompleted(this)) {
             lore.add(ChatColor.GRAY + "Your progress" + ChatColor.WHITE + ": " + ChatColor.GREEN + "Complete");
         } else if (viewer.getProgress(this) > 0) {
-            lore.add(ChatColor.GRAY + "Your progress" + ChatColor.WHITE + ": " + viewer.getProgress(this) + ChatColor.GRAY + "/" + ChatColor.RESET + amountRequirement);
+            lore.add(ChatColor.GRAY + "Your progress" + ChatColor.WHITE + ": " + viewer.getProgress(this) + ChatColor.GRAY + "/" + ChatColor.WHITE + amountRequirement);
         } else {
             lore.add(ChatColor.GRAY + "Your progress" + ChatColor.WHITE + ": " + ChatColor.RED + "Not started");
         }
