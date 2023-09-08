@@ -35,11 +35,13 @@ import java.util.UUID;
 
 public final class XPListener implements Listener {
     @Getter public final Factions plugin;
+    @Getter public final Map<UUID, Long> loginBonusGranted;
     @Getter public final Map<UUID, Long> loginBonusTimestamps;
     @Getter public final BukkitTask loginBonusTickingTask;
 
     public XPListener(Factions plugin) {
         this.plugin = plugin;
+        this.loginBonusGranted = Maps.newConcurrentMap();
         this.loginBonusTimestamps = Maps.newConcurrentMap();
 
         this.loginBonusTickingTask = new Scheduler(plugin).sync(() -> {
@@ -52,7 +54,7 @@ public final class XPListener implements Listener {
             loginBonusTimestamps.forEach((uid, timestamp) -> {
                 final long sec = (Time.now() - timestamp) / 1000L;
 
-                if (sec >= plugin.getConfiguration().getLoginBonusRequiredTime()) {
+                if (sec >= plugin.getConfiguration().getLoginBonusRequiredTime() && !loginBonusGranted.containsKey(uid)) {
                     toRemove.add(uid);
                 }
             });
@@ -62,6 +64,7 @@ public final class XPListener implements Listener {
                 final XPService xpService = (XPService) plugin.getService(XPService.class);
 
                 loginBonusTimestamps.remove(uid);
+                loginBonusGranted.put(uid, (Time.now() + (86400*1000L)));
 
                 if (xpService == null) {
                     plugin.getAresLogger().error("Failed to obtain XP Service");
