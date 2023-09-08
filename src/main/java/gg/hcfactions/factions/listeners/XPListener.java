@@ -49,8 +49,19 @@ public final class XPListener implements Listener {
                 return;
             }
 
+            // clear out granted bonus entries
             final List<UUID> toRemove = Lists.newArrayList();
 
+            loginBonusGranted.forEach((uid, timestamp) -> {
+                if (timestamp <= Time.now()) {
+                    toRemove.add(uid);
+                }
+            });
+
+            toRemove.forEach(loginBonusGranted::remove);
+            toRemove.clear();
+
+            // clear our login bonus timestamps and reward accordingly
             loginBonusTimestamps.forEach((uid, timestamp) -> {
                 final long sec = (Time.now() - timestamp) / 1000L;
 
