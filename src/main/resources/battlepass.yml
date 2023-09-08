@@ -1,0 +1,77 @@
+enabled: true
+
+expire:
+  daily: 0
+  weekly: 0
+
+active:
+  daily:
+  weekly:
+
+objectives:
+  daily:
+    obj1:
+      icon:
+        material: 'ZOMBIE_HEAD'
+        display_name: '&4&lZombie Hunter'
+        lore:
+          - 'Line 1'
+          - 'Line 2'
+          - 'Line 3'
+      type: 'ENTITY_SLAIN'
+      requirements:
+        entity: 'ZOMBIE'
+        world: 'NORMAL'
+        amount: 25
+      base_exp: 50
+    obj2:
+      icon:
+        material: 'NETHERRACK'
+        display_name: ''
+        lore:
+          - 'Line 3'
+          - 'Line 4'
+          - 'Line 5'
+      type: 'BLOCK_BREAK'
+      requirements:
+        world: 'NETHER'
+        block: 'NETHERRACK'
+        amount: 50
+      base_exp: 100
+  weekly:
+    obj1:
+      icon:
+        material: 'ZOMBIE_HEAD'
+        display_name: '&4&lZombie Hunter'
+        lore:
+          - 'Line 1'
+          - 'Line 2'
+          - 'Line 3'
+      type: 'ENTITY_SLAIN'
+      requirements:
+        entity: 'ZOMBIE'
+        world: 'NORMAL'
+        amount: 25
+      base_exp: 50
+    obj2:
+      icon:
+        material: 'NETHERRACK'
+        display_name: ''
+        lore:
+          - 'Line 3'
+          - 'Line 4'
+          - 'Line 5'
+      type: 'BLOCK_BREAK'
+      requirements:
+        world: 'NETHER'
+        block: 'NETHERRACK'
+        amount: 50
+      base_exp: 100
+
+rank_exp_multipliers:
+  silver: 1.05
+  gold: 1.1
+  sapphire: 1.15
+  emerald: 1.25
+  partner: 2.0
+  ruby: 2.0

@@ -239,6 +239,20 @@ lives:
     famous: 5
     media: 2
 
+# XP configuration
+# 1 xp = 0.10
+xp:
+  enabled: true
+  login:
+    time: 30
+    bonus: 25
+  dragon_kill: 50
+  koth_capture: 50
+  palace_capture: 100
+  player_kill: 30
+  diamond_mined: 1
+  netherite_mined: 1
+
 # Custom crafting recipes
 custom_recipes:
   saddle: true

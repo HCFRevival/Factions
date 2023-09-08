@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import gg.hcfactions.factions.events.event.KOTHTickEvent;
 import gg.hcfactions.factions.models.events.IEventSession;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -11,6 +12,7 @@ import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.util.Time;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.*;
@@ -161,6 +163,9 @@ public final class KOTHSession implements IEventSession {
             event.captureEvent(faction);
             return;
         }
+
+        final KOTHTickEvent tickEvent = new KOTHTickEvent(getEvent());
+        Bukkit.getPluginManager().callEvent(tickEvent);
 
         leaderboard.put(faction.getUniqueId(), newTickets);
         FMessage.broadcastCaptureEventMessage(FMessage.LAYER_2 + faction.getName() + FMessage.LAYER_1 + " has gained a ticket for controlling " + event.getDisplayName() + ChatColor.RED + " (" + newTickets + "/" + ticketsNeededToWin + ")");
