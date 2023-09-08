@@ -73,6 +73,7 @@ public final class FConfig {
     @Getter public int defaultServerFactionClaimBuffer;
     @Getter public int defaultPlayerFactionClaimBuffer;
     @Getter public double claimBlockValue;
+    @Getter public int claimMinRatio;
     @Getter public int claimMinSize;
     @Getter public int claimMaxAmount;
     @Getter public double claimRefundPercent;
@@ -276,10 +277,12 @@ public final class FConfig {
         plugin.getAresLogger().info("Event Power Loss Reduction: " + eventPowerLossReduction);
 
         claimMinSize = conf.getInt("factions.claiming.min_size");
+        claimMinRatio = conf.getInt("factions.claiming.min_ratio");
         claimMaxAmount = conf.getInt("factions.claiming.max_claims");
         claimBlockValue = conf.getDouble("factions.claiming.block_value");
         claimRefundPercent = conf.getDouble("factions.claiming.refund_percentage");
         plugin.getAresLogger().info("Minimum Claim Size: " + claimMinSize);
+        plugin.getAresLogger().info("Minimum Claim Ratio: " + claimMinRatio);
         plugin.getAresLogger().info("Max Claim Amount: " + claimMaxAmount);
         plugin.getAresLogger().info("Claim Block Value: " + claimBlockValue);
         plugin.getAresLogger().info("Claim Refund Percentage: " + claimRefundPercent);

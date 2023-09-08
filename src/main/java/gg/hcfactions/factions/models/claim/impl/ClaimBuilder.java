@@ -135,10 +135,18 @@ public final class ClaimBuilder implements IClaimBuilder {
             final List<Claim> existingClaims = manager.getClaimsByOwner(faction);
             boolean isTouching = existingClaims.isEmpty() || faction instanceof ServerFaction;
             final int[] lxw = claim.getSize();
+            final int smallSide = Math.min(lxw[0], lxw[1]);
+            final int largeSide = Math.max(lxw[0], lxw[1]);
+            final int minClaimRatio = manager.getPlugin().getConfiguration().getClaimMinRatio();
             final int minClaimSize = manager.getPlugin().getConfiguration().getClaimMinSize();
 
-            if (lxw[0] < minClaimSize || lxw[1] < minClaimSize) {
+            if (lxw[0] < minClaimSize || lxw[1] < minClaimSize && !hasBypass) {
                 new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Minimum claim size is " + minClaimSize + "x" + minClaimSize)).run();
+                return;
+            }
+
+            if ((largeSide / smallSide) > minClaimRatio && !hasBypass) {
+                new Scheduler(manager.getPlugin()).sync(() -> promise.reject("Minimum claim ratio is " + minClaimRatio + ":1")).run();
                 return;
             }
 

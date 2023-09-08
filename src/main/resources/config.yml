@@ -86,6 +86,9 @@ factions:
     # Minimum claim size (n x n)
     min_size: 8
 
+    # Minimum claim ratio (n:1)
+    min_ratio: 3
+
     # Maximum claim count (anything greater than 4 allows players to make a ring)
     max_claims: 3
 
