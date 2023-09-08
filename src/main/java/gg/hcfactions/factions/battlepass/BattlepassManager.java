@@ -161,14 +161,6 @@ public final class BattlepassManager implements IManager {
         return getWeeklyObjectiveRepository().stream().filter(obj -> !obj.getState().equals(EBPState.INACTIVE)).collect(Collectors.toList());
     }
 
-    public List<BPObjective> getMetRequirementObjectives(Player player, Location location) {
-        return getActiveObjectives().stream().filter(obj -> obj.meetsRequirement(player, location)).collect(Collectors.toList());
-    }
-
-    public List<BPObjective> getMetRequirementObjectives(Player player, Entity entity) {
-        return getActiveObjectives().stream().filter(obj -> obj.meetsRequirement(player, entity)).collect(Collectors.toList());
-    }
-
     public void getNewObjectives(boolean weekly) {
         final List<BPObjective> newObjectives = Lists.newArrayList();
         final List<BPObjective> objPool = (weekly ? weeklyObjectiveRepository : dailyObjectiveRepository);
@@ -384,7 +376,7 @@ public final class BattlepassManager implements IManager {
         plugin.saveConfiguration("bp-progress", file);
     }
 
-    private void saveTrackers() {
+    public void saveTrackers() {
         final YamlConfiguration file = plugin.loadConfiguration("bp-progress");
 
         trackerRepository.forEach(tracker ->
@@ -412,7 +404,7 @@ public final class BattlepassManager implements IManager {
         plugin.saveConfiguration("bp-progress", file);
     }
 
-    private void saveActiveObjectives() {
+    public void saveActiveObjectives() {
         final YamlConfiguration file = plugin.loadConfiguration("battlepass");
         final List<BPObjective> active = getActiveObjectives();
         final List<String> activeWeeklyIds = Lists.newArrayList();
