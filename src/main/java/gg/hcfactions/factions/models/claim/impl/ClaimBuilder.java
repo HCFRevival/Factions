@@ -61,7 +61,16 @@ public final class ClaimBuilder implements IClaimBuilder {
         player.sendMessage(FMessage.LAYER_2 + "Claim point " + FMessage.LAYER_1 + pillarType.name() + FMessage.LAYER_2 + " set at " + FMessage.LAYER_1 + location.toString());
 
         if (cornerA != null && cornerB != null) {
-            player.sendMessage(ChatColor.AQUA + "Claim value" + ChatColor.YELLOW + ": $" + String.format("%.2f", calculateCost()));
+            final double xMin = Math.min(cornerA.getX(), cornerB.getX());
+            final double zMin = Math.min(cornerA.getZ(), cornerB.getZ());
+            final double xMax = Math.max(cornerA.getX(), cornerB.getX());
+            final double zMax = Math.max(cornerA.getZ(), cornerB.getZ());
+            final double a = (int)Math.round(Math.abs(xMax - xMin));
+            final double b = (int)Math.round(Math.abs(zMax - zMin));
+            final double area = (a * b);
+            final boolean isLargeClaim = (area >= manager.getPlugin().getConfiguration().getLargeClaimThreshold());
+
+            player.sendMessage(ChatColor.AQUA + "Claim value" + ChatColor.YELLOW + ": $" + String.format("%.2f", calculateCost()) + (isLargeClaim ? ChatColor.RED + " (Large Claim)" : ""));
         }
     }
 
@@ -88,6 +97,13 @@ public final class ClaimBuilder implements IClaimBuilder {
 
         final double a = (int)Math.round(Math.abs(xMax - xMin));
         final double b = (int)Math.round(Math.abs(zMax - zMin));
+        final double area = (a * b);
+
+        if (area >= manager.getPlugin().getConfiguration().getLargeClaimThreshold()) {
+            final double pre = a * b * manager.getPlugin().getConfiguration().getClaimBlockValue();
+            final double tax = pre * manager.getPlugin().getConfiguration().getLargeClaimTax();
+            return (pre + tax);
+        }
 
         return a * b * manager.getPlugin().getConfiguration().getClaimBlockValue();
     }
