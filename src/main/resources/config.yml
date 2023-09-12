@@ -86,11 +86,22 @@ factions:
     # Minimum claim size (n x n)
     min_size: 8
 
+    # Minimum claim ratio (n:1)
+    min_ratio: 3
+
+    # Minimum threshold of a claim's area to be considered
+    # a 'large claim' and have a large claim tax applied to the price.
+    large_claim_threshold: 2300
+
     # Maximum claim count (anything greater than 4 allows players to make a ring)
     max_claims: 3
 
     # Claim value per block (area * n)
     block_value: 10.0
+
+    # Percentage-based tax that is applied to the price when a claim is considered a
+    # 'large claim' (exceeds area defined in large_claim_threshold)
+    large_claim_tax: 0.25
 
     # Refunded amount when a player unclaims
     refund_percentage: 0.8
