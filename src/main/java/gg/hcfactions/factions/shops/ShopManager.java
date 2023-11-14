@@ -294,7 +294,7 @@ public final class ShopManager implements IManager {
 
     public Optional<IMerchant> getMerchantByLocation(BLocatable location) {
         return merchantRepository.stream().filter(m ->
-                m.getMerchantLocation().getWorldName().equals(location.getWorldName()) && m.getMerchantLocation().getDistance(location) < 1.0).findFirst();
+                m.getMerchantLocation().getWorldName().equals(location.getWorldName()) && m.getMerchantLocation().getDistance(location) < 2.0).findFirst();
     }
 
     public Optional<IMerchant> getMerchantByName(String name) {
