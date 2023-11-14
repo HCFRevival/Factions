@@ -236,7 +236,13 @@ public interface IClass {
         }
 
         if (getOffhand() != null) {
-            return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
+            if (this instanceof final Tank tankClass) {
+                if (!tankClass.hasDrainedStamina(player)) {
+                    return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
+                }
+            } else {
+                return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
+            }
         }
 
         return true;

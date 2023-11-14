@@ -61,6 +61,7 @@ public final class Tank implements IClass {
     @Getter public final int staminaRegenDelay;
     @Getter public final int staminaHardRegenDelay;
     @Getter public final Set<UUID> guardingPlayers;
+    @Getter public final Set<UUID> drainedStaminaPlayers;
     @Getter public final Map<UUID, Double> stamina;
     @Getter public final Map<UUID, PLocatable> guardPoints;
     @Getter public final Map<UUID, Long> nextStaminaRegen;
@@ -73,6 +74,7 @@ public final class Tank implements IClass {
         this.consumables = Lists.newArrayList();
         this.activePlayers = Sets.newConcurrentHashSet();
         this.guardingPlayers = Sets.newConcurrentHashSet();
+        this.drainedStaminaPlayers = Sets.newConcurrentHashSet();
         this.shieldWarmup = 2;
         this.shieldDamageReduction = 0.5;
         this.staminaDamageDivider = 3.0;
@@ -101,6 +103,7 @@ public final class Tank implements IClass {
         this.consumables = Lists.newArrayList();
         this.activePlayers = Sets.newConcurrentHashSet();
         this.guardingPlayers = Sets.newConcurrentHashSet();
+        this.drainedStaminaPlayers = Sets.newConcurrentHashSet();
         this.shieldWarmup = shieldWarmup;
         this.shieldDamageReduction = shieldDamageReduction;
         this.staminaDamageDivider = staminaDamageDivider;
@@ -267,6 +270,7 @@ public final class Tank implements IClass {
             return;
         }
 
+        final UUID playerId = player.getUniqueId();
         final double current = getStamina(player);
         final double updated = Math.max((current - amount), 0.0);
 
@@ -284,12 +288,19 @@ public final class Tank implements IClass {
             player.getEquipment().setItemInOffHand(new ItemStack(Material.AIR));
 
             deactivateShield(player);
+            drainedStaminaPlayers.add(playerId);
 
             new Scheduler(manager.getPlugin()).sync(() -> {
                 player.getInventory().setItemInOffHand(shield);
                 player.setCooldown(Material.SHIELD, 20);
+
+                drainedStaminaPlayers.remove(playerId);
             }).delay(10L).run();
         }
+    }
+
+    public boolean hasDrainedStamina(Player player) {
+        return drainedStaminaPlayers.contains(player.getUniqueId());
     }
 
     public PLocatable getGuardPoint(Player player) {
