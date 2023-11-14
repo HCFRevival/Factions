@@ -1,6 +1,6 @@
 name: Factions
 main: gg.hcfactions.factions.Factions
-version: 1.20
+version: 1.20.2
 author: John Rockwell <john@hcfrevival.net>
 description: Factions Core
 prefix: Factions
