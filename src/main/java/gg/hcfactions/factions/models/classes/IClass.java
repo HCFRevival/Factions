@@ -2,11 +2,13 @@ package gg.hcfactions.factions.models.classes;
 
 import gg.hcfactions.factions.classes.ClassManager;
 import gg.hcfactions.factions.listeners.events.player.ClassActivateEvent;
+import gg.hcfactions.factions.models.classes.impl.Tank;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -161,6 +163,20 @@ public interface IClass {
             return false;
         }
 
+        // edge cases for more abstract classes
+        // this exemption allows tank to have a banner set
+        // to their head once the class activates without breaking
+        // the armor change detection
+        if (this instanceof Tank) {
+            if (player.getEquipment().getHelmet() != null) {
+                final ItemStack helmet = player.getEquipment().getHelmet();
+
+                if (!helmet.getType().name().contains("_BANNER")) {
+                    return false;
+                }
+            }
+        }
+
         if (isEmptyArmorEnforced()) {
             if (getHelmet() == null && player.getEquipment().getHelmet() != null) {
                 return false;
@@ -220,7 +236,13 @@ public interface IClass {
         }
 
         if (getOffhand() != null) {
-            return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
+            if (this instanceof final Tank tankClass) {
+                if (!tankClass.hasDrainedStamina(player)) {
+                    return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
+                }
+            } else {
+                return player.getEquipment().getItemInOffHand().getType().equals(getOffhand());
+            }
         }
 
         return true;
