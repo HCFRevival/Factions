@@ -13,6 +13,7 @@ import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
+import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.base.timer.impl.GenericTimer;
 import gg.hcfactions.libs.base.util.Time;
@@ -238,6 +239,12 @@ public final class TimerManager implements IManager {
             final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
 
             if (playerClass instanceof final Tank tankClass) {
+                // we need this here as a catch-all since scoreboard iteration is
+                // asynchronous and guard can be caught in a race condition
+                if (!factionPlayer.hasTimer(ETimerType.GUARD) && factionPlayer.getScoreboard().getLine(ETimerType.GUARD.getScoreboardPosition()) != null) {
+                    factionPlayer.getScoreboard().removeLine(ETimerType.GUARD.getScoreboardPosition());
+                }
+
                 factionPlayer.getScoreboard().setLine(53, ChatColor.AQUA + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + String.format("%.2f", tankClass.getStamina(factionPlayer.getUniqueId())));
             }
 

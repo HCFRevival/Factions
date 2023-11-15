@@ -126,11 +126,11 @@ public final class Tank implements IClass {
                     .spawnEntity(point.getBukkitLocation(), EntityType.AREA_EFFECT_CLOUD);
 
             cloud.setSource(source);
-            cloud.setParticle(Particle.SNEEZE, Particle.SMOKE_LARGE);
-            cloud.setRadius(6.0f);
+            cloud.setParticle(Particle.SNEEZE);
+            cloud.setRadius(7.0f);
             cloud.setDuration(5);
             cloud.setReapplicationDelay(1);
-            cloud.setBasePotionData(new PotionData(PotionType.TURTLE_MASTER));
+            cloud.setBasePotionType(PotionType.TURTLE_MASTER);
         });
     }
 
