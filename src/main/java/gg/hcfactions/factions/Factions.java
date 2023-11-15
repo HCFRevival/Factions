@@ -51,6 +51,8 @@ import org.bukkit.NamespacedKey;
 import java.util.List;
 
 public final class Factions extends AresPlugin {
+    @Getter public static Factions instance;
+
     @Getter public final NamespacedKey namespacedKey = new NamespacedKey(this, "FACTIONS");
     @Getter public FConfig configuration;
     @Getter public PlayerManager playerManager;
@@ -72,6 +74,8 @@ public final class Factions extends AresPlugin {
 
     @Override
     public void onEnable() {
+        instance = this;
+
         super.onEnable();
 
         // config init
