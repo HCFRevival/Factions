@@ -14,6 +14,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Locale;
 
 @CommandAlias("event")
@@ -420,6 +422,19 @@ public final class EventCommand extends BaseCommand {
                 player.sendMessage(FMessage.ERROR + "Failed to update event schedule: " + s);
             }
         });
+    }
+
+    @Subcommand("time|clock")
+    @Description("View the server's internal clock")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onTime(Player player) {
+        final ZoneId tz = ZoneId.of("America/New_York");
+        final LocalDateTime now = LocalDateTime.now(tz);
+        final int hour = now.getHour();
+        final int min = now.getMinute();
+        final boolean am = (hour <= 11);
+        player.sendMessage(FMessage.LAYER_2 + "[" + FMessage.LAYER_1 + "Event" + FMessage.LAYER_2 + "] "
+                + FMessage.LAYER_1 + "Current Time: " + FMessage.INFO + "" + hour + ":" + min + (am ? "AM" : "PM") + ", " + now.getDayOfWeek().name());
     }
 
     @Subcommand("reload")
