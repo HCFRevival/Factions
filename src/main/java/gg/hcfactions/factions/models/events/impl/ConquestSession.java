@@ -63,7 +63,6 @@ public final class ConquestSession implements IEventSession {
         }
     }
 
-
     public void setUncontested(ConquestZone zone, boolean reset) {
         if (reset) {
             reset(zone);
