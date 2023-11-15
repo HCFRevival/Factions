@@ -16,6 +16,7 @@ import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.*;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -493,6 +494,10 @@ public final class EventManager implements IManager {
         }
 
         plugin.saveConfiguration("events", conf);
+    }
+
+    public void saveDpsEvent(DPSEvent event) {
+
     }
 
     public void deleteEvent(IEvent event) {

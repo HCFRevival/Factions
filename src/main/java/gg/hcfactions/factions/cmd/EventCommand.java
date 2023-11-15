@@ -44,6 +44,22 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("create dps")
+    @Description("Create a new DPS event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name>")
+    public void onCreateDPS(Player player, String eventName) {
+        plugin.getEventManager().getBuilderManager().getExecutor().buildDpsEvent(player, eventName, new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + s);
+            }
+        });
+    }
+
     @Subcommand("create conquest")
     @Description("Create a new Conquest event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
