@@ -5,16 +5,14 @@ import com.google.common.collect.Maps;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.events.IEventExecutor;
 import gg.hcfactions.factions.events.menu.EventMenu;
-import gg.hcfactions.factions.models.events.EPalaceLootTier;
-import gg.hcfactions.factions.models.events.ICaptureEvent;
-import gg.hcfactions.factions.models.events.IEvent;
-import gg.hcfactions.factions.models.events.IScheduledEvent;
+import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
 import gg.hcfactions.factions.models.events.impl.ConquestZone;
 import gg.hcfactions.factions.models.events.impl.EventSchedule;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootable;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -87,6 +85,38 @@ public final class EventExecutor implements IEventExecutor {
         }
 
         conquestEvent.startEvent(ticketsToWin, timerDuration, tokenReward, ticketsPerTick);
+        promise.resolve();
+    }
+
+    @Override
+    public void startDpsEvent(Player player, String eventName, String entityTypeName, int duration, int tokenReward, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
+
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = event.get();
+
+        if (generic.isActive()) {
+            promise.reject("This event is already active");
+            return;
+        }
+
+        if (!(generic instanceof final DPSEvent dpsEvent)) {
+            promise.reject("This is not a DPS Event");
+            return;
+        }
+
+        final EDPSEntityType entityType = EDPSEntityType.getByName(entityTypeName);
+
+        if (entityType == null) {
+            promise.reject("Invalid DPS Entity Type");
+            return;
+        }
+
+        dpsEvent.startEvent(entityType, duration, tokenReward);
         promise.resolve();
     }
 

@@ -141,6 +141,24 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("start dps")
+    @Description("Start a DPS Event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name> <entity> <duration in seconds> <tokens>")
+    public void onStartDPS(Player player, String eventName, String entityTypeName, int duration, int tokenReward) {
+        plugin.getEventManager().getExecutor().startDpsEvent(player, eventName, entityTypeName, duration, tokenReward, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event started");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to start an event: " + s);
+            }
+        });
+    }
+
     @Subcommand("stop")
     @Description("Stop an event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
