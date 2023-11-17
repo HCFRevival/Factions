@@ -16,7 +16,7 @@ import org.bukkit.ChatColor;
 
 import java.util.UUID;
 
-public class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
+public final class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
     @Getter public final Factions plugin;
     @Getter @Setter EDPSBuildStep currentStep;
     @Getter public final UUID builderId;
@@ -57,6 +57,8 @@ public class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
 
         owner = faction;
         currentStep = EDPSBuildStep.INITIAL_SPAWNPOINT;
+
+        giveWand();
         getBuilder().sendMessage(ChatColor.DARK_AQUA + "Select the initial spawnpoint for the DPS Entity (more can be added later using " + ChatColor.YELLOW + "/event dps addspawn " + name);
     }
 
