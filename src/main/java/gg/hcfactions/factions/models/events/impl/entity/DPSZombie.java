@@ -17,11 +17,13 @@ import java.util.Objects;
 
 public final class DPSZombie extends Zombie implements IDPSEntity {
     @Getter public final DPSEvent event;
+    @Getter public final Location origin;
     @Getter public final EDPSEntityType entityType = EDPSEntityType.ZOMBIE;
 
     public DPSZombie(DPSEvent event, Location origin) {
         super(EntityType.ZOMBIE, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
         this.event = event;
+        this.origin = origin;
 
         setup(getBukkitEntity());
     }
