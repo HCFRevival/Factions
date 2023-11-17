@@ -37,6 +37,10 @@ public class DPSSession {
         }
     }
 
+    public long getRemainingTime() {
+        return eventEndTimestamp - Time.now();
+    }
+
     public long getDamage(PlayerFaction faction) {
         return leaderboard.getOrDefault(faction.getUniqueId(), 0L);
     }

@@ -39,11 +39,11 @@ public interface IEventExecutor {
      * @param player Player
      * @param eventName Event name
      * @param entityTypeName DPS Check custom entity type
-     * @param duration Event duration (in seconds)
+     * @param duration Event duration (1h30m25s)
      * @param tokenReward Token reward
      * @param promise Promise
      */
-    void startDpsEvent(Player player, String eventName, String entityTypeName, int duration, int tokenReward, Promise promise);
+    void startDpsEvent(Player player, String eventName, String entityTypeName, String duration, int tokenReward, Promise promise);
 
     /**
      * Alter a Capture Event that is already running

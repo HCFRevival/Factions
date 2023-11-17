@@ -18,6 +18,7 @@ import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.loot.impl.LootTableMenu;
 import lombok.AllArgsConstructor;
@@ -89,7 +90,7 @@ public final class EventExecutor implements IEventExecutor {
     }
 
     @Override
-    public void startDpsEvent(Player player, String eventName, String entityTypeName, int duration, int tokenReward, Promise promise) {
+    public void startDpsEvent(Player player, String eventName, String entityTypeName, String durationName, int tokenReward, Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -113,6 +114,13 @@ public final class EventExecutor implements IEventExecutor {
 
         if (entityType == null) {
             promise.reject("Invalid DPS Entity Type");
+            return;
+        }
+
+        final long duration = Time.parseTime(durationName);
+
+        if (duration <= 0L) {
+            promise.reject("Invalid time format");
             return;
         }
 

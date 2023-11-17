@@ -548,6 +548,12 @@ public final class EventManager implements IManager {
         return ImmutableList.copyOf(koths);
     }
 
+    public ImmutableList<DPSEvent> getActiveDpsEvents() {
+        final List<DPSEvent> events = Lists.newArrayList();
+        eventRepository.stream().filter(e -> e.isActive() && e instanceof DPSEvent).forEach(dps -> events.add((DPSEvent) dps));
+        return ImmutableList.copyOf(events);
+    }
+
     public Optional<ConquestEvent> getActiveConquestEvent() {
         final IEvent event = eventRepository.stream().filter(e -> e.isActive() && e instanceof ConquestEvent).findFirst().orElse(null);
 
