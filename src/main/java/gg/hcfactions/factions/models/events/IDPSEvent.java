@@ -30,8 +30,15 @@ public interface IDPSEvent {
      * @return Returns a random spawnpoint from the list of possible spawnpoints
      */
     default BLocatable getRandomSpawnpoint() {
-        final Random random = new Random();
-        return getSpawnpoints().get(random.nextInt(getSpawnpoints().size() - 1));
+        if (getSpawnpoints().isEmpty()) {
+            return null;
+        }
+
+        if (getSpawnpoints().size() <= 1) {
+            return getSpawnpoints().get(0);
+        }
+
+        return getSpawnpoints().stream().findAny().orElse(null);
     }
 
     /**

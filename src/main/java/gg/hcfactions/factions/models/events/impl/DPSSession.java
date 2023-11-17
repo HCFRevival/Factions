@@ -22,11 +22,13 @@ public class DPSSession {
     @Getter @Setter public int tokenReward;
     @Getter @Setter public long eventEndTimestamp;
     @Getter @Setter public PlayerFaction mostRecentDamager;
+    @Getter public final long eventDuration;
     @Getter public final Map<UUID, Long> leaderboard;
 
     public DPSSession(DPSEvent event, EDPSEntityType entityType, long duration, int tokenReward) {
         this.event = event;
         this.tokenReward = tokenReward;
+        this.eventDuration = duration;
         this.eventEndTimestamp = Time.now() + duration;
         this.leaderboard = Maps.newConcurrentMap();
 

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.Objects;
@@ -23,6 +24,11 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
         this.event = event;
 
         setup(getBukkitEntity());
+    }
+
+    @Override
+    public CraftEntity getEntity() {
+        return getBukkitEntity();
     }
 
     @Override

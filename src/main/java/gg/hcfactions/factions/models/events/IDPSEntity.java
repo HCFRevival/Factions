@@ -2,6 +2,7 @@ package gg.hcfactions.factions.models.events;
 
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 
 public interface IDPSEntity {
     /**
@@ -13,6 +14,11 @@ public interface IDPSEntity {
      * @return Valid DPS event entity types
      */
     EDPSEntityType getEntityType();
+
+    /**
+     * @return Return the internal NPS entity object
+     */
+    CraftEntity getEntity();
 
     /**
      * Performs pre-flight configuration for the entity that is general
