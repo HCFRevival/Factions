@@ -232,6 +232,17 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
+        if (generic instanceof final DPSEvent dpsEvent) {
+            if (!dpsEvent.isActive()) {
+                promise.reject("Event is not active");
+                return;
+            }
+
+            dpsEvent.stopEvent();
+            promise.resolve();
+            return;
+        }
+
         promise.reject("Unknown event type");
     }
 
