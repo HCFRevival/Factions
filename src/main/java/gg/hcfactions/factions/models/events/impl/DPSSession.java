@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.models.events.EDPSEntityType;
 import gg.hcfactions.factions.models.events.IDPSEntity;
+import gg.hcfactions.factions.models.events.impl.entity.DPSPhantom;
 import gg.hcfactions.factions.models.events.impl.entity.DPSZombie;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -34,6 +35,8 @@ public class DPSSession {
 
         if (entityType.equals(EDPSEntityType.ZOMBIE)) {
             dpsEntity = new DPSZombie(event, new Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0));
+        } else if (entityType.equals(EDPSEntityType.PHANTOM)) {
+            dpsEntity = new DPSPhantom(event, new Location(Bukkit.getWorld("world"), 0, 128, 0));
         }
     }
 

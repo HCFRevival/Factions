@@ -1,7 +1,8 @@
 package gg.hcfactions.factions.models.events;
 
 public enum EDPSEntityType {
-    ZOMBIE;
+    ZOMBIE,
+    PHANTOM;
 
     public static EDPSEntityType getByName(String name) {
         for (EDPSEntityType entry : values()) {
