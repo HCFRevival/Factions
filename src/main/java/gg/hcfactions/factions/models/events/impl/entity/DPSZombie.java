@@ -2,9 +2,11 @@ package gg.hcfactions.factions.models.events.impl.entity;
 
 import gg.hcfactions.factions.models.events.EDPSEntityType;
 import gg.hcfactions.factions.models.events.IDPSEntity;
+import gg.hcfactions.factions.models.events.impl.entity.pathfinding.WalkToLocationGoal;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import lombok.Getter;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +26,9 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
         super(EntityType.ZOMBIE, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
         this.event = event;
         this.origin = origin;
+
+        this.goalSelector.removeAllGoals(Goal::isInterruptable);
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints()));
 
         setup(getBukkitEntity());
     }
