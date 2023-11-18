@@ -14,14 +14,16 @@ public final class WalkToLocationGoal extends Goal {
     protected final Mob mob;
     private Path path;
     private double speedModifier;
+    private double minRange;
     private List<Location> destinations;
     private int locationIndex;
 
-    public WalkToLocationGoal(Mob mob, List<BLocatable> locations, double speedModifier) {
+    public WalkToLocationGoal(Mob mob, List<BLocatable> locations, double speedModifier, double minRange) {
         this.mob = mob;
         this.destinations = Lists.newArrayList();
         this.locationIndex = 0;
         this.speedModifier = speedModifier;
+        this.minRange = minRange;
         this.path = null;
 
         locations.forEach(loc -> destinations.add(loc.getBukkitBlock().getLocation()));
@@ -61,7 +63,7 @@ public final class WalkToLocationGoal extends Goal {
 
     @Override
     public void tick() {
-        if (mob.getBukkitEntity().getLocation().distance(getDestination()) <= 3.0) {
+        if (mob.getBukkitEntity().getLocation().distance(getDestination()) <= minRange) {
             assignNewDestination();
 
             final GroundPathNavigation nav = (GroundPathNavigation) mob.getNavigation();

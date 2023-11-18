@@ -32,7 +32,7 @@ public final class DPSRavager extends Ravager implements IDPSEntity {
         this.event = event;
         this.origin = origin;
 
-        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1));
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1, 3.0));
 
         Objects.requireNonNull(this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)).setBaseValue(100.0D);
 
