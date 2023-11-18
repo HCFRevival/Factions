@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class DPSDamageEvent extends PlayerEvent {
+public final class DPSDamageEvent extends PlayerEvent {
     @Getter public static final HandlerList handlerList = new HandlerList();
     @Getter public final DPSEvent event;
     @Getter public final int damage;
