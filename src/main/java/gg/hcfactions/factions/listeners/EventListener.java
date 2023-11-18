@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.listeners;
 
+import gg.hcfactions.cx.event.PreMobstackEvent;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.event.EventStartEvent;
@@ -22,13 +23,16 @@ import lombok.Getter;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -298,6 +302,59 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             }
 
             event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Calculates and applies damage in DPSCHECK events
+     * @param event EntityDamageByEntityEvent
+     */
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final LivingEntity livingEntity)) {
+            return;
+        }
+
+        final Player damager;
+        final int damage = (int)Math.round(event.getFinalDamage());
+
+        if (event.getDamager() instanceof Player) {
+            damager = (Player)event.getDamager();
+        } else if (event.getDamager() instanceof final Projectile proj && proj.getShooter() instanceof Player) {
+            damager = (Player)proj.getShooter();
+        } else {
+            return;
+        }
+
+        plugin.getEventManager().getDpsEventByEntity(livingEntity).ifPresent(dpsEvent -> {
+            event.setDamage(0.0);
+
+            final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(damager);
+
+            if (faction != null) {
+                dpsEvent.getSession().addDamage(faction, damage);
+            }
+        });
+    }
+
+    /**
+     * Prevents DPSCHECK entities from being stacked
+     * @param event PreMobstackEvent
+     */
+    @EventHandler
+    public void onEntityMerge(PreMobstackEvent event) {
+        if (plugin.getEventManager().getDpsEventByEntity(event.getMergingEntity()).isPresent()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (plugin.getEventManager().getDpsEventByEntity(event.getOriginEntity()).isPresent()) {
+            event.setCancelled(true);
+            return;
         }
     }
 }

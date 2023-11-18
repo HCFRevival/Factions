@@ -43,6 +43,7 @@ public final class FMessage {
     public static final ChatColor INFO = ChatColor.BLUE;
     public static final ChatColor P_NAME = ChatColor.RESET;
 
+    public static final String DPS_PREFIX = LAYER_2 + "[" + Colors.RED.toBukkit() + "DPS" + LAYER_2 + "] " + LAYER_1;
     public static final String KOTH_PREFIX = LAYER_2 + "[" + LAYER_1 + "KOTH" + LAYER_2 + "] " + LAYER_1;
     public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
     public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
@@ -77,6 +78,12 @@ public final class FMessage {
 
     public static void broadcastCombatLogger(Player player) {
         Bukkit.broadcastMessage(ERROR + "Combat-Logger" + ChatColor.RESET + ": " + player.getName());
+    }
+
+    public static void broadcastDpsEventMessage(String message) {
+        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcastMessage(DPS_PREFIX + message);
+        Bukkit.broadcastMessage(" ");
     }
 
     public static void broadcastCaptureEventMessage(String message) {

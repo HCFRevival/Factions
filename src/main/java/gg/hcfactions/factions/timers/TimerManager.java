@@ -10,6 +10,7 @@ import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.impl.Tank;
 import gg.hcfactions.factions.models.events.impl.ConquestZone;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
@@ -189,8 +190,48 @@ public final class TimerManager implements IManager {
             hasEntries = true;
         }
 
-        final ConquestEvent conquestEvent = plugin.getEventManager().getActiveConquestEvent().stream().findFirst().orElse(null);
+        for (DPSEvent dpsEvent : plugin.getEventManager().getActiveDpsEvents()) {
+            if (eventCursor >= 19) {
+                break;
+            }
 
+            if (dpsEvent.getSession() == null) {
+                continue;
+            }
+
+            final long remainingMillis = dpsEvent.getSession().getRemainingTime();
+            final int remainingSeconds = (int)(remainingMillis/1000L);
+            String timerDisplay = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
+            String factionDisplay = null;
+
+            if (remainingMillis <= 0) {
+                timerDisplay = "Capturing...";
+            }
+
+            if (dpsEvent.getSession().getMostRecentDamager() != null) {
+                final PlayerFaction capturingFaction = dpsEvent.getSession().getMostRecentDamager();
+                final long damage = dpsEvent.getSession().getDamage(capturingFaction);
+                final boolean isFriendly = capturingFaction.isMember(factionPlayer.getUniqueId());
+                final String factionName = capturingFaction.getName().length() > 10 ? capturingFaction.getName().substring(0, 10) + "..." : capturingFaction.getName();
+                final String formattedValue = String.format("%,d", damage);
+
+                factionDisplay = (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " "
+                        + ChatColor.BLUE + "(" + ChatColor.AQUA + formattedValue + ChatColor.BLUE + ")";
+            }
+
+            factionPlayer.getScoreboard().setLine(eventCursor, dpsEvent.getDisplayName() + ChatColor.RED + ": " + timerDisplay);
+
+            if (factionDisplay != null) {
+                factionPlayer.getScoreboard().setLine((eventCursor - 1), factionDisplay);
+            } else {
+                factionPlayer.getScoreboard().removeLine((eventCursor - 1));
+            }
+
+            eventCursor += 2;
+            hasEntries = true;
+        }
+
+        final ConquestEvent conquestEvent = plugin.getEventManager().getActiveConquestEvent().stream().findFirst().orElse(null);
         if (conquestEvent != null) {
             final String indent = ChatColor.RESET + " " + ChatColor.RESET + " ";
             factionPlayer.getScoreboard().setLine(23, conquestEvent.getDisplayName());

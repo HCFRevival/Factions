@@ -5,21 +5,20 @@ import com.google.common.collect.Maps;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.events.IEventExecutor;
 import gg.hcfactions.factions.events.menu.EventMenu;
-import gg.hcfactions.factions.models.events.EPalaceLootTier;
-import gg.hcfactions.factions.models.events.ICaptureEvent;
-import gg.hcfactions.factions.models.events.IEvent;
-import gg.hcfactions.factions.models.events.IScheduledEvent;
+import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
 import gg.hcfactions.factions.models.events.impl.ConquestZone;
 import gg.hcfactions.factions.models.events.impl.EventSchedule;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootable;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.loot.impl.LootTableMenu;
 import lombok.AllArgsConstructor;
@@ -87,6 +86,45 @@ public final class EventExecutor implements IEventExecutor {
         }
 
         conquestEvent.startEvent(ticketsToWin, timerDuration, tokenReward, ticketsPerTick);
+        promise.resolve();
+    }
+
+    @Override
+    public void startDpsEvent(Player player, String eventName, String entityTypeName, String durationName, int tokenReward, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
+
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = event.get();
+
+        if (generic.isActive()) {
+            promise.reject("This event is already active");
+            return;
+        }
+
+        if (!(generic instanceof final DPSEvent dpsEvent)) {
+            promise.reject("This is not a DPS Event");
+            return;
+        }
+
+        final EDPSEntityType entityType = EDPSEntityType.getByName(entityTypeName);
+
+        if (entityType == null) {
+            promise.reject("Invalid DPS Entity Type");
+            return;
+        }
+
+        final long duration = Time.parseTime(durationName);
+
+        if (duration <= 0L) {
+            promise.reject("Invalid time format");
+            return;
+        }
+
+        dpsEvent.startEvent(entityType, duration, tokenReward);
         promise.resolve();
     }
 
@@ -190,6 +228,17 @@ public final class EventExecutor implements IEventExecutor {
             }
 
             conquestEvent.stopEvent();
+            promise.resolve();
+            return;
+        }
+
+        if (generic instanceof final DPSEvent dpsEvent) {
+            if (!dpsEvent.isActive()) {
+                promise.reject("Event is not active");
+                return;
+            }
+
+            dpsEvent.stopEvent();
             promise.resolve();
             return;
         }

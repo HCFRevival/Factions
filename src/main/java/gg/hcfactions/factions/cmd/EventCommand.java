@@ -44,6 +44,22 @@ public final class EventCommand extends BaseCommand {
         });
     }
 
+    @Subcommand("create dps")
+    @Description("Create a new DPS event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name>")
+    public void onCreateDPS(Player player, String eventName) {
+        plugin.getEventManager().getBuilderManager().getExecutor().buildDpsEvent(player, eventName, new Promise() {
+            @Override
+            public void resolve() {}
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + s);
+            }
+        });
+    }
+
     @Subcommand("create conquest")
     @Description("Create a new Conquest event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
@@ -113,6 +129,24 @@ public final class EventCommand extends BaseCommand {
     @Syntax("<name> <tickets> <timer> <tokens> <pertick>")
     public void onStartConquest(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int ticketsPerTick) {
         plugin.getEventManager().getExecutor().startConquestEvent(player, eventName, ticketsToWin, timerDuration, tokenReward, ticketsPerTick, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(ChatColor.GREEN + "Event started");
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(ChatColor.RED + "Failed to start an event: " + s);
+            }
+        });
+    }
+
+    @Subcommand("start dps")
+    @Description("Start a DPS Event")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Syntax("<name> <entity> <duration> <tokens>")
+    public void onStartDPS(Player player, String eventName, String entityTypeName, String durationName, int tokenReward) {
+        plugin.getEventManager().getExecutor().startDpsEvent(player, eventName, entityTypeName, durationName, tokenReward, new Promise() {
             @Override
             public void resolve() {
                 player.sendMessage(ChatColor.GREEN + "Event started");

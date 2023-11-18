@@ -7,6 +7,7 @@ import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.builder.IEventBuilder;
 import gg.hcfactions.factions.models.events.impl.ConquestEventConfig;
 import gg.hcfactions.factions.models.events.impl.builder.ConquestZoneBuilder;
+import gg.hcfactions.factions.models.events.impl.builder.DPSBuilder;
 import gg.hcfactions.factions.models.events.impl.builder.KOTHBuilder;
 import gg.hcfactions.factions.models.events.impl.builder.PalaceBuilder;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
@@ -103,6 +104,25 @@ public final class EventBuilderExecutor implements IEventBuilderExecutor {
         }
 
         final ConquestZoneBuilder builder = new ConquestZoneBuilder(manager.getEventManager().getPlugin(), conqEvent, player.getUniqueId(), zoneName);
+        manager.getBuilderRepository().add(builder);
+        promise.resolve();
+    }
+
+    @Override
+    public void buildDpsEvent(Player player, String eventName, Promise promise) {
+        final Optional<IEventBuilder> existing = manager.getBuilder(player);
+
+        if (existing.isPresent()) {
+            promise.reject("You are already building an event");
+            return;
+        }
+
+        if (manager.getEventManager().getEvent(eventName).isPresent()) {
+            promise.reject("Event name is already in use");
+            return;
+        }
+
+        final DPSBuilder builder = new DPSBuilder(manager.getEventManager().getPlugin(), player.getUniqueId(), eventName);
         manager.getBuilderRepository().add(builder);
         promise.resolve();
     }

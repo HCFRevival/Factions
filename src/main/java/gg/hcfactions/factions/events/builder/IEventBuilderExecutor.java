@@ -32,6 +32,14 @@ public interface IEventBuilderExecutor {
     void buildConquestZone(Player player, String eventName, String zoneName, Promise promise);
 
     /**
+     * Start building a new DPS event
+     * @param player Player
+     * @param eventName Event Name
+     * @param promise Promise
+     */
+    void buildDpsEvent(Player player, String eventName, Promise promise);
+
+    /**
      * Cancel the building process
      * @param player Player
      * @param promise Promise

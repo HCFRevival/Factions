@@ -16,6 +16,7 @@ import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.*;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -24,6 +25,7 @@ import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,6 +89,67 @@ public final class EventManager implements IManager {
         eventScheduleTask.stop();
 
         eventRepository.clear();
+    }
+
+    private void loadDps(YamlConfiguration conf) {
+        if (conf.getConfigurationSection("data.dps") != null) {
+            for (String eventName : Objects.requireNonNull(conf.getConfigurationSection("data.dps")).getKeys(false)) {
+                final String key = "data.dps." + eventName + ".";
+                final UUID ownerid = (conf.get(key + "owner") != null ? UUID.fromString(conf.getString(key + "owner")) : null);
+                final String displayName = ChatColor.translateAlternateColorCodes('&', conf.getString(key + "display_name"));
+                final int tokenReward = conf.getInt(key + "token_reward");
+                final int defaultDuration = conf.getInt(key + "default_duration");
+                final List<String> spawnpointList = conf.getStringList(key + "spawnpoints");
+                final List<String> scheduleList = conf.getStringList(key + "schedule");
+                final List<BLocatable> spawnpoints = Lists.newArrayList();
+                final List<EventSchedule> schedule = Lists.newArrayList();
+
+                spawnpointList.forEach(entry -> {
+                    final String[] split = entry.split(":");
+
+                    if (split.length == 4) {
+                        final String worldName = split[0];
+                        final double x = Double.parseDouble(split[1]);
+                        final double y = Double.parseDouble(split[2]);
+                        final double z = Double.parseDouble(split[3]);
+                        final BLocatable spawnpoint = new BLocatable(worldName, x, y, z);
+
+                        spawnpoints.add(spawnpoint);
+                    }
+                });
+
+                scheduleList.forEach(entry -> {
+                    final String[] split = entry.split(":");
+
+                    if (split.length == 3) {
+                        int dayOfWeek;
+                        int hourOfDay;
+                        int minuteOfHour;
+
+                        try {
+                            dayOfWeek = Integer.parseInt(split[0]);
+                            hourOfDay = Integer.parseInt(split[1]);
+                            minuteOfHour = Integer.parseInt(split[2]);
+                            schedule.add(new EventSchedule(hourOfDay, minuteOfHour, dayOfWeek));
+                        } catch (NumberFormatException e) {
+                            plugin.getAresLogger().error("bad schedule format", e);
+                        }
+                    }
+                });
+
+                final DPSEvent event = new DPSEvent(
+                        plugin,
+                        ownerid,
+                        eventName,
+                        displayName,
+                        new DPSEventConfig(defaultDuration, tokenReward),
+                        spawnpoints,
+                        schedule
+                );
+
+                eventRepository.add(event);
+            }
+        }
     }
 
     private void loadKoths(YamlConfiguration conf) {
@@ -369,6 +432,7 @@ public final class EventManager implements IManager {
         loadKoths(conf);
         loadPalaces(conf);
         loadConquests(conf);
+        loadDps(conf);
 
         plugin.getAresLogger().info("loaded " + eventRepository.size() + " events");
     }
@@ -495,6 +559,35 @@ public final class EventManager implements IManager {
         plugin.saveConfiguration("events", conf);
     }
 
+    public void saveDpsEvent(DPSEvent event) {
+        final YamlConfiguration conf = plugin.loadConfiguration("events");
+        final String key = "data.dps." + event.getName() + ".";
+
+        if (event.getOwner() != null) {
+            conf.set(key + "owner", event.getOwner().toString());
+        }
+
+        conf.set(key + "display_name", event.getDisplayName());
+        conf.set(key + "token_reward", event.getEventConfig().getTokenReward());
+        conf.set(key + "default_duration", event.getEventConfig().getDefaultDuration());
+
+        final List<String> spawnpointList = Lists.newArrayList();
+        for (BLocatable spawnpoint : event.getSpawnpoints()) {
+            final String combined = spawnpoint.getWorldName() + ":" + spawnpoint.getX() + ":" + spawnpoint.getY() + ":" + spawnpoint.getZ();
+            spawnpointList.add(combined);
+        }
+        conf.set(key + "spawnpoints", spawnpointList);
+
+        final List<String> scheduleList = Lists.newArrayList();
+        if (!event.getSchedule().isEmpty()) {
+            for (EventSchedule schedule : event.getSchedule()) {
+                scheduleList.add(schedule.getDay() + ":" + schedule.getHour() + ":" + schedule.getMinute());
+            }
+        }
+        conf.set(key + "schedule", scheduleList);
+        plugin.saveConfiguration("events", conf);
+    }
+
     public void deleteEvent(IEvent event) {
         final YamlConfiguration conf = plugin.loadConfiguration("events");
         String key = "data.koth.";
@@ -505,6 +598,10 @@ public final class EventManager implements IManager {
 
         if (event instanceof ConquestEvent) {
             key = "data.conquest.";
+        }
+
+        if (event instanceof DPSEvent) {
+            key = "data.dps.";
         }
 
         conf.set(key + event.getName(), null);
@@ -543,6 +640,12 @@ public final class EventManager implements IManager {
         return ImmutableList.copyOf(koths);
     }
 
+    public ImmutableList<DPSEvent> getActiveDpsEvents() {
+        final List<DPSEvent> events = Lists.newArrayList();
+        eventRepository.stream().filter(e -> e.isActive() && e instanceof DPSEvent).forEach(dps -> events.add((DPSEvent) dps));
+        return ImmutableList.copyOf(events);
+    }
+
     public Optional<ConquestEvent> getActiveConquestEvent() {
         final IEvent event = eventRepository.stream().filter(e -> e.isActive() && e instanceof ConquestEvent).findFirst().orElse(null);
 
@@ -551,6 +654,13 @@ public final class EventManager implements IManager {
         }
 
         return Optional.of(((ConquestEvent) event));
+    }
+
+    public Optional<DPSEvent> getDpsEventByEntity(Entity entity) {
+        return getActiveDpsEvents()
+                .stream()
+                .filter(e -> e.getSession().getDpsEntity().getEntity().getUniqueId().equals(entity.getUniqueId()))
+                .findFirst();
     }
 
     public ImmutableList<PalaceEvent> getPalaceEvents() {

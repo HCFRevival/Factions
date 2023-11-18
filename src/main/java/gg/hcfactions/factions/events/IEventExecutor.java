@@ -35,6 +35,17 @@ public interface IEventExecutor {
     void startConquestEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int ticketsPerTick, Promise promise);
 
     /**
+     * Start a new DPS event
+     * @param player Player
+     * @param eventName Event name
+     * @param entityTypeName DPS Check custom entity type
+     * @param duration Event duration (1h30m25s)
+     * @param tokenReward Token reward
+     * @param promise Promise
+     */
+    void startDpsEvent(Player player, String eventName, String entityTypeName, String duration, int tokenReward, Promise promise);
+
+    /**
      * Alter a Capture Event that is already running
      * @param player Player
      * @param eventName Event Name

@@ -3,9 +3,7 @@ package gg.hcfactions.factions.listeners;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.EventBuilderWand;
-import gg.hcfactions.factions.models.events.builder.ECEBuildStep;
-import gg.hcfactions.factions.models.events.builder.ICaptureEventBuilder;
-import gg.hcfactions.factions.models.events.builder.IEventBuilder;
+import gg.hcfactions.factions.models.events.builder.*;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.libs.bukkit.events.impl.ProcessedChatEvent;
@@ -76,7 +74,7 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
         final String message = event.getMessage();
 
         plugin.getEventManager().getBuilderManager().getBuilder(player).ifPresent(builder -> {
-            if (builder instanceof final ICaptureEventBuilder ceb) {
+            if (builder instanceof final ICaptureEventBuilder<?> ceb) {
                 if (ceb.getCurrentStep().equals(ECEBuildStep.DISPLAY_NAME)) {
                     ceb.setDisplayName(message);
                     event.setCancelled(true);
@@ -84,6 +82,20 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
 
                 else if (ceb.getCurrentStep().equals(ECEBuildStep.OWNER)) {
                     ceb.setOwner(message);
+                    event.setCancelled(true);
+                }
+
+                return;
+            }
+
+            if (builder instanceof final IDPSEventBuilder<?> dpseb) {
+                if (dpseb.getCurrentStep().equals(EDPSBuildStep.DISPLAY_NAME)) {
+                    dpseb.setDisplayName(message);
+                    event.setCancelled(true);
+                }
+
+                else if (dpseb.getCurrentStep().equals(EDPSBuildStep.SERVER_FACTION)) {
+                    dpseb.setOwner(message);
                     event.setCancelled(true);
                 }
             }
@@ -125,7 +137,7 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
             if (ci instanceof EventBuilderWand) {
                 final IEventBuilder b = builder.get();
 
-                if (b instanceof final ICaptureEventBuilder ceb) {
+                if (b instanceof final ICaptureEventBuilder<?> ceb) {
                     if (ceb.getCurrentStep().equals(ECEBuildStep.CORNER_A)) {
                         ceb.setCornerA(new BLocatable(block));
                         event.setCancelled(true);
@@ -133,6 +145,13 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
 
                     else if (ceb.getCurrentStep().equals(ECEBuildStep.CORNER_B)) {
                         ceb.setCornerB(new BLocatable(block));
+                        event.setCancelled(true);
+                    }
+                }
+
+                else if (b instanceof final IDPSEventBuilder<?> dpseb) {
+                    if (dpseb.getCurrentStep().equals(EDPSBuildStep.INITIAL_SPAWNPOINT)) {
+                        dpseb.setInitialSpawnpoint(new BLocatable(block.getWorld().getName(), block.getX(), block.getY() + 2.0, block.getZ()));
                         event.setCancelled(true);
                     }
                 }
