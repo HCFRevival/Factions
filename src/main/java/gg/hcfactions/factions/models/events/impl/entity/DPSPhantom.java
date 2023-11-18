@@ -34,7 +34,7 @@ public final class DPSPhantom extends Phantom implements IDPSEntity {
         Objects.requireNonNull(this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)).setBaseValue(100.0D);
 
         setup();
-        setPhantomSize(64);
+        setPhantomSize(24);
     }
 
     @Override
