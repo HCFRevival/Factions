@@ -30,6 +30,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class TimerManager implements IManager {
@@ -201,30 +203,57 @@ public final class TimerManager implements IManager {
 
             final long remainingMillis = dpsEvent.getSession().getRemainingTime();
             final int remainingSeconds = (int)(remainingMillis/1000L);
+            PlayerFaction mostRecentFaction = null;
+            PlayerFaction topFaction = null;
             String timerDisplay = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
-            String factionDisplay = null;
+            String mostRecentFactionDisplay = null;
+            String topFactionDisplay = null;
 
             if (remainingMillis <= 0) {
                 timerDisplay = "Capturing...";
             }
 
             if (dpsEvent.getSession().getMostRecentDamager() != null) {
-                final PlayerFaction capturingFaction = dpsEvent.getSession().getMostRecentDamager();
-                final long damage = dpsEvent.getSession().getDamage(capturingFaction);
-                final boolean isFriendly = capturingFaction.isMember(factionPlayer.getUniqueId());
-                final String factionName = capturingFaction.getName().length() > 10 ? capturingFaction.getName().substring(0, 10) + "..." : capturingFaction.getName();
+                mostRecentFaction = dpsEvent.getSession().getMostRecentDamager();
+                final long damage = dpsEvent.getSession().getDamage(mostRecentFaction);
+                final boolean isFriendly = mostRecentFaction.isMember(factionPlayer.getUniqueId());
+                final String factionName = mostRecentFaction.getName().length() > 10 ? mostRecentFaction.getName().substring(0, 10) + "..." : mostRecentFaction.getName();
                 final String formattedValue = String.format("%,d", damage);
 
-                factionDisplay = (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " "
+                mostRecentFactionDisplay = ChatColor.WHITE + "\uD83D\uDDE1" + " " +
+                        (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " "
                         + ChatColor.BLUE + "(" + ChatColor.AQUA + formattedValue + ChatColor.BLUE + ")";
+            }
+
+            if (!dpsEvent.getSession().getLeaderboard().isEmpty()) {
+                final UUID topFactionId = dpsEvent.getSession().getSortedLeaderboard().keySet().stream().findFirst().orElse(null);
+
+                if (topFactionId != null) {
+                    topFaction = plugin.getFactionManager().getPlayerFactionById(topFactionId);
+                    final long damage = dpsEvent.getSession().getDamage(topFaction);
+                    final boolean isFriendly = topFaction.isMember(factionPlayer.getUniqueId());
+                    final boolean isMostRecent = (mostRecentFaction != null && mostRecentFaction.getUniqueId().equals(topFactionId));
+                    final String factionName = topFaction.getName().length() > 10 ? topFaction.getName().substring(0, 10) + "..." : topFaction.getName();
+                    final String formattedValue = String.format("%,d", damage);
+
+                    topFactionDisplay = ChatColor.GOLD + "①" + (isMostRecent ? ChatColor.WHITE + "\uD83D\uDDE1" : "") +
+                            " " + (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " " +
+                            ChatColor.BLUE + "(" + ChatColor.AQUA + formattedValue + ChatColor.BLUE + ")";
+                }
             }
 
             factionPlayer.getScoreboard().setLine(eventCursor, dpsEvent.getDisplayName() + ChatColor.RED + ": " + timerDisplay);
 
-            if (factionDisplay != null) {
-                factionPlayer.getScoreboard().setLine((eventCursor - 1), factionDisplay);
+            if (topFactionDisplay != null) {
+                factionPlayer.getScoreboard().setLine((eventCursor - 1), topFactionDisplay);
             } else {
                 factionPlayer.getScoreboard().removeLine((eventCursor - 1));
+            }
+
+            if (mostRecentFactionDisplay != null && !Objects.requireNonNull(topFaction).getUniqueId().equals(mostRecentFaction.getUniqueId())) {
+                factionPlayer.getScoreboard().setLine((eventCursor - 2), mostRecentFactionDisplay);
+            } else {
+                factionPlayer.getScoreboard().removeLine((eventCursor - 2));
             }
 
             eventCursor += 2;

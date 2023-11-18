@@ -2,6 +2,7 @@ package gg.hcfactions.factions.models.events.impl.entity;
 
 import gg.hcfactions.factions.models.events.EDPSEntityType;
 import gg.hcfactions.factions.models.events.IDPSEntity;
+import gg.hcfactions.factions.models.events.impl.entity.pathfinding.WalkToLocationGoal;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import lombok.Getter;
 import net.minecraft.world.entity.EntityType;
@@ -24,8 +25,10 @@ public final class DPSPhantom extends Phantom implements IDPSEntity {
         this.event = event;
         this.origin = origin;
 
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.0));
+
         setup(getBukkitEntity());
-        setPhantomSize(100);
+        setPhantomSize(64);
     }
 
     @Override

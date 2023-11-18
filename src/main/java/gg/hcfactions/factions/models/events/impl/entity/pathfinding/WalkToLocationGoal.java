@@ -13,13 +13,15 @@ import java.util.List;
 public final class WalkToLocationGoal extends Goal {
     protected final Mob mob;
     private Path path;
+    private double speedModifier;
     private List<Location> destinations;
     private int locationIndex;
 
-    public WalkToLocationGoal(Mob mob, List<BLocatable> locations) {
+    public WalkToLocationGoal(Mob mob, List<BLocatable> locations, double speedModifier) {
         this.mob = mob;
         this.destinations = Lists.newArrayList();
         this.locationIndex = 0;
+        this.speedModifier = speedModifier;
         this.path = null;
 
         locations.forEach(loc -> destinations.add(loc.getBukkitBlock().getLocation()));
@@ -70,7 +72,7 @@ public final class WalkToLocationGoal extends Goal {
         }
 
         if (path != null) {
-            mob.getNavigation().moveTo(this.path, 1.5);
+            mob.getNavigation().moveTo(this.path, this.speedModifier);
         }
     }
 }

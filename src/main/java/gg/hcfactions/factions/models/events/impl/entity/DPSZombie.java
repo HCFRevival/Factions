@@ -6,10 +6,12 @@ import gg.hcfactions.factions.models.events.impl.entity.pathfinding.WalkToLocati
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import lombok.Getter;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
@@ -27,8 +29,7 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
         this.event = event;
         this.origin = origin;
 
-        this.goalSelector.removeAllGoals(Goal::isInterruptable);
-        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints()));
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.25));
 
         setup(getBukkitEntity());
     }
@@ -59,6 +60,13 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
     @Override
     public void knockback(double d0, double d1, double d2) {
         super.knockback(0.0, 0.0, 0.0);
+    }
+
+    @Override
+    public void move(MoverType enummovetype, Vec3 vec3d) {
+        if (enummovetype.equals(MoverType.PLAYER)) {}
+
+        super.move(enummovetype, vec3d);
     }
 
     @Override
