@@ -67,7 +67,7 @@ public final class EventMenu extends GenericMenu {
                     }
 
                     if (isActive) {
-                        final Map<UUID, Long> leaderboard = dpsEvent.getSession().getLeaderboard();
+                        final Map<UUID, Long> leaderboard = dpsEvent.getSession().getSortedLeaderboard();
                         final String worldName = Strings.capitalize(dpsEvent.getSession().getDpsEntity().getEntity().getWorld().getEnvironment().name().toLowerCase().replaceAll("_", " "));
                         final int x = dpsEvent.getSession().getDpsEntity().getEntity().getLocation().getBlockX();
                         final int y = dpsEvent.getSession().getDpsEntity().getEntity().getLocation().getBlockY();
@@ -133,7 +133,7 @@ public final class EventMenu extends GenericMenu {
                             lore.add(zone.getDisplayName() + FMessage.LAYER_1 + ": " + Time.convertToRemaining(zone.getTimer().getRemaining()));
                         }
 
-                        final Map<UUID, Integer> leaderboard = conqEvent.getSession().getLeaderboard();
+                        final Map<UUID, Integer> leaderboard = conqEvent.getSession().getSortedLeaderboard();
                         int position = 1;
 
                         lore.add(ChatColor.RESET + " ");
