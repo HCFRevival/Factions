@@ -33,7 +33,7 @@ public interface IDPSEntity {
      * @param entity DPS Entity to apply changes towards
      */
     default void setup(org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity entity) {
-        entity.setCustomName(ChatColor.DARK_RED + "" + ChatColor.BOLD + "DPS CHECK");
+        entity.setCustomName(ChatColor.DARK_RED + "🗡" + " " + ChatColor.RED + DPSEvent.getRandomEntityName());
         entity.setCustomNameVisible(true);
         entity.teleport(getOrigin(), PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
