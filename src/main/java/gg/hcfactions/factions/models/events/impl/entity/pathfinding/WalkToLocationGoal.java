@@ -73,6 +73,10 @@ public final class WalkToLocationGoal extends Goal {
 
         if (path != null) {
             mob.getNavigation().moveTo(this.path, this.speedModifier);
+
+            if (mob.isInWater() || mob.isInLava()) {
+                mob.getJumpControl().jump();
+            }
         }
     }
 }
