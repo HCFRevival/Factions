@@ -14,25 +14,26 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 
+import java.util.List;
 import java.util.UUID;
 
-public final class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
+public final class DPSBuilder implements IDPSEventBuilder {
     @Getter public final Factions plugin;
     @Getter @Setter EDPSBuildStep currentStep;
     @Getter public final UUID builderId;
     @Getter public final String name;
     @Getter public String displayName;
     @Getter public ServerFaction owner;
-    @Getter public BLocatable initialSpawnpoint;
+    @Getter public List<BLocatable> spawnpoints;
 
     public DPSBuilder(Factions plugin, UUID builderId, String name) {
         this.plugin = plugin;
         this.currentStep = EDPSBuildStep.DISPLAY_NAME;
         this.builderId = builderId;
         this.name = name;
+        this.spawnpoints = Lists.newArrayList();
         this.displayName = null;
         this.owner = null;
-        this.initialSpawnpoint = null;
 
         getBuilder().sendMessage(ChatColor.DARK_AQUA + "Enter the display name of the event");
     }
@@ -56,31 +57,15 @@ public final class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
         }
 
         owner = faction;
-        currentStep = EDPSBuildStep.INITIAL_SPAWNPOINT;
+        currentStep = EDPSBuildStep.SPAWNPOINTS;
 
         giveWand();
-        getBuilder().sendMessage(ChatColor.DARK_AQUA + "Select the initial spawnpoint for the DPS Entity (more can be added later using " + ChatColor.YELLOW + "/event dps addspawn " + name);
+        getBuilder().sendMessage(ChatColor.DARK_AQUA + "Select spawnpoints for this event. When you're finished, SNEAK + LEFT-CLICK to build the event.");
     }
 
     @Override
-    public void setInitialSpawnpoint(BLocatable initialSpawnpoint) {
-        this.initialSpawnpoint = initialSpawnpoint;
-
-        build(new FailablePromise<DPSEvent>() {
-            @Override
-            public void resolve(DPSEvent dpsEvent) {
-                plugin.getEventManager().getEventRepository().add(dpsEvent);
-                plugin.getEventManager().getBuilderManager().getBuilderRepository().removeIf(b -> b.getBuilderId().equals(builderId));
-                plugin.getEventManager().saveDpsEvent(dpsEvent);
-
-                getBuilder().sendMessage(ChatColor.GREEN + "Event created");
-            }
-
-            @Override
-            public void reject(String s) {
-                getBuilder().sendMessage(ChatColor.RED + "Failed to create event: " + s);
-            }
-        });
+    public void setSpawnpoint(BLocatable point) {
+        this.spawnpoints.add(point);
     }
 
     @Override
@@ -95,7 +80,7 @@ public final class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
             return;
         }
 
-        if (initialSpawnpoint == null) {
+        if (spawnpoints == null || spawnpoints.isEmpty()) {
             promise.reject("Initial spawnpoint is not set");
             return;
         }
@@ -106,7 +91,7 @@ public final class DPSBuilder implements IDPSEventBuilder<DPSEvent> {
                 name,
                 displayName,
                 new DPSEventConfig((3600*1000), 10),
-                Lists.newArrayList(initialSpawnpoint),
+                spawnpoints,
                 Lists.newArrayList()
         );
 

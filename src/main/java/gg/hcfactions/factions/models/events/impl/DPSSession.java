@@ -34,12 +34,13 @@ public class DPSSession {
         this.eventEndTimestamp = Time.now() + duration;
         this.leaderboard = Maps.newConcurrentMap();
 
+        final Location origin = event.getSpawnpoints().get(0).getBukkitBlock().getLocation();
         if (entityType.equals(EDPSEntityType.ZOMBIE)) {
-            dpsEntity = new DPSZombie(event, new Location(Bukkit.getWorld("world"), 0.0, 0.0, 0.0));
+            dpsEntity = new DPSZombie(event, origin);
         } else if (entityType.equals(EDPSEntityType.PHANTOM)) {
-            dpsEntity = new DPSPhantom(event, new Location(Bukkit.getWorld("world"), 0, 128, 0));
+            dpsEntity = new DPSPhantom(event, origin);
         } else if (entityType.equals(EDPSEntityType.RAVAGER)) {
-            dpsEntity = new DPSRavager(event, new Location(Bukkit.getWorld("world"), 0, 0.0, 0));
+            dpsEntity = new DPSRavager(event, origin);
         }
     }
 
