@@ -5,9 +5,11 @@ import gg.hcfactions.factions.models.events.IDPSEntity;
 import gg.hcfactions.factions.models.events.impl.entity.pathfinding.WalkToLocationGoal;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import lombok.Getter;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +19,7 @@ import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 public final class DPSZombie extends Zombie implements IDPSEntity {
@@ -31,7 +34,10 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
 
         this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.25));
 
-        setup(getBukkitEntity());
+        Objects.requireNonNull(this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)).setBaseValue(100.0D);
+        Objects.requireNonNull(this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)).setBaseValue(0.0D);
+
+        setup();
     }
 
     @Override
@@ -47,6 +53,16 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
     @Override
     public void despawn() {
         remove(RemovalReason.DISCARDED);
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity entity) {
+        return false;
+    }
+
+    @Override
+    public @Nullable LivingEntity getTarget() {
+        return null;
     }
 
     @Override

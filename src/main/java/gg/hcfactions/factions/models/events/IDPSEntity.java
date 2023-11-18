@@ -30,12 +30,11 @@ public interface IDPSEntity {
     /**
      * Performs pre-flight configuration for the entity that is general
      * to all DPS Check entity types.
-     * @param entity DPS Entity to apply changes towards
      */
-    default void setup(org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity entity) {
-        entity.setCustomName(ChatColor.DARK_RED + "🗡" + " " + ChatColor.RED + DPSEvent.getRandomEntityName());
-        entity.setCustomNameVisible(true);
-        entity.teleport(getOrigin(), PlayerTeleportEvent.TeleportCause.PLUGIN);
+    default void setup() {
+        getEntity().setCustomName(ChatColor.DARK_RED + "🗡" + " " + ChatColor.RED + DPSEvent.getRandomEntityName());
+        getEntity().setCustomNameVisible(true);
+        getEntity().teleport(getOrigin(), PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 
     /**

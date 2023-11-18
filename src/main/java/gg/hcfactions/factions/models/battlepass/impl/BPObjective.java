@@ -79,6 +79,10 @@ public class BPObjective implements IBPObjective {
             lore.add(ChatColor.GRAY + "Earn " + ChatColor.WHITE + "" + amountRequirement + " Tickets" + ChatColor.GRAY + " during " + ChatColor.WHITE + "King of the Hill");
         }
 
+        if (objectiveType.equals(EBPObjectiveType.DPS_CHECK_DAMAGE)) {
+            lore.add(ChatColor.GRAY + "Inflict " + ChatColor.WHITE + "" + String.format("%,d", amountRequirement) + " Damage" + ChatColor.GRAY + " during " + ChatColor.WHITE + "DPS Check");
+        }
+
         lore.add(ChatColor.RESET + " ");
         lore.add(ChatColor.RED + "Additional Requirements:");
 

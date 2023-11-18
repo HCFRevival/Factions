@@ -1,15 +1,17 @@
 package gg.hcfactions.factions.models.events.builder;
 
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 
-public interface IDPSEventBuilder<T> extends IEventBuilder {
-    EDPSBuildStep getCurrentStep();
+import java.util.List;
 
+public interface IDPSEventBuilder extends IEventBuilder {
+    EDPSBuildStep getCurrentStep();
     String getDisplayName();
-    BLocatable getInitialSpawnpoint();
+    List<BLocatable> getSpawnpoints();
 
     void setCurrentStep(EDPSBuildStep step);
-    void setInitialSpawnpoint(BLocatable location);
-    void build(FailablePromise<T> promise);
+    void setSpawnpoint(BLocatable point);
+    void build(FailablePromise<DPSEvent> promise);
 }

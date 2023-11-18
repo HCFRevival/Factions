@@ -45,7 +45,7 @@ public final class WalkToLocationGoal extends Goal {
             return false;
         }
 
-        if (mob.getBukkitEntity().getLocation().distance(getDestination()) <= 0.6) {
+        if (mob.getBukkitEntity().getLocation().distance(getDestination()) <= 0.5) {
             return false;
         }
 
@@ -61,7 +61,7 @@ public final class WalkToLocationGoal extends Goal {
 
     @Override
     public void tick() {
-        if (mob.getBukkitEntity().getLocation().distance(getDestination()) <= 1.25) {
+        if (mob.getBukkitEntity().getLocation().distance(getDestination()) <= 3.0) {
             assignNewDestination();
 
             final GroundPathNavigation nav = (GroundPathNavigation) mob.getNavigation();
@@ -73,6 +73,10 @@ public final class WalkToLocationGoal extends Goal {
 
         if (path != null) {
             mob.getNavigation().moveTo(this.path, this.speedModifier);
+
+            if (mob.isInWater() || mob.isInLava()) {
+                mob.getJumpControl().jump();
+            }
         }
     }
 }

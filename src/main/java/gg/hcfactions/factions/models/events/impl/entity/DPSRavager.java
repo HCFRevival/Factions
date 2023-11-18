@@ -8,9 +8,12 @@ import lombok.Getter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.entity.monster.Ravager;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
@@ -19,22 +22,21 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public final class DPSPhantom extends Phantom implements IDPSEntity {
+public final class DPSRavager extends Ravager implements IDPSEntity {
     @Getter public final DPSEvent event;
     @Getter public final Location origin;
-    @Getter public final EDPSEntityType entityType = EDPSEntityType.PHANTOM;
+    @Getter public final EDPSEntityType entityType = EDPSEntityType.RAVAGER;
 
-    public DPSPhantom(DPSEvent event, Location origin) {
-        super(EntityType.PHANTOM, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
+    public DPSRavager(DPSEvent event, Location origin) {
+        super(EntityType.RAVAGER, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
         this.event = event;
         this.origin = origin;
 
-        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.0));
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1));
 
         Objects.requireNonNull(this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)).setBaseValue(100.0D);
 
         setup();
-        setPhantomSize(64);
     }
 
     @Override
@@ -61,7 +63,30 @@ public final class DPSPhantom extends Phantom implements IDPSEntity {
     protected void pickUpItem(ItemEntity entityitem) {}
 
     @Override
-    protected boolean isSunBurnTick() {
+    public void knockback(double d0, double d1, double d2) {
+        super.knockback(0.0, 0.0, 0.0);
+    }
+
+    @Override
+    public void move(MoverType enummovetype, Vec3 vec3d) {
+        if (enummovetype.equals(MoverType.PLAYER)) {}
+
+        super.move(enummovetype, vec3d);
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return false;
+    }
+
+    @Override
+    public boolean isBaby() {
+        return false;
+    }
+
+
+    @Override
+    public boolean canHoldItem(ItemStack itemstack) {
         return false;
     }
 

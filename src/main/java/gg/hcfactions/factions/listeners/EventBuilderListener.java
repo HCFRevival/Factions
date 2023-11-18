@@ -5,7 +5,9 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.EventBuilderWand;
 import gg.hcfactions.factions.models.events.builder.*;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
+import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.bukkit.events.impl.ProcessedChatEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
@@ -88,7 +90,7 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
                 return;
             }
 
-            if (builder instanceof final IDPSEventBuilder<?> dpseb) {
+            if (builder instanceof final IDPSEventBuilder dpseb) {
                 if (dpseb.getCurrentStep().equals(EDPSBuildStep.DISPLAY_NAME)) {
                     dpseb.setDisplayName(message);
                     event.setCancelled(true);
@@ -149,9 +151,31 @@ public record EventBuilderListener(@Getter Factions plugin) implements Listener 
                     }
                 }
 
-                else if (b instanceof final IDPSEventBuilder<?> dpseb) {
-                    if (dpseb.getCurrentStep().equals(EDPSBuildStep.INITIAL_SPAWNPOINT)) {
-                        dpseb.setInitialSpawnpoint(new BLocatable(block.getWorld().getName(), block.getX(), block.getY() + 2.0, block.getZ()));
+                else if (b instanceof final IDPSEventBuilder dpseb) {
+                    if (dpseb.getCurrentStep().equals(EDPSBuildStep.SPAWNPOINTS)) {
+
+                        if (player.isSneaking()) {
+                            dpseb.build(new FailablePromise<>() {
+                                @Override
+                                public void resolve(DPSEvent dpsEvent) {
+                                    plugin.getEventManager().getEventRepository().add(dpsEvent);
+                                    plugin.getEventManager().getBuilderManager().getBuilderRepository().removeIf(b -> b.getBuilderId().equals(player.getUniqueId()));
+                                    plugin.getEventManager().saveDpsEvent(dpsEvent);
+
+                                    player.sendMessage(ChatColor.GREEN + "Event created");
+                                }
+
+                                @Override
+                                public void reject(String s) {
+                                    player.sendMessage(ChatColor.RED + "Failed to create event: " + s);
+                                }
+                            });
+
+                            return;
+                        }
+
+                        dpseb.setSpawnpoint(new BLocatable(block.getWorld().getName(), block.getX(), block.getY() + 2.0, block.getZ()));
+                        player.sendMessage(ChatColor.YELLOW + "Point added");
                         event.setCancelled(true);
                     }
                 }
