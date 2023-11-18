@@ -1,12 +1,14 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.DPSDamageEvent;
 import gg.hcfactions.factions.events.event.KOTHTickEvent;
 import gg.hcfactions.factions.listeners.events.player.BattlepassCompleteEvent;
 import gg.hcfactions.factions.listeners.events.player.BattlepassIncrementEvent;
 import gg.hcfactions.factions.models.battlepass.EBPObjectiveType;
 import gg.hcfactions.factions.models.battlepass.impl.BPObjective;
 import gg.hcfactions.factions.models.battlepass.impl.BPTracker;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -138,6 +140,33 @@ public record BattlepassListener(@Getter Factions plugin) implements Listener {
                     tracker.addToObjective(captureObj, 1);
                 }
             });
+        });
+    }
+
+    /**
+     * Listens for Battlepass progress with DPS Check event damage
+      * @param event DPSDamageEvent
+     */
+    @EventHandler
+    public void onDpsDamage(DPSDamageEvent event) {
+        if (!plugin.getBattlepassManager().isEnabled()) {
+            return;
+        }
+
+        final DPSEvent dpsEvent = event.getEvent();
+        final Player player = event.getPlayer();
+        final int damage = event.getDamage();
+
+        plugin.getBattlepassManager().getActiveObjectives().stream().filter(obj -> obj.getObjectiveType().equals(EBPObjectiveType.DPS_CHECK_DAMAGE)).forEach(dpsObj -> {
+            final BPTracker tracker = plugin.getBattlepassManager().getTracker(player);
+
+            if (dpsObj.meetsRequirement(player, dpsEvent.getSpawnpoints().get(0).getBukkitBlock().getLocation())) {
+                if (!plugin.getBattlepassManager().isBeingTracked(player)) {
+                    plugin.getBattlepassManager().getTrackerRepository().add(tracker);
+                }
+
+                tracker.addToObjective(dpsObj, damage);
+            }
         });
     }
 

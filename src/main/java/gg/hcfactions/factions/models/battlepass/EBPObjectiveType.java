@@ -6,5 +6,6 @@ public enum EBPObjectiveType {
     FISH,
     BLOCK_BREAK,
     CAPTURE_KOTH_TICKET,
+    DPS_CHECK_DAMAGE,
     GENERIC
 }

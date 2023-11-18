@@ -3,6 +3,7 @@ package gg.hcfactions.factions.listeners;
 import gg.hcfactions.cx.event.PreMobstackEvent;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.DPSDamageEvent;
 import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
@@ -21,6 +22,7 @@ import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -331,9 +333,11 @@ public record EventListener(@Getter Factions plugin) implements Listener {
         }
 
         plugin.getEventManager().getDpsEventByEntity(livingEntity).ifPresent(dpsEvent -> {
-            event.setDamage(0.0);
-
             final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(damager);
+            final DPSDamageEvent damageEvent = new DPSDamageEvent(dpsEvent, damager, damage);
+
+            Bukkit.getPluginManager().callEvent(damageEvent);
+            event.setDamage(0.0);
 
             if (faction != null) {
                 dpsEvent.getSession().addDamage(faction, damage);
