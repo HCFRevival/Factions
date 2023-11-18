@@ -6,10 +6,7 @@ import com.google.common.collect.Maps;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.builder.EventBuilderManager;
 import gg.hcfactions.factions.events.impl.EventExecutor;
-import gg.hcfactions.factions.events.tick.ConquestTickingTask;
-import gg.hcfactions.factions.events.tick.EventSchedulerTask;
-import gg.hcfactions.factions.events.tick.KOTHTickingTask;
-import gg.hcfactions.factions.events.tick.PalaceRestockTask;
+import gg.hcfactions.factions.events.tick.*;
 import gg.hcfactions.factions.items.EventBuilderWand;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.events.*;
@@ -40,6 +37,7 @@ public final class EventManager implements IManager {
     @Getter public KOTHTickingTask kothTickingTask;
     @Getter public ConquestTickingTask conqTickingTask;
     @Getter public EventSchedulerTask eventScheduleTask;
+    @Getter public DPSTickingTask dpsTickingTask;
     @Getter public PalaceRestockTask palaceRestockTask;
 
     public EventManager(Factions plugin) {
@@ -66,12 +64,14 @@ public final class EventManager implements IManager {
         kothTickingTask = new KOTHTickingTask(this);
         conqTickingTask = new ConquestTickingTask(this);
         eventScheduleTask = new EventSchedulerTask(this);
+        dpsTickingTask = new DPSTickingTask(this);
         palaceRestockTask = new PalaceRestockTask(this);
 
         // TODO: This is super unoptimized, let's make these more dynamic
         conqTickingTask.start();
         eventScheduleTask.start();
         kothTickingTask.start();
+        dpsTickingTask.start();
         palaceRestockTask.start();
 
         builderManager.onEnable();
@@ -86,6 +86,7 @@ public final class EventManager implements IManager {
         conqTickingTask.stop();
         palaceRestockTask.stop();
         kothTickingTask.stop();
+        dpsTickingTask.stop();
         eventScheduleTask.stop();
 
         eventRepository.clear();
