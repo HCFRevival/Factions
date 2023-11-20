@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.boss.impl.BossGiant;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
@@ -17,6 +18,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.persistence.PersistentDataType;
 
 public record OutpostListener(@Getter Factions plugin) implements Listener {
     /**
@@ -54,6 +56,29 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
         });
     }
 
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onOutpostGiantSpawn(CreatureSpawnEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final LivingEntity entity = event.getEntity();
+
+        if (!(entity instanceof Giant)) {
+            return;
+        }
+
+        final String flag = entity.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING);
+        if (flag != null && flag.equalsIgnoreCase("boss")) {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        final BossGiant giant = new BossGiant(plugin, event.getLocation());
+        giant.spawn();
+    }
+
     @EventHandler
     public void onOutpostEntitySpawn(CreatureSpawnEvent event) {
         final LivingEntity entity = event.getEntity();
@@ -73,7 +98,8 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
                 entity.getType().equals(EntityType.ENDERMAN)
                         || entity.getType().equals(EntityType.CREEPER)
                         || entity.getType().equals(EntityType.ARMOR_STAND)
-                        || entity.getType().equals(EntityType.VILLAGER)) {
+                        || entity.getType().equals(EntityType.VILLAGER)
+                        || entity.getType().equals(EntityType.GIANT)) {
 
             return;
         }
