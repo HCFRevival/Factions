@@ -16,10 +16,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.entity.player.Player;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.Zombie;
@@ -48,6 +45,7 @@ public final class BossGiant extends Giant implements IBossEntity {
     private static final int MINION_MAX_COUNT = 6;
     private static final int KICK_COOLDOWN = 5;
     private static final int STOMP_COOLDOWN = 10;
+    private static final double HEALTH = 400.0;
 
     private Factions plugin;
     private List<ItemStack> possibleDrops;
@@ -61,13 +59,15 @@ public final class BossGiant extends Giant implements IBossEntity {
         this.possibleDrops = Lists.newArrayList();
         this.hasLandedTask = null;
 
+        // Set attrs
+        Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(16.0);
+        Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH)).setBaseValue(HEALTH);
+
         final CraftLivingEntity livingEntity = (CraftLivingEntity) getBukkitEntity();
         livingEntity.teleport(origin);
         livingEntity.setPersistent(true);
-
-        // Set attrs
-        Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(16.0);
-        Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH)).setBaseValue(4096.0);
+        livingEntity.setHealth(HEALTH);
+        livingEntity.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, "boss");
 
         registerGoals();
     }
