@@ -6,7 +6,6 @@ import gg.hcfactions.factions.models.boss.IBossEntity;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
-import lombok.Getter;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
