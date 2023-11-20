@@ -148,8 +148,11 @@ public final class BossGiant extends Giant implements IBossEntity {
 
         if (!damageEvent.isCancelled()) {
             final float newHealth = (float)Math.max(affectedEntity.getHealth() - damageEvent.getFinalDamage(), 0);
-            affectedEntity.setHealth(newHealth);
-            affectedEntity.setLastHurtByMob(this);
+
+            if (!(affectedEntity instanceof final Player player) || player.getBukkitEntity().getGameMode().equals(GameMode.SURVIVAL)) {
+                affectedEntity.setHealth(newHealth);
+                affectedEntity.setLastHurtByMob(this);
+            }
         }
 
         affectedEntity.getBukkitEntity().setVelocity(currentVelocity.add(new Vector(addedVelocity.getX(), 0.8, addedVelocity.getZ())));
