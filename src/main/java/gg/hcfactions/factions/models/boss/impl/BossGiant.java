@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.boss.IBossEntity;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,12 +18,15 @@ import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftLivingEntity;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
@@ -40,6 +44,8 @@ public final class BossGiant extends Giant implements IBossEntity {
     private static final float STOMP_CHANCE = 0.5F; // revert to 0.15F when done
     private static final double STOMP_FORCE_BASE = 48.0D;
     private static final double STOMP_FORCE_VARIANCE = 16.0D;
+    private static final int MINION_MIN_COUNT = 2;
+    private static final int MINION_MAX_COUNT = 6;
     private static final int KICK_COOLDOWN = 5;
     private static final int STOMP_COOLDOWN = 10;
 
@@ -175,6 +181,7 @@ public final class BossGiant extends Giant implements IBossEntity {
         hasLandedTask = new Scheduler(plugin).sync(() -> {
             if (getBukkitEntity().isOnGround()) {
                 performStompShockwave();
+                spawnMinions();
 
                 hasLandedTask.cancel();
                 hasLandedTask = null;
@@ -186,5 +193,22 @@ public final class BossGiant extends Giant implements IBossEntity {
             getBukkitEntity().setVelocity(getBukkitEntity().getVelocity().add(new Vector(velocity.getX(), 1.5, velocity.getZ())));
             Worlds.playSound(getBukkitEntity().getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP);
         }).delay(1L).run();
+    }
+
+    private void spawnMinions() {
+        final int spawnCount = Math.max(Math.abs(RANDOM.nextInt(MINION_MAX_COUNT)), MINION_MIN_COUNT);
+
+        for (int i = 0; i < spawnCount; i++) {
+            final Zombie zombie = (Zombie) getBukkitEntity().getWorld().spawnEntity(getBukkitEntity().getLocation(), org.bukkit.entity.EntityType.ZOMBIE);
+            zombie.setBaby();
+            zombie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
+            zombie.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, PotionEffect.INFINITE_DURATION, 0));
+            zombie.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, "noMerge");
+            zombie.setCanPickupItems(false);
+
+            if (zombie.getEquipment() != null) {
+                zombie.getEquipment().setItemInMainHand(new ItemBuilder().setMaterial(Material.GOLDEN_SWORD).setAmount(1).build());
+            }
+        }
     }
 }
