@@ -2,17 +2,13 @@ package gg.hcfactions.factions.cmd;
 
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
-import gg.hcfactions.factions.items.Crowbar;
-import gg.hcfactions.factions.items.Sugarcube;
-import gg.hcfactions.factions.models.logger.impl.CombatLogger;
+import gg.hcfactions.factions.models.boss.impl.BossGiant;
 import gg.hcfactions.libs.acf.BaseCommand;
 import gg.hcfactions.libs.acf.annotation.CommandAlias;
 import gg.hcfactions.libs.acf.annotation.CommandPermission;
 import gg.hcfactions.libs.acf.annotation.Subcommand;
-import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 @AllArgsConstructor
@@ -20,10 +16,10 @@ import org.bukkit.entity.Player;
 public final class DebugCommand extends BaseCommand {
     @Getter public final Factions plugin;
 
-    @Subcommand("cl")
+    @Subcommand("entity")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onCombatLoggerSpawn(Player player) {
-        final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
-        cis.getItem(Sugarcube.class).ifPresent(sc -> player.getInventory().addItem(sc.getItem()));
+    public void onDebug(Player player) {
+        final BossGiant giant = new BossGiant(plugin, player.getLocation());
+        giant.spawn();
     }
 }

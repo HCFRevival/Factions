@@ -29,12 +29,12 @@ public final class DPSPhantom extends Phantom implements IDPSEntity {
         this.event = event;
         this.origin = origin;
 
-        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.0));
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.0, 8.0));
 
         Objects.requireNonNull(this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)).setBaseValue(100.0D);
 
         setup();
-        setPhantomSize(64);
+        setPhantomSize(24);
     }
 
     @Override
