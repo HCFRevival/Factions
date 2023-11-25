@@ -23,6 +23,7 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -38,6 +39,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -179,6 +182,39 @@ public record EventListener(@Getter Factions plugin) implements Listener {
         }
 
         event.setCancelled(true);
+    }
+
+    /**
+     * Suspends DPS CHECK entities when the chunk unloads
+     * @param event ChunkUnloadEvent
+     */
+    @EventHandler
+    public void onChunkUnload(ChunkUnloadEvent event) {
+        final Chunk chunk = event.getChunk();
+
+        plugin.getEventManager().getActiveDpsEvents()
+                .stream()
+                .filter(e -> !e.getSession().getDpsEntity().isSuspended())
+                .forEach(toSuspend -> {
+                    if (
+                            toSuspend.getSession().getDpsEntity().getEntity().getLocation().getChunk().getX() == chunk.getX()
+                            && toSuspend.getSession().getDpsEntity().getEntity().getLocation().getChunk().getZ() == chunk.getZ()) {
+                        toSuspend.getSession().getDpsEntity().suspend();
+                    }
+                });
+    }
+
+    /**
+     * Unsuspends DPS CHECK entities when a chunk is loaded again
+     * @param event ChunkLoadEvent
+     */
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) {
+        plugin.getEventManager().getDpsEventBySuspendedEntityChunk(event.getChunk()).forEach(toUnsuspend -> {
+            toUnsuspend.getSession().getDpsEntity().setSuspendedLocation(null);
+            toUnsuspend.getSession().createEntity(toUnsuspend.getSession().getDpsEntity().getSuspendedLocation());
+            toUnsuspend.getSession().getDpsEntity().spawn();
+        });
     }
 
     /**

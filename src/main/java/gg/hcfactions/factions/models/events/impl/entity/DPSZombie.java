@@ -4,7 +4,9 @@ import gg.hcfactions.factions.models.events.EDPSEntityType;
 import gg.hcfactions.factions.models.events.IDPSEntity;
 import gg.hcfactions.factions.models.events.impl.entity.pathfinding.WalkToLocationGoal;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,12 +27,16 @@ import java.util.Objects;
 public final class DPSZombie extends Zombie implements IDPSEntity {
     @Getter public final DPSEvent event;
     @Getter public final Location origin;
+    @Getter @Setter public Location suspendedLocation;
+    @Getter @Setter public boolean recentlySuspended;
     @Getter public final EDPSEntityType entityType = EDPSEntityType.ZOMBIE;
 
     public DPSZombie(DPSEvent event, Location origin) {
         super(EntityType.ZOMBIE, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
         this.event = event;
         this.origin = origin;
+        this.suspendedLocation = null;
+        this.recentlySuspended = false;
 
         this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.25, 2.5));
 
@@ -40,6 +46,23 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
         setup();
     }
 
+    public DPSZombie(DPSZombie clone) {
+        super(EntityType.ZOMBIE, ((CraftWorld) Objects.requireNonNull(clone.getEntity().getWorld())).getHandle());
+        this.event = clone.getEvent();
+        this.origin = clone.getOrigin();
+        this.suspendedLocation = clone.getSuspendedLocation();
+        this.recentlySuspended = clone.isRecentlySuspended();
+
+        final Location lastLocation = (isSuspended() ? getSuspendedLocation() : clone.getEntity().getLocation());
+        this.goalSelector.addGoal(0, new WalkToLocationGoal(this, event.getSpawnpoints(), 1.25, 2.5, getClosestNodeIndex(new BLocatable(lastLocation.getBlock()), event.getSpawnpoints())));
+
+        Objects.requireNonNull(this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)).setBaseValue(100.0D);
+        Objects.requireNonNull(this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)).setBaseValue(0.0D);
+
+        setup();
+        getEntity().teleport(lastLocation);
+    }
+
     @Override
     public CraftEntity getEntity() {
         return getBukkitEntity();
@@ -47,6 +70,7 @@ public final class DPSZombie extends Zombie implements IDPSEntity {
 
     @Override
     public void spawn() {
+        setRemoved(null);
         level().addFreshEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
     }
 
