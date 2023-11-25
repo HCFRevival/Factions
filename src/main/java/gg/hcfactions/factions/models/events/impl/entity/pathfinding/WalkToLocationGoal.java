@@ -29,6 +29,16 @@ public final class WalkToLocationGoal extends Goal {
         locations.forEach(loc -> destinations.add(loc.getBukkitBlock().getLocation()));
     }
 
+    public WalkToLocationGoal(Mob mob, List<BLocatable> locations, double speedModifier, double minRange, int startLocationIndex) {
+        this(mob, locations, speedModifier, minRange);
+
+        if (startLocationIndex > locations.size()) {
+            throw new IllegalArgumentException("Start location index can not be greater than location array");
+        }
+
+        this.locationIndex = startLocationIndex;
+    }
+
     private Location getDestination() {
         return destinations.get(locationIndex);
     }

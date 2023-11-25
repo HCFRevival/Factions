@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.models.events.EDPSEntityType;
 import gg.hcfactions.factions.models.events.IDPSEntity;
-import gg.hcfactions.factions.models.events.impl.entity.DPSPhantom;
 import gg.hcfactions.factions.models.events.impl.entity.DPSRavager;
 import gg.hcfactions.factions.models.events.impl.entity.DPSZombie;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
@@ -12,7 +11,6 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.libs.base.util.Time;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.util.*;
@@ -20,6 +18,7 @@ import java.util.*;
 public class DPSSession {
     @Getter public final DPSEvent event;
     @Getter @Setter public IDPSEntity dpsEntity;
+    @Getter public final EDPSEntityType entityType;
     @Getter @Setter public boolean active;
     @Getter @Setter public int tokenReward;
     @Getter @Setter public long eventEndTimestamp;
@@ -29,18 +28,21 @@ public class DPSSession {
 
     public DPSSession(DPSEvent event, EDPSEntityType entityType, long duration, int tokenReward) {
         this.event = event;
+        this.entityType = entityType;
         this.tokenReward = tokenReward;
         this.eventDuration = duration;
         this.eventEndTimestamp = Time.now() + duration;
         this.leaderboard = Maps.newConcurrentMap();
 
         final Location origin = event.getSpawnpoints().get(0).getBukkitBlock().getLocation();
+        createEntity(origin);
+    }
+
+    public void createEntity(Location location) {
         if (entityType.equals(EDPSEntityType.ZOMBIE)) {
-            dpsEntity = new DPSZombie(event, origin);
-        } else if (entityType.equals(EDPSEntityType.PHANTOM)) {
-            dpsEntity = new DPSPhantom(event, origin);
+            dpsEntity = (dpsEntity != null ? new DPSZombie((DPSZombie) dpsEntity) : new DPSZombie(event, location));
         } else if (entityType.equals(EDPSEntityType.RAVAGER)) {
-            dpsEntity = new DPSRavager(event, origin);
+            dpsEntity = (dpsEntity != null ? new DPSRavager((DPSRavager) dpsEntity) : new DPSRavager(event, location));
         }
     }
 

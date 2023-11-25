@@ -21,6 +21,7 @@ import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 
@@ -662,6 +663,13 @@ public final class EventManager implements IManager {
                 .stream()
                 .filter(e -> e.getSession().getDpsEntity().getEntity().getUniqueId().equals(entity.getUniqueId()))
                 .findFirst();
+    }
+
+    public List<DPSEvent> getDpsEventBySuspendedEntityChunk(Chunk chunk) {
+        return getActiveDpsEvents()
+                .stream()
+                .filter(e -> e.getSession().getDpsEntity().isSuspended() && e.getSession().getDpsEntity().getSuspendedLocation().getChunk().getX() == chunk.getX() && e.getSession().getDpsEntity().getSuspendedLocation().getChunk().getZ() == chunk.getZ())
+                .collect(Collectors.toList());
     }
 
     public ImmutableList<PalaceEvent> getPalaceEvents() {

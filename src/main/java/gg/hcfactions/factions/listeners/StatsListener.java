@@ -3,8 +3,11 @@ package gg.hcfactions.factions.listeners;
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.events.event.DPSCaptureEvent;
 import gg.hcfactions.factions.events.event.KOTHCaptureEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
+import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.stats.EStatisticType;
 import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.libs.base.util.Time;
@@ -28,6 +31,32 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 
 public record StatsListener(@Getter Factions plugin) implements Listener {
+    /**
+     * Creates an event capture entry
+     * @param event Captured Event
+     * @param capturingFaction Capturing Faction
+     */
+    private void handleEventCaptureStat(IEvent event, PlayerFaction capturingFaction) {
+        final List<String> capturingUsernames = Lists.newArrayList();
+
+        capturingFaction.getOnlineMembers().forEach(onlineMember -> {
+            final Player player = Bukkit.getPlayer(onlineMember.getUniqueId());
+
+            if (player != null) {
+                final PlayerStatHolder holder = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
+                capturingUsernames.add(player.getName());
+                holder.addToStatistic(EStatisticType.EVENT_CAPTURES, 1);
+            }
+        });
+
+        plugin.getStatsManager().createEventCapture(
+                event.getName(),
+                capturingFaction.getUniqueId(),
+                capturingFaction.getName(),
+                capturingUsernames
+        );
+    }
+
     /**
      * Handles caching a player's statistic holder upon login
      *
@@ -165,29 +194,21 @@ public record StatsListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Handles creating event capture entries when a DPS event is completed
+     * @param event DPSCaptureEvent
+     */
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onDPSCapture(DPSCaptureEvent event) {
+        handleEventCaptureStat(event.getEvent(), event.getCapturingFaction());
+    }
+
+    /**
      * Handles creating event capture entries when capture events are completed
      * @param event KOTHCaptureEvent
      */
     @EventHandler (priority = EventPriority.MONITOR)
     public void onEventCapture(KOTHCaptureEvent event) {
-        final List<String> capturingUsernames = Lists.newArrayList();
-
-        event.getCapturingFaction().getOnlineMembers().forEach(onlineMember -> {
-            final Player player = Bukkit.getPlayer(onlineMember.getUniqueId());
-
-            if (player != null) {
-                final PlayerStatHolder holder = plugin.getStatsManager().getPlayerStatistics(player.getUniqueId());
-                capturingUsernames.add(player.getName());
-                holder.addToStatistic(EStatisticType.EVENT_CAPTURES, 1);
-            }
-        });
-
-        plugin.getStatsManager().createEventCapture(
-                event.getEvent().getName(),
-                event.getCapturingFaction().getUniqueId(),
-                event.getCapturingFaction().getName(),
-                capturingUsernames
-        );
+        handleEventCaptureStat(event.getEvent(), event.getCapturingFaction());
     }
 
     /**

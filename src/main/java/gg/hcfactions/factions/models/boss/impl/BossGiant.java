@@ -168,7 +168,7 @@ public final class BossGiant extends Giant implements IBossEntity {
 
     private void performStompShockwave() {
         getBukkitEntity().getWorld().getNearbyEntities(getBukkitEntity().getLocation(), 16, 4, 16).forEach(entity -> {
-            if (entity instanceof final CraftLivingEntity livingEntity && !entity.getUniqueId().equals(getUUID())) {
+            if (entity instanceof final CraftLivingEntity livingEntity && !entity.getUniqueId().equals(getUUID()) && !entity.getType().equals(org.bukkit.entity.EntityType.ZOMBIE)) {
                 final double force = Math.abs(RANDOM.nextDouble(STOMP_FORCE_VARIANCE)) + STOMP_FORCE_BASE;
                 shockwaveEntity(livingEntity.getHandle(), getBukkitEntity().getLocation(), force);
             }
