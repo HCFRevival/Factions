@@ -18,7 +18,7 @@ public record PalaceLootChest(@Getter EventManager manager,
 
     @Override
     public void restock() {
-        final int amount = LootManager.RANDOM.nextInt(3);
+        final int amount = LootManager.RANDOM.nextInt(3) + 1;
 
         getChest().getBlockInventory().clear();
 

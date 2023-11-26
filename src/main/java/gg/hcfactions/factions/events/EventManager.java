@@ -90,6 +90,12 @@ public final class EventManager implements IManager {
         dpsTickingTask.stop();
         eventScheduleTask.stop();
 
+        getActiveDpsEvents().forEach(dpsEvent -> {
+            if (!dpsEvent.getSession().getDpsEntity().isSuspended()) {
+                dpsEvent.getSession().getDpsEntity().despawn();
+            }
+        });
+
         eventRepository.clear();
     }
 

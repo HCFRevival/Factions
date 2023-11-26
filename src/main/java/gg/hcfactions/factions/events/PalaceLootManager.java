@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public final class PalaceLootManager extends LootManager implements IManager {
     @Getter public final Factions plugin;
@@ -61,35 +62,36 @@ public final class PalaceLootManager extends LootManager implements IManager {
     }
 
     public ImmutableList<ItemStack> getItems(EPalaceLootTier tier, int amount) {
-        final List<ItemStack> res = Lists.newArrayListWithExpectedSize(amount);
+        final Random random = new Random();
+        final List<PalaceLootable> eligibleLootables = lootRepository.stream()
+                .filter(lootable -> lootable instanceof PalaceLootable)
+                .map(lootable -> (PalaceLootable) lootable)
+                .filter(palaceLootable -> palaceLootable.getLootTier().equals(tier))
+                .toList();
 
-        for (int i = 0; i < 250; i++) {
-            if (res.size() >= amount) {
-                break;
-            }
+        if (eligibleLootables.isEmpty()) {
+            return ImmutableList.of();
+        }
 
-            for (GenericLootable lootable : lootRepository) {
-                if (res.size() >= amount) {
+        final ImmutableList.Builder<ItemStack> builder = new ImmutableList.Builder<>();
+        int totalAdded = 0;
+
+        while (totalAdded < amount) {
+            for (PalaceLootable palaceLootable : eligibleLootables) {
+                if (totalAdded >= amount) {
                     break;
                 }
 
-                if (!(lootable instanceof final PalaceLootable palaceLootable)) {
-                    continue;
-                }
-
-                if (!palaceLootable.getLootTier().equals(tier)) {
-                    continue;
-                }
-
-                final int roll = (int)Math.round(Math.random()*100);
+                final int roll = random.nextInt(100) + 1;
 
                 if (roll <= palaceLootable.getProbability()) {
-                    res.add(palaceLootable.getItem(false));
+                    builder.add(palaceLootable.getItem(false));
+                    totalAdded += 1;
                 }
             }
         }
 
-        return ImmutableList.copyOf(res);
+        return builder.build();
     }
 
     public void saveItem(PalaceLootable lootable) {
