@@ -14,10 +14,12 @@ import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.items.Sugarcube;
-import gg.hcfactions.factions.items.horn.BerserkBattleHorn;
-import gg.hcfactions.factions.items.horn.ChargeBattleHorn;
-import gg.hcfactions.factions.items.horn.CleanseBattleHorn;
-import gg.hcfactions.factions.items.horn.RetreatBattleHorn;
+import gg.hcfactions.factions.items.horn.impl.BerserkBattleHorn;
+import gg.hcfactions.factions.items.horn.impl.ChargeBattleHorn;
+import gg.hcfactions.factions.items.horn.impl.CleanseBattleHorn;
+import gg.hcfactions.factions.items.horn.impl.RetreatBattleHorn;
+import gg.hcfactions.factions.items.mythic.impl.FireSword;
+import gg.hcfactions.factions.items.mythic.impl.KnockbackSword;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
@@ -288,6 +290,7 @@ public final class Factions extends AresPlugin {
         registerListener(new BattlepassListener(this));
         registerListener(new XPListener(this));
         registerListener(new BossListener(this));
+        registerListener(new MythicItemListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();
@@ -298,6 +301,8 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new CleanseBattleHorn(this));
         customItemService.registerNewItem(new ChargeBattleHorn(this));
         customItemService.registerNewItem(new BerserkBattleHorn(this));
+        customItemService.registerNewItem(new KnockbackSword());
+        customItemService.registerNewItem(new FireSword(this));
 
         if (configuration.starterKitEnabled) {
             customItemService.registerNewItem(new StarterRod());

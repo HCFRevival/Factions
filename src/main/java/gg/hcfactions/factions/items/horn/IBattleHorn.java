@@ -3,6 +3,7 @@ package gg.hcfactions.factions.items.horn;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.items.horn.impl.EBattleHornType;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import org.bukkit.Bukkit;
