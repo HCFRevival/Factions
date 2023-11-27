@@ -1,4 +1,4 @@
-package gg.hcfactions.factions.items.horn;
+package gg.hcfactions.factions.items.horn.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
