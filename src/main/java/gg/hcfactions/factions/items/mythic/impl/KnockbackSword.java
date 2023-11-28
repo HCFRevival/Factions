@@ -23,7 +23,7 @@ public final class KnockbackSword implements IMythicItem {
 
     @Override
     public List<String> getLore() {
-        return Lists.newArrayList();
+        return getMythicLore();
     }
 
     @Override

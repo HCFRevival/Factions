@@ -33,7 +33,7 @@ public final class FireSword implements IMythicItem {
 
     @Override
     public List<String> getLore() {
-        return Lists.newArrayList();
+        return getMythicLore();
     }
 
     @Override
