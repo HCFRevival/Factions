@@ -1,6 +1,5 @@
 package gg.hcfactions.factions.items.mythic.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.cx.modules.player.combat.EnchantLimitModule;
