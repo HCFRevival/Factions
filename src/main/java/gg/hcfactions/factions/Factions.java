@@ -19,6 +19,7 @@ import gg.hcfactions.factions.items.horn.impl.ChargeBattleHorn;
 import gg.hcfactions.factions.items.horn.impl.CleanseBattleHorn;
 import gg.hcfactions.factions.items.horn.impl.RetreatBattleHorn;
 import gg.hcfactions.factions.items.mythic.impl.FireSword;
+import gg.hcfactions.factions.items.mythic.impl.GhostbladeSword;
 import gg.hcfactions.factions.items.mythic.impl.KnockbackSword;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
@@ -303,6 +304,7 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new BerserkBattleHorn(this));
         customItemService.registerNewItem(new KnockbackSword());
         customItemService.registerNewItem(new FireSword(this));
+        customItemService.registerNewItem(new GhostbladeSword(this));
         customItemService.registerNewItem(new StarterRod());
     }
 

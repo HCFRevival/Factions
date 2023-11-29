@@ -7,6 +7,7 @@ import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
@@ -149,5 +151,60 @@ public final class MythicItemListener implements Listener {
         }
 
         event.setResult(new ItemStack(Material.AIR));
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onEntityKill(EntityDeathEvent event) {
+        final LivingEntity livingEntity = event.getEntity();
+        final Player killer = livingEntity.getKiller();
+
+        if (killer == null) {
+            return;
+        }
+
+        final ItemStack hand = killer.getInventory().getItemInMainHand();
+        final Optional<ICustomItem> customItemQuery = customItemService.getItem(hand);
+
+        if (customItemQuery.isEmpty()) {
+            return;
+        }
+
+        final ICustomItem customItem = customItemQuery.get();
+
+        if (!(customItem instanceof final IMythicItem mythic)) {
+            return;
+        }
+
+        mythic.onKill(killer, livingEntity);
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final LivingEntity livingEntity)) {
+            return;
+        }
+
+        if (!(event.getDamager() instanceof final Player player)) {
+            return;
+        }
+
+        final ItemStack hand = player.getInventory().getItemInMainHand();
+        final Optional<ICustomItem> customItemQuery = customItemService.getItem(hand);
+
+        if (customItemQuery.isEmpty()) {
+            return;
+        }
+
+        final ICustomItem customItem = customItemQuery.get();
+
+        if (!(customItem instanceof final IMythicItem mythic)) {
+            return;
+        }
+
+        mythic.onAttack(player, livingEntity);
     }
 }

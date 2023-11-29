@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -17,4 +19,7 @@ public interface IMythicItem extends ICustomItem {
         res.add(ChatColor.GRAY + "or enchanted.");
         return res;
     }
+
+    default void onKill(Player player, LivingEntity slainEntity) {}
+    default void onAttack(Player player, LivingEntity attackedEntity) {}
 }
