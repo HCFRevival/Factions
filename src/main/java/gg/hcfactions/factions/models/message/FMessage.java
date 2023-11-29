@@ -346,6 +346,18 @@ public final class FMessage {
         player.sendMessage(ChatColor.RESET + " ");
     }
 
+    public static void printGhostblade(Player viewer, Player killer) {
+        if (viewer.getUniqueId().equals(killer.getUniqueId())) {
+            viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY
+                    + ": You've been granted a " + Colors.LAVENDAR.toBukkit() + "Speed Boost" + ChatColor.GRAY + " thanks to your Mythic Item");
+
+            return;
+        }
+
+        viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY + ": "
+                + "You've been granted a " + Colors.LAVENDAR.toBukkit() + "Speed Boost" + ChatColor.GRAY + " thanks to " + ChatColor.GREEN + killer.getName());
+    }
+
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Death Location]")

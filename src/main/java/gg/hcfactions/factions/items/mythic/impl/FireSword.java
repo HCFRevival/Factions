@@ -1,6 +1,5 @@
 package gg.hcfactions.factions.items.mythic.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.cx.modules.player.combat.EnchantLimitModule;
@@ -33,7 +32,7 @@ public final class FireSword implements IMythicItem {
 
     @Override
     public List<String> getLore() {
-        return Lists.newArrayList();
+        return getMythicLore();
     }
 
     @Override

@@ -231,6 +231,7 @@ state:
 # Starter kits are given to players their first time joining or upon respawning
 starter_kit:
   enabled: true
+  name: 'Starter'
 
 # Lunar configuration
 lunar_api:

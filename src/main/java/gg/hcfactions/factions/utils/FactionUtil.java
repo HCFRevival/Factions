@@ -2,9 +2,9 @@ package gg.hcfactions.factions.utils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
-import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
@@ -13,13 +13,9 @@ import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
-import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.utils.Players;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -54,7 +50,7 @@ public final class FactionUtil {
     }
 
     public static void cleanPlayer(Factions plugin, FactionPlayer factionPlayer) {
-        final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
+        final CXService cxs = (CXService) plugin.getService(CXService.class);
         final Player player = factionPlayer.getBukkit();
         final int protDuration = plugin.getServerStateManager().getCurrentState().equals(EServerState.SOTW)
                 ? plugin.getConfiguration().getSotwProtectionDuration()
@@ -66,8 +62,8 @@ public final class FactionUtil {
             factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
         }
 
-        if (cis != null) {
-            cis.getItem(StarterRod.class).ifPresent(starterRod -> player.getInventory().addItem(starterRod.getItem()));
+        if (plugin.getConfiguration().isStarterKitEnabled() && cxs != null) {
+            cxs.getKitManager().getKitByName(plugin.getConfiguration().getStarterKitName()).ifPresent(kit -> kit.give(player, false));
         }
 
         Players.resetHealth(player);
