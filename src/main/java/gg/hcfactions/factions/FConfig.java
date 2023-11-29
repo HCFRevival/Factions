@@ -1,5 +1,6 @@
 package gg.hcfactions.factions;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.models.state.EServerState;
 import gg.hcfactions.factions.stats.StatsConfig;
@@ -11,6 +12,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Map;
@@ -129,6 +131,7 @@ public final class FConfig {
 
     // starter kit
     @Getter public boolean starterKitEnabled;
+    @Getter public String starterKitName;
 
     // server states
     @Getter public EServerState initialServerState;
@@ -317,6 +320,9 @@ public final class FConfig {
         plugin.getAresLogger().info("End Exit set to: " + endExit.toString());
 
         starterKitEnabled = conf.getBoolean("starter_kit.enabled");
+        starterKitName = conf.getString("starter_kit.name");
+        plugin.getAresLogger().info("Starter Kit Enabled: " + starterKitEnabled);
+        plugin.getAresLogger().info("Starter Kit Name: " + starterKitName);
 
         attackerCombatTagDuration = conf.getInt("player.timers.combat_tag.attacker");
         attackedCombatTagDuration = conf.getInt("player.timers.combat_tag.attacked");
