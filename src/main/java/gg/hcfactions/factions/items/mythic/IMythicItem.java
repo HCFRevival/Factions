@@ -1,6 +1,8 @@
 package gg.hcfactions.factions.items.mythic;
 
 import com.google.common.collect.Lists;
+import gg.hcfactions.cx.CXService;
+import gg.hcfactions.cx.modules.player.combat.EnchantLimitModule;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -8,6 +10,7 @@ import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import org.bukkit.ChatColor;
 import org.bukkit.Particle;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -135,6 +138,22 @@ public interface IMythicItem extends ICustomItem {
                 }).delay(i).run();
             }
         }
+    }
+
+    /**
+     * Utility command to quickly grab the highest sharpness level on the map
+     * @return Max sharpness level that can be applied
+     */
+    default int getMaxSharpness() {
+        final CXService cxService = (CXService)getPlugin().getService(CXService.class);
+        final EnchantLimitModule enchantLimitModule = cxService.getEnchantLimitModule();
+        final int sharpnessLimit = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.DAMAGE_ALL);
+
+        if (sharpnessLimit <= -1) {
+            return 5;
+        }
+
+        return sharpnessLimit;
     }
 
     default void onKill(Player player, LivingEntity slainEntity) {}
