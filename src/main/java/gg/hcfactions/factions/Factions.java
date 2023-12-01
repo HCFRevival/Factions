@@ -305,6 +305,8 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new StarterRod());
 
         // mythics
+        customItemService.registerNewItem(new DeepslateMiner(this));
+
         // TODO: Make these configurable
         customItemService.registerNewItem(new Ghostblade(this, new Ghostblade.GhostbladeConfig(
                 20,

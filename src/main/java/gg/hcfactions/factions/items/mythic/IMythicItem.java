@@ -93,7 +93,10 @@ public interface IMythicItem extends ICustomItem {
         final List<String> res = Lists.newArrayList();
 
         res.add(Colors.DARK_AQUA.toBukkit() + StringUtil.getMythicEmblem(getMaterial()) + " Mythic");
-        res.add(Colors.LIGHT_AQUA.toBukkit() + "Durability Cost" + ChatColor.GRAY + ": " + getDurabilityCost() + " per hit");
+
+        if (getDurabilityCost() > 1) {
+            res.add(Colors.LIGHT_AQUA.toBukkit() + "Durability Cost" + ChatColor.GRAY + ": " + getDurabilityCost() + " per hit");
+        }
 
         for (EMythicAbilityType abilityType : EMythicAbilityType.values()) {
             final List<MythicAbility> abilities = getAbilityInfoByType(abilityType);

@@ -37,6 +37,8 @@ public final class StringUtil {
 
         if (material.name().endsWith("_AXE")) {
             emblem = "\uD83E\uDE93"; // Axe
+        } else if (material.name().endsWith("_PICKAXE")) {
+            emblem = "⛏"; // Pickaxe
         } else if (material.equals(Material.BOW) || material.equals(Material.CROSSBOW)) {
             emblem = "\uD83C\uDFF9"; // Bow
         } else if (material.equals(Material.TRIDENT)) {
