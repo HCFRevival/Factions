@@ -18,9 +18,7 @@ import gg.hcfactions.factions.items.horn.impl.BerserkBattleHorn;
 import gg.hcfactions.factions.items.horn.impl.ChargeBattleHorn;
 import gg.hcfactions.factions.items.horn.impl.CleanseBattleHorn;
 import gg.hcfactions.factions.items.horn.impl.RetreatBattleHorn;
-import gg.hcfactions.factions.items.mythic.impl.FireSword;
-import gg.hcfactions.factions.items.mythic.impl.GhostbladeSword;
-import gg.hcfactions.factions.items.mythic.impl.KnockbackSword;
+import gg.hcfactions.factions.items.mythic.impl.*;
 import gg.hcfactions.factions.listeners.*;
 import gg.hcfactions.factions.loggers.CombatLoggerManager;
 import gg.hcfactions.factions.models.stats.EStatisticType;
@@ -302,10 +300,34 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new CleanseBattleHorn(this));
         customItemService.registerNewItem(new ChargeBattleHorn(this));
         customItemService.registerNewItem(new BerserkBattleHorn(this));
-        customItemService.registerNewItem(new KnockbackSword());
-        customItemService.registerNewItem(new FireSword(this));
-        customItemService.registerNewItem(new GhostbladeSword(this));
+        customItemService.registerNewItem(new SymsSong(this));
+        customItemService.registerNewItem(new AdmiralsEmber(this));
         customItemService.registerNewItem(new StarterRod());
+
+        // mythics
+        customItemService.registerNewItem(new DeepslateMiner(this));
+
+        // TODO: Make these configurable
+        customItemService.registerNewItem(new Ghostblade(this, new Ghostblade.GhostbladeConfig(
+                20,
+                16,
+                1,
+                3,
+                5.0f,
+                60
+        )));
+
+        customItemService.registerNewItem(new Hullbreaker(this, new Hullbreaker.HullbreakerConfig(
+                5,
+                16,
+                3
+        )));
+
+        customItemService.registerNewItem(new CrimsonFang(this, new CrimsonFang.CrimsonFangConfig(
+                0.25D,
+                1,
+                10
+        )));
     }
 
     @Override

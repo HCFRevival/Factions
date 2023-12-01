@@ -346,7 +346,7 @@ public final class FMessage {
         player.sendMessage(ChatColor.RESET + " ");
     }
 
-    public static void printGhostblade(Player viewer, Player killer) {
+    public static void printGhostbladeKill(Player viewer, Player killer) {
         if (viewer.getUniqueId().equals(killer.getUniqueId())) {
             viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY
                     + ": You've been granted a " + Colors.LAVENDAR.toBukkit() + "Speed Boost" + ChatColor.GRAY + " thanks to your Mythic Item");
@@ -356,6 +356,19 @@ public final class FMessage {
 
         viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY + ": "
                 + "You've been granted a " + Colors.LAVENDAR.toBukkit() + "Speed Boost" + ChatColor.GRAY + " thanks to " + ChatColor.GREEN + killer.getName());
+    }
+
+    public static void printGhostbladeRefresh(Player viewer, int seconds) {
+        viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY
+                + ": Your Speed has been refreshed by " + seconds + " second" + (seconds > 1 ? "s" : "") + ".");
+    }
+
+    public static void printHullbreaker(Player viewer, int seconds) {
+        viewer.sendMessage(Colors.GOLD.toBukkit() + "Hullbreaker" + ChatColor.GRAY + ": You've been given Resistance for " + seconds + " seconds.");
+    }
+
+    public static void printCrimsonFangKill(Player viewer, int seconds) {
+        viewer.sendMessage(Colors.DARK_BLUE.toBukkit() + "Immortality" + ChatColor.GRAY + ": You've been given Regeneration for " + seconds + " seconds.");
     }
 
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
