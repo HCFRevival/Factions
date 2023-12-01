@@ -8,6 +8,6 @@ public record MythicAbility(@Getter String name,
                             @Getter EMythicAbilityType abilityType) {
 
     public String toString() {
-        return name + ChatColor.RESET + ": " + description;
+        return name + ChatColor.GRAY + ": " + description;
     }
 }
