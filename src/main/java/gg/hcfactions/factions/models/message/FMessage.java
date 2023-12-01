@@ -371,6 +371,15 @@ public final class FMessage {
         viewer.sendMessage(Colors.DARK_BLUE.toBukkit() + "Immortality" + ChatColor.GRAY + ": You've been given Regeneration for " + seconds + " seconds.");
     }
 
+    public static void printNeptunesFuryImpaleVictim(Player viewer, double woundDamagePerTick, int woundSeconds) {
+        viewer.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Impaled!" + ChatColor.YELLOW + " You will bleed "
+                + ChatColor.RED+ woundDamagePerTick + " ♥" + ChatColor.YELLOW + " over the span of " + ChatColor.BLUE + woundSeconds + " seconds" + ChatColor.YELLOW + ".");
+    }
+
+    public static void printNeptunesFuryImpale(Player viewer, int woundSeconds) {
+        viewer.sendMessage(Colors.RED.toBukkit() + "Impaled" + ChatColor.GRAY + ": You've inflicted wounds to your enemy that will bleed for " + woundSeconds + " seconds");
+    }
+
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
         viewer.spigot().sendMessage(
                 new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
