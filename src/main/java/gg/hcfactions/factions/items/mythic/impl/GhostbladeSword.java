@@ -1,11 +1,15 @@
 package gg.hcfactions.factions.items.mythic.impl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.items.mythic.EMythicAbilityType;
 import gg.hcfactions.factions.items.mythic.IMythicItem;
+import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.FactionUtil;
+import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
@@ -17,16 +21,24 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 
 import java.util.List;
 import java.util.Map;
 
 public final class GhostbladeSword implements IMythicItem {
     @Getter public final Factions plugin;
+    @Getter public final List<MythicAbility> abilityInfo;
+    private final int effectDuration;
 
-    public GhostbladeSword(Factions plugin) {
+    public GhostbladeSword(Factions plugin, int effectDuration) {
         this.plugin = plugin;
+        this.effectDuration = effectDuration;
+        this.abilityInfo = Lists.newArrayList();
+
+        addAbilityInfo(
+                Colors.LAVENDAR.toBukkit() + "Excited",
+                ChatColor.GRAY + "Slaying an enemy will grant you and nearby faction members Speed III and Haste II for " + effectDuration + " seconds.",
+                EMythicAbilityType.ON_KILL);
     }
 
     @Override
@@ -41,20 +53,7 @@ public final class GhostbladeSword implements IMythicItem {
 
     @Override
     public List<String> getLore() {
-        final net.md_5.bungee.api.ChatColor speedColor = net.md_5.bungee.api.ChatColor.of(String.format("#%02x%02x%02x",
-                PotionType.SPEED.getEffectType().getColor().getRed(),
-                PotionType.SPEED.getEffectType().getColor().getGreen(),
-                PotionType.SPEED.getEffectType().getColor().getBlue())
-        );
-
-        final List<String> res = getMythicLore();
-        res.add(ChatColor.RESET + " ");
-        res.add(ChatColor.GOLD + "Active" + ChatColor.YELLOW + ": Slaying a player");
-        res.add(ChatColor.YELLOW + "will grant you and your nearby");
-        res.add(ChatColor.YELLOW + "faction members a " + speedColor + "Speed Boost");
-        res.add(ChatColor.YELLOW + "for " + ChatColor.GOLD + "20 seconds" + ChatColor.YELLOW + ".");
-
-        return res;
+        return getMythicLore();
     }
 
     @Override
@@ -73,8 +72,8 @@ public final class GhostbladeSword implements IMythicItem {
             return;
         }
 
-        final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 20*20, 2);
-        final PotionEffect hasteEffect = new PotionEffect(PotionEffectType.FAST_DIGGING, 20*20, 0);
+        final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, effectDuration*20, 2);
+        final PotionEffect hasteEffect = new PotionEffect(PotionEffectType.FAST_DIGGING, effectDuration*20, 0);
 
         Players.giveTemporaryEffect(plugin, player, speedEffect);
         Players.giveTemporaryEffect(plugin, player, hasteEffect);

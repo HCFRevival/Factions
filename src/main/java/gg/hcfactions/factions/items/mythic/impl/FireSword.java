@@ -1,10 +1,12 @@
 package gg.hcfactions.factions.items.mythic.impl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.cx.modules.player.combat.EnchantLimitModule;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.mythic.IMythicItem;
+import gg.hcfactions.factions.items.mythic.MythicAbility;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,9 +17,11 @@ import java.util.Map;
 
 public final class FireSword implements IMythicItem {
     @Getter public final Factions plugin;
+    @Getter public final List<MythicAbility> abilityInfo;
 
     public FireSword(Factions plugin) {
         this.plugin = plugin;
+        this.abilityInfo = Lists.newArrayList();
     }
 
     @Override

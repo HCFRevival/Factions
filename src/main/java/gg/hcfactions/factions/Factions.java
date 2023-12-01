@@ -304,7 +304,7 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new BerserkBattleHorn(this));
         customItemService.registerNewItem(new KnockbackSword());
         customItemService.registerNewItem(new FireSword(this));
-        customItemService.registerNewItem(new GhostbladeSword(this));
+        customItemService.registerNewItem(new GhostbladeSword(this, 20)); // TODO: Make this configurable
         customItemService.registerNewItem(new StarterRod());
     }
 
