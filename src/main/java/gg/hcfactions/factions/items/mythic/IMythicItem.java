@@ -139,4 +139,5 @@ public interface IMythicItem extends ICustomItem {
 
     default void onKill(Player player, LivingEntity slainEntity) {}
     default void onAttack(Player player, LivingEntity attackedEntity) {}
+    default void onShoot(Player player, LivingEntity attackedEntity) {}
 }
