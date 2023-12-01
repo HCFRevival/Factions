@@ -319,6 +319,7 @@ public final class Factions extends AresPlugin {
 
         customItemService.registerNewItem(new Hullbreaker(this, new Hullbreaker.HullbreakerConfig(
                 5,
+                0,
                 16,
                 3
         )));
@@ -327,6 +328,17 @@ public final class Factions extends AresPlugin {
                 0.25D,
                 1,
                 10
+        )));
+
+        customItemService.registerNewItem(new NeptunesFury(this, new NeptunesFury.NeptunesFuryConfig(
+                6.0,
+                3.0
+        )));
+
+        customItemService.registerNewItem(new SerpentsImpaler(this, new SerpentsImpaler.SerpentsImpalerConfig(
+                50.0f,
+                3,
+                0.5
         )));
     }
 

@@ -16,6 +16,7 @@ import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -142,6 +143,10 @@ public final class FactionUtil {
     }
 
     public static ImmutableList<Player> getNearbyEnemies(Factions plugin, Player player, double radius) {
+        return getNearbyEnemies(plugin, player, player.getLocation(), radius);
+    }
+
+    public static ImmutableList<Player> getNearbyEnemies(Factions plugin, Player player, Location location, double radius) {
         final List<Player> result = Lists.newArrayList();
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 

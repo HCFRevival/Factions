@@ -1,21 +1,22 @@
 package gg.hcfactions.factions.listeners;
 
+import com.google.common.collect.Sets;
 import gg.hcfactions.cx.event.EnchantLimitApplyEvent;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.mythic.IMythicItem;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
@@ -23,18 +24,28 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public final class MythicItemListener implements Listener {
+    public record ProjectileTracker(@Getter Player shooter, @Getter UUID projectileId, @Getter ItemStack item, @Getter ICustomItem customItem) {}
+
     @Getter public final Factions plugin;
     @Getter public final CustomItemService customItemService;
+    private final Set<ProjectileTracker> trackerRepository;
 
     public MythicItemListener(Factions plugin) {
         this.plugin = plugin;
         this.customItemService = (CustomItemService) plugin.getService(CustomItemService.class);
+        this.trackerRepository = Sets.newConcurrentHashSet();
 
         if (customItemService == null) {
             plugin.getAresLogger().error("Failed to obtain custom item service");
         }
+    }
+
+    private Optional<ProjectileTracker> getTrackerByEntityId(UUID entityId) {
+        return trackerRepository.stream().filter(pt -> pt.getProjectileId().equals(entityId)).findFirst();
     }
 
     private void cancelMythicEvent(ItemStack item, Cancellable event) {
@@ -207,5 +218,77 @@ public final class MythicItemListener implements Listener {
         }
 
         mythic.onAttack(player, livingEntity);
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getEntity().getShooter() instanceof final Player shooter)) {
+            return;
+        }
+
+        if (event.getEntity() instanceof final Trident trident) {
+            final ItemStack item = trident.getItem();
+            final Optional<ICustomItem> customItemQuery = customItemService.getItem(item);
+
+            if (customItemQuery.isEmpty()) {
+                return;
+            }
+
+            final ProjectileTracker tracker = new ProjectileTracker(shooter, event.getEntity().getUniqueId(), item, customItemQuery.get());
+            trackerRepository.add(tracker);
+            new Scheduler(plugin).sync(() -> trackerRepository.remove(tracker)).delay(10*20L).run();
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onEntityShootBow(EntityShootBowEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof final Player shooter)) {
+            return;
+        }
+
+        final ItemStack item = event.getBow();
+
+        if (item == null) {
+            return;
+        }
+
+        final Optional<ICustomItem> customItemQuery = customItemService.getItem(item);
+
+        if (customItemQuery.isEmpty()) {
+            return;
+        }
+
+        final ProjectileTracker tracker = new ProjectileTracker(shooter, event.getEntity().getUniqueId(), item, customItemQuery.get());
+        trackerRepository.add(tracker);
+        new Scheduler(plugin).sync(() -> trackerRepository.remove(tracker)).delay(10*20L).run();
+    }
+
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent event) {
+        if (!(event.getHitEntity() instanceof final LivingEntity hitEntity)) {
+            return;
+        }
+
+        final Projectile proj = event.getEntity();
+
+        getTrackerByEntityId(proj.getUniqueId()).ifPresent(pt -> {
+            trackerRepository.remove(pt);
+
+            if (pt.getShooter() == null || !pt.getShooter().isOnline()) {
+                return;
+            }
+
+            if (pt.getCustomItem() instanceof final IMythicItem mythicItem) {
+                mythicItem.onShoot(pt.getShooter(), hitEntity);
+            }
+        });
     }
 }

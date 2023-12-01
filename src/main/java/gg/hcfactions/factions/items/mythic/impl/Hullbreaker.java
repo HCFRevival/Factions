@@ -9,6 +9,7 @@ import gg.hcfactions.factions.items.mythic.IMythicItem;
 import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.FactionUtil;
+import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
@@ -29,6 +30,7 @@ import java.util.Objects;
 public final class Hullbreaker implements IMythicItem {
     public record HullbreakerConfig(
             @Getter int resistanceDuration,
+            @Getter int resistanceAmplifier,
             @Getter int requiredAllyDistance,
             @Getter int requiredEnemyCount) {}
 
@@ -43,7 +45,8 @@ public final class Hullbreaker implements IMythicItem {
 
         addAbilityInfo(
                 Colors.GOLD.toBukkit() + "Last Man Standing",
-                "Attacking any enemy with no nearby allies grants you Resistance I for " + config.resistanceDuration() + " seconds.",
+                "Attacking any enemy with " + config.getRequiredEnemyCount() + " enemies nearby and no nearby allies grants you Resistance "
+                        + StringUtil.getRomanNumeral(config.getResistanceAmplifier() + 1) + " for " + config.resistanceDuration() + " seconds.",
                 EMythicAbilityType.ON_HIT
         );
     }
@@ -123,7 +126,7 @@ public final class Hullbreaker implements IMythicItem {
         }
 
         spawnAbilityParticles(player);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, config.getResistanceDuration()*20, 0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, config.getResistanceDuration()*20, config.getResistanceAmplifier()));
         Players.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD);
         FMessage.printHullbreaker(player, config.getResistanceDuration());
     }
