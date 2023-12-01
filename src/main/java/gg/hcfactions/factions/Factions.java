@@ -319,6 +319,7 @@ public final class Factions extends AresPlugin {
 
         customItemService.registerNewItem(new Hullbreaker(this, new Hullbreaker.HullbreakerConfig(
                 5,
+                0,
                 16,
                 3
         )));
