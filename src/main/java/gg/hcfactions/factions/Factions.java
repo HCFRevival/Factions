@@ -329,6 +329,17 @@ public final class Factions extends AresPlugin {
                 1,
                 10
         )));
+
+        customItemService.registerNewItem(new NeptunesFury(this, new NeptunesFury.NeptunesFuryConfig(
+                6.0,
+                3.0
+        )));
+
+        customItemService.registerNewItem(new SerpentsImpaler(this, new SerpentsImpaler.SerpentsImpalerConfig(
+                50.0f,
+                3,
+                0.5
+        )));
     }
 
     @Override
