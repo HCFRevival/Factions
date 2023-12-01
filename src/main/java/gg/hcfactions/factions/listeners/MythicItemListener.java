@@ -120,13 +120,14 @@ public final class MythicItemListener implements Listener {
 
         final ICustomItem customItem = customItemQuery.get();
 
-        if (!(customItem instanceof IMythicItem)) {
+        if (!(customItem instanceof final IMythicItem mythicItem)) {
             return;
         }
 
         if (item.getItemMeta() instanceof final Damageable meta) {
-            meta.setDamage(meta.getDamage() + 1);
+            meta.setDamage(meta.getDamage() + mythicItem.getDurabilityCost());
             item.setItemMeta(meta);
+            damager.getInventory().setItemInMainHand(item);
         }
     }
 
