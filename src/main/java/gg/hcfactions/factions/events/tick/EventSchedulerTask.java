@@ -1,6 +1,8 @@
 package gg.hcfactions.factions.events.tick;
 
 import gg.hcfactions.factions.events.EventManager;
+import gg.hcfactions.factions.models.events.IScheduledEvent;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,16 @@ public final class EventSchedulerTask {
 
                 if (!koth.isActive()) {
                     new Scheduler(manager.getPlugin()).sync(koth::startEvent).run();
+                }
+            }
+
+            else if (event instanceof final DPSEvent dps) {
+                if (!manager.getDpsTickingTask().isActive()) {
+                    manager.getDpsTickingTask().start();
+                }
+
+                if (!dps.isActive()) {
+                    new Scheduler(manager.getPlugin()).sync(dps::startEvent).run();
                 }
             }
         })).repeat(0L, 60 * 20L).run();
