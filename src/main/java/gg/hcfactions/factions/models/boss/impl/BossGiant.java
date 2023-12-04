@@ -1,6 +1,5 @@
 package gg.hcfactions.factions.models.boss.impl;
 
-import com.google.common.collect.Lists;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.boss.IBossEntity;
 import gg.hcfactions.libs.base.util.Time;
@@ -22,33 +21,30 @@ import org.bukkit.craftbukkit.v1_20_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
 public final class BossGiant extends Giant implements IBossEntity {
     private static final Random RANDOM = new Random();
-    private static final float KICK_CHANCE = 0.25F;
+    private static final float KICK_CHANCE = 0.2F;
     private static final double KICK_FORCE_BASE = 5.5D;
     private static final double KICK_FORCE_VARIANCE = 2.5D;
-    private static final float STOMP_CHANCE = 0.5F; // revert to 0.15F when done
+    private static final float STOMP_CHANCE = 0.15F;
     private static final double STOMP_FORCE_BASE = 48.0D;
     private static final double STOMP_FORCE_VARIANCE = 16.0D;
-    private static final int MINION_MIN_COUNT = 2;
+    private static final int MINION_MIN_COUNT = 3;
     private static final int MINION_MAX_COUNT = 6;
-    private static final int KICK_COOLDOWN = 5;
-    private static final int STOMP_COOLDOWN = 10;
+    private static final int KICK_COOLDOWN = 8;
+    private static final int STOMP_COOLDOWN = 15;
     private static final double HEALTH = 400.0;
 
-    private Factions plugin;
-    private List<ItemStack> possibleDrops;
+    private final Factions plugin;
     private long nextKick = Time.now();
     private long nextStomp = Time.now();
     private BukkitTask hasLandedTask;
@@ -56,7 +52,6 @@ public final class BossGiant extends Giant implements IBossEntity {
     public BossGiant(Factions plugin, Location origin) {
         super(EntityType.GIANT, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
         this.plugin = plugin;
-        this.possibleDrops = Lists.newArrayList();
         this.hasLandedTask = null;
 
         // Set attrs

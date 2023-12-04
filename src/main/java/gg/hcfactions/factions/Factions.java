@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.battlepass.BattlepassManager;
+import gg.hcfactions.factions.bosses.BossManager;
 import gg.hcfactions.factions.claims.ClaimManager;
 import gg.hcfactions.factions.claims.subclaims.SubclaimManager;
 import gg.hcfactions.factions.classes.ClassManager;
@@ -72,6 +73,7 @@ public final class Factions extends AresPlugin {
     @Getter public CrowbarManager crowbarManager;
     @Getter public OutpostManager outpostManager;
     @Getter public BattlepassManager battlepassManager;
+    @Getter public BossManager bossManager;
 
     @Override
     public void onEnable() {
@@ -108,6 +110,7 @@ public final class Factions extends AresPlugin {
         registerCommand(new ClassCommand(this));
         registerCommand(new DebugCommand(this));
         registerCommand(new BattlepassCommand(this));
+        registerCommand(new BossCommand(this));
 
         cmdMng.getCommandCompletions().registerAsyncCompletion("pfactions", ctx -> {
             final List<String> res = Lists.newArrayList();
@@ -239,6 +242,7 @@ public final class Factions extends AresPlugin {
         crowbarManager = new CrowbarManager(this);
         outpostManager = new OutpostManager(this);
         battlepassManager = new BattlepassManager(this);
+        bossManager = new BossManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -256,6 +260,7 @@ public final class Factions extends AresPlugin {
         crowbarManager.onEnable();
         outpostManager.onEnable();
         battlepassManager.onEnable();
+        bossManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -366,5 +371,6 @@ public final class Factions extends AresPlugin {
         crowbarManager.onDisable();
         outpostManager.onDisable();
         battlepassManager.onDisable();
+        bossManager.onDisable();
     }
 }
