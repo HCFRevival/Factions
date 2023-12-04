@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -61,6 +62,27 @@ public final class BossCommand extends BaseCommand {
         );
 
         player.sendMessage(ChatColor.GREEN + "Lootable Created");
+    }
+
+    @Subcommand("loot simulate")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    @Description("Simulate loot tables for (n) amount of runs")
+    @Syntax("<amount per run> <total runs>")
+    public void onLootSimulate(Player player, int amountPerRun, int totalRuns) {
+        if (totalRuns > 100) {
+            player.sendMessage(ChatColor.RED + "Run limit max is 100");
+            return;
+        }
+
+        final List<GenericLootable> loot = plugin.getBossManager().getLootManager().simulateDrops(plugin.getBossManager().getLootManager().getLootRepository(), amountPerRun, totalRuns);
+
+        if (loot.isEmpty()) {
+            player.sendMessage(ChatColor.RED + "No results found (is the table empty?)");
+            return;
+        }
+
+        final LootTableMenu<GenericLootable> menu = new LootTableMenu<>(plugin, player, plugin.getBossManager().getLootManager(), loot);
+        menu.open();
     }
 
     @Subcommand("loot reload")
