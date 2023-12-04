@@ -13,7 +13,8 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 
 public final class BossLootManager extends LootManager implements IManager {
-    public static final String TABLE_NAME = "boss-loot";
+    public static final String TABLE_NAME = "Boss Loot Table";
+    public static final String FILE_NAME = "boss-loot";
     public static final String FILE_KEY = "data.";
 
     @Getter public final BossManager manager;
@@ -27,7 +28,7 @@ public final class BossLootManager extends LootManager implements IManager {
 
     @Override
     public void onEnable() {
-        lootRepository.addAll(load(plugin.loadConfiguration(TABLE_NAME), FILE_KEY));
+        lootRepository.addAll(load(plugin.loadConfiguration(FILE_NAME), FILE_KEY));
         plugin.getAresLogger().info("Loaded " + lootRepository.size() + " Boss Lootable Items");
     }
 
