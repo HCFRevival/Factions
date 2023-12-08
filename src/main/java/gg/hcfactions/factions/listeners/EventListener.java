@@ -10,6 +10,7 @@ import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.IFaction;
@@ -179,6 +180,12 @@ public record EventListener(@Getter Factions plugin) implements Listener {
 
         if (!attachedEvent.isActive()) {
             return;
+        }
+
+        if (attachedEvent instanceof final DPSEvent dpsEvent) {
+            if (event.getEntity().getUniqueId().equals(dpsEvent.getSession().getDpsEntity().getEntity().getUniqueId())) {
+                return;
+            }
         }
 
         event.setCancelled(true);
