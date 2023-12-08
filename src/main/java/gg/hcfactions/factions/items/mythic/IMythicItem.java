@@ -156,6 +156,16 @@ public interface IMythicItem extends ICustomItem {
         return sharpnessLimit;
     }
 
+    @Override
+    default boolean isSoulbound() {
+        return false;
+    }
+
+    @Override
+    default boolean isRepairable() {
+        return false;
+    }
+
     default void onKill(Player player, LivingEntity slainEntity) {}
     default void onAttack(Player player, LivingEntity attackedEntity) {}
     default void onShoot(Player player, LivingEntity attackedEntity) {}
