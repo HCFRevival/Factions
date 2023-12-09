@@ -306,13 +306,21 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new ChargeBattleHorn(this));
         customItemService.registerNewItem(new BerserkBattleHorn(this));
         customItemService.registerNewItem(new SymsSong(this));
-        customItemService.registerNewItem(new AdmiralsEmber(this));
         customItemService.registerNewItem(new StarterRod());
 
         // mythics
         customItemService.registerNewItem(new DeepslateMiner(this));
 
         // TODO: Make these configurable
+        customItemService.registerNewItem(new AdmiralsEmber(this, new AdmiralsEmber.AdmiralsEmberConfig(
+                5,
+                10,
+                20*8,
+                30,
+                16,
+                20*30
+        )));
+
         customItemService.registerNewItem(new Ghostblade(this, new Ghostblade.GhostbladeConfig(
                 20,
                 16,
