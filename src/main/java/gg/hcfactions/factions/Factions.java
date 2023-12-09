@@ -324,8 +324,8 @@ public final class Factions extends AresPlugin {
         customItemService.registerNewItem(new Ghostblade(this, new Ghostblade.GhostbladeConfig(
                 20,
                 16,
-                1,
-                3,
+                5,
+                10,
                 5.0f,
                 60
         )));

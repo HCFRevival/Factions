@@ -81,6 +81,11 @@ public final class Ghostblade implements IMythicItem {
     }
 
     @Override
+    public int getAbilityParticleCount() {
+        return 12;
+    }
+
+    @Override
     public int getDurabilityCost() {
         return 3;
     }
@@ -134,14 +139,10 @@ public final class Ghostblade implements IMythicItem {
             return;
         }
 
-        if ((existingSpeed.getDuration() / 20) > 60) {
-            return;
-        }
-
         final float roll = Math.abs(random.nextFloat(100.0f));
 
         if (roll <= config.refreshChance()) {
-            final int diff = Math.abs(random.nextInt(3)) + 1;
+            final int diff = Math.abs(random.nextInt(5)) + 1;
             final int seconds = Math.max(config.refreshEffectMinDuration() + diff, config.refreshEffectMaxDuration());
             final PotionEffect newSpeed = new PotionEffect(PotionEffectType.SPEED, existingSpeed.getDuration() + (seconds*20), existingSpeed.getAmplifier());
 
