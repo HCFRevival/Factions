@@ -71,6 +71,13 @@ public interface IMythicItem extends ICustomItem {
     }
 
     /**
+     * @return If true onAttack and onKill will trigger on friendlies
+     */
+    default boolean isFriendlyFireEnabled() {
+        return false;
+    }
+
+    /**
      * Queries mythic abilities by provided ability type
      * @param type Ability Type
      * @return List of MythicAbility

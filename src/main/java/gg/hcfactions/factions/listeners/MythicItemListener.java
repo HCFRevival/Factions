@@ -4,11 +4,11 @@ import com.google.common.collect.Sets;
 import gg.hcfactions.cx.event.EnchantLimitApplyEvent;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.mythic.IMythicItem;
+import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.Cancellable;
@@ -187,6 +187,14 @@ public final class MythicItemListener implements Listener {
             return;
         }
 
+        if (!mythic.isFriendlyFireEnabled() && livingEntity instanceof final Player killedPlayer) {
+            final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(killer);
+
+            if (faction != null && faction.isMember(killedPlayer)) {
+                return;
+            }
+        }
+
         mythic.onKill(killer, livingEntity);
     }
 
@@ -215,6 +223,14 @@ public final class MythicItemListener implements Listener {
 
         if (!(customItem instanceof final IMythicItem mythic)) {
             return;
+        }
+
+        if (!mythic.isFriendlyFireEnabled() && livingEntity instanceof final Player attackedPlayer) {
+            final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+            if (faction != null && faction.isMember(attackedPlayer)) {
+                return;
+            }
         }
 
         mythic.onAttack(player, livingEntity);
@@ -286,8 +302,16 @@ public final class MythicItemListener implements Listener {
                 return;
             }
 
-            if (pt.getCustomItem() instanceof final IMythicItem mythicItem) {
-                mythicItem.onShoot(pt.getShooter(), hitEntity);
+            if (pt.getCustomItem() instanceof final IMythicItem mythic) {
+                if (!mythic.isFriendlyFireEnabled() && hitEntity instanceof final Player hitPlayer) {
+                    final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(pt.getShooter());
+
+                    if (faction != null && faction.isMember(hitPlayer)) {
+                        return;
+                    }
+                }
+
+                mythic.onShoot(pt.getShooter(), hitEntity);
             }
         });
     }
