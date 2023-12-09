@@ -118,10 +118,12 @@ public final class Hullbreaker implements IMythicItem {
         }
 
         final List<Player> nearbyEnemies = FactionUtil.getNearbyEnemies(plugin, player, config.getRequiredAllyDistance());
-
-        // TODO: Make scalable for better balance?
-
         if (nearbyEnemies.size() < config.getRequiredEnemyCount()) {
+            return;
+        }
+
+        final List<Player> nearbyAllies = FactionUtil.getNearbyFriendlies(plugin, player, config.getRequiredAllyDistance());
+        if (!nearbyAllies.isEmpty()) {
             return;
         }
 

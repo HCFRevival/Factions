@@ -109,6 +109,7 @@ public final class FConfig {
     @Getter public int diverClassLimit;
     @Getter public int rogueClassLimit;
     @Getter public int bardClassLimit;
+    @Getter public int guardianClassLimit;
 
     // deathbans
     @Getter public boolean deathbansEnabled;
@@ -260,11 +261,13 @@ public final class FConfig {
         rogueClassLimit = conf.getInt("factions.class_limits.rogue");
         minerClassLimit = conf.getInt("factions.class_limits.miner");
         diverClassLimit = conf.getInt("factions.class_limits.diver");
+        guardianClassLimit = conf.getInt("factions.class_limits.guardian");
         plugin.getAresLogger().info("Archer Class Limit: " + archerClassLimit);
         plugin.getAresLogger().info("Bard Class Limit: " + bardClassLimit);
         plugin.getAresLogger().info("Rogue Class Limit: " + rogueClassLimit);
         plugin.getAresLogger().info("Diver Class Limit: " + diverClassLimit);
         plugin.getAresLogger().info("Miner Class Limit: " + minerClassLimit);
+        plugin.getAresLogger().info("Guardian Class Limit: " + guardianClassLimit);
 
         powerMax = conf.getDouble("factions.power.max_power");
         powerMin = conf.getDouble("factions.power.min_power");

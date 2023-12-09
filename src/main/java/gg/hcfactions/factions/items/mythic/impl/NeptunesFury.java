@@ -141,7 +141,6 @@ public final class NeptunesFury implements IMythicItem {
         affectedEntity.setLastDamageCause(damageEvent);
 
         final Vector vec = new Vector(addedVelocity.getX(), 0.2, addedVelocity.getZ());
-        Bukkit.broadcastMessage(vec.toString());
         affectedEntity.setVelocity(currentVelocity.add(vec));
     }
 }

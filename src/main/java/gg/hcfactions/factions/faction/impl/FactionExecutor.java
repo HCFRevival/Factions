@@ -498,6 +498,13 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
                 }
             }
+
+            if (playerClass instanceof Tank) {
+                if (count >= manager.getPlugin().getConfiguration().getGuardianClassLimit()) {
+                    playerClass.deactivate(player, false);
+                    player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
+                }
+            }
         }
 
         faction.getPendingInvites().remove(player.getUniqueId());

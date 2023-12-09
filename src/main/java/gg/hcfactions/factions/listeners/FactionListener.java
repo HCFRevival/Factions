@@ -95,6 +95,14 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
                 event.setCancelled(true);
             }
         }
+
+        if (playerClass instanceof Tank) {
+            if (count >= plugin.getConfiguration().getGuardianClassLimit()) {
+                playerClass.deactivate(player, false);
+                player.sendMessage(FMessage.ERROR + FError.C_CLASS_LIMIT_MET.getErrorDescription());
+                event.setCancelled(true);
+            }
+        }
     }
 
     /**

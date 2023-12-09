@@ -10,6 +10,7 @@ import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.loot.PalaceLootChest;
+import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.IFaction;
@@ -135,6 +136,12 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             final World world = claim.getCornerA().getBukkitBlock().getWorld();
 
             world.getLivingEntities().forEach(livingEntity -> {
+                if (event.getEvent() instanceof final DPSEvent dpsEvent) {
+                    if (dpsEvent.getSession().getDpsEntity().getEntity().getHandle().getUUID().equals(livingEntity.getUniqueId())) {
+                        return;
+                    }
+                }
+
                 if (livingEntity instanceof Monster && claim.isInside(new PLocatable(livingEntity), false)) {
                     livingEntity.remove();
                 }
@@ -179,6 +186,12 @@ public record EventListener(@Getter Factions plugin) implements Listener {
 
         if (!attachedEvent.isActive()) {
             return;
+        }
+
+        if (attachedEvent instanceof final DPSEvent dpsEvent) {
+            if (dpsEvent.getSession().getDpsEntity().getEntity().getHandle().getUUID().equals(event.getEntity().getUniqueId())) {
+                return;
+            }
         }
 
         event.setCancelled(true);

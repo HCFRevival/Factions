@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.models.displays.impl;
 
 import com.google.common.collect.Maps;
+import gg.hcfactions.cx.CXService;
 import gg.hcfactions.cx.hologram.EHologramOrder;
 import gg.hcfactions.cx.hologram.impl.Hologram;
 import gg.hcfactions.factions.Factions;
@@ -38,7 +39,15 @@ public final class LeaderboardDisplayable implements IDisplayable {
         this.type = type;
         this.origin = origin;
         this.title = ChatColor.GOLD + "" + ChatColor.BOLD + type.getDisplayName() + " Leaderboard";
-        this.hologram = new Hologram(-1, Collections.singletonList(title), origin, EHologramOrder.DESCENDING);
+
+        final CXService cxs = (CXService) plugin.getService(CXService.class);
+
+        if (cxs == null) {
+            plugin.getAresLogger().error("Attempted to spawn in a Leaderboard Hologram without CX Service enabled");
+            return;
+        }
+
+        this.hologram = new Hologram(cxs, -1, Collections.singletonList(title), origin, EHologramOrder.DESCENDING);
     }
 
     public void update() {
