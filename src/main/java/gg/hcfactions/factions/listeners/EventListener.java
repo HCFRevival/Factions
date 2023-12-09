@@ -183,7 +183,7 @@ public record EventListener(@Getter Factions plugin) implements Listener {
         }
 
         if (attachedEvent instanceof final DPSEvent dpsEvent) {
-            if (event.getEntity().getUniqueId().equals(dpsEvent.getSession().getDpsEntity().getEntity().getUniqueId())) {
+            if (dpsEvent.getSession().getDpsEntity().getEntity().getHandle().getUUID().equals(event.getEntity().getUniqueId())) {
                 return;
             }
         }
