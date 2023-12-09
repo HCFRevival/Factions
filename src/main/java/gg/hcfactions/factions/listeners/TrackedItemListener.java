@@ -7,6 +7,7 @@ import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.stats.impl.item.TrackedBow;
 import gg.hcfactions.factions.models.stats.impl.item.TrackedPickaxe;
 import gg.hcfactions.factions.models.stats.impl.item.TrackedWeapon;
+import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -47,6 +48,11 @@ public record TrackedItemListener(@Getter Factions plugin) implements Listener {
         if (slain.getKiller() != null) {
             final Player killer = slain.getKiller();
             final ItemStack hand = killer.getInventory().getItemInMainHand();
+            final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
+
+            if (cis != null && cis.getItem(hand).isPresent()) {
+                return;
+            }
 
             if (TrackedWeapon.VALID_ITEMS.contains(hand.getType())) {
                 final TrackedWeapon trackedSword = new TrackedWeapon().fromItem(hand);
@@ -72,6 +78,11 @@ public record TrackedItemListener(@Getter Factions plugin) implements Listener {
         if (event.getKiller() != null) {
             final Player killer = event.getKiller();
             final ItemStack hand = killer.getInventory().getItemInMainHand();
+            final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
+
+            if (cis != null && cis.getItem(hand).isPresent()) {
+                return;
+            }
 
             if (TrackedWeapon.VALID_ITEMS.contains(hand.getType())) {
                 final TrackedWeapon trackedSword = new TrackedWeapon().fromItem(hand);
@@ -102,6 +113,11 @@ public record TrackedItemListener(@Getter Factions plugin) implements Listener {
         }
 
         if (!TrackedPickaxe.VALID_ITEMS.contains(hand.getType())) {
+            return;
+        }
+
+        final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
+        if (cis != null && cis.getItem(hand).isPresent()) {
             return;
         }
 
