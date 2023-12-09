@@ -201,6 +201,7 @@ public final class BossGiant extends Giant implements IBossEntity {
             zombie.setBaby();
             zombie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
             zombie.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, PotionEffect.INFINITE_DURATION, 0));
+            zombie.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
             zombie.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, "noMerge");
             zombie.setCanPickupItems(false);
 

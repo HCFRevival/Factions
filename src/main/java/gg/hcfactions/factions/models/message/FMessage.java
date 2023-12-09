@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
@@ -378,6 +379,22 @@ public final class FMessage {
 
     public static void printNeptunesFuryImpale(Player viewer, int woundSeconds) {
         viewer.sendMessage(Colors.RED.toBukkit() + "Impaled" + ChatColor.GRAY + ": You've inflicted wounds to your enemy that will bleed for " + woundSeconds + " seconds");
+    }
+
+    public static void printAdmiralsEmberAblazeVictim(Player viewer, int seconds) {
+        viewer.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Set Ablaze!" + ChatColor.YELLOW + " You will burn for " + ChatColor.RED + seconds + " seconds");
+    }
+
+    public static void printAdmiralsEmberAblazeAttacker(Player viewer, int seconds) {
+        viewer.sendMessage(Colors.RED.toBukkit() + "Set The World Ablaze" + ChatColor.GRAY + ": You've ignited all nearby enemies for " + ChatColor.RED + seconds + " seconds");
+    }
+
+    public static void printAdmiralsEmberOverheatVictim(Player viewer, Player attacker, int seconds) {
+        viewer.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Overheating!" + ChatColor.YELLOW + " You will burn for " + ChatColor.RED + seconds + " seconds");
+    }
+
+    public static void printAdmiralsEmberOverheatAttacker(Player viewer, LivingEntity victim, int seconds) {
+        viewer.sendMessage(Colors.GOLD.toBukkit() + "Overheat" + ChatColor.GRAY + ": You've ignited " + ChatColor.RED + victim.getName() + ChatColor.GRAY + " for " + ChatColor.RED + seconds + " seconds");
     }
 
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {

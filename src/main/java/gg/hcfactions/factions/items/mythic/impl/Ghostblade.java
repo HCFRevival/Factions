@@ -32,8 +32,7 @@ public final class Ghostblade implements IMythicItem {
                                    @Getter int killEffectRange,
                                    @Getter int refreshEffectMinDuration,
                                    @Getter int refreshEffectMaxDuration,
-                                   @Getter float refreshChance,
-                                   @Getter int refreshSpeedMaxDuration) {}
+                                   @Getter float refreshChance) {}
 
     @Getter public final Factions plugin;
     @Getter public final List<MythicAbility> abilityInfo;
@@ -54,15 +53,14 @@ public final class Ghostblade implements IMythicItem {
         addAbilityInfo(
                 ChatColor.WHITE + "Refreshed",
                 ChatColor.GRAY + "Attacking an enemy has a 5% chance to extend your active Speed effect by "
-                        + ghostbladeConfig.refreshEffectMinDuration() + "-" + ghostbladeConfig.refreshEffectMaxDuration()
-                        + " seconds if your Speed duration is less than " + config.refreshSpeedMaxDuration() + " seconds.",
+                        + ghostbladeConfig.refreshEffectMinDuration() + "-" + ghostbladeConfig.refreshEffectMaxDuration() + " seconds.",
                 EMythicAbilityType.ON_HIT
         );
     }
 
     @Override
     public Material getMaterial() {
-        return Material.DIAMOND_SWORD;
+        return Material.NETHERITE_SWORD;
     }
 
     @Override
@@ -78,6 +76,11 @@ public final class Ghostblade implements IMythicItem {
     @Override
     public Particle getAbilityParticle() {
         return Particle.CHERRY_LEAVES;
+    }
+
+    @Override
+    public int getAbilityParticleCount() {
+        return 12;
     }
 
     @Override
@@ -134,14 +137,10 @@ public final class Ghostblade implements IMythicItem {
             return;
         }
 
-        if ((existingSpeed.getDuration() / 20) > 60) {
-            return;
-        }
-
         final float roll = Math.abs(random.nextFloat(100.0f));
 
         if (roll <= config.refreshChance()) {
-            final int diff = Math.abs(random.nextInt(3)) + 1;
+            final int diff = Math.abs(random.nextInt(5)) + 1;
             final int seconds = Math.max(config.refreshEffectMinDuration() + diff, config.refreshEffectMaxDuration());
             final PotionEffect newSpeed = new PotionEffect(PotionEffectType.SPEED, existingSpeed.getDuration() + (seconds*20), existingSpeed.getAmplifier());
 

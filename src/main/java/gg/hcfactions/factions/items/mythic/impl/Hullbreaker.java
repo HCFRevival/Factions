@@ -53,7 +53,7 @@ public final class Hullbreaker implements IMythicItem {
 
     @Override
     public Material getMaterial() {
-        return Material.DIAMOND_SWORD;
+        return Material.NETHERITE_SWORD;
     }
 
     @Override
