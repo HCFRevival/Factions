@@ -136,6 +136,12 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             final World world = claim.getCornerA().getBukkitBlock().getWorld();
 
             world.getLivingEntities().forEach(livingEntity -> {
+                if (event.getEvent() instanceof final DPSEvent dpsEvent) {
+                    if (dpsEvent.getSession().getDpsEntity().getEntity().getHandle().getUUID().equals(livingEntity.getUniqueId())) {
+                        return;
+                    }
+                }
+
                 if (livingEntity instanceof Monster && claim.isInside(new PLocatable(livingEntity), false)) {
                     livingEntity.remove();
                 }
