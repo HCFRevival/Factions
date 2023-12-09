@@ -32,8 +32,7 @@ public final class Ghostblade implements IMythicItem {
                                    @Getter int killEffectRange,
                                    @Getter int refreshEffectMinDuration,
                                    @Getter int refreshEffectMaxDuration,
-                                   @Getter float refreshChance,
-                                   @Getter int refreshSpeedMaxDuration) {}
+                                   @Getter float refreshChance) {}
 
     @Getter public final Factions plugin;
     @Getter public final List<MythicAbility> abilityInfo;
@@ -54,8 +53,7 @@ public final class Ghostblade implements IMythicItem {
         addAbilityInfo(
                 ChatColor.WHITE + "Refreshed",
                 ChatColor.GRAY + "Attacking an enemy has a 5% chance to extend your active Speed effect by "
-                        + ghostbladeConfig.refreshEffectMinDuration() + "-" + ghostbladeConfig.refreshEffectMaxDuration()
-                        + " seconds if your Speed duration is less than " + config.refreshSpeedMaxDuration() + " seconds.",
+                        + ghostbladeConfig.refreshEffectMinDuration() + "-" + ghostbladeConfig.refreshEffectMaxDuration() + " seconds.",
                 EMythicAbilityType.ON_HIT
         );
     }
