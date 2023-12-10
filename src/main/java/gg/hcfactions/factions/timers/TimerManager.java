@@ -332,11 +332,11 @@ public final class TimerManager implements IManager {
                 final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(cd.getEffectType());
                 final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
                 final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
-                final long remainingTime = cd.getCooldowns().get(factionPlayer.getUniqueId()) - Time.now();
+                final long remainingTime = cd.getCooldowns().getOrDefault(factionPlayer.getUniqueId(), 0L) - Time.now();
                 final int remainingSeconds = (int)remainingTime / 1000;
 
                 // we do not set hasEntries here
-                if (mapping != null) {
+                if (mapping != null && remainingTime > 0) {
                     factionPlayer.getScoreboard().setLine(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
                             + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
                 }
