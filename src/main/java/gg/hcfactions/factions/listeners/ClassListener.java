@@ -62,6 +62,13 @@ public final class ClassListener implements Listener {
             return;
         }
 
+        // Failsafe to prevent hidden players
+        Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
+            if (!onlinePlayer.canSee(player)) {
+                onlinePlayer.showPlayer(plugin, player);
+            }
+        });
+
         if (!rogue.getInvisibilityStates().containsKey(player.getUniqueId()) || rogue.getInvisibilityStates().get(player.getUniqueId()).equals(Rogue.InvisibilityState.NONE)) {
             return;
         }
