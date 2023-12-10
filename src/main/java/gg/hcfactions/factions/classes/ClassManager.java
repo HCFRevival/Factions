@@ -40,11 +40,13 @@ public final class ClassManager implements IManager {
 
     @Override
     public void onDisable() {
+        classes.stream().filter(c -> c instanceof Rogue).map(rc -> (Rogue)rc).findAny().ifPresent(Rogue::disableInvisibilityTask);
         classes.clear();
     }
 
     @Override
     public void onReload() {
+        classes.stream().filter(c -> c instanceof Rogue).map(rc -> (Rogue)rc).findAny().ifPresent(Rogue::disableInvisibilityTask);
         loadClasses();
     }
 
@@ -80,8 +82,28 @@ public final class ClassManager implements IManager {
                 final int backstabCooldown = conf.getInt(path + "backstab.cooldown");
                 final int backstabTickrate = conf.getInt(path + "backstab.tickrate");
                 final double backstabDamage = conf.getDouble(path + "backstab.damage");
+                final int grappleCooldown = conf.getInt(path + "grapple.cooldown");
+                final double grappleHorizontalSpeed = conf.getInt(path + "grapple.speed.horizontal");
+                final double grappleVerticalSpeed = conf.getInt(path + "grapple.speed.vertical");
+                final boolean invisEnabled = conf.getBoolean(path + "cloak.enabled");
+                final int fullInvisMinRadius = conf.getInt(path + "cloak.ranges.full");
+                final int partialInvisMinRadius = conf.getInt(path + "cloak.ranges.partial");
+                final int invisCooldown = conf.getInt(path + "cloak.cooldown");
 
-                playerClass = new Rogue(this, warmup, backstabDamage, backstabTickrate, backstabCooldown);
+                playerClass = new Rogue(
+                        this,
+                        warmup,
+                        backstabDamage,
+                        backstabTickrate,
+                        backstabCooldown,
+                        invisCooldown,
+                        grappleCooldown,
+                        grappleHorizontalSpeed,
+                        grappleVerticalSpeed,
+                        invisEnabled,
+                        fullInvisMinRadius,
+                        partialInvisMinRadius
+                );
             }
 
             else if (className.equalsIgnoreCase("diver")) {

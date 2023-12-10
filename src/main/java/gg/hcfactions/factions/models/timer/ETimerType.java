@@ -7,6 +7,13 @@ import net.md_5.bungee.api.ChatColor;
 
 @AllArgsConstructor
 public enum ETimerType {
+    GRAPPLE(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Grapple",
+            Colors.GOLD.toBukkit() + "Grapple",
+            16,
+            true,
+            true,
+            false
+    ),
     GUARD(
             Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Guard",
             Colors.GOLD.toBukkit() + "Guard",
@@ -18,7 +25,7 @@ public enum ETimerType {
     CHORUS_FRUIT(
             Colors.LAVENDAR.toBukkit() + "" + ChatColor.BOLD + "Chorus Fruit",
             Colors.LAVENDAR.toBukkit() + "Chorus Fruit",
-            14,
+            16,
             true,
             true,
             false

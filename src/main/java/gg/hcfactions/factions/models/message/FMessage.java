@@ -58,6 +58,7 @@ public final class FMessage {
     public static final String T_GAPPLE_UNLOCKED = SUCCESS + "Your gapples have been unlocked";
     public static final String T_CHORUS_UNLOCKED = SUCCESS + "Your chorus fruit have been unlocked";
     public static final String T_TRIDENT_UNLOCKED = SUCCESS + "Your riptide has been unlocked";
+    public static final String T_GRAPPLE_UNLOCKED = SUCCESS + "Your grapple has been unlocked";
     public static final String T_HOME_EXPIRE = SUCCESS + "You have been returned to your faction home";
     public static final String T_STUCK_EXPIRE = SUCCESS + "You have been teleported to safety";
     public static final String T_LOGOUT_EXPIRE = SUCCESS + "You have been disconnected safely";
@@ -271,6 +272,10 @@ public final class FMessage {
 
     public static void printClassDeactivated(Player player, IClass playerClass) {
         player.sendMessage(LAYER_2 + "Class Deactivated" + LAYER_1 + ": " + INFO + playerClass.getName());
+    }
+
+    public static void printRogueUncloak(Player player, String reason) {
+        player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Uncloaked!" + " " + ChatColor.YELLOW + "You are now visible because you " + reason);
     }
 
     public static void printSubclaimAdded(Subclaim subclaim, String addingUsername, String addedUsername) {

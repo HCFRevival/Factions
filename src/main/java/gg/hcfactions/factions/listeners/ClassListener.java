@@ -3,6 +3,7 @@ package gg.hcfactions.factions.listeners;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
 import gg.hcfactions.factions.models.classes.*;
@@ -12,10 +13,9 @@ import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
-import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
-import gg.hcfactions.libs.bukkit.events.impl.PlayerShieldEvent;
+import gg.hcfactions.libs.bukkit.events.impl.*;
 import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
@@ -30,6 +30,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -51,6 +53,21 @@ public final class ClassListener implements Listener {
     public ClassListener(Factions plugin) {
         this.plugin = plugin;
         this.recentlyLoggedIn = Sets.newConcurrentHashSet();
+    }
+
+    private void handleUncloak(Player player, String reason) {
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof Rogue rogue)) {
+            return;
+        }
+
+        if (!rogue.getInvisibilityStates().containsKey(player.getUniqueId()) || rogue.getInvisibilityStates().get(player.getUniqueId()).equals(Rogue.InvisibilityState.NONE)) {
+            return;
+        }
+
+        rogue.unvanishPlayer(player, reason);
+        rogue.getInvisibilityStates().remove(player.getUniqueId());
     }
 
     @EventHandler
@@ -319,6 +336,136 @@ public final class ClassListener implements Listener {
                     + ChatColor.YELLOW + ")");
 
         }).delay(1L).run();
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onRogueGrappleEntity(PlayerFishEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Player player = event.getPlayer();
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+
+        if (event.getHand() == null) {
+            return;
+        }
+
+        final ItemStack hand = player.getInventory().getItem(event.getHand());
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof Rogue rogueClass)) {
+            return;
+        }
+
+        if (factionPlayer.hasTimer(ETimerType.GRAPPLE)) {
+            FMessage.printLockedTimer(player, "Grapple", factionPlayer.getTimer(ETimerType.GRAPPLE).getRemaining());
+            event.setCancelled(true);
+            event.getHook().setHookedEntity(null);
+            event.getHook().remove();
+            return;
+        }
+
+        if (event.getState().equals(PlayerFishEvent.State.CAUGHT_ENTITY) && event.getCaught() instanceof final LivingEntity attachedEntity) {
+            final PlayerGrappleEvent grappleEvent = new PlayerGrappleEvent(player, hand, player.getLocation(), attachedEntity.getLocation(), attachedEntity);
+            Bukkit.getPluginManager().callEvent(grappleEvent);
+
+            if (grappleEvent.isCancelled()) {
+                return;
+            }
+
+            factionPlayer.addTimer(new FTimer(ETimerType.GRAPPLE, rogueClass.getGrappleCooldown()));
+
+            final Vector velocity = attachedEntity.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
+            player.setVelocity(velocity.multiply(rogueClass.getGrappleHorizontalSpeed()).setY(rogueClass.getGrappleVerticalSpeed()));
+            event.setCancelled(true);
+            event.getHook().setHookedEntity(null);
+            event.getHook().remove();
+            return;
+        }
+
+        if (!event.getState().equals(PlayerFishEvent.State.IN_GROUND)) {
+            return;
+        }
+
+        final PlayerGrappleEvent grappleEvent = new PlayerGrappleEvent(player, hand, player.getLocation(), event.getHook().getLocation(), null);
+        Bukkit.getPluginManager().callEvent(grappleEvent);
+
+        if (grappleEvent.isCancelled()) {
+            return;
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.GRAPPLE, rogueClass.getGrappleCooldown()));
+
+        final Vector velocity = event.getHook().getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
+        player.setVelocity(velocity.multiply(rogueClass.getGrappleHorizontalSpeed()).setY(rogueClass.getGrappleVerticalSpeed()));
+        event.setCancelled(true);
+        event.getHook().remove();
+    }
+
+    @EventHandler
+    public void onRogueCloak(PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+        final UUID uniqueId = player.getUniqueId();
+        final ItemStack hand = event.getItem();
+        final EPlayerHand handType = (event.getHand() == null || event.getHand().equals(EquipmentSlot.HAND) ? EPlayerHand.MAIN : EPlayerHand.OFFHAND);
+
+        if (hand == null) {
+            return;
+        }
+
+        if (!hand.getType().equals(Material.ENDER_EYE)) {
+            return;
+        }
+
+        if (!player.getGameMode().equals(GameMode.SURVIVAL)) {
+            return;
+        }
+
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && !event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Rogue rogue)) {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        if (rogue.isInvisible(player)) {
+            player.sendMessage(ChatColor.RED + "You are already cloaked");
+            return;
+        }
+
+        if (rogue.hasInvisCooldown(player)) {
+            final long timeUntilNextCall = (rogue.getInvisCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now());
+            player.sendMessage(ChatColor.RED + "Cloak is locked for " + ChatColor.RED + "" + ChatColor.BOLD + Time.convertToDecimal(timeUntilNextCall) + ChatColor.RED + "s");
+            return;
+        }
+
+        if (hand.getAmount() > 1) {
+            hand.setAmount(hand.getAmount() - 1);
+        } else if (handType.equals(EPlayerHand.MAIN)) {
+            player.getInventory().setItemInMainHand(null);
+        } else {
+            player.getInventory().setItemInOffHand(null);
+        }
+
+        final Rogue.InvisibilityState currentInvisState = rogue.getInvisibilityStates().getOrDefault(player.getUniqueId(), Rogue.InvisibilityState.NONE);
+
+        if (!currentInvisState.equals(Rogue.InvisibilityState.NONE)) {
+            player.sendMessage(ChatColor.RED + "Your cloak is already active");
+            return;
+        }
+
+        rogue.getInvisCooldowns().put(player.getUniqueId(), (Time.now() + (rogue.getInvisibilityCooldown()*1000L)));
+        rogue.getInvisibilityStates().put(player.getUniqueId(), Rogue.InvisibilityState.FULL);
+        rogue.vanishPlayer(player);
+        rogue.updateVisibility(player, rogue.getExpectedInvisibilityState(player));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0));
+        new Scheduler(plugin).sync(() -> rogue.getInvisCooldowns().remove(uniqueId)).delay(rogue.getInvisibilityCooldown()*20L).run();
     }
 
     @EventHandler
@@ -757,7 +904,7 @@ public final class ClassListener implements Listener {
      * @param event ClassDeactivateEvent
      */
     @EventHandler
-    public void onPlayerClassDeactivate(ClassDeactivateEvent event) {
+    public void onPlayerClassDeactivateScoreboard(ClassDeactivateEvent event) {
         final Player player = event.getPlayer();
         final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
 
@@ -771,6 +918,23 @@ public final class ClassListener implements Listener {
 
         for (EEffectScoreboardMapping mapping : EEffectScoreboardMapping.values()) {
             factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
+        }
+    }
+
+    /**
+     * Class cleanup
+     * @param event ClassDeactivateEvent
+     */
+    @EventHandler
+    public void onPlayerClassDeactivate(ClassDeactivateEvent event) {
+        final Player player = event.getPlayer();
+
+        if (event.getPlayerClass() instanceof final Rogue rogue) {
+            if (rogue.isInvisible(player)) {
+                rogue.unvanishPlayer(player, "your class deactivated");
+            }
+
+            rogue.getInvisibilityStates().remove(player.getUniqueId());
         }
     }
 
@@ -1050,5 +1214,149 @@ public final class ClassListener implements Listener {
         });
 
         toRemove.forEach(drops::remove);
+    }
+
+    @EventHandler
+    public void onRogueBlockBreak(BlockBreakEvent event) {
+        handleUncloak(event.getPlayer(), "broke a block");
+    }
+
+    @EventHandler
+    public void onRogueBlockPlace(BlockPlaceEvent event) {
+        handleUncloak(event.getPlayer(), "placed a block");
+    }
+
+    @EventHandler
+    public void onRogueBlockInteract(PlayerInteractEvent event) {
+        if (!event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+            return;
+        }
+
+        if (event.getClickedBlock() == null) {
+            return;
+        }
+
+        if (!FactionUtil.isInteractable(event.getClickedBlock().getType())) {
+            return;
+        }
+
+        handleUncloak(event.getPlayer(), "interacted with a block");
+    }
+
+    @EventHandler
+    public void onRogueLaunchProjectile(ProjectileLaunchEvent event) {
+        if (!(event.getEntity().getShooter() instanceof final Player player)) {
+            return;
+        }
+
+        if (event.getEntity() instanceof FishHook) {
+            return;
+        }
+
+        handleUncloak(player, "launched a projectile");
+    }
+
+    @EventHandler
+    public void onRogueGrapple(PlayerGrappleEvent event) {
+        handleUncloak(event.getPlayer(), "used your grapple");
+    }
+
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof final Player player) {
+            handleUncloak(player, "took damage");
+            return;
+        }
+
+        if (event.getDamager() instanceof final Player player) {
+            handleUncloak(player, "inflicted damage");
+        }
+    }
+
+    @EventHandler
+    public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+        final Player player = event.getPlayer();
+        handleUncloak(player, "changed worlds");
+    }
+
+    @EventHandler
+    public void onPlayerSplashPlayer(PlayerSplashPlayerEvent event) {
+        final Player damaged = event.getDamaged();
+        final Player damager = event.getDamager();
+
+        handleUncloak(damaged, "were impacted by a potion");
+        handleUncloak(damager, "impacted a player with your potion");
+    }
+
+    @EventHandler
+    public void onLingeringSplash(PlayerLingeringSplashEvent event) {
+        final Player damaged = event.getDamaged();
+        final Player damager = event.getDamager();
+
+        handleUncloak(damaged, "were impacted by a potion");
+        handleUncloak(damager, "impacted a player with your potion");
+    }
+
+    @EventHandler
+    public void onEntityTarget(EntityTargetLivingEntityEvent event) {
+        if (!(event.getTarget() instanceof final Player player)) {
+            return;
+        }
+
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+        if (!(playerClass instanceof Rogue rogue)) {
+            return;
+        }
+
+        if (rogue.isInvisible(player)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onRogueDeath(PlayerDeathEvent event) {
+        final Player player = event.getEntity();
+        handleUncloak(player, "died");
+    }
+
+    @EventHandler
+    public void onRogueQuit(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
+
+        if (!(playerClass instanceof final Rogue rogue)) {
+            return;
+        }
+
+        if (rogue.isInvisible(player)) {
+            rogue.unvanishPlayer(player);
+        }
+    }
+
+    @EventHandler
+    public void onJoinRogueVanish(PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+        final Rogue rogue = (Rogue)plugin.getClassManager().getClassByName("Rogue");
+
+        if (rogue == null) {
+            return;
+        }
+
+        rogue.getInvisiblePlayers().forEach((id, state) -> {
+            final Player roguePlayer = Bukkit.getPlayer(id);
+
+            if (roguePlayer == null) {
+                return;
+            }
+
+            if (!state.equals(Rogue.InvisibilityState.NONE) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                if (faction != null && faction.isMember(player)) {
+                    return;
+                }
+
+                player.hidePlayer(plugin, roguePlayer);
+            }
+        });
     }
 }

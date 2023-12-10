@@ -38,6 +38,17 @@ data:
       cooldown: 3
       damage: 1.0
       tickrate: 10
+    grapple:
+      cooldown: 5
+      speed:
+        horizontal: 1.25
+        vertical: 0.25
+    cloak:
+      enabled: true
+      cooldown: 300
+      ranges:
+        full: 16
+        partial: 8
     passive:
       SPEED: 3
       JUMP: 2
