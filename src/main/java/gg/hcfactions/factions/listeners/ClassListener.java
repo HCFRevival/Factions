@@ -445,6 +445,13 @@ public final class ClassListener implements Listener {
             return;
         }
 
+        final Rogue.InvisibilityState entryState = rogue.getExpectedInvisibilityState(player);
+
+        if (!entryState.equals(Rogue.InvisibilityState.FULL)) {
+            player.sendMessage(ChatColor.RED + "You can not cloak while enemies are nearby");
+            return;
+        }
+
         if (hand.getAmount() > 1) {
             hand.setAmount(hand.getAmount() - 1);
         } else if (handType.equals(EPlayerHand.MAIN)) {
