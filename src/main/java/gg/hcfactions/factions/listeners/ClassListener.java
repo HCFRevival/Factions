@@ -1143,6 +1143,14 @@ public final class ClassListener implements Listener {
             return;
         }
 
+        if (event instanceof final EntityDamageByEntityEvent entityDamageEntEvent) {
+            final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+            if (faction != null && entityDamageEntEvent.getDamager() instanceof final Player playerDamager && faction.isMember(playerDamager)) {
+                return;
+            }
+        }
+
         if (!player.isHandRaised()) {
             return;
         }
