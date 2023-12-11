@@ -354,15 +354,6 @@ public final class Factions extends AresPlugin {
         )));
     }
 
-    /*
-        TODO:
-            Track down why players can log in immediately after combat logging
-            Track down why players killed by a giant stomp keep their inventory
-            Heal Bow
-            Collateral Bow
-            Axe that breaks da trees
-     */
-
     @Override
     public void onDisable() {
         super.onDisable();

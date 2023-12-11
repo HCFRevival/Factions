@@ -739,7 +739,7 @@ public final class ClassListener implements Listener {
 
                     if (Bukkit.getPlayer(attackerUUID) != null) {
                         Objects.requireNonNull(Bukkit.getPlayer(attackerUUID)).sendMessage(ChatColor.GREEN + rogue.getName() + " backstab is ready");
-                        Players.playSound(Objects.requireNonNull(Bukkit.getPlayer(attackerUUID)), Sound.BLOCK_NOTE_BLOCK_HARP); // TODO: Test sound and match to original
+                        Players.playSound(Objects.requireNonNull(Bukkit.getPlayer(attackerUUID)), Sound.BLOCK_NOTE_BLOCK_HARP);
                     }
                 }).delay(rogue.getBackstabCooldown() * 20L).run();
             }).run();
