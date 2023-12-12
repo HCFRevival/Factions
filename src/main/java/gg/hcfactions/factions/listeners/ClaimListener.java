@@ -892,7 +892,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.removeTimer(timer.getType(), true);
+                profile.removeTimer(timer.getType());
 
                 event.setCancelled(true);
             }
@@ -903,7 +903,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.removeTimer(timer.getType(), true);
+                profile.removeTimer(timer.getType());
 
                 event.setCancelled(true);
             }
@@ -912,7 +912,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.removeTimer(timer.getType(), true);
+                profile.removeTimer(timer.getType());
 
                 event.setCancelled(true);
             }
@@ -922,7 +922,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                     player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                     player.sendMessage(ChatColor.RED + "You can not enderpearl in Palace claims");
 
-                    profile.removeTimer(timer.getType(), true);
+                    profile.removeTimer(timer.getType());
 
                     event.setCancelled(true);
                 }

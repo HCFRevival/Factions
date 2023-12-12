@@ -320,20 +320,6 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         toRemove.forEach(pillars::remove);
     }
 
-    /**
-     * Similar to #removeTimer, this function allows an optional bool value
-     * which will remove the scoreboard entry too
-     * @param type Timer Type
-     * @param removeScoreboard If true the scoreboard entry will be wiped
-     */
-    public void removeTimer(ETimerType type, boolean removeScoreboard) {
-        getTimers().removeIf(t -> t.getType().equals(type));
-
-        if (removeScoreboard && scoreboard != null) {
-            scoreboard.removeLine(type.getScoreboardPosition());
-        }
-    }
-
     @Override
     public void finishTimer(ETimerType type) {
         if (type.equals(ETimerType.ENDERPEARL)) {
@@ -421,10 +407,6 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         removeTimer(type);
-
-        if (scoreboard != null && !scoreboard.isHidden()) {
-            scoreboard.removeLine(type.getScoreboardPosition());
-        }
     }
 
     @Override

@@ -9,7 +9,7 @@ import net.md_5.bungee.api.ChatColor;
 public enum ETimerType {
     GRAPPLE(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Grapple",
             Colors.GOLD.toBukkit() + "Grapple",
-            16,
+            8,
             true,
             true,
             false
@@ -17,7 +17,7 @@ public enum ETimerType {
     GUARD(
             Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Guard",
             Colors.GOLD.toBukkit() + "Guard",
-            15,
+            8,
             true,
             true,
             false
@@ -25,7 +25,7 @@ public enum ETimerType {
     CHORUS_FRUIT(
             Colors.LAVENDAR.toBukkit() + "" + ChatColor.BOLD + "Chorus Fruit",
             Colors.LAVENDAR.toBukkit() + "Chorus Fruit",
-            16,
+            12,
             true,
             true,
             false
@@ -33,7 +33,7 @@ public enum ETimerType {
     TRIDENT(
       Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Riptide",
       Colors.AQUA.toBukkit() + "Riptide",
-      13,
+      8,
       true,
       true,
       false
@@ -41,7 +41,7 @@ public enum ETimerType {
     ENDERPEARL(
             Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Enderpearl",
             Colors.DARK_AQUA.toBukkit() + "Enderpearl",
-            12,
+            13,
             true,
             true,
             true
@@ -49,69 +49,69 @@ public enum ETimerType {
     HOME(
             Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Home",
             Colors.AQUA.toBukkit() + "Home",
-            11,
+            10,
             true,
             true,
             false
     ),
     STUCK(Colors.BLUE.toBukkit() + "" + ChatColor.BOLD + "Stuck",
             Colors.BLUE.toBukkit() + "Stuck",
-            10,
+            9,
             true,
             true,
             false
     ),
     CRAPPLE(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Crapple",
             Colors.GOLD.toBukkit() + "Crapple",
-            9,
+            6,
             true,
             true,
             false
     ),
     GAPPLE(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Gapple",
             Colors.GOLD.toBukkit() + "Gapple",
-            8,
+            4,
             true,
             false,
             true),
     LOGOUT(Colors.BLUE.toBukkit() + "" + ChatColor.BOLD + "Logout",
             Colors.BLUE.toBukkit() + "Logout",
-            7,
+            11,
             true,
             true,
             false
     ),
     COMBAT(Colors.RED.toBukkit() + "" + ChatColor.BOLD + "Combat Tag",
             Colors.RED.toBukkit() + "Combat Tag",
-            3,
+            15,
             true,
             true,
             true
     ),
     PROTECTION(Colors.GREEN.toBukkit() + "" + ChatColor.BOLD + "Protection",
             Colors.GREEN.toBukkit() + "Protection",
-            4,
+            16,
             true,
             false,
             true
     ),
     CLASS(Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Class",
             Colors.DARK_AQUA.toBukkit() + "Class",
-            5,
+            14,
             true,
             true,
             false
     ),
     TOTEM(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Totem",
             Colors.GOLD.toBukkit() + "Totem",
-            6,
+            5,
             true,
             false,
             true
     ),
     ARCHER_MARK(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Mark",
             Colors.GOLD.toBukkit() + "Mark",
-            14,
+            7,
             true,
             true,
             false

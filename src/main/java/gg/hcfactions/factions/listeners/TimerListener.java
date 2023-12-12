@@ -105,7 +105,6 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         if (factionPlayer.hasTimer(ETimerType.CLASS)) {
-            factionPlayer.getScoreboard().removeLine(ETimerType.CLASS.getScoreboardPosition());
             factionPlayer.removeTimer(ETimerType.CLASS);
         }
 
@@ -135,7 +134,6 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         if (factionPlayer.hasTimer(ETimerType.CLASS)) {
-            factionPlayer.getScoreboard().removeLine(ETimerType.CLASS.getScoreboardPosition());
             factionPlayer.removeTimer(ETimerType.CLASS);
         }
     }
@@ -275,8 +273,6 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
-            factionPlayer.getScoreboard().removeLine(timer.getType().getScoreboardPosition());
-
             FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "moved");
         }
     }
@@ -316,8 +312,6 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
-            factionPlayer.getScoreboard().removeLine(timer.getType().getScoreboardPosition());
-
             FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "took damage");
         }
     }

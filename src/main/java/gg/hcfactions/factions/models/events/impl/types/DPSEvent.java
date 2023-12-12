@@ -97,14 +97,6 @@ public final class DPSEvent implements IEvent, IDPSEvent, IScheduledEvent {
         session.setActive(false);
         faction.addTokens(session.getTokenReward());
 
-        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
-            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                final int index = p.getScoreboard().findIndex(ChatColor.stripColor(displayName));
-                p.getScoreboard().removeLine(index);
-                p.getScoreboard().removeLine(index - 1);
-            }
-        });
-
         FMessage.broadcastDpsEventMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
         Bukkit.getPluginManager().callEvent(new DPSCaptureEvent(this, faction));
     }
@@ -113,15 +105,6 @@ public final class DPSEvent implements IEvent, IDPSEvent, IScheduledEvent {
     public void stopEvent() {
         session.getDpsEntity().despawn();
         session = null;
-
-        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
-            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                final int index = p.getScoreboard().findIndex(ChatColor.stripColor(displayName));
-                p.getScoreboard().removeLine(index);
-                p.getScoreboard().removeLine(index - 1);
-            }
-        });
-
         FMessage.broadcastDpsEventMessage(displayName + FMessage.LAYER_1 + " can no longer be contested");
     }
 

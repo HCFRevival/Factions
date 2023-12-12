@@ -16,7 +16,6 @@ import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.*;
-import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.utils.Colors;
@@ -880,62 +879,6 @@ public final class ClassListener implements Listener {
     }
 
     /**
-     * Clear expired consumable effects from scoreboard
-     * @param event ClassConsumableReadyEvent
-     */
-    @EventHandler
-    public void onConsumableReady(ClassConsumableReadyEvent event) {
-        final Player player = event.getPlayer();
-        final IClass playerClass = plugin.getClassManager().getCurrentClass(player);
-
-        if (playerClass == null) {
-            return;
-        }
-
-        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
-
-        // hide scoreboard entry
-        if (factionPlayer != null && factionPlayer.getScoreboard() != null) {
-            final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(event.getConsumable().getEffectType());
-
-            if (remapped != null) {
-                final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
-
-                if (mapping != null) {
-                    factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
-                }
-            }
-
-            if (playerClass.getConsumables().stream().noneMatch(c -> c.hasCooldown(player))) {
-                factionPlayer.getScoreboard().removeLine(29);
-                factionPlayer.getScoreboard().removeLine(52);
-            }
-        }
-    }
-
-    /**
-     * Clear scoreboard entries for player class cooldowns
-     * @param event ClassDeactivateEvent
-     */
-    @EventHandler
-    public void onPlayerClassDeactivateScoreboard(ClassDeactivateEvent event) {
-        final Player player = event.getPlayer();
-        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
-
-        if (factionPlayer == null || factionPlayer.getScoreboard() == null) {
-            return;
-        }
-
-        factionPlayer.getScoreboard().removeLine(29);
-        factionPlayer.getScoreboard().removeLine(52);
-        factionPlayer.getScoreboard().removeLine(53);
-
-        for (EEffectScoreboardMapping mapping : EEffectScoreboardMapping.values()) {
-            factionPlayer.getScoreboard().removeLine(mapping.getScoreboardPosition());
-        }
-    }
-
-    /**
      * Class cleanup
      * @param event ClassDeactivateEvent
      */
@@ -1037,7 +980,7 @@ public final class ClassListener implements Listener {
         Bukkit.getPluginManager().callEvent(unreadyEvent);
 
         if (factionPlayer.hasTimer(ETimerType.GUARD)) {
-            factionPlayer.removeTimer(ETimerType.GUARD, true);
+            factionPlayer.removeTimer(ETimerType.GUARD);
         }
     }
 

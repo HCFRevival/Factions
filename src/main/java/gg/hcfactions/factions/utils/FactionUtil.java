@@ -57,7 +57,7 @@ public final class FactionUtil {
                 ? plugin.getConfiguration().getSotwProtectionDuration()
                 : plugin.getConfiguration().getNormalProtectionDuration();
 
-        factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType(), true));
+        factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType()));
 
         if (protDuration > 0 && !plugin.getServerStateManager().isEOTW()) {
             factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));

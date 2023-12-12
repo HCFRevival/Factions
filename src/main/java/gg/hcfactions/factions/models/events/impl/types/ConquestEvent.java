@@ -75,15 +75,6 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
             z.setCapturingFaction(null);
         });
 
-        // completely wipe scoreboard entries this event could be consuming
-        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
-            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                for (int i = 19; i < 24; i++) {
-                    p.getScoreboard().removeLine(i);
-                }
-            }
-        });
-
         capturingFaction = faction.getUniqueId();
 
         FMessage.broadcastConquestMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
@@ -136,15 +127,6 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
         zones.forEach(z -> {
             z.setTimer(null);
             z.setCapturingFaction(null);
-        });
-
-        // completely wipe scoreboard entries this event could be consuming
-        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
-            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                for (int i = 19; i < 24; i++) {
-                    p.getScoreboard().removeLine(i);
-                }
-            }
         });
     }
 

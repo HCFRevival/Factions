@@ -63,7 +63,6 @@ public final class TimerCommand extends BaseCommand {
 
         if (fp.hasTimer(timerType)) {
             fp.removeTimer(timerType);
-            fp.getScoreboard().removeLine(timerType.getScoreboardPosition());
         }
 
         final FTimer timer = new FTimer(timerType, duration);
