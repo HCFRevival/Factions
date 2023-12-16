@@ -136,6 +136,13 @@ public final class MythicItemListener implements Listener {
         }
 
         if (item.getItemMeta() instanceof final Damageable meta) {
+            final int newDamage = meta.getDamage() - mythicItem.getDurabilityCost();
+
+            if (newDamage <= 0) {
+                damager.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+                return;
+            }
+
             meta.setDamage(meta.getDamage() + mythicItem.getDurabilityCost());
             item.setItemMeta(meta);
             damager.getInventory().setItemInMainHand(item);
