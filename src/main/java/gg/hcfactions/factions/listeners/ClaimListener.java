@@ -788,6 +788,24 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Disables block formation like snow, obsidian, cobblestone inside Server Faction claims
+     *
+     * @param event BlockFormEvent
+     */
+    @EventHandler
+    public void onBlockForm(BlockFormEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        if (plugin.getFactionManager().getFactionById(inside.getOwner()) instanceof ServerFaction) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
      * Disables block fading inside server faction claims
      *
      * @param event BlockFadeEvent
