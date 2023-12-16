@@ -22,6 +22,7 @@ import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
@@ -357,7 +358,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.COMBAT)) {
-            hideAllCombatShields();
+            new Scheduler(playerManager.getPlugin()).sync(this::hideAllCombatShields).delay(1L).run();
             sendMessage(FMessage.T_CTAG_EXPIRE);
         }
 
@@ -402,7 +403,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.PROTECTION)) {
-            hideAllProtectionShields();
+            new Scheduler(playerManager.getPlugin()).sync(this::hideAllProtectionShields).delay(1L).run();
             sendMessage(FMessage.T_PROTECTION_EXPIRE);
         }
 
