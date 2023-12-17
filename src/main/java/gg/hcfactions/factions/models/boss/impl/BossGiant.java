@@ -62,7 +62,6 @@ public final class BossGiant extends Giant implements IBossEntity {
 
         final CraftLivingEntity livingEntity = (CraftLivingEntity) getBukkitEntity();
         livingEntity.teleport(origin);
-        livingEntity.setPersistent(true);
         livingEntity.setHealth(HEALTH);
         livingEntity.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, "boss");
 
@@ -87,6 +86,11 @@ public final class BossGiant extends Giant implements IBossEntity {
     @Override
     public void despawn() {
         remove(RemovalReason.DISCARDED);
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double d0) {
+        return true;
     }
 
     @Override
