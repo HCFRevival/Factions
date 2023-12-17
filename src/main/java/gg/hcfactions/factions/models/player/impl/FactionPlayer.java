@@ -358,7 +358,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.COMBAT)) {
-            new Scheduler(playerManager.getPlugin()).sync(this::hideAllCombatShields).delay(1L).run();
+            new Scheduler(playerManager.getPlugin()).sync(this::hideAllCombatShields).delay(5L).run();
             sendMessage(FMessage.T_CTAG_EXPIRE);
         }
 
@@ -403,7 +403,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.PROTECTION)) {
-            new Scheduler(playerManager.getPlugin()).sync(this::hideAllProtectionShields).delay(1L).run();
+            new Scheduler(playerManager.getPlugin()).sync(this::hideAllProtectionShields).delay(5L).run();
             sendMessage(FMessage.T_PROTECTION_EXPIRE);
         }
 
