@@ -29,7 +29,7 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
     @Getter public final PLocatable position;
 
     public MerchantVillager(Factions plugin, GenericMerchant merchant) {
-        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.DESERT);
+        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.SNOW);
         this.plugin = plugin;
         this.merchantId = merchant.getId();
         this.position = merchant.getMerchantLocation();
