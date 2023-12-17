@@ -55,7 +55,7 @@ public final class BossGiant extends Giant implements IBossEntity {
         this.hasLandedTask = null;
 
         // Set attrs
-        Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(16.0);
+        Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(8.0);
         Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH)).setBaseValue(HEALTH);
 
         final CraftLivingEntity livingEntity = (CraftLivingEntity) getBukkitEntity();
@@ -69,7 +69,7 @@ public final class BossGiant extends Giant implements IBossEntity {
 
     @Override
     public void registerGoals() {
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 24.0F));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 32.0F));
         this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.25, false));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.25));
@@ -206,7 +206,6 @@ public final class BossGiant extends Giant implements IBossEntity {
         for (int i = 0; i < spawnCount; i++) {
             final Zombie zombie = (Zombie) getBukkitEntity().getWorld().spawnEntity(getBukkitEntity().getLocation(), org.bukkit.entity.EntityType.ZOMBIE);
             zombie.setBaby();
-            zombie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
             zombie.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, PotionEffect.INFINITE_DURATION, 0));
             zombie.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
             zombie.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, "noMerge");
