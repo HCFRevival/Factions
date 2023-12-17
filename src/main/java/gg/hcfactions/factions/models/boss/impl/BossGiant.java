@@ -48,11 +48,13 @@ public final class BossGiant extends Giant implements IBossEntity {
     private long nextKick = Time.now();
     private long nextStomp = Time.now();
     private BukkitTask hasLandedTask;
+    private Location originLocation;
 
     public BossGiant(Factions plugin, Location origin) {
         super(EntityType.GIANT, ((CraftWorld) Objects.requireNonNull(origin.getWorld())).getHandle());
         this.plugin = plugin;
         this.hasLandedTask = null;
+        this.originLocation = origin;
 
         // Set attrs
         Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(8.0);
@@ -79,6 +81,7 @@ public final class BossGiant extends Giant implements IBossEntity {
     @Override
     public void spawn() {
         level().addFreshEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
+        Worlds.playSound(originLocation, Sound.ENTITY_WARDEN_AGITATED);
     }
 
     @Override
