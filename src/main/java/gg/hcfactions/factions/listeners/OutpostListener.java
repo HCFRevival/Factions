@@ -104,6 +104,11 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        // prevent giant minions/baby zombies from receiving buffed attributes
+        if (entity.getType().equals(EntityType.ZOMBIE) && entity instanceof final Ageable ageable && !ageable.isAdult()) {
+            return;
+        }
+
         // prevent natural spawns inside outpost claims
         if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)) {
             event.setCancelled(true);
