@@ -20,6 +20,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Objects;
+
 public record OutpostListener(@Getter Factions plugin) implements Listener {
     /**
      * Listens for block break events inside Outpost claims
@@ -104,9 +106,11 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        // prevent giant minions/baby zombies from receiving buffed attributes
-        if (entity.getType().equals(EntityType.ZOMBIE) && entity instanceof final Ageable ageable && !ageable.isAdult()) {
-            return;
+        // skip noMerge mobs from having attributes applied
+        if (entity.getPersistentDataContainer().has(plugin.getNamespacedKey(), PersistentDataType.STRING)) {
+            if (Objects.requireNonNull(entity.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING)).equalsIgnoreCase("noMerge")) {
+                return;
+            }
         }
 
         // prevent natural spawns inside outpost claims
