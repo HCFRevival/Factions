@@ -51,18 +51,10 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     public void captureEvent(PlayerFaction faction) {
         session.setActive(false);
         session.setCapturingFaction(faction);
+
         faction.addTokens(session.getTokenReward());
 
-        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
-            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                final int index = p.getScoreboard().findIndex(ChatColor.stripColor(displayName));
-                p.getScoreboard().removeLine(index);
-                p.getScoreboard().removeLine(index - 1);
-            }
-        });
-
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
-
         Bukkit.getPluginManager().callEvent(new KOTHCaptureEvent(this, faction));
     }
 
@@ -84,15 +76,6 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     @Override
     public void stopEvent() {
         session = null;
-
-        plugin.getPlayerManager().getPlayerRepository().forEach(p -> {
-            if (p.getScoreboard() != null && !p.getScoreboard().isHidden()) {
-                final int index = p.getScoreboard().findIndex(ChatColor.stripColor(displayName));
-                p.getScoreboard().removeLine(index);
-                p.getScoreboard().removeLine(index - 1);
-            }
-        });
-
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can no longer be contested");
     }
 

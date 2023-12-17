@@ -22,6 +22,7 @@ import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
@@ -320,20 +321,6 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         toRemove.forEach(pillars::remove);
     }
 
-    /**
-     * Similar to #removeTimer, this function allows an optional bool value
-     * which will remove the scoreboard entry too
-     * @param type Timer Type
-     * @param removeScoreboard If true the scoreboard entry will be wiped
-     */
-    public void removeTimer(ETimerType type, boolean removeScoreboard) {
-        getTimers().removeIf(t -> t.getType().equals(type));
-
-        if (removeScoreboard && scoreboard != null) {
-            scoreboard.removeLine(type.getScoreboardPosition());
-        }
-    }
-
     @Override
     public void finishTimer(ETimerType type) {
         if (type.equals(ETimerType.ENDERPEARL)) {
@@ -356,6 +343,10 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             sendMessage(FMessage.T_TRIDENT_UNLOCKED);
         }
 
+        if (type.equals(ETimerType.GRAPPLE)) {
+            sendMessage(FMessage.T_GRAPPLE_UNLOCKED);
+        }
+
         if (type.equals(ETimerType.STUCK)) {
             FactionUtil.teleportToSafety(playerManager.getPlugin(), getBukkit());
             sendMessage(FMessage.T_STUCK_EXPIRE);
@@ -367,7 +358,7 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.COMBAT)) {
-            hideAllCombatShields();
+            new Scheduler(playerManager.getPlugin()).sync(this::hideAllCombatShields).delay(5L).run();
             sendMessage(FMessage.T_CTAG_EXPIRE);
         }
 
@@ -412,15 +403,11 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
         }
 
         if (type.equals(ETimerType.PROTECTION)) {
-            hideAllProtectionShields();
+            new Scheduler(playerManager.getPlugin()).sync(this::hideAllProtectionShields).delay(5L).run();
             sendMessage(FMessage.T_PROTECTION_EXPIRE);
         }
 
         removeTimer(type);
-
-        if (scoreboard != null && !scoreboard.isHidden()) {
-            scoreboard.removeLine(type.getScoreboardPosition());
-        }
     }
 
     @Override

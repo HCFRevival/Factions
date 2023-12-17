@@ -788,6 +788,24 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
+     * Disables block formation like snow, obsidian, cobblestone inside Server Faction claims
+     *
+     * @param event BlockFormEvent
+     */
+    @EventHandler
+    public void onBlockForm(BlockFormEvent event) {
+        final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(event.getBlock()));
+
+        if (inside == null) {
+            return;
+        }
+
+        if (plugin.getFactionManager().getFactionById(inside.getOwner()) instanceof ServerFaction) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
      * Disables block fading inside server faction claims
      *
      * @param event BlockFadeEvent
@@ -892,7 +910,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.removeTimer(timer.getType(), true);
+                profile.removeTimer(timer.getType());
 
                 event.setCancelled(true);
             }
@@ -903,7 +921,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.removeTimer(timer.getType(), true);
+                profile.removeTimer(timer.getType());
 
                 event.setCancelled(true);
             }
@@ -912,7 +930,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 player.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_PEARL_IN_CLAIM.getErrorDescription());
 
-                profile.removeTimer(timer.getType(), true);
+                profile.removeTimer(timer.getType());
 
                 event.setCancelled(true);
             }
@@ -922,7 +940,7 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                     player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                     player.sendMessage(ChatColor.RED + "You can not enderpearl in Palace claims");
 
-                    profile.removeTimer(timer.getType(), true);
+                    profile.removeTimer(timer.getType());
 
                     event.setCancelled(true);
                 }

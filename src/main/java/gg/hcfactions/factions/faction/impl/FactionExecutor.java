@@ -1467,7 +1467,6 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
     @Override
     public void showFactionInfo(Player player, String name) {
-        // TODO: Validate name is alphanumeric and less than 16 characters
         IFaction faction = manager.getFactionByName(name);
 
         if (faction != null) {

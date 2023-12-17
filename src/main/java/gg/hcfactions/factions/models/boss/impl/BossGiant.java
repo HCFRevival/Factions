@@ -145,13 +145,20 @@ public final class BossGiant extends Giant implements IBossEntity {
             final float newHealth = (float)Math.max(affectedEntity.getHealth() - damageEvent.getFinalDamage(), 0);
 
             if (!(affectedEntity instanceof final Player player) || player.getBukkitEntity().getGameMode().equals(GameMode.SURVIVAL)) {
-                affectedEntity.setHealth(newHealth);
                 affectedEntity.setLastHurtByMob(this);
+
+                if (newHealth <= 0) {
+                    affectedEntity.kill();
+                } else {
+                    affectedEntity.setHealth(newHealth);
+                }
             }
         }
 
-        affectedEntity.getBukkitEntity().setVelocity(currentVelocity.add(new Vector(addedVelocity.getX(), 0.8, addedVelocity.getZ())));
-        applyShockwaveEffects(affectedEntity, (int)Math.round(power));
+        if (affectedEntity.isAlive()) {
+            affectedEntity.getBukkitEntity().setVelocity(currentVelocity.add(new Vector(addedVelocity.getX(), 0.8, addedVelocity.getZ())));
+            applyShockwaveEffects(affectedEntity, (int)Math.round(power));
+        }
     }
 
     private void applyShockwaveEffects(LivingEntity affectedEntity, int duration) {

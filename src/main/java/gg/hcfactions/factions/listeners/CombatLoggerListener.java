@@ -195,6 +195,7 @@ public final class CombatLoggerListener implements Listener {
         final CombatLoggerDeathEvent deathEvent = new CombatLoggerDeathEvent(logger, event.getEntity().getKiller());
         Bukkit.getPluginManager().callEvent(deathEvent);
         logger.dropItems(event.getEntity().getLocation());
+        plugin.getLoggerManager().getLoggerRepository().remove(logger);
     }
 
     @EventHandler

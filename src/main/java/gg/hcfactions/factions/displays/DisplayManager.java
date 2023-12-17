@@ -40,7 +40,7 @@ public final class DisplayManager implements IManager {
 
         // start updating task
         displayUpdaterTask = new Scheduler(plugin).sync(() ->
-                displayRepository.forEach(IDisplayable::update)).repeat(0L, 300*20L).run(); // TODO: Make configurable
+                displayRepository.forEach(IDisplayable::update)).repeat(0L, 60*20L).run(); // TODO: Make configurable
     }
 
     @Override

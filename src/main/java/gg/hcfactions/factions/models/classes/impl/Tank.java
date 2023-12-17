@@ -29,16 +29,6 @@ import org.bukkit.potion.PotionType;
 import java.util.*;
 import java.util.List;
 
-/**
- * TODO:
- * - Handle player disconnect
- * - Handle shield/armor breaking causing desync class message spam
- * - Fix particles on banner change to not look ugly (DONE)
- * - Store effects given in Guard mode in the config and load them in (DONE)
- * - Ensure infinite potion effects are removed upon login (DONE)
- * - Ensure banner is removed using a PersistentDataContainer and checking on login
- */
-
 public final class Tank implements IClass {
     @Getter public ClassManager manager;
     @Getter public final String name = "Guardian";

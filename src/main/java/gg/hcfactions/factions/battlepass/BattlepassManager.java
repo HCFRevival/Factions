@@ -16,7 +16,6 @@ import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.menu.impl.Icon;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.model.impl.AresRank;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,11 +56,6 @@ public final class BattlepassManager implements IManager {
         loadConfiguration();
         loadObjectives(true);
         loadObjectives(false);
-
-        // TODO: This is for testing, remove
-        final RankService rankService = (RankService) plugin.getService(RankService.class);
-        rankService.getRankRepository().forEach(rank -> rankMultipliers.put(rank, 1.5));
-        // end test
 
         expireCheckTask = new Scheduler(plugin).async(() -> {
             if (dailyExpireTimestamp >= Time.now()) {

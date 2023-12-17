@@ -57,7 +57,7 @@ public final class FactionUtil {
                 ? plugin.getConfiguration().getSotwProtectionDuration()
                 : plugin.getConfiguration().getNormalProtectionDuration();
 
-        factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType(), true));
+        factionPlayer.getTimers().forEach(t -> factionPlayer.removeTimer(t.getType()));
 
         if (protDuration > 0 && !plugin.getServerStateManager().isEOTW()) {
             factionPlayer.addTimer(new FTimer(ETimerType.PROTECTION, protDuration));
@@ -150,7 +150,7 @@ public final class FactionUtil {
         final List<Player> result = Lists.newArrayList();
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 
-        for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
+        for (Entity entity : Objects.requireNonNull(location.getWorld()).getNearbyEntities(location, radius, radius, radius)) {
             if (!(entity instanceof final Player otherPlayer)) {
                 continue;
             }
