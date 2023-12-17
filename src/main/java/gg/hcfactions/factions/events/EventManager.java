@@ -621,7 +621,13 @@ public final class EventManager implements IManager {
     }
 
     public Optional<IEvent> getEvent(ServerFaction owningFaction) {
-        return eventRepository.stream().filter(e -> e.getOwner() != null && e.getOwner().equals(owningFaction.getUniqueId())).findAny();
+        final List<IEvent> foundEvents = eventRepository.stream().filter(e -> e.getOwner() != null && e.getOwner().equals(owningFaction.getUniqueId())).toList();
+
+        if (foundEvents.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return foundEvents.stream().filter(IEventSession::isActive).findFirst();
     }
 
     public ImmutableList<IScheduledEvent> getEventsThatShouldStart() {
