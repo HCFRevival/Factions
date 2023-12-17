@@ -25,7 +25,7 @@ public enum ETimerType {
     CHORUS_FRUIT(
             Colors.LAVENDAR.toBukkit() + "" + ChatColor.BOLD + "Chorus Fruit",
             Colors.LAVENDAR.toBukkit() + "Chorus Fruit",
-            12,
+            13,
             true,
             true,
             false
@@ -41,7 +41,7 @@ public enum ETimerType {
     ENDERPEARL(
             Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Enderpearl",
             Colors.DARK_AQUA.toBukkit() + "Enderpearl",
-            13,
+            14,
             true,
             true,
             true
@@ -49,14 +49,14 @@ public enum ETimerType {
     HOME(
             Colors.AQUA.toBukkit() + "" + ChatColor.BOLD + "Home",
             Colors.AQUA.toBukkit() + "Home",
-            10,
+            11,
             true,
             true,
             false
     ),
     STUCK(Colors.BLUE.toBukkit() + "" + ChatColor.BOLD + "Stuck",
             Colors.BLUE.toBukkit() + "Stuck",
-            9,
+            10,
             true,
             true,
             false
@@ -76,28 +76,28 @@ public enum ETimerType {
             true),
     LOGOUT(Colors.BLUE.toBukkit() + "" + ChatColor.BOLD + "Logout",
             Colors.BLUE.toBukkit() + "Logout",
-            11,
+            12,
             true,
             true,
             false
     ),
     COMBAT(Colors.RED.toBukkit() + "" + ChatColor.BOLD + "Combat Tag",
             Colors.RED.toBukkit() + "Combat Tag",
-            15,
+            16,
             true,
             true,
             true
     ),
     PROTECTION(Colors.GREEN.toBukkit() + "" + ChatColor.BOLD + "Protection",
             Colors.GREEN.toBukkit() + "Protection",
-            16,
+            17,
             true,
             false,
             true
     ),
     CLASS(Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Class",
             Colors.DARK_AQUA.toBukkit() + "Class",
-            14,
+            15,
             true,
             true,
             false
