@@ -53,7 +53,7 @@ public final class BossCommand extends BaseCommand {
 
         plugin.getBossManager().getLootManager().getLootRepository().add(lootable);
         plugin.getBossManager().getLootManager().saveItem(
-                BossLootManager.TABLE_NAME,
+                BossLootManager.FILE_NAME,
                 BossLootManager.FILE_KEY,
                 hand,
                 min,
