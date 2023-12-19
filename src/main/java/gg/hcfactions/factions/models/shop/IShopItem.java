@@ -94,6 +94,7 @@ public interface IShopItem {
 
         builder.setMaterial(getMaterial());
         builder.setAmount(getAmount());
+        builder.addFlag(ItemFlag.HIDE_ARMOR_TRIM);
         builder.addFlag(ItemFlag.HIDE_ATTRIBUTES);
         builder.addFlag(ItemFlag.HIDE_PLACED_ON);
 
