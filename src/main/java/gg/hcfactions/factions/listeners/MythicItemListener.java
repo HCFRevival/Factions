@@ -10,6 +10,7 @@ import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -79,6 +80,11 @@ public final class MythicItemListener implements Listener {
     @EventHandler
     public void onItemMend(PlayerItemMendEvent event) {
         final ItemStack item = event.getItem();
+
+        if (item.getItemMeta() != null && item.getItemMeta().hasEnchant(Enchantment.MENDING)) {
+            return;
+        }
+
         cancelMythicEvent(item, event);
     }
 
@@ -136,14 +142,15 @@ public final class MythicItemListener implements Listener {
         }
 
         if (item.getItemMeta() instanceof final Damageable meta) {
-            final int newDamage = meta.getDamage() - mythicItem.getDurabilityCost();
+            final int newDamage = meta.getDamage() + mythicItem.getDurabilityCost();
+            final int maxDamage = mythicItem.getItem().getType().getMaxDurability();
 
-            if (newDamage <= 0) {
+            if (newDamage >= maxDamage) {
                 damager.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                 return;
             }
 
-            meta.setDamage(meta.getDamage() + mythicItem.getDurabilityCost());
+            meta.setDamage(newDamage);
             item.setItemMeta(meta);
             damager.getInventory().setItemInMainHand(item);
         }
