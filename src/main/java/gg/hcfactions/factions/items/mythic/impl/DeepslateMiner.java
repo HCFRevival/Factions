@@ -41,7 +41,8 @@ public final class DeepslateMiner implements IMythicItem {
     public Map<Enchantment, Integer> getEnchantments() {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
         enchantments.put(Enchantment.DIG_SPEED, 8);
-        enchantments.put(Enchantment.DURABILITY, 4);
+        enchantments.put(Enchantment.DURABILITY, 3);
+        enchantments.put(Enchantment.MENDING, 1);
         return enchantments;
     }
 }
