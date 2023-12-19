@@ -6,6 +6,7 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
+import lombok.Getter;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -44,6 +45,7 @@ public final class BossGiant extends Giant implements IBossEntity {
     private static final int STOMP_COOLDOWN = 15;
     private static final double HEALTH = 400.0;
 
+    @Getter public final org.bukkit.entity.EntityType bukkitType = org.bukkit.entity.EntityType.GIANT;
     private final Factions plugin;
     private long nextKick = Time.now();
     private long nextStomp = Time.now();
