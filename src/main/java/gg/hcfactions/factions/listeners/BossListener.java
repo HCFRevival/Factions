@@ -75,6 +75,6 @@ public record BossListener(@Getter Factions plugin) implements Listener {
 
         event.setDroppedExp(event.getDroppedExp()*3);
         event.getDrops().clear();
-        event.getDrops().addAll(plugin.getBossManager().getLootManager().getItems(1));
+        event.getDrops().addAll(plugin.getBossManager().getLootManager().getItems(3));
     }
 }
