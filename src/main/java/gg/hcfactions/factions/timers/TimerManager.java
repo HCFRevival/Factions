@@ -167,6 +167,12 @@ public final class TimerManager implements IManager {
             return;
         }
 
+        if (playerClass instanceof Tank tankClass) {
+            res.put(9, ChatColor.BLUE + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + tankClass.getStamina(player));
+        }
+
+        // Render class cooldowns, everything below this will not be reached if they do not have an active cooldown
+        // due to this guard statement
         if (playerClass.getConsumables().stream().noneMatch(c -> c.getCooldowns().containsKey(player.getUniqueId()))) {
             return;
         }
@@ -189,10 +195,6 @@ public final class TimerManager implements IManager {
                         + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
             }
         });
-
-        if (playerClass instanceof Tank tankClass) {
-            res.put(9, ChatColor.BLUE + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + tankClass.getStamina(player));
-        }
     }
 
     private void getServiceScoreboardEntries(Player player, Map<Integer, String> res) {
@@ -209,7 +211,6 @@ public final class TimerManager implements IManager {
         if (cxService.getRebootModule().isEnabled() && cxService.getRebootModule().isRebootInProgress()) {
             res.put(19, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
         }
-
     }
 
     private void getEventScoreboardEntries(Player player, Map<Integer, String> res) {
