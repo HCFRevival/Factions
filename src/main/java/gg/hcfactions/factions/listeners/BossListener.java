@@ -1,16 +1,13 @@
 package gg.hcfactions.factions.listeners;
 
-import com.google.common.collect.Maps;
 import gg.hcfactions.cx.event.PreMobstackEvent;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.world.BossSpawnEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
-import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Giant;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,17 +19,13 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public final class BossListener implements Listener {
     @Getter public final Factions plugin;
-    private final Map<UUID, EntityType> spawnCooldowns;
 
     public BossListener(Factions plugin) {
         this.plugin = plugin;
-        this.spawnCooldowns = Maps.newConcurrentMap();
     }
 
     @EventHandler
@@ -52,10 +45,6 @@ public final class BossListener implements Listener {
 
         if (serverFaction == null) {
             return;
-        }
-
-        if (spawnCooldowns.containsKey(serverFaction.getUniqueId())) {
-            event.setCancelled(true);
         }
     }
 
@@ -112,17 +101,6 @@ public final class BossListener implements Listener {
 
         if (!event.getEntity().getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING).equals("boss")) {
             return;
-        }
-
-        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(event.getEntity().getLocation().getBlock()));
-        if (insideClaim != null) {
-            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
-
-            if (owner != null) {
-                final UUID ownerId = owner.getUniqueId();
-                spawnCooldowns.put(ownerId, event.getEntityType());
-                new Scheduler(plugin).sync(() -> spawnCooldowns.remove(ownerId)).delay(12000L).run();
-            }
         }
 
         event.setDroppedExp(event.getDroppedExp()*3);
