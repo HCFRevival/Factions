@@ -33,17 +33,17 @@ import java.util.Random;
 
 public final class BossGiant extends Giant implements IBossEntity {
     private static final Random RANDOM = new Random();
-    private static final float KICK_CHANCE = 0.2F;
+    private static final float KICK_CHANCE = 0.15F;
     private static final double KICK_FORCE_BASE = 5.5D;
     private static final double KICK_FORCE_VARIANCE = 2.5D;
     private static final float STOMP_CHANCE = 0.15F;
     private static final double STOMP_FORCE_BASE = 48.0D;
     private static final double STOMP_FORCE_VARIANCE = 16.0D;
-    private static final int MINION_MIN_COUNT = 3;
-    private static final int MINION_MAX_COUNT = 6;
-    private static final int KICK_COOLDOWN = 8;
+    private static final int MINION_MIN_COUNT = 4;
+    private static final int MINION_MAX_COUNT = 8;
+    private static final int KICK_COOLDOWN = 10;
     private static final int STOMP_COOLDOWN = 15;
-    private static final double HEALTH = 400.0;
+    private static final double HEALTH = 500.0;
 
     @Getter public final org.bukkit.entity.EntityType bukkitType = org.bukkit.entity.EntityType.GIANT;
     private final Factions plugin;
