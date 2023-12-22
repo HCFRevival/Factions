@@ -155,12 +155,7 @@ public final class BossGiant extends Giant implements IBossEntity {
 
             if (!(affectedEntity instanceof final Player player) || player.getBukkitEntity().getGameMode().equals(GameMode.SURVIVAL)) {
                 affectedEntity.setLastHurtByMob(this);
-
-                if (newHealth <= 0) {
-                    affectedEntity.kill();
-                } else {
-                    affectedEntity.setHealth(newHealth);
-                }
+                affectedEntity.setHealth(newHealth);
             }
         }
 
