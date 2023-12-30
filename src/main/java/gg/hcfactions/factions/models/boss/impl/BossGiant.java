@@ -135,7 +135,6 @@ public final class BossGiant extends Giant implements IBossEntity {
     private void kickEntity(LivingEntity affectedEntity, Location origin, double force) {
         final Vector vec = origin.getDirection().multiply(force).setY(1.25);
         affectedEntity.getBukkitEntity().setVelocity(vec);
-
         applyShockwaveEffects(affectedEntity, (int)Math.round(force));
     }
 
@@ -146,12 +145,12 @@ public final class BossGiant extends Giant implements IBossEntity {
         final double power = Math.min(force / distance, force);
         final Vector currentVelocity = affectedEntity.getBukkitEntity().getVelocity();
         final Vector addedVelocity = direction.multiply(power);
-
         final EntityDamageEvent damageEvent = new EntityDamageEvent(affectedEntity.getBukkitEntity(), EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, Math.round(64 / distance));
+
         Bukkit.getPluginManager().callEvent(damageEvent);
 
         if (!damageEvent.isCancelled()) {
-            final float newHealth = (float)Math.max(affectedEntity.getHealth() - damageEvent.getFinalDamage(), 0);
+            final float newHealth = (float)Math.max(affectedEntity.getHealth() - damageEvent.getFinalDamage(), 0.5);
 
             if (!(affectedEntity instanceof final Player player) || player.getBukkitEntity().getGameMode().equals(GameMode.SURVIVAL)) {
                 affectedEntity.setLastHurtByMob(this);
