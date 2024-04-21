@@ -48,11 +48,6 @@ public record TrackedItemListener(@Getter Factions plugin) implements Listener {
         if (slain.getKiller() != null) {
             final Player killer = slain.getKiller();
             final ItemStack hand = killer.getInventory().getItemInMainHand();
-            final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
-
-            if (cis != null && cis.getItem(hand).isPresent()) {
-                return;
-            }
 
             if (TrackedWeapon.VALID_ITEMS.contains(hand.getType())) {
                 final TrackedWeapon trackedSword = new TrackedWeapon().fromItem(hand);
@@ -78,11 +73,6 @@ public record TrackedItemListener(@Getter Factions plugin) implements Listener {
         if (event.getKiller() != null) {
             final Player killer = event.getKiller();
             final ItemStack hand = killer.getInventory().getItemInMainHand();
-            final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
-
-            if (cis != null && cis.getItem(hand).isPresent()) {
-                return;
-            }
 
             if (TrackedWeapon.VALID_ITEMS.contains(hand.getType())) {
                 final TrackedWeapon trackedSword = new TrackedWeapon().fromItem(hand);
