@@ -22,7 +22,6 @@ import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -112,48 +111,6 @@ public final class MythicItemListener implements Listener {
         }
 
         event.getInventory().setResult(new ItemStack(Material.AIR));
-    }
-
-    @EventHandler (priority = EventPriority.HIGHEST)
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
-
-        if (!(event.getEntity() instanceof Player)) {
-            return;
-        }
-
-        if (!(event.getDamager() instanceof final Player damager)) {
-            return;
-        }
-
-        final ItemStack item = damager.getInventory().getItemInMainHand();
-        final Optional<ICustomItem> customItemQuery = customItemService.getItem(item);
-
-        if (customItemQuery.isEmpty()) {
-            return;
-        }
-
-        final ICustomItem customItem = customItemQuery.get();
-
-        if (!(customItem instanceof final IMythicItem mythicItem)) {
-            return;
-        }
-
-        if (item.getItemMeta() instanceof final Damageable meta) {
-            final int newDamage = meta.getDamage() + mythicItem.getDurabilityCost();
-            final int maxDamage = mythicItem.getItem().getType().getMaxDurability();
-
-            if (newDamage >= maxDamage) {
-                damager.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                return;
-            }
-
-            meta.setDamage(newDamage);
-            item.setItemMeta(meta);
-            damager.getInventory().setItemInMainHand(item);
-        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)

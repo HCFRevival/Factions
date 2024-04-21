@@ -72,11 +72,6 @@ public final class CrimsonFang implements IMythicItem {
     }
 
     @Override
-    public int getDurabilityCost() {
-        return 10;
-    }
-
-    @Override
     public Particle getAbilityParticle() {
         return Particle.DAMAGE_INDICATOR;
     }

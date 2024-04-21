@@ -43,11 +43,6 @@ public final class SymsSong implements IMythicItem {
     }
 
     @Override
-    public int getDurabilityCost() {
-        return 5;
-    }
-
-    @Override
     public Map<Enchantment, Integer> getEnchantments() {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
         enchantments.put(Enchantment.KNOCKBACK, 2);

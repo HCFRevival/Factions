@@ -67,11 +67,6 @@ public final class Hullbreaker implements IMythicItem {
     }
 
     @Override
-    public int getDurabilityCost() {
-        return 10;
-    }
-
-    @Override
     public Particle getAbilityParticle() {
         return Particle.WAX_OFF;
     }
