@@ -4,7 +4,7 @@ import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.List;

@@ -17,8 +17,9 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -117,7 +118,7 @@ public final class BossGiant extends Giant implements IBossEntity {
     }
 
     @Override
-    protected boolean damageEntity0(DamageSource damagesource, float f) {
+    public boolean hurt(DamageSource damagesource, float f) {
         if (damagesource.isIndirect()) {
             return false;
         }
@@ -129,7 +130,7 @@ public final class BossGiant extends Giant implements IBossEntity {
             nextStomp = Time.now() + (STOMP_COOLDOWN*1000L);
         }
 
-        return super.damageEntity0(damagesource, f);
+        return super.hurt(damagesource, f);
     }
 
     private void kickEntity(LivingEntity affectedEntity, Location origin, double force) {
@@ -145,7 +146,8 @@ public final class BossGiant extends Giant implements IBossEntity {
         final double power = Math.min(force / distance, force);
         final Vector currentVelocity = affectedEntity.getBukkitEntity().getVelocity();
         final Vector addedVelocity = direction.multiply(power);
-        final EntityDamageEvent damageEvent = new EntityDamageEvent(affectedEntity.getBukkitEntity(), EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, Math.round(64 / distance));
+        final org.bukkit.damage.DamageSource damageSource = org.bukkit.damage.DamageSource.builder(DamageType.EXPLOSION).build();
+        final EntityDamageEvent damageEvent = new EntityDamageEvent(affectedEntity.getBukkitEntity(), EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, damageSource, Math.round(64 / distance));
 
         Bukkit.getPluginManager().callEvent(damageEvent);
 

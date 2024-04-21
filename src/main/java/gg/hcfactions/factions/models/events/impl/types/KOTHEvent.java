@@ -25,7 +25,7 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     @Getter @Setter public String displayName;
     @Getter public final List<EventSchedule> schedule;
     @Getter @Setter public CaptureRegion captureRegion;
-    @Getter @Setter public CaptureEventConfig eventConfig;
+    @Getter public CaptureEventConfig eventConfig;
     @Getter @Setter KOTHSession session;
 
     public KOTHEvent(
@@ -60,16 +60,28 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
 
     @Override
     public void startEvent() {
-        startEvent(eventConfig.getDefaultTicketsNeededToWin(), eventConfig.getDefaultTimerDuration(), eventConfig.getTokenReward(), eventConfig.getTickCheckpointInterval());
+        startEvent(
+                eventConfig.getDefaultTicketsNeededToWin(),
+                eventConfig.getDefaultTimerDuration(),
+                eventConfig.getTokenReward(),
+                eventConfig.getTickCheckpointInterval(),
+                eventConfig.getContestedThreshold()
+        );
     }
 
     @Override
-    public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval) {
-        session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward, tickCheckpointInterval);
+    public void startEvent(CaptureEventConfig conf) {
+        session = new KOTHSession(this, conf);
         session.setActive(true);
-
         Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
+        FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can now be contested");
+    }
 
+    @Override
+    public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
+        session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
+        session.setActive(true);
+        Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can now be contested");
     }
 
@@ -88,6 +100,14 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     public void setActive(boolean b) {
         if (session != null) {
             session.setActive(false);
+        }
+    }
+
+    public void setEventConfig(CaptureEventConfig newConfig) {
+        this.eventConfig = newConfig;
+
+        if (session != null) {
+            session.updateConfig(newConfig);
         }
     }
 }

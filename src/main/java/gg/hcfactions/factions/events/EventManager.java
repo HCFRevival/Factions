@@ -169,6 +169,7 @@ public final class EventManager implements IManager {
                 final int ticketsNeeded = conf.getInt(key + "tickets_needed");
                 final int timerDuration = conf.getInt(key + "timer_duration");
                 final int tickCheckpointInterval = conf.getInt(key + "tick_checkpoint_interval");
+                final int contestedThreshold = conf.getInt(key + "contested_threshold");
                 final int maxLifespan = conf.getInt(key + "max_lifespan");
                 final int tokenReward = conf.getInt(key + "token_reward");
 
@@ -186,7 +187,7 @@ public final class EventManager implements IManager {
                 final BLocatable cornerA = new BLocatable(cornerAWorld, cornerAX, cornerAY, cornerAZ);
                 final BLocatable cornerB = new BLocatable(cornerBWorld, cornerBX, cornerBY, cornerBZ);
                 final CaptureRegion captureRegion = new CaptureRegion(cornerA, cornerB);
-                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, tokenReward, tickCheckpointInterval);
+                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
 
                 for (String dateValue : conf.getStringList(key + "schedule")) {
                     final String[] split = dateValue.split(":");
@@ -236,6 +237,7 @@ public final class EventManager implements IManager {
                 final int ticketsNeeded = conf.getInt(key + "tickets_needed");
                 final int timerDuration = conf.getInt(key + "timer_duration");
                 final int tickCheckpointInterval = conf.getInt(key + "tick_checkpoint_interval");
+                final int contestedThreshold = conf.getInt(key + "contested_threshold");
                 final int restockInterval = conf.getInt(key + "restock_interval");
                 final int tokenReward = conf.getInt(key + "token_reward");
 
@@ -255,7 +257,7 @@ public final class EventManager implements IManager {
                 final BLocatable cornerA = new BLocatable(cornerAWorld, cornerAX, cornerAY, cornerAZ);
                 final BLocatable cornerB = new BLocatable(cornerBWorld, cornerBX, cornerBY, cornerBZ);
                 final CaptureRegion captureRegion = new CaptureRegion(cornerA, cornerB);
-                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, tokenReward, tickCheckpointInterval);
+                final CaptureEventConfig eventConfig = new CaptureEventConfig(ticketsNeeded, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
 
                 for (String dateValue : conf.getStringList(key + "schedule")) {
                     final String[] split = dateValue.split(":");
@@ -463,6 +465,7 @@ public final class EventManager implements IManager {
             conf.set(key + "max_lifespan", kothEvent.getEventConfig().getMaxLifespan());
             conf.set(key + "token_reward", kothEvent.getEventConfig().getTokenReward());
             conf.set(key + "tick_checkpoint_interval", kothEvent.getEventConfig().getTickCheckpointInterval());
+            conf.set(key + "contested_threshold", kothEvent.getEventConfig().getContestedThreshold());
 
             conf.set(key + "capture_region.a.world", kothEvent.getCaptureRegion().getCornerA().getWorldName());
             conf.set(key + "capture_region.a.x", kothEvent.getCaptureRegion().getCornerA().getX());

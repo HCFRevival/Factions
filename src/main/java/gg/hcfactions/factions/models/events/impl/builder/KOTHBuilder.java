@@ -118,7 +118,7 @@ public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
                 displayName,
                 Lists.newArrayList(),
                 new CaptureRegion(cornerA, cornerB),
-                new CaptureEventConfig(20, 60, 100, 0)
+                new CaptureEventConfig(20, 60, 100, 0, 0)
         );
 
         promise.resolve(event);
