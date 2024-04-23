@@ -1,8 +1,17 @@
 package gg.hcfactions.factions.models.events.tracking;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import gg.hcfactions.factions.listeners.events.web.EventTrackerPublishEvent;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.tracking.entry.EventTrackerEntry;
+import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.connect.impl.mongo.MongoDocument;
+import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -29,6 +38,22 @@ public interface IEventTracker<T> extends MongoDocument<T> {
      * @return True if this tracker is active
      */
     boolean isTracking();
+
+    /**
+     * @return Event end timestamp
+     */
+    long getEndTime();
+
+    /**
+     * @param timestamp Set event end timestamp
+     */
+    void setEndTime(long timestamp);
+
+    /**
+     * Update the tracking status
+     * @param b Value
+     */
+    void setTracking(boolean b);
 
     /**
      * @param player Player to query
@@ -91,5 +116,39 @@ public interface IEventTracker<T> extends MongoDocument<T> {
     /**
      * Push tracking data to the database
      */
-    void publishTracking();
+    default void publishTracking() {
+        final long start = Time.now();
+
+        setTracking(false);
+        setEndTime(Time.now());
+
+        new Scheduler(getEvent().getPlugin()).async(() -> {
+            final Mongo mdb = (Mongo) getEvent().getPlugin().getConnectable(Mongo.class);
+            if (mdb == null) {
+                getEvent().getPlugin().getAresLogger().error("Attempted to publish event tracker with null mdb instance");
+                return;
+            }
+
+            final MongoDatabase db = mdb.getDatabase(getEvent().getPlugin().getConfiguration().getMongoDatabaseName());
+            if (db == null) {
+                getEvent().getPlugin().getAresLogger().error("Attempted to publish event tracker with null mongo database");
+                return;
+            }
+
+            final MongoCollection<Document> coll = db.getCollection(getEvent().getPlugin().getConfiguration().getTrackerCollection());
+            final Document doc = toDocument();
+
+            coll.insertOne(doc);
+            final ObjectId docId = doc.getObjectId("_id");
+
+            new Scheduler(getEvent().getPlugin()).sync(() -> {
+                final EventTrackerPublishEvent pubEvent = new EventTrackerPublishEvent(getEvent().getPlugin().getConfiguration().getWebsiteDomain() + "tracker/" + docId);
+                Bukkit.getPluginManager().callEvent(pubEvent);
+
+                final long end = Time.now();
+                final long diff = (end - start);
+                getEvent().getPlugin().getAresLogger().info("Published event tracker data (took " + diff + "ms)");
+            }).run();
+        }).run();
+    }
 }

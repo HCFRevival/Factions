@@ -82,6 +82,12 @@ public final class FMessage {
         Bukkit.broadcastMessage(ERROR + "Combat-Logger" + ChatColor.RESET + ": " + player.getName());
     }
 
+    public static void broadcastEventTrackerPublish(String url) {
+        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcastMessage(LAYER_2 + "See the after-match report here" + LAYER_1 + ": " + url);
+        Bukkit.broadcastMessage(" ");
+    }
+
     public static void broadcastDpsEventMessage(String message) {
         Bukkit.broadcastMessage(" ");
         Bukkit.broadcastMessage(DPS_PREFIX + message);

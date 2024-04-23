@@ -37,6 +37,9 @@ public final class FConfig {
 
     @Getter public String redisUri;
 
+    // website
+    @Getter public String websiteDomain;
+
     // autosave
     @Getter public int factionAutosaveDelay;
     @Getter public int claimAutosaveDelay;
@@ -241,6 +244,9 @@ public final class FConfig {
 
         redisUri = conf.getString("databases.redis.uri");
         plugin.getAresLogger().info("Using MongoDB Database: " + mongoDatabaseName);
+
+        websiteDomain = conf.getString("website.domain");
+        plugin.getAresLogger().info("Website Domain: " + websiteDomain);
 
         factionAutosaveDelay = conf.getInt("autosave.factions");
         playerAutosaveDelay = conf.getInt("autosave.players");
