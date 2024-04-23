@@ -295,6 +295,7 @@ public final class Factions extends AresPlugin {
         registerListener(new XPListener(this));
         registerListener(new BossListener(this));
         registerListener(new MythicItemListener(this));
+        registerListener(new EventTrackerListener(this));
 
         // custom recipes
         new FRecipes(this, configuration.getRecipeConfig()).register();

@@ -13,7 +13,6 @@ import gg.hcfactions.factions.models.message.FMessage;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +50,7 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     public void captureEvent(PlayerFaction faction) {
         session.setActive(false);
         session.setCapturingFaction(faction);
+        session.getTracker().publishTracking();
 
         faction.addTokens(session.getTokenReward());
 
@@ -73,6 +73,7 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     public void startEvent(CaptureEventConfig conf) {
         session = new KOTHSession(this, conf);
         session.setActive(true);
+        session.getTracker().startTracking();
         Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can now be contested");
     }
@@ -81,12 +82,14 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
         session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
         session.setActive(true);
+        session.getTracker().startTracking();
         Bukkit.getPluginManager().callEvent(new EventStartEvent(this));
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can now be contested");
     }
 
     @Override
     public void stopEvent() {
+        session.getTracker().stopTracking();
         session = null;
         FMessage.broadcastCaptureEventMessage(displayName + FMessage.LAYER_1 + " can no longer be contested");
     }

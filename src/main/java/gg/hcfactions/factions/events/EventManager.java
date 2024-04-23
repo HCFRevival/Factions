@@ -7,6 +7,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.builder.EventBuilderManager;
 import gg.hcfactions.factions.events.impl.EventExecutor;
 import gg.hcfactions.factions.events.tick.*;
+import gg.hcfactions.factions.events.tracker.EventTrackerManager;
 import gg.hcfactions.factions.items.EventBuilderWand;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.events.*;
@@ -33,6 +34,7 @@ public final class EventManager implements IManager {
     @Getter public final EventExecutor executor;
     @Getter public final EventBuilderManager builderManager;
     @Getter public final PalaceLootManager palaceLootManager;
+    @Getter public final EventTrackerManager trackerManager;
     @Getter public final List<IEvent> eventRepository;
 
     @Getter public KOTHTickingTask kothTickingTask;
@@ -46,6 +48,7 @@ public final class EventManager implements IManager {
         this.executor = new EventExecutor(this);
         this.builderManager = new EventBuilderManager(this);
         this.palaceLootManager = new PalaceLootManager(plugin);
+        this.trackerManager = new EventTrackerManager(this);
         this.eventRepository = Lists.newArrayList();
     }
 

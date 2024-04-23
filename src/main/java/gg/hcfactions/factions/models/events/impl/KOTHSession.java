@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.events.event.KOTHTickEvent;
 import gg.hcfactions.factions.models.events.IEventSession;
+import gg.hcfactions.factions.models.events.impl.tracking.KOTHEventTracker;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -33,6 +34,7 @@ public final class KOTHSession implements IEventSession {
     @Getter @Setter public PlayerFaction capturingFaction;
     @Getter public final Map<UUID, Integer> leaderboard;
     @Getter public final KOTHTimer timer;
+    @Getter public KOTHEventTracker tracker;
 
     public KOTHSession(KOTHEvent event, CaptureEventConfig config) {
         this.event = event;
@@ -49,6 +51,7 @@ public final class KOTHSession implements IEventSession {
         this.leaderboard = Maps.newConcurrentMap();
         this.timer = new KOTHTimer(event, timerDuration);
         this.timer.setFrozen(true);
+        this.tracker = new KOTHEventTracker(event);
     }
 
     public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
@@ -64,6 +67,7 @@ public final class KOTHSession implements IEventSession {
         this.leaderboard = Maps.newConcurrentMap();
         this.timer = new KOTHTimer(event, timerDuration);
         this.timer.setFrozen(true);
+        this.tracker = new KOTHEventTracker(event);
     }
 
     public boolean isCaptured() {
@@ -216,7 +220,7 @@ public final class KOTHSession implements IEventSession {
             return;
         }
 
-        final KOTHTickEvent tickEvent = new KOTHTickEvent(getEvent());
+        final KOTHTickEvent tickEvent = new KOTHTickEvent(getEvent(), newTickets);
         Bukkit.getPluginManager().callEvent(tickEvent);
 
         leaderboard.put(faction.getUniqueId(), newTickets);

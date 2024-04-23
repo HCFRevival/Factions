@@ -61,14 +61,12 @@ public final class KOTHTickingTask {
 
                 // Cap zone is empty, capturing faction is not null but it should be
                 if (inCapzone.isEmpty() && event.getSession().getCapturingFaction() != null) {
-                    Bukkit.broadcastMessage("inCapzone empty, capturing faction not null");
                     event.getSession().reset();
                     continue;
                 }
 
                 // Capturing faction is not null and the capturing faction is not in the cap zone anymore
                 if (event.getSession().getCapturingFaction() != null && !inCapzone.containsKey(event.getSession().getCapturingFaction().getUniqueId())) {
-                    Bukkit.broadcastMessage("capturingFaction no null, inCapzone does not contain the capturing faction");
                     event.getSession().reset();
                     continue;
                 }

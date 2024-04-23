@@ -1,0 +1,90 @@
+package gg.hcfactions.factions.events.tracker;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import gg.hcfactions.factions.events.EventManager;
+import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.events.IEvent;
+import gg.hcfactions.factions.models.events.impl.tracking.GenericEventTrackerPlayer;
+import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
+import gg.hcfactions.factions.models.events.tracking.IEventTracker;
+import gg.hcfactions.factions.models.events.tracking.IEventTrackerPlayer;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.libs.bukkit.location.ILocatable;
+import lombok.Getter;
+import org.bukkit.entity.Player;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public final class EventTrackerManager {
+    public static final String P_DAMAGE_DEALT = "damage_dealt";
+    public static final String P_DAMAGE_TAKEN = "damage_taken";
+    public static final String P_ARCHER_RANGE_DMG = "archer_damage_dealt";
+    public static final String P_ARCHER_TAG_HIT = "archer_tag_dealt";
+    public static final String P_ROGUE_BACKSTAB = "rogue_backstab";
+    public static final String P_BARD_EFFECT_GIVEN = "bard_effect_dealt";
+    public static final String P_DIVER_DMG = "diver_damage_dealt";
+
+    @Getter public final EventManager eventManager;
+
+    public EventTrackerManager(EventManager eventManager) {
+        this.eventManager = eventManager;
+    }
+
+    public IEventTrackerPlayer getOrCreatePlayerTracker(Player player, IEventTracker<?> tracker) {
+        return getOrCreatePlayerTracker(player.getUniqueId(), player.getName(), tracker);
+    }
+
+    public IEventTrackerPlayer getOrCreatePlayerTracker(UUID uniqueId, String username, IEventTracker<?> tracker) {
+        final Optional<IEventTrackerPlayer> existingPlayerQuery = tracker.getParticipant(uniqueId);
+        if (existingPlayerQuery.isEmpty()) {
+            final GenericEventTrackerPlayer newPlayerTracker = new GenericEventTrackerPlayer(uniqueId, username);
+            tracker.getParticipants().add(newPlayerTracker);
+            return newPlayerTracker;
+        }
+
+        return existingPlayerQuery.get();
+    }
+
+    public Optional<IEventTracker<?>> getTrackerByLocation(ILocatable location) {
+        final Claim insideClaim = eventManager.getPlugin().getClaimManager().getClaimAt(location);
+        if (insideClaim == null) {
+            return Optional.empty();
+        }
+
+        final ServerFaction serverFaction = eventManager.getPlugin().getFactionManager().getServerFactionById(insideClaim.getOwner());
+        if (serverFaction == null) {
+            return Optional.empty();
+        }
+
+        final Optional<IEvent> eventQuery = eventManager.getPlugin().getEventManager().getEvent(serverFaction);
+        if (eventQuery.isEmpty()) {
+            return Optional.empty();
+        }
+
+        final IEvent event = eventQuery.get();
+
+        if (event instanceof final KOTHEvent kothEvent) {
+            return Optional.of(kothEvent.getSession().getTracker());
+        }
+
+        eventManager.getPlugin().getAresLogger().warn("Attempted to query an event tracker for an unsupported event type");
+        return Optional.empty();
+    }
+
+    public ImmutableList<IEventTrackerPlayer> getActiveTrackers(UUID uniqueId) {
+        final List<IEventTrackerPlayer> res = Lists.newArrayList();
+
+        eventManager.getActiveEvents().forEach(event -> {
+            if (event instanceof final KOTHEvent kothEvent) {
+                kothEvent.getSession().getTracker().getParticipant(uniqueId).ifPresent(res::add);
+            }
+
+            // TODO: Add support for other event types
+        });
+
+        return ImmutableList.copyOf(res);
+    }
+}

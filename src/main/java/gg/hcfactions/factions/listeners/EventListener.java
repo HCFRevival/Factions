@@ -6,6 +6,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.event.DPSDamageEvent;
 import gg.hcfactions.factions.events.event.EventStartEvent;
 import gg.hcfactions.factions.listeners.events.faction.FactionDisbandEvent;
+import gg.hcfactions.factions.listeners.events.faction.FactionTicketLossEvent;
 import gg.hcfactions.factions.listeners.events.player.CombatLoggerDeathEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.IEvent;
@@ -94,6 +95,9 @@ public record EventListener(@Getter Factions plugin) implements Listener {
             }
 
             if (newTickets != currentTickets) {
+                final FactionTicketLossEvent ticketLossEvent = new FactionTicketLossEvent(koth, playerFaction, newTickets, currentTickets);
+                Bukkit.getPluginManager().callEvent(ticketLossEvent);
+
                 koth.getSession().getLeaderboard().put(playerFaction.getUniqueId(), newTickets);
                 playerFaction.sendMessage(" ");
                 playerFaction.sendMessage(FMessage.KOTH_PREFIX + "Your faction now has " + FMessage.LAYER_2 + newTickets + " tickets" + FMessage.LAYER_1 + " on the leaderboard for " + koth.getDisplayName());
