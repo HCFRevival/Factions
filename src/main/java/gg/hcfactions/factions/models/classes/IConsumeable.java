@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ClassConsumableReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
+import gg.hcfactions.factions.listeners.events.player.PostConsumeClassItemEvent;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -129,6 +130,15 @@ public interface IConsumeable {
         });
         // end uuid gathering
 
+        // post event fire for analytics
+        final PostConsumeClassItemEvent postEvent = new PostConsumeClassItemEvent(player, playerClass, this, affected);
+        Bukkit.getPluginManager().callEvent(postEvent);
+
+        if (postEvent.isCancelled()) {
+            return;
+        }
+        // end event fire for analytics
+
         // apply effects to all gathered uuids
         for (UUID affectedId : affected) {
             final Player affectedPlayer = Bukkit.getPlayer(affectedId);
@@ -169,10 +179,6 @@ public interface IConsumeable {
                 }).delay((getDuration() * 20L) + 1L).run();
             }
         }
-
-        affected.forEach(affectedId -> {
-
-        });
         // end applying effect to all uuids
 
         // play audio que at source

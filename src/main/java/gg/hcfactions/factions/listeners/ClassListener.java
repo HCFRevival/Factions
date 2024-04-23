@@ -628,13 +628,6 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        final ConsumeClassItemEvent consumeClassItemEvent = new ConsumeClassItemEvent(player, playerClass, consumable);
-        Bukkit.getPluginManager().callEvent(consumeClassItemEvent);
-
-        if (consumeClassItemEvent.isCancelled()) {
-            return;
-        }
-
         if (factionPlayer != null) {
             if (!factionPlayer.hasTimer(ETimerType.COMBAT)) {
                 FMessage.printCombatTag(player, (plugin.getConfiguration().getAttackerCombatTagDuration()*1000L));
@@ -1086,6 +1079,13 @@ public final class ClassListener implements Listener {
                 }
 
                 if (effectType.equals(PotionEffectType.HEALTH_BOOST) && entity.hasPotionEffect(PotionEffectType.HEALTH_BOOST)) {
+                    continue;
+                }
+
+                final TankGuardApplyEvent applyEvent = new TankGuardApplyEvent(player, entity, effectType);
+                Bukkit.getPluginManager().callEvent(applyEvent);
+
+                if (applyEvent.isCancelled()) {
                     continue;
                 }
 
