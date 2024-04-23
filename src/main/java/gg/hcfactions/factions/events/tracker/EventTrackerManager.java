@@ -20,6 +20,8 @@ import java.util.UUID;
 
 public final class EventTrackerManager {
     // Player Tracker Keys
+    public static final String P_KILLS = "kills";
+    public static final String P_DEATHS = "deaths";
     public static final String P_DAMAGE_DEALT = "melee_damage_dealt";
     public static final String P_DAMAGE_TAKEN = "melee_damage_taken";
     public static final String P_ARCHER_RANGE_DMG = "archer_damage_dealt";
