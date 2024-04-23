@@ -7,6 +7,7 @@ import gg.hcfactions.factions.events.event.KOTHTickEvent;
 import gg.hcfactions.factions.events.tracker.EventTrackerManager;
 import gg.hcfactions.factions.listeners.events.faction.FactionTicketLossEvent;
 import gg.hcfactions.factions.listeners.events.player.*;
+import gg.hcfactions.factions.listeners.events.web.EventTrackerPublishEvent;
 import gg.hcfactions.factions.models.classes.impl.Bard;
 import gg.hcfactions.factions.models.events.impl.tracking.entry.EventTrackerEntry;
 import gg.hcfactions.factions.models.events.impl.tracking.entry.types.DeathEventTrackerEntry;
@@ -16,7 +17,9 @@ import gg.hcfactions.factions.models.events.impl.tracking.entry.types.KillEventT
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.tracking.IEventTrackerPlayer;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
+import gg.hcfactions.libs.bukkit.location.ILocatable;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
@@ -50,6 +53,14 @@ public final class EventTrackerListener implements Listener {
 
     private record BardAssistTracker(@Getter UUID bardPlayerId, @Getter Set<UUID> buffedPlayerIds) {}
 
+    // Creates a new entry in a player tracker object for the provided player and location
+    private void createPlayerEntry(ILocatable origin, Player player, String key, Number value) {
+        plugin.getEventManager().getTrackerManager().getTrackerByLocation(origin).ifPresent(tracker -> {
+            final IEventTrackerPlayer trackedPlayer = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
+            trackedPlayer.add(key, value);
+        });
+    }
+
     // Creates a wrapper object to help determine bard kills
     private void createBardAssist(Player bardPlayer, Set<UUID> buffedPlayerIds, int effectDuration) {
         final UUID bardPlayerId = bardPlayer.getUniqueId();
@@ -81,6 +92,14 @@ public final class EventTrackerListener implements Listener {
                 slainUsername,
                 deathLocation
         );
+    }
+
+    @EventHandler
+    public void onEventTrackerPublish(EventTrackerPublishEvent event) {
+        final String url = event.getUrl();
+
+        // slight delay to bypass any shit being spammed in chat after the event
+        new Scheduler(plugin).sync(() -> FMessage.broadcastEventTrackerPublish(url)).delay(5*20L).run();
     }
 
     /**
@@ -120,6 +139,7 @@ public final class EventTrackerListener implements Listener {
                     location
             )));
 
+            createPlayerEntry(location, killerPlayer, EventTrackerManager.P_KILLS, 1);
             return;
         }
 
@@ -132,6 +152,8 @@ public final class EventTrackerListener implements Listener {
                 null,
                 location
         )));
+
+        createPlayerEntry(location, slainPlayer, EventTrackerManager.P_DEATHS, 1);
     }
 
     /**
@@ -209,15 +231,8 @@ public final class EventTrackerListener implements Listener {
         final Player attacked = event.getDamaged();
         final double damage = event.getDamage();
 
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(attacker)).ifPresent(attackerTracker -> {
-            final IEventTrackerPlayer trackedPlayer = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(attacker, attackerTracker);
-            trackedPlayer.add(EventTrackerManager.P_DAMAGE_DEALT, damage);
-        });
-
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(attacked)).ifPresent(attackedTracker -> {
-            final IEventTrackerPlayer trackedPlayer = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(attacked, attackedTracker);
-            trackedPlayer.add(EventTrackerManager.P_DAMAGE_TAKEN, damage);
-        });
+        createPlayerEntry(new PLocatable(attacker), attacker, EventTrackerManager.P_DAMAGE_DEALT, damage);
+        createPlayerEntry(new PLocatable(attacked), attacker, EventTrackerManager.P_DAMAGE_TAKEN, damage);
     }
 
     /**
@@ -231,10 +246,7 @@ public final class EventTrackerListener implements Listener {
         }
 
         final Player player = event.getPlayer();
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_ARCHER_RANGE_DMG, event.getDamage());
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_ARCHER_RANGE_DMG, event.getDamage());
     }
 
     /**
@@ -248,10 +260,7 @@ public final class EventTrackerListener implements Listener {
         }
 
         final Player player = event.getPlayer();
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_ARCHER_TAG_HIT, 1);
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_ARCHER_TAG_HIT, 1);
     }
 
     /**
@@ -265,10 +274,7 @@ public final class EventTrackerListener implements Listener {
         }
 
         final Player player = event.getPlayer();
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_ROGUE_BACKSTAB, 1);
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_ROGUE_BACKSTAB, 1);
     }
 
     /**
@@ -282,10 +288,7 @@ public final class EventTrackerListener implements Listener {
         }
 
         final Player player = event.getPlayer();
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_DIVER_DMG, event.getDamage());
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_DIVER_DMG, event.getDamage());
     }
 
     /**
@@ -309,10 +312,7 @@ public final class EventTrackerListener implements Listener {
             createBardAssist(player, event.getAffectedPlayers(), event.getConsumable().getDuration());
         }
 
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_BARD_EFFECT_GIVEN, event.getAffectedPlayers().size());
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_BARD_EFFECT_GIVEN, event.getAffectedPlayers().size());
     }
 
     /**
@@ -334,10 +334,7 @@ public final class EventTrackerListener implements Listener {
             final Player bardPlayer = Bukkit.getPlayer(assistTracker.getBardPlayerId());
 
             if (bardPlayer != null && bardPlayer.isOnline()) {
-                plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(killerPlayer)).ifPresent(tracker -> {
-                    final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(bardPlayer, tracker);
-                    playerTracker.add(EventTrackerManager.P_BARD_ASSISTS, 1);
-                });
+                createPlayerEntry(new PLocatable(killerPlayer), bardPlayer, EventTrackerManager.P_BARD_ASSISTS, 1);
             }
         });
     }
@@ -356,10 +353,7 @@ public final class EventTrackerListener implements Listener {
         final ItemStack item = event.getItem();
 
         if (item.getType().equals(Material.ENCHANTED_GOLDEN_APPLE)) {
-            plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-                final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-                playerTracker.add(EventTrackerManager.P_GAPPLES_USED, 1);
-            });
+            createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_GAPPLES_USED, 1);
         }
     }
 
@@ -380,10 +374,7 @@ public final class EventTrackerListener implements Listener {
         final ThrownPotion potion = event.getPotion();
 
         if (potion.getEffects().stream().anyMatch(eff -> eff.getType().equals(PotionEffectType.HEAL))) {
-            plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-                final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-                playerTracker.add(EventTrackerManager.P_HEALTH_POTIONS_USED, 1);
-            });
+            createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_HEALTH_POTIONS_USED, 1);
         }
     }
 
@@ -401,10 +392,7 @@ public final class EventTrackerListener implements Listener {
             return;
         }
 
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_TOTEMS_USED, 1);
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_TOTEMS_USED, 1);
     }
 
     /**
@@ -419,9 +407,6 @@ public final class EventTrackerListener implements Listener {
             return;
         }
 
-        plugin.getEventManager().getTrackerManager().getTrackerByLocation(new PLocatable(player)).ifPresent(tracker -> {
-            final IEventTrackerPlayer playerTracker = plugin.getEventManager().getTrackerManager().getOrCreatePlayerTracker(player, tracker);
-            playerTracker.add(EventTrackerManager.P_TANK_GUARD, 1);
-        });
+        createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_TANK_GUARD, 1);
     }
 }
