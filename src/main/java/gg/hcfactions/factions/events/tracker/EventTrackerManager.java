@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class EventTrackerManager {
+    // Player Tracker Keys
     public static final String P_DAMAGE_DEALT = "melee_damage_dealt";
     public static final String P_DAMAGE_TAKEN = "melee_damage_taken";
     public static final String P_ARCHER_RANGE_DMG = "archer_damage_dealt";
@@ -38,10 +39,33 @@ public final class EventTrackerManager {
         this.eventManager = eventManager;
     }
 
+    /**
+     * Attempts to query a player tracker and if none
+     * is found creates and returns a new instance
+     *
+     * This function also handles adding the newly created
+     * tracker to the provided EventTracker's player repo
+     *
+     * @param player Bukkit Player
+     * @param tracker Event Tracker
+     * @return Event Tracker Player Instance
+     */
     public IEventTrackerPlayer getOrCreatePlayerTracker(Player player, IEventTracker<?> tracker) {
         return getOrCreatePlayerTracker(player.getUniqueId(), player.getName(), tracker);
     }
 
+    /**
+     * Attempts to query a player tracker and if none
+     * is found creates and returns a new instance
+     *
+     * This function also handles adding the newly created
+     * tracker to the provided EventTracker's player repo
+     *
+     * @param uniqueId Bukkit Player UUID
+     * @param username Bukkit Player Username
+     * @param tracker Event Tracker
+     * @return Event Tracker Player Instance
+     */
     public IEventTrackerPlayer getOrCreatePlayerTracker(UUID uniqueId, String username, IEventTracker<?> tracker) {
         final Optional<IEventTrackerPlayer> existingPlayerQuery = tracker.getParticipant(uniqueId);
         if (existingPlayerQuery.isEmpty()) {
@@ -53,8 +77,13 @@ public final class EventTrackerManager {
         return existingPlayerQuery.get();
     }
 
+    /**
+     * Queries an event tracker active at the provided location
+     * @param location Location to query
+     * @return Optional of Event Trackers
+     */
     public Optional<IEventTracker<?>> getTrackerByLocation(ILocatable location) {
-        final Claim insideClaim = eventManager.getPlugin().getClaimManager().getClaimAt(location);
+        Claim insideClaim = eventManager.getPlugin().getClaimManager().getClaimAt(location);
         if (insideClaim == null) {
             return Optional.empty();
         }
@@ -79,6 +108,12 @@ public final class EventTrackerManager {
         return Optional.empty();
     }
 
+    /**
+     * Returns all active event trackers associated
+     * with the provided Bukkit Player UUID
+     * @param uniqueId Bukkit Player UUID
+     * @return List of Event Tracker Player instances
+     */
     public ImmutableList<IEventTrackerPlayer> getActiveTrackers(UUID uniqueId) {
         final List<IEventTrackerPlayer> res = Lists.newArrayList();
 
