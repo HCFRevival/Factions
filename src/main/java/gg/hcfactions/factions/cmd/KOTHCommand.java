@@ -31,7 +31,7 @@ public final class KOTHCommand extends BaseCommand {
         plugin.getEventManager().getEventRepository().stream().filter(event -> event instanceof KOTHEvent).forEach(koth -> koths.add(((KOTHEvent) koth)));
         koths.removeIf(koth -> koth.getSchedule().isEmpty()); // TODO: Refactor: this sucks, let's just filter them in the first place
 
-        if (koths.isEmpty() || koths.stream().noneMatch(kothEvent -> kothEvent.getRemainingTimeUntilNextSchedule() > -1L)) {
+        if (koths.isEmpty() || koths.stream().noneMatch(kothEvent -> kothEvent.getRemainingTimeUntilNextSchedule() > 0L)) {
             player.sendMessage(ChatColor.RED + "No events found");
             return;
         }

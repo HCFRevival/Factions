@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.events.event.KOTHTickEvent;
 import gg.hcfactions.factions.models.events.IEventSession;
+import gg.hcfactions.factions.models.events.impl.tracking.KOTHEventTracker;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -26,27 +27,55 @@ public final class KOTHSession implements IEventSession {
     @Getter @Setter public int timerDuration;
     @Getter @Setter public int tokenReward;
     @Getter @Setter public int tickCheckpointInterval;
+    @Getter @Setter public int contestedThreshold;
+    @Getter @Setter public boolean majorityTurnoverEnabled;
+    @Getter @Setter public boolean suddenDeathEnabled;
     @Getter @Setter public long nextNotificationTime;
     @Getter @Setter public PlayerFaction capturingFaction;
     @Getter public final Map<UUID, Integer> leaderboard;
     @Getter public final KOTHTimer timer;
+    @Getter public KOTHEventTracker tracker;
 
-    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval) {
+    public KOTHSession(KOTHEvent event, CaptureEventConfig config) {
+        this.event = event;
+        this.active = false;
+        this.ticketsNeededToWin = config.getDefaultTicketsNeededToWin();
+        this.timerDuration = config.getDefaultTimerDuration();
+        this.tokenReward = config.getTokenReward();
+        this.tickCheckpointInterval = config.getTickCheckpointInterval();
+        this.contestedThreshold = config.getContestedThreshold();
+        this.majorityTurnoverEnabled = config.isMajorityTurnoverEnabled();
+        this.suddenDeathEnabled = config.isSuddenDeathEnabled();
+        this.nextNotificationTime = Time.now();
+        this.capturingFaction = null;
+        this.leaderboard = Maps.newConcurrentMap();
+        this.timer = new KOTHTimer(event, timerDuration);
+        this.timer.setFrozen(true);
+        this.tracker = new KOTHEventTracker(event);
+    }
+
+    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
         this.event = event;
         this.active = false;
         this.ticketsNeededToWin = ticketsNeededToWin;
         this.timerDuration = timerDuration;
         this.tokenReward = tokenReward;
         this.tickCheckpointInterval = tickCheckpointInterval;
+        this.contestedThreshold = contestedThreshold;
         this.nextNotificationTime = Time.now();
         this.capturingFaction = null;
         this.leaderboard = Maps.newConcurrentMap();
         this.timer = new KOTHTimer(event, timerDuration);
         this.timer.setFrozen(true);
+        this.tracker = new KOTHEventTracker(event);
     }
 
     public boolean isCaptured() {
         return capturingFaction != null && !active;
+    }
+
+    public boolean hasContestThreshold() {
+        return contestedThreshold > 1;
     }
 
     public int getTickets(PlayerFaction faction) {
@@ -114,6 +143,33 @@ public final class KOTHSession implements IEventSession {
         return 0;
     }
 
+    public boolean shouldBeContested(Map<UUID, Set<UUID>> inCapzone) {
+        if (capturingFaction == null) {
+            return false;
+        }
+
+        if (!hasContestThreshold()) {
+            return (inCapzone.size() > 1);
+        }
+
+        final Set<UUID> capturingFactionCount = inCapzone.get(capturingFaction.getUniqueId());
+        final int contestRequirement = (int)Math.floor(Math.round((double)(capturingFactionCount.size() / contestedThreshold)));
+
+        for (UUID factionId : inCapzone.keySet()) {
+            if (factionId.equals(capturingFaction.getUniqueId())) {
+                continue;
+            }
+
+            final Set<UUID> playerIds = inCapzone.get(factionId);
+
+            if (playerIds.size() >= contestRequirement) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void setContested(Set<PlayerFaction> factions) {
         final List<String> names = Lists.newArrayList();
         factions.forEach(f -> names.add(f.getName()));
@@ -164,7 +220,7 @@ public final class KOTHSession implements IEventSession {
             return;
         }
 
-        final KOTHTickEvent tickEvent = new KOTHTickEvent(getEvent());
+        final KOTHTickEvent tickEvent = new KOTHTickEvent(getEvent(), newTickets);
         Bukkit.getPluginManager().callEvent(tickEvent);
 
         leaderboard.put(faction.getUniqueId(), newTickets);
@@ -194,5 +250,15 @@ public final class KOTHSession implements IEventSession {
         }
 
         timer.setExpire(Time.now() + (timerDuration * 1000L));
+    }
+
+    public void updateConfig(CaptureEventConfig config) {
+        this.ticketsNeededToWin = config.getDefaultTicketsNeededToWin();
+        this.timerDuration = config.getDefaultTimerDuration();
+        this.tokenReward = config.getTokenReward();
+        this.tickCheckpointInterval = config.getTickCheckpointInterval();
+        this.contestedThreshold = config.getContestedThreshold();
+        this.majorityTurnoverEnabled = config.isMajorityTurnoverEnabled();
+        this.suddenDeathEnabled = config.isSuddenDeathEnabled();
     }
 }

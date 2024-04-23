@@ -33,6 +33,7 @@ public final class FConfig {
     @Getter public String deathStatsCollection;
     @Getter public String eventStatsCollection;
     @Getter public String playerStatsCollection;
+    @Getter public String trackerCollection;
 
     @Getter public String redisUri;
 
@@ -236,6 +237,7 @@ public final class FConfig {
         deathStatsCollection = conf.getString("databases.mongo.collections.stats_deaths");
         eventStatsCollection = conf.getString("databases.mongo.collections.stats_events");
         playerStatsCollection = conf.getString("databases.mongo.collections.stats_players");
+        trackerCollection = conf.getString("databases.mongo.collections.event_trackers");
 
         redisUri = conf.getString("databases.redis.uri");
         plugin.getAresLogger().info("Using MongoDB Database: " + mongoDatabaseName);

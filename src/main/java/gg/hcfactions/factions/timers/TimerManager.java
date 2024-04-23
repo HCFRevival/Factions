@@ -9,6 +9,7 @@ import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.classes.impl.Tank;
 import gg.hcfactions.factions.models.events.impl.ConquestZone;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.DPSEvent;
@@ -113,16 +114,17 @@ public final class TimerManager implements IManager {
         21
         20
         19
-        18 CommandX Reboot
-        17 CommandX Vanish
-        16 Protection
-        15 Combat
-        14 Class
-        13 Enderpearl
-        12 Chorus Fruit
-        11 Logout
-        10 Home
-        9 Stuck
+        19 CommandX Reboot
+        18 CommandX Vanish
+        17 Protection
+        16 Combat
+        15 Class
+        14 Enderpearl
+        13 Chorus Fruit
+        12 Logout
+        11 Home
+        10 Stuck
+        9 Stamina
         8 Guard or Grapple or Trident
         7 Archer Mark
         6 Crapple
@@ -165,6 +167,12 @@ public final class TimerManager implements IManager {
             return;
         }
 
+        if (playerClass instanceof Tank tankClass) {
+            res.put(9, ChatColor.BLUE + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + tankClass.getStamina(player));
+        }
+
+        // Render class cooldowns, everything below this will not be reached if they do not have an active cooldown
+        // due to this guard statement
         if (playerClass.getConsumables().stream().noneMatch(c -> c.getCooldowns().containsKey(player.getUniqueId()))) {
             return;
         }
@@ -197,13 +205,12 @@ public final class TimerManager implements IManager {
         }
 
         if (cxService.getVanishManager().isVanished(player.getUniqueId())) {
-            res.put(17, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
+            res.put(18, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
         }
 
         if (cxService.getRebootModule().isEnabled() && cxService.getRebootModule().isRebootInProgress()) {
-            res.put(18, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
+            res.put(19, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
         }
-
     }
 
     private void getEventScoreboardEntries(Player player, Map<Integer, String> res) {

@@ -16,6 +16,7 @@ databases:
       stats_deaths: 'stats_deaths'
       stats_events: 'stats_events'
       stats_players: 'stats_players'
+      event_trackers: 'event_trackers'
   redis:
     uri: 'redis://0.0.0.0:6379'
 

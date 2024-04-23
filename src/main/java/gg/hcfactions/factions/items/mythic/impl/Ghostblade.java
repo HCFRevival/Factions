@@ -84,11 +84,6 @@ public final class Ghostblade implements IMythicItem {
     }
 
     @Override
-    public int getDurabilityCost() {
-        return 3;
-    }
-
-    @Override
     public Map<Enchantment, Integer> getEnchantments() {
         final CXService cxs = (CXService) plugin.getService(CXService.class);
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();

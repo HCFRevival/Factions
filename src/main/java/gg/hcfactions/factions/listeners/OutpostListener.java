@@ -1,6 +1,7 @@
 package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.world.BossSpawnEvent;
 import gg.hcfactions.factions.models.boss.impl.BossGiant;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
@@ -8,6 +9,7 @@ import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -19,6 +21,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Objects;
 
 public record OutpostListener(@Getter Factions plugin) implements Listener {
     /**
@@ -76,6 +80,13 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
         event.setCancelled(true);
 
         final BossGiant giant = new BossGiant(plugin, event.getLocation());
+        final BossSpawnEvent spawnEvent = new BossSpawnEvent(giant, event.getLocation());
+        Bukkit.getPluginManager().callEvent(spawnEvent);
+
+        if (spawnEvent.isCancelled()) {
+            return;
+        }
+
         giant.spawn();
     }
 
@@ -104,9 +115,11 @@ public record OutpostListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
-        // prevent giant minions/baby zombies from receiving buffed attributes
-        if (entity.getType().equals(EntityType.ZOMBIE) && entity instanceof final Ageable ageable && !ageable.isAdult()) {
-            return;
+        // skip noMerge mobs from having attributes applied
+        if (entity.getPersistentDataContainer().has(plugin.getNamespacedKey(), PersistentDataType.STRING)) {
+            if (Objects.requireNonNull(entity.getPersistentDataContainer().get(plugin.getNamespacedKey(), PersistentDataType.STRING)).equalsIgnoreCase("noMerge")) {
+                return;
+            }
         }
 
         // prevent natural spawns inside outpost claims

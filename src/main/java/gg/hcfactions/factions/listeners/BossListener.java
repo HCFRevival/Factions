@@ -2,9 +2,11 @@ package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.cx.event.PreMobstackEvent;
 import gg.hcfactions.factions.Factions;
-import gg.hcfactions.factions.models.boss.impl.BossGiant;
+import gg.hcfactions.factions.listeners.events.world.BossSpawnEvent;
+import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.faction.impl.ServerFaction;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Giant;
 import org.bukkit.entity.Player;
@@ -17,7 +19,35 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-public record BossListener(@Getter Factions plugin) implements Listener {
+import java.util.Objects;
+
+public final class BossListener implements Listener {
+    @Getter public final Factions plugin;
+
+    public BossListener(Factions plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onBossSpawn(BossSpawnEvent event) {
+        final Claim insideClaim = plugin.getClaimManager().getClaimAt(new BLocatable(
+                Objects.requireNonNull(event.getSpawnLocation().getWorld()).getName(),
+                event.getSpawnLocation().getX(),
+                event.getSpawnLocation().getY(),
+                event.getSpawnLocation().getZ())
+        );
+
+        if (insideClaim == null) {
+            return;
+        }
+
+        final ServerFaction serverFaction = plugin.getFactionManager().getServerFactionById(insideClaim.getOwner());
+
+        if (serverFaction == null) {
+            return;
+        }
+    }
+
     @EventHandler
     public void onGiantFallDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Giant)) {
@@ -75,6 +105,6 @@ public record BossListener(@Getter Factions plugin) implements Listener {
 
         event.setDroppedExp(event.getDroppedExp()*3);
         event.getDrops().clear();
-        event.getDrops().addAll(plugin.getBossManager().getLootManager().getItems(1));
+        event.getDrops().addAll(plugin.getBossManager().getLootManager().getItems(3));
     }
 }

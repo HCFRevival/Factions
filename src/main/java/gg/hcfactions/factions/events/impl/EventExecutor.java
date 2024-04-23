@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.events.IEventExecutor;
 import gg.hcfactions.factions.events.menu.EventMenu;
+import gg.hcfactions.factions.events.menu.KOTHConfigMenu;
 import gg.hcfactions.factions.models.events.*;
 import gg.hcfactions.factions.models.events.impl.CaptureEventConfig;
 import gg.hcfactions.factions.models.events.impl.ConquestZone;
@@ -40,7 +41,15 @@ public final class EventExecutor implements IEventExecutor {
     @Getter public EventManager manager;
 
     @Override
-    public void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise) {
+    public void startCaptureEvent(
+            Player player,
+            String eventName,
+            int ticketsToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -60,7 +69,33 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval);
+        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
+        promise.resolve();
+    }
+
+    @Override
+    public void startCaptureEventWithConfig(Player player, String eventName, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
+
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
+        }
+
+        final IEvent generic = event.get();
+
+        if (generic.isActive()) {
+            promise.reject("This event is already active");
+            return;
+        }
+
+        if (!(generic instanceof final KOTHEvent kothEvent)) {
+            promise.reject("This is not a Capture Event");
+            return;
+        }
+
+        final KOTHConfigMenu menu = new KOTHConfigMenu(manager.getPlugin(), kothEvent, player);
+        menu.open();
         promise.resolve();
     }
 
@@ -129,7 +164,16 @@ public final class EventExecutor implements IEventExecutor {
     }
 
     @Override
-    public void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise) {
+    public void setCaptureEventConfig(
+            Player player,
+            String eventName,
+            int ticketsToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            Promise promise
+    ) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
         if (event.isEmpty()) {
@@ -144,15 +188,29 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval));
+        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold));
 
-        if (koth.isActive()) {
-            koth.getSession().setTicketsNeededToWin(ticketsToWin);
-            koth.getSession().setTimerDuration(timerDuration);
-            koth.getSession().setTokenReward(tokenReward);
-            koth.getSession().setTickCheckpointInterval(tickCheckpointInterval);
+        promise.resolve();
+    }
+
+    @Override
+    public void openCaptureEventConfig(Player player, String eventName, Promise promise) {
+        final Optional<IEvent> event = manager.getEvent(eventName);
+
+        if (event.isEmpty()) {
+            promise.reject("Event not found");
+            return;
         }
 
+        final IEvent generic = event.get();
+
+        if (!(generic instanceof final KOTHEvent koth)) {
+            promise.reject("Not a capture event");
+            return;
+        }
+
+        final KOTHConfigMenu menu = new KOTHConfigMenu(manager.getPlugin(), koth, player);
+        menu.open();
         promise.resolve();
     }
 

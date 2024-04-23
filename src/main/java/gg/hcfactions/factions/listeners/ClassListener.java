@@ -253,7 +253,13 @@ public final class ClassListener implements Listener {
 
         final int percent = (int)Math.round(archerClass.getMarkPercentage() * 100);
 
-        arrow.setGlowingTicks(archerClass.getMarkDuration() * 20);
+        final ArcherMarkEvent markEvent = new ArcherMarkEvent(shooter, damaged, archerClass.getMarkDuration() * 20);
+        Bukkit.getPluginManager().callEvent(markEvent);
+        if (markEvent.isCancelled()) {
+            return;
+        }
+
+        arrow.setGlowingTicks(markEvent.getTicks());
         archerClass.mark(damaged);
 
         shooter.sendMessage(ChatColor.YELLOW + "Your arrow has" + ChatColor.BLUE + " marked " + name + ChatColor.YELLOW + " for " + ChatColor.BLUE + archerClass.getMarkDuration() + " seconds");
@@ -310,17 +316,21 @@ public final class ClassListener implements Listener {
         // flatten to 2D then calculate
         locA.setY(0.0);
         locB.setY(0.0);
+
         final double distance = locA.distance(locB);
-
-        archerClass.addHit(player, (LivingEntity) damaged, 10); // TODO: Make configurable
-
         final int hitCount = archerClass.getHitCount(player, (LivingEntity) damaged);
         final double distanceDamage = (damagePerBlock * distance);
-        final double consecutiveDamage = (archerClass.getConsecutiveBase() * (hitCount * archerClass.getConsecutiveMultiplier()));
-
+        final double consecutiveDamage = (archerClass.getConsecutiveBase() * ((hitCount + 1) * archerClass.getConsecutiveMultiplier()));
         final double finalDamage = Math.min((distanceDamage + consecutiveDamage + damage), maxDamage);
 
-        event.setDamage(finalDamage);
+        final ArcherTagEvent tagEvent = new ArcherTagEvent(player, (LivingEntity) damaged, finalDamage, distance, hitCount);
+        Bukkit.getPluginManager().callEvent(tagEvent);
+        if (tagEvent.isCancelled()) {
+            return;
+        }
+
+        archerClass.addHit(player, (LivingEntity) damaged, 10); // TODO: Make configurable
+        event.setDamage(tagEvent.getDamage());
 
         final double healthPre = ((LivingEntity) damaged).getHealth();
 
@@ -338,7 +348,7 @@ public final class ClassListener implements Listener {
 
             player.sendMessage(ChatColor.YELLOW + "Your arrow has" + ChatColor.RED + " pierced " + name +
                     ChatColor.YELLOW + " from a distance of " + ChatColor.BLUE + String.format("%.2f", distance) + " blocks " +
-                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + (hitCount > 1 ? ChatColor.GOLD + " x" + hitCount : "")
+                    ChatColor.YELLOW + "(" + ChatColor.RED + String.format("%.2f", diff) + " ❤" + ((hitCount + 1) > 1 ? ChatColor.GOLD + " x" + (hitCount + 1) : "")
                     + ChatColor.YELLOW + ")");
 
         }).delay(1L).run();
@@ -618,13 +628,6 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        final ConsumeClassItemEvent consumeClassItemEvent = new ConsumeClassItemEvent(player, playerClass, consumable);
-        Bukkit.getPluginManager().callEvent(consumeClassItemEvent);
-
-        if (consumeClassItemEvent.isCancelled()) {
-            return;
-        }
-
         if (factionPlayer != null) {
             if (!factionPlayer.hasTimer(ETimerType.COMBAT)) {
                 FMessage.printCombatTag(player, (plugin.getConfiguration().getAttackerCombatTagDuration()*1000L));
@@ -820,7 +823,15 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        event.setDamage(pre*diverClass.getDamageMultiplier());
+        final double damage = pre*diverClass.getDamageMultiplier();
+
+        final DiverPierceEvent pierceEvent = new DiverPierceEvent(attacker, attacked, damage, dist);
+        Bukkit.getPluginManager().callEvent(pierceEvent);
+        if (pierceEvent.isCancelled()) {
+            return;
+        }
+
+        event.setDamage(pierceEvent.getDamage());
 
         if (attacked instanceof final Player playerDamaged) {
             // reset trident CD on non-riptide trident hit
@@ -1068,6 +1079,13 @@ public final class ClassListener implements Listener {
                 }
 
                 if (effectType.equals(PotionEffectType.HEALTH_BOOST) && entity.hasPotionEffect(PotionEffectType.HEALTH_BOOST)) {
+                    continue;
+                }
+
+                final TankGuardApplyEvent applyEvent = new TankGuardApplyEvent(player, entity, effectType);
+                Bukkit.getPluginManager().callEvent(applyEvent);
+
+                if (applyEvent.isCancelled()) {
                     continue;
                 }
 

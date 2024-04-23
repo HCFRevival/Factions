@@ -64,13 +64,6 @@ public interface IMythicItem extends ICustomItem {
     }
 
     /**
-     * @return Durability subtracted per use
-     */
-    default int getDurabilityCost() {
-        return 1;
-    }
-
-    /**
      * @return If true onAttack and onKill will trigger on friendlies
      */
     default boolean isFriendlyFireEnabled() {
@@ -103,10 +96,6 @@ public interface IMythicItem extends ICustomItem {
         final List<String> res = Lists.newArrayList();
 
         res.add(Colors.DARK_AQUA.toBukkit() + StringUtil.getMythicEmblem(getMaterial()) + " Mythic");
-
-        if (getDurabilityCost() > 1) {
-            res.add(Colors.LIGHT_AQUA.toBukkit() + "Durability Cost" + ChatColor.GRAY + ": " + getDurabilityCost() + " per hit");
-        }
 
         for (EMythicAbilityType abilityType : EMythicAbilityType.values()) {
             final List<MythicAbility> abilities = getAbilityInfoByType(abilityType);

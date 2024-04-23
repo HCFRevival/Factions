@@ -17,8 +17,8 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.UUID;
@@ -29,7 +29,7 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
     @Getter public final PLocatable position;
 
     public MerchantVillager(Factions plugin, GenericMerchant merchant) {
-        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.DESERT);
+        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.SNOW);
         this.plugin = plugin;
         this.merchantId = merchant.getId();
         this.position = merchant.getMerchantLocation();
@@ -89,7 +89,7 @@ public final class MerchantVillager extends Villager implements IMerchantVillage
     }
 
     @Override
-    protected boolean damageEntity0(DamageSource damagesource, float f) {
+    public boolean hurt(DamageSource damagesource, float f) {
         return false;
     }
 

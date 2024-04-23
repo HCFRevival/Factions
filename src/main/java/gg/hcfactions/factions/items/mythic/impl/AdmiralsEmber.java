@@ -77,11 +77,6 @@ public final class AdmiralsEmber implements IMythicItem {
     }
 
     @Override
-    public int getDurabilityCost() {
-        return 4;
-    }
-
-    @Override
     public Particle getAbilityParticle() {
         return Particle.FLAME;
     }

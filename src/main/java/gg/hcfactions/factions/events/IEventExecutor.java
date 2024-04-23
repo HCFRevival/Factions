@@ -18,9 +18,18 @@ public interface IEventExecutor {
      * @param timerDuration Timer duration
      * @param tokenReward Token reward
      * @param tickCheckpointInterval Tick checkpoint interval
+     * @param contestedThreshold Threshold to consider an event as contested
      * @param promise Promise
      */
-    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise);
+    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold, Promise promise);
+
+    /**
+     * Start a Capture Event with specified rules using the KOTH Config Menu
+     * @param player Player
+     * @param eventname Event Name
+     * @param promise Promise
+     */
+    void startCaptureEventWithConfig(Player player, String eventname, Promise promise);
 
     /**
      * Start a Conquest Event with specified rules
@@ -46,6 +55,7 @@ public interface IEventExecutor {
     void startDpsEvent(Player player, String eventName, String entityTypeName, String duration, int tokenReward, Promise promise);
 
     /**
+     * @Deprecated - Use openCaptureEventConfig for GUI support
      * Alter a Capture Event that is already running
      * @param player Player
      * @param eventName Event Name
@@ -53,9 +63,18 @@ public interface IEventExecutor {
      * @param timerDuration Timer duration
      * @param tokenReward Token reward
      * @param tickCheckpointInterval Tick checkpoint interval
+     * @param contestedThreshold Player ratio to mark an event as contested
      * @param promise Promise
      */
-    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, Promise promise);
+    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold, Promise promise);
+
+    /**
+     * Alter a Capture Event that is already running
+     * @param player Player
+     * @param eventName Event Name
+     * @param promise Promise
+     */
+    void openCaptureEventConfig(Player player, String eventName, Promise promise);
 
     /**
      * Alter a Capture Event's leaderboard
