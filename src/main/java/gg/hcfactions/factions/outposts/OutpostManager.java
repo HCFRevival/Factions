@@ -137,7 +137,7 @@ public final class OutpostManager implements IManager {
         builder.addEnchant(Enchantment.VANISHING_CURSE, 1);
 
         if (protLevel > 0) {
-            builder.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, protLevel);
+            builder.addEnchant(Enchantment.PROTECTION, protLevel);
         }
 
         return builder.build();
@@ -152,7 +152,7 @@ public final class OutpostManager implements IManager {
         builder.addEnchant(Enchantment.VANISHING_CURSE, 1);
 
         if (sharpLevel > 0) {
-            builder.addEnchant(Enchantment.DAMAGE_ALL, sharpLevel);
+            builder.addEnchant(Enchantment.SHARPNESS, sharpLevel);
         }
 
         if (knockbackLevel > 0) {
@@ -194,15 +194,15 @@ public final class OutpostManager implements IManager {
         builder.addEnchant(Enchantment.VANISHING_CURSE, 1);
 
         if (powerLevel > 0) {
-            builder.addEnchant(Enchantment.ARROW_DAMAGE, powerLevel);
+            builder.addEnchant(Enchantment.POWER, powerLevel);
         }
 
         if (flameLevel > 0) {
-            builder.addEnchant(Enchantment.ARROW_FIRE, flameLevel);
+            builder.addEnchant(Enchantment.FLAME, flameLevel);
         }
 
         if (punchLevel > 0) {
-            builder.addEnchant(Enchantment.ARROW_KNOCKBACK, punchLevel);
+            builder.addEnchant(Enchantment.PUNCH, punchLevel);
         }
 
         return builder.build();

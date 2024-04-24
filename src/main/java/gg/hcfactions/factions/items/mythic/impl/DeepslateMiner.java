@@ -40,8 +40,8 @@ public final class DeepslateMiner implements IMythicItem {
     @Override
     public Map<Enchantment, Integer> getEnchantments() {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
-        enchantments.put(Enchantment.DIG_SPEED, 8);
-        enchantments.put(Enchantment.DURABILITY, 3);
+        enchantments.put(Enchantment.EFFICIENCY, 8);
+        enchantments.put(Enchantment.UNBREAKING, 3);
         enchantments.put(Enchantment.MENDING, 1);
         return enchantments;
     }

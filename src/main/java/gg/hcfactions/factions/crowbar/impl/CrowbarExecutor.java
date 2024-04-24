@@ -12,10 +12,10 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -100,7 +100,7 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
                 return;
             }
 
-            dropMeta.setDisplayName(Colors.DARK_BLUE.toBukkit() + StringUtils.capitalize(spawner.getSpawnedType().name().toLowerCase().replaceAll("_", " ")) + " Spawner");
+            dropMeta.setDisplayName(ChatColor.BLUE + StringUtils.capitalize(spawner.getSpawnedType().name().toLowerCase().replaceAll("_", " ")) + " Spawner");
             toDrop.setItemMeta(dropMeta);
         }
 

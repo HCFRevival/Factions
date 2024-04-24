@@ -7,10 +7,10 @@ import gg.hcfactions.factions.items.mythic.EMythicAbilityType;
 import gg.hcfactions.factions.items.mythic.IMythicItem;
 import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.*;
+import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -41,7 +41,7 @@ public final class NeptunesFury implements IMythicItem {
         this.abilityInfo = Lists.newArrayList();
 
         addAbilityInfo(
-                Colors.DARK_AQUA.toBukkit() + "The Sea Calls",
+                ChatColor.DARK_AQUA + "The Sea Calls",
                 "Slaying an enemy while in riptide will channel a lightning strike with amplified explosive damage at the victims last location damaging and knocking back all nearby enemies.",
                 EMythicAbilityType.ON_KILL
         );
@@ -75,7 +75,7 @@ public final class NeptunesFury implements IMythicItem {
     @Override
     public Map<Enchantment, Integer> getEnchantments() {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
-        enchantments.put(Enchantment.DAMAGE_ALL, getMaxSharpness());
+        enchantments.put(Enchantment.SHARPNESS, getMaxSharpness());
         enchantments.put(Enchantment.RIPTIDE, 4);
         enchantments.put(Enchantment.IMPALING, 3);
         return enchantments;
@@ -113,7 +113,7 @@ public final class NeptunesFury implements IMythicItem {
 
     private void spawnShockwaveParticle(Location location) {
         Objects.requireNonNull(location.getWorld()).spawnParticle(
-                Particle.EXPLOSION_HUGE,
+                Particle.EXPLOSION,
                 location.getX(),
                 location.getY() + 1.0,
                 location.getZ(),
@@ -129,7 +129,8 @@ public final class NeptunesFury implements IMythicItem {
         final double power = Math.min(force / distance, force);
         final Vector currentVelocity = affectedEntity.getVelocity();
         final Vector addedVelocity = direction.multiply(power);
-        final EntityDamageEvent damageEvent = new EntityDamageEvent(affectedEntity, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, Math.round(64 / distance));
+        final org.bukkit.damage.DamageSource damageSource = org.bukkit.damage.DamageSource.builder(DamageType.EXPLOSION).build();
+        final EntityDamageEvent damageEvent = new EntityDamageEvent(affectedEntity, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, damageSource, Math.round(64 / distance));
 
         Bukkit.getPluginManager().callEvent(damageEvent);
         if (damageEvent.isCancelled()) {
@@ -138,7 +139,6 @@ public final class NeptunesFury implements IMythicItem {
 
         final float newHealth = (float)Math.max(affectedEntity.getHealth() - damageEvent.getFinalDamage(), 0);
         affectedEntity.setHealth(newHealth);
-        affectedEntity.setLastDamageCause(damageEvent);
 
         final Vector vec = new Vector(addedVelocity.getX(), 0.2, addedVelocity.getZ());
         affectedEntity.setVelocity(currentVelocity.add(vec));

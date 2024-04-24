@@ -1,8 +1,8 @@
 name: Factions
 main: gg.hcfactions.factions.Factions
-version: 1.20.2
-author: John Rockwell <john@hcfrevival.net>
+version: 1.20.5
+author: John Rockwell <admin@hcfrevival.net>
 description: Factions Core
 prefix: Factions
-api-version: 1.19
+api-version: 1.20.5
 depends: [ProtocolLib, LunarClient-API]

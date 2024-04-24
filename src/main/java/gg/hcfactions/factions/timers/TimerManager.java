@@ -18,7 +18,6 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.base.timer.impl.GenericTimer;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
@@ -184,15 +183,17 @@ public final class TimerManager implements IManager {
         res.put(55, ChatColor.GOLD + "" + ChatColor.BOLD + playerClass.getName() + " Cooldowns");
 
         playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(player.getUniqueId())).forEach(consumeable -> {
-            final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(consumeable.getEffectType());
-            final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
-            final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
-            final long remainingTime = consumeable.getCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now();
-            final int remainingSeconds = (int)remainingTime / 1000;
+            final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByEffect(consumeable.getEffectType());
 
-            if (mapping != null && remainingTime > 0) {
-                res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
-                        + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
+            if (mapping != null) {
+                final String effectName = StringUtils.capitalize(mapping.name().toLowerCase().replaceAll("_", " "));
+                final long remainingTime = consumeable.getCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now();
+                final int remainingSeconds = (int)remainingTime / 1000;
+
+                if (remainingTime > 0) {
+                    res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
+                            + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
+                }
             }
         });
     }

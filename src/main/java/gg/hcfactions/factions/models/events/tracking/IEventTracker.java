@@ -2,7 +2,7 @@ package gg.hcfactions.factions.models.events.tracking;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import gg.hcfactions.factions.listeners.events.web.EventTrackerPublishEvent;
+import gg.hcfactions.factions.events.event.EventTrackerPublishEvent;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.tracking.entry.EventTrackerEntry;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;

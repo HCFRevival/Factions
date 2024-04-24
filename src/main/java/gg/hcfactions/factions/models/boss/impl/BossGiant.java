@@ -17,8 +17,8 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R4.entity.CraftLivingEntity;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -168,7 +168,7 @@ public final class BossGiant extends Giant implements IBossEntity {
 
     private void applyShockwaveEffects(LivingEntity affectedEntity, int duration) {
         if (affectedEntity instanceof final Player player) {
-            player.getBukkitEntity().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, duration*20, 1));
+            player.getBukkitEntity().addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, duration*20, 1));
             player.getBukkitEntity().addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, duration*20, 0));
         }
     }
@@ -211,7 +211,7 @@ public final class BossGiant extends Giant implements IBossEntity {
         for (int i = 0; i < spawnCount; i++) {
             final Zombie zombie = (Zombie) getBukkitEntity().getWorld().spawnEntity(getBukkitEntity().getLocation(), org.bukkit.entity.EntityType.ZOMBIE);
             zombie.setBaby();
-            zombie.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, PotionEffect.INFINITE_DURATION, 0));
+            zombie.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, PotionEffect.INFINITE_DURATION, 0));
             zombie.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
             zombie.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, "noMerge");
             zombie.setCanPickupItems(false);

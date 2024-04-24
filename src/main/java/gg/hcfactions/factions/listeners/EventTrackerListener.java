@@ -7,7 +7,7 @@ import gg.hcfactions.factions.events.event.KOTHTickEvent;
 import gg.hcfactions.factions.events.tracker.EventTrackerManager;
 import gg.hcfactions.factions.listeners.events.faction.FactionTicketLossEvent;
 import gg.hcfactions.factions.listeners.events.player.*;
-import gg.hcfactions.factions.listeners.events.web.EventTrackerPublishEvent;
+import gg.hcfactions.factions.events.event.EventTrackerPublishEvent;
 import gg.hcfactions.factions.models.classes.impl.Bard;
 import gg.hcfactions.factions.models.events.impl.tracking.entry.EventTrackerEntry;
 import gg.hcfactions.factions.models.events.impl.tracking.entry.types.DeathEventTrackerEntry;
@@ -307,7 +307,7 @@ public final class EventTrackerListener implements Listener {
 
         final Player player = event.getPlayer();
 
-        if (event.getConsumable().getEffectType().equals(PotionEffectType.INCREASE_DAMAGE)) {
+        if (event.getConsumable().getEffectType().equals(PotionEffectType.STRENGTH)) {
             pendingBardAssists.removeIf(pba -> pba.getBardPlayerId().equals(player.getUniqueId()));
             createBardAssist(player, event.getAffectedPlayers(), event.getConsumable().getDuration());
         }
@@ -373,7 +373,7 @@ public final class EventTrackerListener implements Listener {
 
         final ThrownPotion potion = event.getPotion();
 
-        if (potion.getEffects().stream().anyMatch(eff -> eff.getType().equals(PotionEffectType.HEAL))) {
+        if (potion.getEffects().stream().anyMatch(eff -> eff.getType().equals(PotionEffectType.INSTANT_HEALTH))) {
             createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_HEALTH_POTIONS_USED, 1);
         }
     }

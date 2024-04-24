@@ -15,7 +15,7 @@ import gg.hcfactions.factions.models.shop.impl.events.EventShopItem;
 import gg.hcfactions.factions.shops.impl.ShopExecutor;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
-import gg.hcfactions.libs.bukkit.remap.ERemappedEnchantment;
+import gg.hcfactions.libs.bukkit.utils.Enchants;
 import lombok.Getter;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.ChatColor;
@@ -131,7 +131,7 @@ public final class ShopManager implements IManager {
 
                             if (conf.get(itemPath + "enchantments") != null) {
                                 for (String enchantmentName : Objects.requireNonNull(conf.getConfigurationSection(itemPath + "enchantments")).getKeys(false)) {
-                                    final Enchantment enchantment = ERemappedEnchantment.getEnchantment(enchantmentName);
+                                    final Enchantment enchantment = Enchants.getEnchantment(enchantmentName);
                                     final int level = conf.getInt(itemPath + "enchantments." + enchantmentName);
 
                                     if (enchantment == null) {
@@ -243,7 +243,7 @@ public final class ShopManager implements IManager {
                 }
 
                 if (item.getEnchantments() != null && !item.getEnchantments().isEmpty()) {
-                    item.getEnchantments().forEach((enchantment, level) -> conf.set(itemPath + "enchantments." + ERemappedEnchantment.getRemappedEnchantment(enchantment).name(), level));
+                    item.getEnchantments().forEach((enchantment, level) -> conf.set(itemPath + "enchantments." + enchantment.getKey(), level));
                 }
             }
         }

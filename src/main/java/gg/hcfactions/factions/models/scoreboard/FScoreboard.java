@@ -4,7 +4,6 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.player.EScoreboardEntryType;
 import gg.hcfactions.libs.bukkit.scoreboard.AresScoreboard;
 import lombok.Getter;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 

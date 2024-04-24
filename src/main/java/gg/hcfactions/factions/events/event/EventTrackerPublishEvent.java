@@ -1,4 +1,4 @@
-package gg.hcfactions.factions.listeners.events.web;
+package gg.hcfactions.factions.events.event;
 
 import lombok.Getter;
 import org.bukkit.event.Event;

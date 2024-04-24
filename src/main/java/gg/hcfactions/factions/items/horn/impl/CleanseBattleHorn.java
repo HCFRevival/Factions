@@ -73,7 +73,7 @@ public record CleanseBattleHorn(@Getter Factions plugin) implements ICustomItem,
 
         if (meta != null) {
             final MusicInstrumentMeta instrumentMeta = (MusicInstrumentMeta) meta;
-            instrumentMeta.setInstrument(MusicInstrument.SING);
+            instrumentMeta.setInstrument(MusicInstrument.SING_GOAT_HORN);
             item.setItemMeta(instrumentMeta);
         }
 

@@ -45,9 +45,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+@Getter
 public final class CombatListener implements Listener {
-    @Getter Factions plugin;
-    @Getter public final Set<UUID> recentlyPrintedDeathMessage;
+    private final Factions plugin;
+    public final Set<UUID> recentlyPrintedDeathMessage;
 
     public CombatListener(Factions plugin) {
         this.plugin = plugin;
@@ -202,15 +203,14 @@ public final class CombatListener implements Listener {
             return;
         }
 
-        if (cloud == null || cloud.getBasePotionData().getType().getEffectType() == null) {
-            return;
-        }
-
-        if (!cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.HARM) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.WEAKNESS) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.POISON) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW_FALLING)) {
+        if (cloud == null
+                || cloud.getBasePotionType() == null
+                || cloud.getBasePotionType().getPotionEffects().stream().noneMatch(eff ->
+                    eff.getType().equals(PotionEffectType.INSTANT_DAMAGE)
+                    && eff.getType().equals(PotionEffectType.WEAKNESS)
+                    && eff.getType().equals(PotionEffectType.SLOWNESS)
+                    && eff.getType().equals(PotionEffectType.POISON)
+                    && eff.getType().equals(PotionEffectType.SLOW_FALLING))) {
             return;
         }
 
@@ -270,9 +270,9 @@ public final class CombatListener implements Listener {
 
         for (PotionEffect effect : potion.getEffects()) {
             if (effect.getType().equals(PotionEffectType.POISON) ||
-                    effect.getType().equals(PotionEffectType.SLOW) ||
+                    effect.getType().equals(PotionEffectType.SLOWNESS) ||
                     effect.getType().equals(PotionEffectType.WEAKNESS) ||
-                    effect.getType().equals(PotionEffectType.HARM) ||
+                    effect.getType().equals(PotionEffectType.INSTANT_DAMAGE) ||
                     effect.getType().equals(PotionEffectType.SLOW_FALLING)) {
                 isDebuff = true;
                 break;
