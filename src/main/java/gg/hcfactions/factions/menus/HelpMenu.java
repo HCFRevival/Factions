@@ -54,7 +54,6 @@ public final class HelpMenu extends GenericMenu {
                         .setMaterial(menuPage.getIconMaterial())
                         .setName(menuPage.getDisplayName())
                         .addFlag(ItemFlag.HIDE_ATTRIBUTES)
-                        .addFlag(ItemFlag.HIDE_POTION_EFFECTS)
                         .addLore(menuPage.getDescription()).build();
 
                 addItem(new Clickable(icon, menuPage.getPosition(), click -> loadWindow(menuPage)));
@@ -97,7 +96,7 @@ public final class HelpMenu extends GenericMenu {
                             + Strings.capitalize(effectType.getKey().getKey().toLowerCase().replaceAll("_", " "))
                             + (potionLimit.isDisabled() ? ChatColor.DARK_RED + " (DISABLED)" : ""));
 
-                    potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+                    potionMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
                     potionMeta.setColor(color);
                     potionMeta.setLore(lore);
 
