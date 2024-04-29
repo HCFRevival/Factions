@@ -55,7 +55,7 @@ import java.util.List;
 public final class Factions extends AresPlugin {
     @Getter public static Factions instance;
 
-    @Getter public final NamespacedKey namespacedKey = new NamespacedKey(this, "FACTIONS");
+    @Getter public final NamespacedKey namespacedKey = new NamespacedKey(this, "factions");
     @Getter public FConfig configuration;
     @Getter public PlayerManager playerManager;
     @Getter public FactionManager factionManager;
