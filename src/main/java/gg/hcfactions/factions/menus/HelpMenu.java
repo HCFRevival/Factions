@@ -96,7 +96,7 @@ public final class HelpMenu extends GenericMenu {
                             + Strings.capitalize(effectType.getKey().getKey().toLowerCase().replaceAll("_", " "))
                             + (potionLimit.isDisabled() ? ChatColor.DARK_RED + " (DISABLED)" : ""));
 
-                    potionMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                    potionMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
                     potionMeta.setColor(color);
                     potionMeta.setLore(lore);
 
