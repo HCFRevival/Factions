@@ -267,7 +267,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
-            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "moved");
+            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getLegacyDisplayName()), "moved");
         }
     }
 
@@ -306,7 +306,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
-            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "took damage");
+            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getLegacyDisplayName()), "took damage");
         }
     }
 

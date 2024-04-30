@@ -28,7 +28,7 @@ public final class PlayerTimerMenu extends PaginatedMenu<IFactionPlayer> {
     @Getter public List<IFactionPlayer> timerPlayers;
 
     public PlayerTimerMenu(Factions plugin, Player player, ETimerType timerType, Collection<IFactionPlayer> entries) {
-        super(plugin, player, ChatColor.stripColor(timerType.getDisplayName()) + " Timers", 6, entries);
+        super(plugin, player, ChatColor.stripColor(timerType.getLegacyDisplayName()) + " Timers", 6, entries);
         this.plugin = plugin;
         this.timerType = timerType;
         this.timerPlayers = Lists.newArrayList(entries);
@@ -40,7 +40,7 @@ public final class PlayerTimerMenu extends PaginatedMenu<IFactionPlayer> {
 
         addUpdater(() -> {
             timerPlayers.clear();
-            timerPlayers.addAll(plugin.getPlayerManager().getPlayerRepository().stream().filter(fp -> fp.hasTimer(timerType)).collect(Collectors.toList()));
+            timerPlayers.addAll(plugin.getPlayerManager().getPlayerRepository().stream().filter(fp -> fp.hasTimer(timerType)).toList());
             update();
         }, 20L);
     }

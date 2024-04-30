@@ -21,6 +21,7 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -154,7 +155,7 @@ public final class TimerManager implements IManager {
                     ? Time.convertToDecimal(timer.getRemaining()) + "s"
                     : Time.convertToHHMMSS(timer.getRemaining());
 
-            res.put(timer.getType().getScoreboardPosition(), timer.getType().getDisplayName() + ChatColor.RED + ": " + time);
+            res.put(timer.getType().getScoreboardPosition(), timer.getType().getLegacyScoreboardName() + ChatColor.RED + ": " + time);
         });
     }
 
