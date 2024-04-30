@@ -327,6 +327,10 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             sendMessage(FMessage.T_EPEARL_UNLOCKED);
         }
 
+        if (type.equals(ETimerType.WIND_CHARGE)) {
+            sendMessage(FMessage.T_WINDCHARGE_UNLOCKED);
+        }
+
         if (type.equals(ETimerType.CRAPPLE)) {
             sendMessage(FMessage.T_CRAPPLE_UNLOCKED);
         }

@@ -20,10 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.AreaEffectCloud;
-import org.bukkit.entity.EnderPearl;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -352,7 +349,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      * @param event ProjectileLaunchEvent
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onEnderpearlLaunch(ProjectileLaunchEvent event) {
         if (event.isCancelled()) {
             return;
         }
@@ -382,6 +379,77 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.ENDERPEARL, plugin.getConfiguration().getEnderpearlDuration()));
+    }
+
+    /**
+     * Handles applying the wind charge cooldown
+     *
+     * @param event PlayerInteractEvent
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onWindCharge(PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && !event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+            return;
+        }
+
+        final ItemStack hand = event.getItem();
+
+        if (hand == null || !hand.getType().equals(Material.WIND_CHARGE)) {
+            return;
+        }
+
+        final FactionPlayer account = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (account == null) {
+            return;
+        }
+
+        final FTimer existing = account.getTimer(ETimerType.WIND_CHARGE);
+
+        if (existing != null && !existing.isExpired()) {
+            event.setCancelled(true);
+            FMessage.printLockedTimer(player, "wind charges", existing.getRemaining());
+        }
+    }
+
+    /**
+     * Handles preventing wind charges from being thrown while on cooldown
+     *
+     * @param event ProjectileLaunchEvent
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onWindChargeLaunch(ProjectileLaunchEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Projectile projectile = event.getEntity();
+
+        if (!(projectile instanceof WindCharge)) {
+            return;
+        }
+
+        if (!(projectile.getShooter() instanceof final Player player)) {
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (factionPlayer == null) {
+            return;
+        }
+
+        final FTimer existing = factionPlayer.getTimer(ETimerType.WIND_CHARGE);
+
+        if (existing != null && !existing.isExpired()) {
+            event.setCancelled(true);
+            player.updateInventory();
+            return;
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.WIND_CHARGE, plugin.getConfiguration().getWindChargeDuration()));
     }
 
     /**

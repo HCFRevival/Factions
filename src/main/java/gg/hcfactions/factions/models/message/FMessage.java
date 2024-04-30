@@ -52,6 +52,7 @@ public final class FMessage {
     public static final String EOTW_PREFIX = LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + LAYER_1;
 
     public static final String T_EPEARL_UNLOCKED = SUCCESS + "Your enderpearls have been unlocked";
+    public static final String T_WINDCHARGE_UNLOCKED = SUCCESS + "Your wind charges have been unlocked";
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
     public static final String T_CRAPPLE_UNLOCKED = SUCCESS + "Your crapples have been unlocked";
     public static final String T_GAPPLE_UNLOCKED = SUCCESS + "Your gapples have been unlocked";

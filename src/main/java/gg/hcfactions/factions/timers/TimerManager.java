@@ -111,13 +111,12 @@ public final class TimerManager implements IManager {
         23
         22
         21
-        20
-        19
-        19 CommandX Reboot
-        18 CommandX Vanish
-        17 Protection
-        16 Combat
-        15 Class
+        20 CommandX Reboot
+        19 CommandX Vanish
+        18 Protection
+        17 Combat
+        16 Class
+        15 Wind Charge
         14 Enderpearl
         13 Chorus Fruit
         12 Logout
@@ -206,11 +205,11 @@ public final class TimerManager implements IManager {
         }
 
         if (cxService.getVanishManager().isVanished(player.getUniqueId())) {
-            res.put(18, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
+            res.put(19, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
         }
 
         if (cxService.getRebootModule().isEnabled() && cxService.getRebootModule().isRebootInProgress()) {
-            res.put(19, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
+            res.put(20, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
         }
     }
 

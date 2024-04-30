@@ -164,6 +164,7 @@ player:
       attacker: 30
       attacked: 15
     enderpearl: 16
+    windcharge: 16
     crapple: 5
     gapple: 300
     chorus: 30

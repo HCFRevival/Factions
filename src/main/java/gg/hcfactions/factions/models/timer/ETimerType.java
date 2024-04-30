@@ -45,6 +45,14 @@ public enum ETimerType {
             true,
             true
     ),
+    WIND_CHARGE(
+            ChatColor.YELLOW + "" + ChatColor.BOLD + "Wind Charge",
+            ChatColor.YELLOW + "Wind Charge",
+            15,
+            true,
+            true,
+            false
+    ),
     HOME(
             ChatColor.AQUA + "" + ChatColor.BOLD + "Home",
             ChatColor.AQUA + "Home",
@@ -82,21 +90,21 @@ public enum ETimerType {
     ),
     COMBAT(ChatColor.RED + "" + ChatColor.BOLD + "Combat Tag",
             ChatColor.RED + "Combat Tag",
-            16,
+            17,
             true,
             true,
             true
     ),
     PROTECTION(ChatColor.GREEN + "" + ChatColor.BOLD + "Protection",
             ChatColor.GREEN + "Protection",
-            17,
+            18,
             true,
             false,
             true
     ),
     CLASS(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Class",
             ChatColor.DARK_AQUA + "Class",
-            15,
+            16,
             true,
             true,
             false
