@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.listeners;
 
+import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent;
 import com.google.common.collect.Sets;
 import com.mongodb.client.model.Filters;
 import gg.hcfactions.factions.FPermissions;
@@ -31,6 +32,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -55,16 +57,7 @@ public final class CombatListener implements Listener {
         this.recentlyPrintedDeathMessage = Sets.newConcurrentHashSet();
     }
 
-    /**
-     * Handles enforcing physical combat restrictions
-     *
-     * @param event PlayerDamagePlayerEvent
-     */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPhysicalDamage(PlayerDamagePlayerEvent event) {
-        final Player attacker = event.getDamager();
-        final Player attacked = event.getDamaged();
-
+    private void handlePlayerAttack(Cancellable event, Player attacker, Player attacked, boolean printFeedback) {
         if (attacker.getUniqueId().equals(attacked.getUniqueId())) {
             return;
         }
@@ -77,13 +70,19 @@ public final class CombatListener implements Listener {
         }
 
         if (attackerProfile.hasTimer(ETimerType.PROTECTION)) {
-            attacker.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_ATTACK_PVP_PROT.getErrorDescription());
+            if (printFeedback) {
+                attacker.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_ATTACK_PVP_PROT.getErrorDescription());
+            }
+
             event.setCancelled(true);
             return;
         }
 
         if (attackedProfile.hasTimer(ETimerType.PROTECTION)) {
-            attacker.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_ATTACK_PVP_PROT_OTHER.getErrorDescription());
+            if (printFeedback) {
+                attacker.sendMessage(FMessage.ERROR + FError.P_CAN_NOT_ATTACK_PVP_PROT_OTHER.getErrorDescription());
+            }
+
             event.setCancelled(true);
             return;
         }
@@ -96,7 +95,10 @@ public final class CombatListener implements Listener {
 
             if (owner != null) {
                 if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
+                    if (printFeedback) {
+                        FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
+                    }
+
                     event.setCancelled(true);
                     return;
                 }
@@ -108,7 +110,10 @@ public final class CombatListener implements Listener {
 
             if (owner != null) {
                 if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
+                    if (printFeedback) {
+                        FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
+                    }
+
                     event.setCancelled(true);
                 }
             }
@@ -117,9 +122,76 @@ public final class CombatListener implements Listener {
         final PlayerFaction attackerFaction = plugin.getFactionManager().getPlayerFactionByPlayer(attacker);
 
         if (attackerFaction != null && attackerFaction.getMember(attacked.getUniqueId()) != null) {
-            FMessage.printCanNotAttackFactionMembers(attacker);
+            if (printFeedback) {
+                FMessage.printCanNotAttackFactionMembers(attacker);
+            }
+
             event.setCancelled(true);
         }
+    }
+
+    /**
+     * Prints death coordinates upon player death
+     * @param event PlayerDeathEvent
+     */
+    @EventHandler
+    public void onPrintDeathLocation(PlayerDeathEvent event) {
+        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                FMessage.printStaffDeathMessage(staff, event.getEntity().getName(), event.getEntity().getLocation()));
+    }
+
+    /**
+     * Prints combat logger coordinates upon player death
+     * @param event CombatLoggerDeathEvent
+     */
+    @EventHandler
+    public void onPrintLoggerDeathLocation(CombatLoggerDeathEvent event) {
+        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                FMessage.printStaffDeathMessage(staff, event.getLogger().getOwnerUsername(), event.getLogger().getBukkitEntity().getLocation()));
+    }
+
+    /**
+     * Handles rendering display for Faction member deaths
+     *
+     * @param event FactionMemberDeathEvent
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMemberDeath(FactionMemberDeathEvent event) {
+        final String username = event.getUsername();
+        final PlayerFaction faction = event.getFaction();
+        final double subtracted = event.getSubtractedDTR();
+
+        FMessage.printMemberDeath(faction, username, subtracted);
+    }
+
+    @EventHandler
+    public void onEntityKnockbackByEntity(EntityKnockbackByEntityEvent event) {
+        if (!(event.getEntity() instanceof final Player attacked)) {
+            return;
+        }
+
+        if (!(event.getHitBy() instanceof final WindCharge windCharge)) {
+            return;
+        }
+
+        if (!(windCharge.getShooter() instanceof final Player attacker)) {
+            return;
+        }
+
+        handlePlayerAttack(event, attacker, attacked, true);
+    }
+
+    /**
+     * Handles enforcing physical combat restrictions
+     *
+     * @param event PlayerDamagePlayerEvent
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPhysicalDamage(PlayerDamagePlayerEvent event) {
+        final Player attacker = event.getDamager();
+        final Player attacked = event.getDamaged();
+
+        handlePlayerAttack(event, attacker, attacked, true);
     }
 
     /**
@@ -139,58 +211,7 @@ public final class CombatListener implements Listener {
             return;
         }
 
-        if (attacker.getUniqueId().equals(attacked.getUniqueId())) {
-            return;
-        }
-
-        final FactionPlayer attackerProfile = (FactionPlayer) plugin.getPlayerManager().getPlayer(attacker.getUniqueId());
-        final FactionPlayer attackedProfile = (FactionPlayer) plugin.getPlayerManager().getPlayer(attacked.getUniqueId());
-
-        if (attackerProfile == null || attackedProfile == null) {
-            return;
-        }
-
-        if (attackerProfile.hasTimer(ETimerType.PROTECTION)) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (attackedProfile.hasTimer(ETimerType.PROTECTION)) {
-            event.setCancelled(true);
-            return;
-        }
-
-        final Claim attackerClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacker));
-        final Claim attackedClaim = plugin.getClaimManager().getClaimAt(new PLocatable(attacked));
-
-        if (attackerClaim != null) {
-            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackerClaim.getOwner());
-
-            if (owner != null) {
-                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-        }
-
-        if (attackedClaim != null) {
-            final ServerFaction owner = plugin.getFactionManager().getServerFactionById(attackedClaim.getOwner());
-
-            if (owner != null) {
-                if (owner.getFlag().equals(ServerFaction.Flag.SAFEZONE)) {
-                    FMessage.printCanNotFightInClaim(attacker, owner.getDisplayName());
-                    event.setCancelled(true);
-                }
-            }
-        }
-
-        final PlayerFaction attackerFaction = plugin.getFactionManager().getPlayerFactionByPlayer(attacker.getUniqueId());
-
-        if (attackerFaction != null && attackerFaction.getMember(attacked.getUniqueId()) != null) {
-            event.setCancelled(true);
-        }
+        handlePlayerAttack(event, attacker, attacked, false);
     }
 
     @EventHandler
@@ -358,40 +379,6 @@ public final class CombatListener implements Listener {
             FMessage.printCanNotAttackFactionMembers(player);
             event.setCancelled(true);
         }
-    }
-
-    /**
-     * Prints death coordinates upon player death
-     * @param event PlayerDeathEvent
-     */
-    @EventHandler
-    public void onPrintDeathLocation(PlayerDeathEvent event) {
-        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
-                FMessage.printStaffDeathMessage(staff, event.getEntity().getName(), event.getEntity().getLocation()));
-    }
-
-    /**
-     * Prints combat logger coordinates upon player death
-     * @param event CombatLoggerDeathEvent
-     */
-    @EventHandler
-    public void onPrintLoggerDeathLocation(CombatLoggerDeathEvent event) {
-        Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
-                FMessage.printStaffDeathMessage(staff, event.getLogger().getOwnerUsername(), event.getLogger().getBukkitEntity().getLocation()));
-    }
-
-    /**
-     * Handles rendering display for Faction member deaths
-     *
-     * @param event FactionMemberDeathEvent
-     */
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onMemberDeath(FactionMemberDeathEvent event) {
-        final String username = event.getUsername();
-        final PlayerFaction faction = event.getFaction();
-        final double subtracted = event.getSubtractedDTR();
-
-        FMessage.printMemberDeath(faction, username, subtracted);
     }
 
     /**
