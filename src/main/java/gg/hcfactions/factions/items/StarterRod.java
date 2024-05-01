@@ -3,7 +3,6 @@ package gg.hcfactions.factions.items;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -19,7 +18,7 @@ public final class StarterRod implements ICustomItem {
 
     @Override
     public String getName() {
-        return Colors.GREEN.toBukkit() + "Welcome to Revival";
+        return ChatColor.GREEN + "Welcome to Revival";
     }
 
     @Override
@@ -38,7 +37,7 @@ public final class StarterRod implements ICustomItem {
     public Map<Enchantment, Integer> getEnchantments() {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
         enchantments.put(Enchantment.LURE, 1);
-        enchantments.put(Enchantment.DURABILITY, 1);
+        enchantments.put(Enchantment.UNBREAKING, 1);
         return enchantments;
     }
 

@@ -7,7 +7,6 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
@@ -95,7 +94,7 @@ public interface IMythicItem extends ICustomItem {
     default List<String> getMythicLore() {
         final List<String> res = Lists.newArrayList();
 
-        res.add(Colors.DARK_AQUA.toBukkit() + StringUtil.getMythicEmblem(getMaterial()) + " Mythic");
+        res.add(ChatColor.DARK_AQUA + StringUtil.getMythicEmblem(getMaterial()) + " Mythic");
 
         for (EMythicAbilityType abilityType : EMythicAbilityType.values()) {
             final List<MythicAbility> abilities = getAbilityInfoByType(abilityType);
@@ -143,7 +142,7 @@ public interface IMythicItem extends ICustomItem {
     default int getMaxSharpness() {
         final CXService cxService = (CXService)getPlugin().getService(CXService.class);
         final EnchantLimitModule enchantLimitModule = cxService.getEnchantLimitModule();
-        final int sharpnessLimit = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        final int sharpnessLimit = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.SHARPNESS);
 
         if (sharpnessLimit <= -1) {
             return 5;

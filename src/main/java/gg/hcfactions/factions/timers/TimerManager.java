@@ -18,10 +18,10 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.base.timer.impl.GenericTimer;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -112,13 +112,12 @@ public final class TimerManager implements IManager {
         23
         22
         21
-        20
-        19
-        19 CommandX Reboot
-        18 CommandX Vanish
-        17 Protection
-        16 Combat
-        15 Class
+        20 CommandX Reboot
+        19 CommandX Vanish
+        18 Protection
+        17 Combat
+        16 Class
+        15 Wind Charge
         14 Enderpearl
         13 Chorus Fruit
         12 Logout
@@ -156,7 +155,7 @@ public final class TimerManager implements IManager {
                     ? Time.convertToDecimal(timer.getRemaining()) + "s"
                     : Time.convertToHHMMSS(timer.getRemaining());
 
-            res.put(timer.getType().getScoreboardPosition(), timer.getType().getDisplayName() + ChatColor.RED + ": " + time);
+            res.put(timer.getType().getScoreboardPosition(), timer.getType().getLegacyScoreboardName() + ChatColor.RED + ": " + time);
         });
     }
 
@@ -184,15 +183,17 @@ public final class TimerManager implements IManager {
         res.put(55, ChatColor.GOLD + "" + ChatColor.BOLD + playerClass.getName() + " Cooldowns");
 
         playerClass.getConsumables().stream().filter(c -> c.getCooldowns().containsKey(player.getUniqueId())).forEach(consumeable -> {
-            final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(consumeable.getEffectType());
-            final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByRemappedEffect(remapped);
-            final String effectName = StringUtils.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
-            final long remainingTime = consumeable.getCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now();
-            final int remainingSeconds = (int)remainingTime / 1000;
+            final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByEffect(consumeable.getEffectType());
 
-            if (mapping != null && remainingTime > 0) {
-                res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
-                        + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
+            if (mapping != null) {
+                final String effectName = StringUtils.capitalize(mapping.name().toLowerCase().replaceAll("_", " "));
+                final long remainingTime = consumeable.getCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now();
+                final int remainingSeconds = (int)remainingTime / 1000;
+
+                if (remainingTime > 0) {
+                    res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
+                            + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
+                }
             }
         });
     }
@@ -205,11 +206,11 @@ public final class TimerManager implements IManager {
         }
 
         if (cxService.getVanishManager().isVanished(player.getUniqueId())) {
-            res.put(18, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
+            res.put(19, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
         }
 
         if (cxService.getRebootModule().isEnabled() && cxService.getRebootModule().isRebootInProgress()) {
-            res.put(19, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
+            res.put(20, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
         }
     }
 

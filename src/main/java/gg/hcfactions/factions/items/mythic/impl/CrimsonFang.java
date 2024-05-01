@@ -11,7 +11,6 @@ import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
 import org.bukkit.ChatColor;
@@ -49,7 +48,7 @@ public final class CrimsonFang implements IMythicItem {
         );
 
         addAbilityInfo(
-                Colors.DARK_BLUE.toBukkit() + "Immortality",
+                ChatColor.BLUE + "Immortality",
                 "Gain Regeneration " + StringUtil.getRomanNumeral(config.killRegenAmplifier + 1)
                 + " for " + config.killRegenDuration + " seconds upon slaying an enemy.",
                 EMythicAbilityType.ON_KILL
@@ -98,11 +97,11 @@ public final class CrimsonFang implements IMythicItem {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
         int sharpnessLevel = 5;
 
-        if (enchantLimitModule.getEnchantLimits().containsKey(Enchantment.DAMAGE_ALL)) {
-            sharpnessLevel = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        if (enchantLimitModule.getEnchantLimits().containsKey(Enchantment.SHARPNESS)) {
+            sharpnessLevel = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.SHARPNESS);
         }
 
-        enchantments.put(Enchantment.DAMAGE_ALL, sharpnessLevel);
+        enchantments.put(Enchantment.SHARPNESS, sharpnessLevel);
 
         return enchantments;
     }

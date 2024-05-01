@@ -10,7 +10,6 @@ import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.factions.utils.StringUtil;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
 import org.bukkit.ChatColor;
@@ -22,7 +21,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,7 +42,7 @@ public final class Hullbreaker implements IMythicItem {
         this.config = config;
 
         addAbilityInfo(
-                Colors.GOLD.toBukkit() + "Last Man Standing",
+                ChatColor.GOLD + "Last Man Standing",
                 "Attacking any enemy with " + config.getRequiredEnemyCount() + " enemies nearby and no nearby allies grants you Resistance "
                         + StringUtil.getRomanNumeral(config.getResistanceAmplifier() + 1) + " for " + config.resistanceDuration() + " seconds.",
                 EMythicAbilityType.ON_HIT
@@ -90,9 +88,9 @@ public final class Hullbreaker implements IMythicItem {
     public Map<Enchantment, Integer> getEnchantments() {
         final CXService cxs = (CXService) plugin.getService(CXService.class);
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
-        final int sharpLevel = cxs.getEnchantLimitModule().getMaxEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        final int sharpLevel = cxs.getEnchantLimitModule().getMaxEnchantmentLevel(Enchantment.SHARPNESS);
 
-        enchantments.put(Enchantment.DAMAGE_ALL, (sharpLevel == -1 ? 5 : sharpLevel));
+        enchantments.put(Enchantment.SHARPNESS, (sharpLevel == -1 ? 5 : sharpLevel));
         return enchantments;
     }
 
@@ -103,8 +101,8 @@ public final class Hullbreaker implements IMythicItem {
         }
 
         if (
-                player.hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)
-                && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)).getDuration() >= config.getResistanceDuration()) {
+                player.hasPotionEffect(PotionEffectType.RESISTANCE)
+                && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.RESISTANCE)).getDuration() >= config.getResistanceDuration()) {
             return;
         }
 
@@ -123,7 +121,7 @@ public final class Hullbreaker implements IMythicItem {
         }
 
         spawnAbilityParticles(player);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, config.getResistanceDuration()*20, config.getResistanceAmplifier()));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, config.getResistanceDuration()*20, config.getResistanceAmplifier()));
         Players.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD);
         FMessage.printHullbreaker(player, config.getResistanceDuration());
     }

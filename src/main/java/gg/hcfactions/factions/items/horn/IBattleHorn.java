@@ -30,7 +30,7 @@ public interface IBattleHorn {
                 if (affectedPlayer != null) {
                     final List<PotionEffectType> toRemove = List.of(
                             PotionEffectType.POISON,
-                            PotionEffectType.SLOW,
+                            PotionEffectType.SLOWNESS,
                             PotionEffectType.WEAKNESS,
                             PotionEffectType.SLOW_FALLING,
                             PotionEffectType.WITHER,

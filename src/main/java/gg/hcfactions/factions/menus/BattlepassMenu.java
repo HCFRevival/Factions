@@ -57,7 +57,7 @@ public final class BattlepassMenu extends GenericMenu {
             fill(new ItemBuilder()
                     .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
                     .setName(ChatColor.RESET + "")
-                    .addEnchant(Enchantment.LUCK, 1)
+                    .addEnchant(Enchantment.LUCK_OF_THE_SEA, 1)
                     .addFlag(ItemFlag.HIDE_ENCHANTS)
                     .build());
         }, 20L);

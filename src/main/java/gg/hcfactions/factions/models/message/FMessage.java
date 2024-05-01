@@ -22,7 +22,6 @@ import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.impl.Deathban;
 import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -44,15 +43,16 @@ public final class FMessage {
     public static final ChatColor INFO = ChatColor.BLUE;
     public static final ChatColor P_NAME = ChatColor.RESET;
 
-    public static final String DPS_PREFIX = LAYER_2 + "[" + Colors.RED.toBukkit() + "DPS" + LAYER_2 + "] " + LAYER_1;
+    public static final String DPS_PREFIX = LAYER_2 + "[" + ChatColor.RED + "DPS" + LAYER_2 + "] " + LAYER_1;
     public static final String KOTH_PREFIX = LAYER_2 + "[" + LAYER_1 + "KOTH" + LAYER_2 + "] " + LAYER_1;
     public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
     public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
-    public static final String CONQ_PREFIX = LAYER_2 + "[" + Colors.RED.toBukkit() + "Conquest" + LAYER_2 + "] " + LAYER_1;
-    public static final String OUTPOST_PREFIX = LAYER_2 + "[" + Colors.GOLD.toBukkit() + "Outpost" + LAYER_2 + "] " + LAYER_1;
+    public static final String CONQ_PREFIX = LAYER_2 + "[" + ChatColor.RED + "Conquest" + LAYER_2 + "] " + LAYER_1;
+    public static final String OUTPOST_PREFIX = LAYER_2 + "[" + ChatColor.GOLD + "Outpost" + LAYER_2 + "] " + LAYER_1;
     public static final String EOTW_PREFIX = LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + LAYER_1;
 
     public static final String T_EPEARL_UNLOCKED = SUCCESS + "Your enderpearls have been unlocked";
+    public static final String T_WINDCHARGE_UNLOCKED = SUCCESS + "Your wind charges have been unlocked";
     public static final String T_CTAG_EXPIRE = SUCCESS + "Your combat-tag has expired";
     public static final String T_CRAPPLE_UNLOCKED = SUCCESS + "Your crapples have been unlocked";
     public static final String T_GAPPLE_UNLOCKED = SUCCESS + "Your gapples have been unlocked";
@@ -80,6 +80,12 @@ public final class FMessage {
 
     public static void broadcastCombatLogger(Player player) {
         Bukkit.broadcastMessage(ERROR + "Combat-Logger" + ChatColor.RESET + ": " + player.getName());
+    }
+
+    public static void broadcastEventTrackerPublish(String url) {
+        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcastMessage(LAYER_2 + "See the after-match report here" + LAYER_1 + ": " + url);
+        Bukkit.broadcastMessage(" ");
     }
 
     public static void broadcastDpsEventMessage(String message) {
@@ -262,7 +268,7 @@ public final class FMessage {
     }
 
     public static void printEotwMessage(String message) {
-        Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + Colors.DARK_AQUA.toBukkit() + message);
+        Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + ChatColor.DARK_AQUA + message);
     }
 
     public static void printClassActivated(Player player, IClass playerClass) {
@@ -329,11 +335,11 @@ public final class FMessage {
     public static void printBattlepassProgress(Player player, BPObjective objective, int newValue) {
         player.sendMessage(ChatColor.RESET + " ");
 
-        player.sendMessage(Colors.GOLD.toBukkit() + "" + ChatColor.BOLD + "Battlepass Progress" + ChatColor.RESET + ": "
+        player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Battlepass Progress" + ChatColor.RESET + ": "
                 + objective.getIcon().getDisplayName());
 
-        player.sendMessage(Colors.YELLOW.toBukkit() + "Current Status" + ChatColor.RESET + ": "
-                + newValue + Colors.YELLOW.toBukkit() + "/" + ChatColor.RESET + objective.getAmountRequirement());
+        player.sendMessage(ChatColor.YELLOW + "Current Status" + ChatColor.RESET + ": "
+                + newValue + ChatColor.YELLOW + "/" + ChatColor.RESET + objective.getAmountRequirement());
 
         player.sendMessage(ChatColor.RESET + " ");
     }
@@ -343,7 +349,7 @@ public final class FMessage {
         final int diff = (multipliedExp - objective.getBaseExp());
 
         player.sendMessage(ChatColor.RESET + " ");
-        player.sendMessage(Colors.DARK_AQUA.toBukkit() + "" + ChatColor.BOLD + "Battlepass Completion" + ChatColor.RESET + ": "
+        player.sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Battlepass Completion" + ChatColor.RESET + ": "
                 + objective.getIcon().getDisplayName());
 
         player.sendMessage(XPService.XP_COLOR_ACCENT_INFO + "Reward" + ChatColor.RESET + ": "
@@ -354,27 +360,27 @@ public final class FMessage {
 
     public static void printGhostbladeKill(Player viewer, Player killer) {
         if (viewer.getUniqueId().equals(killer.getUniqueId())) {
-            viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY
-                    + ": You've been granted a " + Colors.LAVENDAR.toBukkit() + "Speed Boost" + ChatColor.GRAY + " thanks to your Mythic Item");
+            viewer.sendMessage(ChatColor.LIGHT_PURPLE + "Ghostblade" + ChatColor.GRAY
+                    + ": You've been granted a " + ChatColor.LIGHT_PURPLE + "Speed Boost" + ChatColor.GRAY + " thanks to your Mythic Item");
 
             return;
         }
 
-        viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY + ": "
-                + "You've been granted a " + Colors.LAVENDAR.toBukkit() + "Speed Boost" + ChatColor.GRAY + " thanks to " + ChatColor.GREEN + killer.getName());
+        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "Ghostblade" + ChatColor.GRAY + ": "
+                + "You've been granted a " + ChatColor.LIGHT_PURPLE + "Speed Boost" + ChatColor.GRAY + " thanks to " + ChatColor.GREEN + killer.getName());
     }
 
     public static void printGhostbladeRefresh(Player viewer, int seconds) {
-        viewer.sendMessage(Colors.LAVENDAR.toBukkit() + "Ghostblade" + ChatColor.GRAY
+        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "Ghostblade" + ChatColor.GRAY
                 + ": Your Speed has been refreshed by " + seconds + " second" + (seconds > 1 ? "s" : "") + ".");
     }
 
     public static void printHullbreaker(Player viewer, int seconds) {
-        viewer.sendMessage(Colors.GOLD.toBukkit() + "Hullbreaker" + ChatColor.GRAY + ": You've been given Resistance for " + seconds + " seconds.");
+        viewer.sendMessage(ChatColor.GOLD + "Hullbreaker" + ChatColor.GRAY + ": You've been given Resistance for " + seconds + " seconds.");
     }
 
     public static void printCrimsonFangKill(Player viewer, int seconds) {
-        viewer.sendMessage(Colors.DARK_BLUE.toBukkit() + "Immortality" + ChatColor.GRAY + ": You've been given Regeneration for " + seconds + " seconds.");
+        viewer.sendMessage(ChatColor.BLUE + "Immortality" + ChatColor.GRAY + ": You've been given Regeneration for " + seconds + " seconds.");
     }
 
     public static void printNeptunesFuryImpaleVictim(Player viewer, double woundDamagePerTick, int woundSeconds) {
@@ -383,7 +389,7 @@ public final class FMessage {
     }
 
     public static void printNeptunesFuryImpale(Player viewer, int woundSeconds) {
-        viewer.sendMessage(Colors.RED.toBukkit() + "Impaled" + ChatColor.GRAY + ": You've inflicted wounds to your enemy that will bleed for " + woundSeconds + " seconds");
+        viewer.sendMessage(ChatColor.RED + "Impaled" + ChatColor.GRAY + ": You've inflicted wounds to your enemy that will bleed for " + woundSeconds + " seconds");
     }
 
     public static void printAdmiralsEmberAblazeVictim(Player viewer, int seconds) {
@@ -391,7 +397,7 @@ public final class FMessage {
     }
 
     public static void printAdmiralsEmberAblazeAttacker(Player viewer, int seconds) {
-        viewer.sendMessage(Colors.RED.toBukkit() + "Set The World Ablaze" + ChatColor.GRAY + ": You've ignited all nearby enemies for " + ChatColor.RED + seconds + " seconds");
+        viewer.sendMessage(ChatColor.RED + "Set The World Ablaze" + ChatColor.GRAY + ": You've ignited all nearby enemies for " + ChatColor.RED + seconds + " seconds");
     }
 
     public static void printAdmiralsEmberOverheatVictim(Player viewer, Player attacker, int seconds) {
@@ -399,7 +405,7 @@ public final class FMessage {
     }
 
     public static void printAdmiralsEmberOverheatAttacker(Player viewer, LivingEntity victim, int seconds) {
-        viewer.sendMessage(Colors.GOLD.toBukkit() + "Overheat" + ChatColor.GRAY + ": You've ignited " + ChatColor.RED + victim.getName() + ChatColor.GRAY + " for " + ChatColor.RED + seconds + " seconds");
+        viewer.sendMessage(ChatColor.GOLD + "Overheat" + ChatColor.GRAY + ": You've ignited " + ChatColor.RED + victim.getName() + ChatColor.GRAY + " for " + ChatColor.RED + seconds + " seconds");
     }
 
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
@@ -590,12 +596,12 @@ public final class FMessage {
                             + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.LEADER)));
                 }
 
-                if (formattedNames.containsKey(PlayerFaction.Rank.OFFICER) && formattedNames.get(PlayerFaction.Rank.OFFICER).size() > 0) {
+                if (formattedNames.containsKey(PlayerFaction.Rank.OFFICER) && !formattedNames.get(PlayerFaction.Rank.OFFICER).isEmpty()) {
                     message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Officers: " : "Officer: ")
                             + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.OFFICER)));
                 }
 
-                if (formattedNames.containsKey(PlayerFaction.Rank.MEMBER) && formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 0) {
+                if (formattedNames.containsKey(PlayerFaction.Rank.MEMBER) && !formattedNames.get(PlayerFaction.Rank.MEMBER).isEmpty()) {
                     message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 1 ? "Members: " : "Member: ")
                             + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.MEMBER)));
                 }

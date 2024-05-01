@@ -9,7 +9,6 @@ import gg.hcfactions.factions.items.mythic.IMythicItem;
 import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.FactionUtil;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
@@ -46,7 +45,7 @@ public final class Ghostblade implements IMythicItem {
         this.abilityInfo = Lists.newArrayList();
 
         addAbilityInfo(
-                Colors.LAVENDAR.toBukkit() + "Excited",
+                ChatColor.LIGHT_PURPLE + "Excited",
                 ChatColor.GRAY + "Slaying an enemy will grant you and nearby faction members Speed III and Haste II for " + ghostbladeConfig.killEffectDuration() + " seconds.",
                 EMythicAbilityType.ON_KILL);
 
@@ -87,9 +86,9 @@ public final class Ghostblade implements IMythicItem {
     public Map<Enchantment, Integer> getEnchantments() {
         final CXService cxs = (CXService) plugin.getService(CXService.class);
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
-        final int sharpLevel = cxs.getEnchantLimitModule().getMaxEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        final int sharpLevel = cxs.getEnchantLimitModule().getMaxEnchantmentLevel(Enchantment.SHARPNESS);
 
-        enchantments.put(Enchantment.DAMAGE_ALL, (sharpLevel == -1 ? 5 : sharpLevel));
+        enchantments.put(Enchantment.SHARPNESS, (sharpLevel == -1 ? 5 : sharpLevel));
         return enchantments;
     }
 
@@ -100,7 +99,7 @@ public final class Ghostblade implements IMythicItem {
         }
 
         final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, config.killEffectDuration()*20, 2);
-        final PotionEffect hasteEffect = new PotionEffect(PotionEffectType.FAST_DIGGING, config.killEffectDuration()*20, 0);
+        final PotionEffect hasteEffect = new PotionEffect(PotionEffectType.HASTE, config.killEffectDuration()*20, 0);
 
         spawnAbilityParticles(player);
         Players.giveTemporaryEffect(plugin, player, speedEffect);

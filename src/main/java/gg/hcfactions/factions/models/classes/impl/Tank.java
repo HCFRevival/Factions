@@ -22,40 +22,40 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import java.util.*;
 import java.util.List;
 
+@Getter
 public final class Tank implements IClass {
-    @Getter public ClassManager manager;
-    @Getter public final String name = "Guardian";
-    @Getter public final String description = "Use your shield to protect nearby allies";
-    @Getter public final boolean emptyArmorEnforced = false;
-    @Getter public final int warmup;
-    @Getter public final Material helmet = null;
-    @Getter public final Material chestplate = Material.NETHERITE_CHESTPLATE;
-    @Getter public final Material leggings = Material.NETHERITE_LEGGINGS;
-    @Getter public final Material boots = Material.NETHERITE_BOOTS;
-    @Getter public final Material offhand = Material.SHIELD;
-    @Getter public final Map<PotionEffectType, Integer> passiveEffects;
-    @Getter public final List<IConsumeable> consumables;
-    @Getter public final Set<UUID> activePlayers;
+    public ClassManager manager;
+    public final String name = "Guardian";
+    public final String description = "Use your shield to protect nearby allies";
+    public final boolean emptyArmorEnforced = false;
+    public final int warmup;
+    public final Material helmet = null;
+    public final Material chestplate = Material.NETHERITE_CHESTPLATE;
+    public final Material leggings = Material.NETHERITE_LEGGINGS;
+    public final Material boots = Material.NETHERITE_BOOTS;
+    public final Material offhand = Material.SHIELD;
+    public final Map<PotionEffectType, Integer> passiveEffects;
+    public final List<IConsumeable> consumables;
+    public final Set<UUID> activePlayers;
 
-    @Getter public final int shieldWarmup;
-    @Getter public final double shieldDamageReduction;
-    @Getter public final double staminaDamageDivider;
-    @Getter public final int staminaRegenInterval;
-    @Getter public final int staminaRegenDelay;
-    @Getter public final int staminaHardRegenDelay;
-    @Getter public final Set<UUID> guardingPlayers;
-    @Getter public final Set<UUID> drainedStaminaPlayers;
-    @Getter public final Map<UUID, Double> stamina;
-    @Getter public final Map<UUID, PLocatable> guardPoints;
-    @Getter public final Map<UUID, Long> nextStaminaRegen;
-    @Getter public final Map<PotionEffectType, Integer> guardEffects;
+    public final int shieldWarmup;
+    public final double shieldDamageReduction;
+    public final double staminaDamageDivider;
+    public final int staminaRegenInterval;
+    public final int staminaRegenDelay;
+    public final int staminaHardRegenDelay;
+    public final Set<UUID> guardingPlayers;
+    public final Set<UUID> drainedStaminaPlayers;
+    public final Map<UUID, Double> stamina;
+    public final Map<UUID, PLocatable> guardPoints;
+    public final Map<UUID, Long> nextStaminaRegen;
+    public final Map<PotionEffectType, Integer> guardEffects;
 
     public Tank(ClassManager manager) {
         this.manager = manager;

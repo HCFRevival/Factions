@@ -12,7 +12,6 @@ import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -49,13 +48,13 @@ public final class AdmiralsEmber implements IMythicItem {
         this.overheatDataRepository = Lists.newArrayList();
 
         addAbilityInfo(
-                Colors.GOLD.toBukkit() + "Overheat",
+                ChatColor.GOLD + "Overheat",
                 "Attacking an enemy " + config.getOverheatRequirement() + " times within " + config.getOverheatExpireRate() + " seconds will ignite them for " + (config.getOverheatFireTicks()/20) + " seconds. (30 second cooldown)",
                 EMythicAbilityType.ON_HIT
         );
 
         addAbilityInfo(
-                Colors.RED.toBukkit() + "Set The World Ablaze",
+                ChatColor.RED + "Set Ablaze",
                 "Ignite all enemies within " + config.getAblazeRange() + " blocks for " + (config.getAblazeFireTicks()/20) + " seconds upon slaying an enemy.",
                 EMythicAbilityType.ON_KILL
         );
@@ -108,11 +107,11 @@ public final class AdmiralsEmber implements IMythicItem {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
         int sharpnessLevel = 5;
 
-        if (enchantLimitModule.getEnchantLimits().containsKey(Enchantment.DAMAGE_ALL)) {
-            sharpnessLevel = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        if (enchantLimitModule.getEnchantLimits().containsKey(Enchantment.SHARPNESS)) {
+            sharpnessLevel = enchantLimitModule.getMaxEnchantmentLevel(Enchantment.SHARPNESS);
         }
 
-        enchantments.put(Enchantment.DAMAGE_ALL, sharpnessLevel);
+        enchantments.put(Enchantment.SHARPNESS, sharpnessLevel);
 
         return enchantments;
     }

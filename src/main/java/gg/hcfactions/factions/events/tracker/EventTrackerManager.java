@@ -20,6 +20,8 @@ import java.util.UUID;
 
 public final class EventTrackerManager {
     // Player Tracker Keys
+    public static final String P_KILLS = "kills";
+    public static final String P_DEATHS = "deaths";
     public static final String P_DAMAGE_DEALT = "melee_damage_dealt";
     public static final String P_DAMAGE_TAKEN = "melee_damage_taken";
     public static final String P_ARCHER_RANGE_DMG = "archer_damage_dealt";
@@ -27,11 +29,11 @@ public final class EventTrackerManager {
     public static final String P_ROGUE_BACKSTAB = "rogue_backstabs";
     public static final String P_BARD_EFFECT_GIVEN = "bard_effects_dealt";
     public static final String P_BARD_ASSISTS = "bard_assists";
+    public static final String P_TANK_GUARD = "guardian_protection";
     public static final String P_DIVER_DMG = "diver_damage_dealt";
     public static final String P_HEALTH_POTIONS_USED = "health_potions_consumed";
     public static final String P_TOTEMS_USED = "totems_consumed";
     public static final String P_GAPPLES_USED = "gapples_consumed";
-    public static final String P_TANK_GUARD = "guardian_protection";
 
     @Getter public final EventManager eventManager;
 

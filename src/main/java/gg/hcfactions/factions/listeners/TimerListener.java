@@ -20,10 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.AreaEffectCloud;
-import org.bukkit.entity.EnderPearl;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -167,9 +164,9 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
 
         for (PotionEffect effect : event.getPotion().getEffects()) {
             if (effect.getType().equals(PotionEffectType.POISON) ||
-                    effect.getType().equals(PotionEffectType.SLOW) ||
+                    effect.getType().equals(PotionEffectType.SLOWNESS) ||
                     effect.getType().equals(PotionEffectType.WEAKNESS) ||
-                    effect.getType().equals(PotionEffectType.HARM) ||
+                    effect.getType().equals(PotionEffectType.INSTANT_DAMAGE) ||
                     effect.getType().equals(PotionEffectType.SLOW_FALLING)) {
                 isDebuff = true;
                 break;
@@ -196,18 +193,15 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
 
         final AreaEffectCloud cloud = event.getCloud();
 
-        if (cloud == null || cloud.getBasePotionData().getType().getEffectType() == null) {
+        if (cloud == null
+                || cloud.getBasePotionType() == null
+                || cloud.getBasePotionType().getPotionEffects().stream().noneMatch(eff ->
+                eff.getType().equals(PotionEffectType.INSTANT_DAMAGE)
+                        && eff.getType().equals(PotionEffectType.WEAKNESS)
+                        && eff.getType().equals(PotionEffectType.SLOWNESS)
+                        && eff.getType().equals(PotionEffectType.POISON)
+                        && eff.getType().equals(PotionEffectType.SLOW_FALLING))) {
             return;
-        }
-
-        if (!cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.HARM) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.WEAKNESS) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.POISON) &&
-                !cloud.getBasePotionData().getType().getEffectType().equals(PotionEffectType.SLOW_FALLING)) {
-
-            return;
-
         }
 
         handleAttack(event.getDamager(), event.getDamaged());
@@ -273,7 +267,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
-            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "moved");
+            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getLegacyDisplayName()), "moved");
         }
     }
 
@@ -312,7 +306,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
             }
 
             factionPlayer.removeTimer(timer.getType());
-            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getDisplayName()), "took damage");
+            FMessage.printTimerCancelled(player, ChatColor.stripColor(timer.getType().getLegacyDisplayName()), "took damage");
         }
     }
 
@@ -355,7 +349,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
      * @param event ProjectileLaunchEvent
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onEnderpearlLaunch(ProjectileLaunchEvent event) {
         if (event.isCancelled()) {
             return;
         }
@@ -385,6 +379,77 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.ENDERPEARL, plugin.getConfiguration().getEnderpearlDuration()));
+    }
+
+    /**
+     * Handles applying the wind charge cooldown
+     *
+     * @param event PlayerInteractEvent
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onWindCharge(PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && !event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+            return;
+        }
+
+        final ItemStack hand = event.getItem();
+
+        if (hand == null || !hand.getType().equals(Material.WIND_CHARGE)) {
+            return;
+        }
+
+        final FactionPlayer account = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (account == null) {
+            return;
+        }
+
+        final FTimer existing = account.getTimer(ETimerType.WIND_CHARGE);
+
+        if (existing != null && !existing.isExpired()) {
+            event.setCancelled(true);
+            FMessage.printLockedTimer(player, "wind charges", existing.getRemaining());
+        }
+    }
+
+    /**
+     * Handles preventing wind charges from being thrown while on cooldown
+     *
+     * @param event ProjectileLaunchEvent
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onWindChargeLaunch(ProjectileLaunchEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final Projectile projectile = event.getEntity();
+
+        if (!(projectile instanceof WindCharge)) {
+            return;
+        }
+
+        if (!(projectile.getShooter() instanceof final Player player)) {
+            return;
+        }
+
+        final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (factionPlayer == null) {
+            return;
+        }
+
+        final FTimer existing = factionPlayer.getTimer(ETimerType.WIND_CHARGE);
+
+        if (existing != null && !existing.isExpired()) {
+            event.setCancelled(true);
+            player.updateInventory();
+            return;
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.WIND_CHARGE, plugin.getConfiguration().getWindChargeDuration()));
     }
 
     /**

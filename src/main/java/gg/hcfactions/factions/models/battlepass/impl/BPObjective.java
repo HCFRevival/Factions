@@ -15,7 +15,6 @@ import gg.hcfactions.libs.bukkit.menu.impl.Icon;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.model.impl.AresRank;
 import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -139,7 +138,7 @@ public class BPObjective implements IBPObjective {
                 ? plugin.getBattlepassManager().getDailyExpireTimestamp()
                 : plugin.getBattlepassManager().getWeeklyExpireTimestamp();
 
-        lore.add(ChatColor.GRAY + "Ends in" + ChatColor.WHITE + ": " + Colors.GREEN.toBukkit()
+        lore.add(ChatColor.GRAY + "Ends in" + ChatColor.WHITE + ": " + ChatColor.GREEN
                 + Time.convertToRemaining(expire - Time.now()));
 
         meta.setLore(lore);

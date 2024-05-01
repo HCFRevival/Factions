@@ -29,15 +29,15 @@ public record BerserkBattleHorn(@Getter Factions plugin) implements ICustomItem,
     @Override
     public List<PotionEffect> getActiveEffects() {
         final List<PotionEffect> res = Lists.newArrayList();
-        res.add(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 30 * 20, 0));
+        res.add(new PotionEffect(PotionEffectType.STRENGTH, 30 * 20, 0));
         res.add(new PotionEffect(PotionEffectType.SPEED, 30 * 20, 2));
-        res.add(new PotionEffect(PotionEffectType.FAST_DIGGING, 30 * 20, 1));
+        res.add(new PotionEffect(PotionEffectType.HASTE, 30 * 20, 1));
         return res;
     }
 
     @Override
     public Map<PotionEffect, Integer> getPostEffects() {
-        final PotionEffect slow = new PotionEffect(PotionEffectType.SLOW, 20 * 20, 1);
+        final PotionEffect slow = new PotionEffect(PotionEffectType.SLOWNESS, 20 * 20, 1);
         final PotionEffect weak = new PotionEffect(PotionEffectType.WEAKNESS, 15 * 20, 0);
         final Map<PotionEffect, Integer> res = Maps.newHashMap();
 
@@ -63,9 +63,9 @@ public record BerserkBattleHorn(@Getter Factions plugin) implements ICustomItem,
         res.add(ChatColor.RESET + " ");
 
         final ChatColor speedColor = ChatColor.of(String.format("#%02x%02x%02x",
-                PotionType.SPEED.getEffectType().getColor().getRed(),
-                PotionType.SPEED.getEffectType().getColor().getGreen(),
-                PotionType.SPEED.getEffectType().getColor().getBlue())
+                PotionType.SWIFTNESS.getEffectType().getColor().getRed(),
+                PotionType.SWIFTNESS.getEffectType().getColor().getGreen(),
+                PotionType.SWIFTNESS.getEffectType().getColor().getBlue())
         );
 
         final ChatColor strColor = ChatColor.of(String.format("#%02x%02x%02x",
@@ -112,7 +112,7 @@ public record BerserkBattleHorn(@Getter Factions plugin) implements ICustomItem,
 
         if (meta != null) {
             final MusicInstrumentMeta instrumentMeta = (MusicInstrumentMeta) meta;
-            instrumentMeta.setInstrument(MusicInstrument.CALL);
+            instrumentMeta.setInstrument(MusicInstrument.CALL_GOAT_HORN);
             item.setItemMeta(instrumentMeta);
         }
 

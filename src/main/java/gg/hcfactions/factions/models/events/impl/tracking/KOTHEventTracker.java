@@ -3,17 +3,13 @@ package gg.hcfactions.factions.models.events.impl.tracking;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.tracking.IEventTracker;
 import gg.hcfactions.factions.models.events.tracking.IEventTrackerEntry;
 import gg.hcfactions.factions.models.events.tracking.IEventTrackerPlayer;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
-import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
@@ -26,18 +22,19 @@ import java.util.Set;
 public class KOTHEventTracker implements IEventTracker<KOTHEventTracker> {
     @Getter public final KOTHEvent event;
     @Getter @Setter public boolean tracking;
+    @Getter @Setter public long endTime;
     @Getter public final Set<IEventTrackerPlayer> participants;
     @Getter public final Set<IEventTrackerEntry> entries;
 
     private final Factions plugin;
     private long startTime;
-    private long endTime;
 
     public KOTHEventTracker(KOTHEvent event) {
         this.event = event;
         this.plugin = event.getPlugin();
         this.participants = Sets.newConcurrentHashSet();
         this.entries = Sets.newHashSet();
+        this.endTime = -1L;
     }
 
     @Override
@@ -49,37 +46,6 @@ public class KOTHEventTracker implements IEventTracker<KOTHEventTracker> {
     @Override
     public void stopTracking() {
         this.tracking = false;
-    }
-
-    @Override
-    public void publishTracking() {
-        final long start = Time.now();
-
-        this.tracking = false;
-        this.endTime = Time.now();
-
-        new Scheduler(plugin).async(() -> {
-            final Mongo mdb = (Mongo) plugin.getConnectable(Mongo.class);
-            if (mdb == null) {
-                plugin.getAresLogger().error("Attempted to publish event tracker with null mdb instance");
-                return;
-            }
-
-            final MongoDatabase db = mdb.getDatabase(plugin.getConfiguration().getMongoDatabaseName());
-            if (db == null) {
-                plugin.getAresLogger().error("Attempted to publish event tracker with null mongo database");
-                return;
-            }
-
-            final MongoCollection<Document> coll = db.getCollection(plugin.getConfiguration().getTrackerCollection());
-            coll.insertOne(toDocument());
-
-            new Scheduler(plugin).sync(() -> {
-                final long end = Time.now();
-                final long diff = (end - start);
-                plugin.getAresLogger().info("Published event tracker data (took " + diff + "ms)");
-            }).run();
-        }).run();
     }
 
     @Override

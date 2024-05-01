@@ -8,7 +8,6 @@ import gg.hcfactions.factions.items.mythic.IMythicItem;
 import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
@@ -41,7 +40,7 @@ public final class SerpentsImpaler implements IMythicItem {
         this.abilityInfo = Lists.newArrayList();
 
         addAbilityInfo(
-                Colors.RED.toBukkit() + "Impale",
+                ChatColor.RED + "Impale",
                 "Attacking an enemy while riptiding has a 25% chance to inflict wounds that will drain "
                         + config.getWoundDamagePerTick() + " ♥ over the span of " + config.woundTicks +  " seconds.",
                 EMythicAbilityType.ON_HIT);
@@ -65,7 +64,7 @@ public final class SerpentsImpaler implements IMythicItem {
     @Override
     public Map<Enchantment, Integer> getEnchantments() {
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
-        enchantments.put(Enchantment.DAMAGE_ALL, getMaxSharpness());
+        enchantments.put(Enchantment.SHARPNESS, getMaxSharpness());
         enchantments.put(Enchantment.IMPALING, 3);
         enchantments.put(Enchantment.CHANNELING, 1);
         return enchantments;

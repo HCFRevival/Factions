@@ -18,7 +18,6 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.events.impl.*;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
@@ -570,7 +569,7 @@ public final class ClassListener implements Listener {
             Players.playSound(worldPlayer, Sound.ITEM_GOAT_HORN_SOUND_3);
 
             worldPlayer.sendMessage(ChatColor.RESET + " ");
-            worldPlayer.sendMessage(Colors.DARK_AQUA.toBukkit() + "The sea calls for " + displayName);
+            worldPlayer.sendMessage(ChatColor.DARK_AQUA + "The sea calls for " + displayName);
             worldPlayer.sendMessage(ChatColor.RESET + " ");
         });
 
@@ -1039,7 +1038,7 @@ public final class ClassListener implements Listener {
         final AreaEffectCloud cloud = event.getEntity();
         final List<LivingEntity> affectedEntities = Lists.newArrayList(event.getAffectedEntities());
 
-        if (!cloud.getBasePotionData().getType().equals(PotionType.TURTLE_MASTER)) {
+        if (cloud.getBasePotionType() == null || !cloud.getBasePotionType().equals(PotionType.TURTLE_MASTER)) {
             return;
         }
 
@@ -1149,7 +1148,7 @@ public final class ClassListener implements Listener {
         if (!oldBanner.getType().equals(newBanner.getType())) {
             Objects.requireNonNull(player.getEquipment()).setHelmet(newBanner);
             Worlds.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT);
-            player.getWorld().spawnParticle(Particle.VILLAGER_ANGRY, player.getLocation().add(0, 1.5, 0), 8, 0.5, 2.0, 0.5);
+            player.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, player.getLocation().add(0, 1.5, 0), 8, 0.5, 2.0, 0.5);
         }
     }
 

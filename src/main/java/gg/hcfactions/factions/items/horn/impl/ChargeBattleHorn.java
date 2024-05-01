@@ -55,9 +55,9 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
         res.add(ChatColor.RESET + " ");
 
         final ChatColor speedColor = ChatColor.of(String.format("#%02x%02x%02x",
-                PotionType.SPEED.getEffectType().getColor().getRed(),
-                PotionType.SPEED.getEffectType().getColor().getGreen(),
-                PotionType.SPEED.getEffectType().getColor().getBlue())
+                PotionType.SWIFTNESS.getEffectType().getColor().getRed(),
+                PotionType.SWIFTNESS.getEffectType().getColor().getGreen(),
+                PotionType.SWIFTNESS.getEffectType().getColor().getBlue())
         );
 
         final ChatColor fresColor = ChatColor.of(String.format("#%02x%02x%02x",
@@ -84,7 +84,7 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
 
         if (meta != null) {
             final MusicInstrumentMeta instrumentMeta = (MusicInstrumentMeta) meta;
-            instrumentMeta.setInstrument(MusicInstrument.PONDER);
+            instrumentMeta.setInstrument(MusicInstrument.PONDER_GOAT_HORN);
             item.setItemMeta(instrumentMeta);
         }
 

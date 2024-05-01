@@ -37,6 +37,9 @@ public final class FConfig {
 
     @Getter public String redisUri;
 
+    // website
+    @Getter public String websiteDomain;
+
     // autosave
     @Getter public int factionAutosaveDelay;
     @Getter public int claimAutosaveDelay;
@@ -87,6 +90,7 @@ public final class FConfig {
     @Getter public int attackerCombatTagDuration;
     @Getter public int attackedCombatTagDuration;
     @Getter public int enderpearlDuration;
+    @Getter public int windChargeDuration;
     @Getter public int crappleDuration;
     @Getter public int gappleDuration;
     @Getter public int chorusDuration;
@@ -242,6 +246,9 @@ public final class FConfig {
         redisUri = conf.getString("databases.redis.uri");
         plugin.getAresLogger().info("Using MongoDB Database: " + mongoDatabaseName);
 
+        websiteDomain = conf.getString("website.domain");
+        plugin.getAresLogger().info("Website Domain: " + websiteDomain);
+
         factionAutosaveDelay = conf.getInt("autosave.factions");
         playerAutosaveDelay = conf.getInt("autosave.players");
         claimAutosaveDelay = conf.getInt("autosave.claims");
@@ -332,6 +339,7 @@ public final class FConfig {
         attackerCombatTagDuration = conf.getInt("player.timers.combat_tag.attacker");
         attackedCombatTagDuration = conf.getInt("player.timers.combat_tag.attacked");
         enderpearlDuration = conf.getInt("player.timers.enderpearl");
+        windChargeDuration = conf.getInt("player.timers.windcharge");
         crappleDuration = conf.getInt("player.timers.crapple");
         gappleDuration = conf.getInt("player.timers.gapple");
         chorusDuration = conf.getInt("player.timers.chorus");

@@ -11,11 +11,13 @@ import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.base.util.Strings;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
-import gg.hcfactions.libs.bukkit.utils.Colors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -100,12 +102,17 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
                 return;
             }
 
-            dropMeta.setDisplayName(Colors.DARK_BLUE.toBukkit() + StringUtils.capitalize(spawner.getSpawnedType().name().toLowerCase().replaceAll("_", " ")) + " Spawner");
+            dropMeta.displayName(Component
+                    .text(Strings.capitalize(Objects.requireNonNull(spawner.getSpawnedType()).name().toLowerCase()) + " Spawner")
+                    .color(NamedTextColor.DARK_RED)
+                    .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
             toDrop.setItemMeta(dropMeta);
         }
 
         lore.set(useType.getLorePosition(), ((useType.equals(ECrowbarUseType.SPAWNER) ? Crowbar.MONSTER_SPAWNER_PREFIX : Crowbar.END_PORTAL_PREFIX)) + (remainingUses - 1));
         meta.setLore(lore);
+
         item.setItemMeta(meta);
 
         block.getWorld().dropItem(block.getLocation(), toDrop);

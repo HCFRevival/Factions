@@ -730,21 +730,52 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
     }
 
     /**
-     * Handles preventing entity exploding and destroying blocks in claimed land
+     * Handles protecting land from entity explosions and wind changes
      *
      * @param event EntityExplodeEvent
      */
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         final List<Block> toRemove = Lists.newArrayList();
+        Player initiator = null;
+
+        // Set an initiator for the entity explosion
+        if (event.getEntity() instanceof final WindCharge windCharge) {
+            if (windCharge.getShooter() instanceof Player) {
+                initiator = (Player) windCharge.getShooter();
+            }
+        }
 
         for (Block block : event.blockList()) {
             final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(block));
             final List<Claim> insideBuildBuffer = plugin.getClaimManager().getClaimsNearby(new BLocatable(block), true);
 
-            if (inside != null || !insideBuildBuffer.isEmpty()) {
-                toRemove.add(block);
+            if (inside == null) {
+                continue;
             }
+
+            final IFaction ownerFaction = plugin.getFactionManager().getFactionById(inside.getOwner());
+            if (ownerFaction instanceof final PlayerFaction ownerPlayerFaction) {
+                if (ownerPlayerFaction.isRaidable()) {
+                    continue;
+                }
+
+                if (initiator != null) {
+                    if (ownerPlayerFaction.isMember(initiator)) {
+                        continue;
+                    }
+
+                    if (initiator.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                        continue;
+                    }
+                }
+            }
+
+            if (insideBuildBuffer.isEmpty()) {
+                continue;
+            }
+
+            toRemove.add(block);
         }
 
         event.blockList().removeAll(toRemove);

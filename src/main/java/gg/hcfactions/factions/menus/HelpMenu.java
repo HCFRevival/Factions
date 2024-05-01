@@ -14,8 +14,6 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
-import gg.hcfactions.libs.bukkit.remap.ERemappedEffect;
-import gg.hcfactions.libs.bukkit.remap.ERemappedEnchantment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.*;
@@ -25,9 +23,9 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class HelpMenu extends GenericMenu {
@@ -56,7 +54,6 @@ public final class HelpMenu extends GenericMenu {
                         .setMaterial(menuPage.getIconMaterial())
                         .setName(menuPage.getDisplayName())
                         .addFlag(ItemFlag.HIDE_ATTRIBUTES)
-                        .addFlag(ItemFlag.HIDE_POTION_EFFECTS)
                         .addLore(menuPage.getDescription()).build();
 
                 addItem(new Clickable(icon, menuPage.getPosition(), click -> loadWindow(menuPage)));
@@ -87,13 +84,8 @@ public final class HelpMenu extends GenericMenu {
 
                 if (potionMeta != null) {
                     //  meta.setBasePotionData(new PotionData(type, extend, upgraded));
-                    final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(potionLimit.getType());
-
-                    if (remapped.getDataType() == null) {
-                        continue;
-                    }
-
-                    final Color color = Objects.requireNonNull(remapped.getDataType().getEffectType()).getColor();
+                    final PotionEffectType effectType = potionLimit.getType();
+                    final Color color = effectType.getColor();
                     final List<String> lore = Lists.newArrayList();
 
                     lore.add(ChatColor.YELLOW + "Amplifiable: " + (potionLimit.isAmplifiable() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No"));
@@ -101,10 +93,10 @@ public final class HelpMenu extends GenericMenu {
                     lore.add(ChatColor.YELLOW + "Splashable: " + (potionLimit.canSplash() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No"));
 
                     potionMeta.setDisplayName(net.md_5.bungee.api.ChatColor.of(String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()))
-                            + Strings.capitalize(remapped.name().toLowerCase().replaceAll("_", " "))
+                            + Strings.capitalize(effectType.getKey().getKey().toLowerCase().replaceAll("_", " "))
                             + (potionLimit.isDisabled() ? ChatColor.DARK_RED + " (DISABLED)" : ""));
 
-                    potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+                    potionMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
                     potionMeta.setColor(color);
                     potionMeta.setLore(lore);
 
@@ -132,13 +124,12 @@ public final class HelpMenu extends GenericMenu {
             int cursor = 0;
 
             for (Enchantment enchantment : cxService.getEnchantLimitModule().getEnchantLimits().keySet()) {
-                final ERemappedEnchantment remapped = ERemappedEnchantment.getRemappedEnchantment(enchantment);
                 final int maxLevel = cxService.getEnchantLimitModule().getMaxEnchantmentLevel(enchantment);
                 final boolean disabled = (maxLevel <= 0);
                 final ItemBuilder builder = new ItemBuilder().setMaterial(Material.ENCHANTED_BOOK);
                 final List<String> lore = Lists.newArrayList();
 
-                builder.setName(ChatColor.AQUA + Strings.capitalize(remapped.name().toLowerCase().replaceAll("_", " ")) + (disabled ? ChatColor.DARK_RED + " (DISABLED)" : ""));
+                builder.setName(ChatColor.AQUA + Strings.capitalize(enchantment.getKey().getKey().toLowerCase().replaceAll("_", " ")) + (disabled ? ChatColor.DARK_RED + " (DISABLED)" : ""));
 
                 if (disabled) {
                     lore.add(ChatColor.RED + "This enchantment can not be applied");
@@ -238,8 +229,7 @@ public final class HelpMenu extends GenericMenu {
 
                         bardClass.getHoldables().forEach(holdable -> {
                             final String matName = Strings.capitalize(holdable.getMaterial().name().toLowerCase().replaceAll("_", " "));
-                            final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(holdable.getEffectType());
-                            final String effName = Strings.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
+                            final String effName = Strings.capitalize(holdable.getEffectType().getKey().getKey().toLowerCase().replaceAll("_", " "));
                             final int amplifier = holdable.getAmplifier();
                             final int seconds = holdable.getDuration();
 
@@ -282,8 +272,7 @@ public final class HelpMenu extends GenericMenu {
 
                     playerClass.getConsumables().forEach(consumable -> {
                         final String matName = Strings.capitalize(consumable.getMaterial().name().toLowerCase().replaceAll("_", " "));
-                        final ERemappedEffect remapped = ERemappedEffect.getRemappedEffect(consumable.getEffectType());
-                        final String effName = Strings.capitalize(remapped.name().toLowerCase().replaceAll("_", " "));
+                        final String effName = Strings.capitalize(consumable.getEffectType().getKey().getKey().toLowerCase().replaceAll("_", " "));
                         final int amplifier = consumable.getAmplifier();
                         final int seconds = consumable.getDuration();
                         String applicationType = null;

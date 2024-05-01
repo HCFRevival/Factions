@@ -201,7 +201,7 @@ public final class Rogue implements IClass {
         invisibilityStates.put(player.getUniqueId(), expectedState);
 
         player.getWorld().spawnParticle(
-                Particle.SPELL_WITCH,
+                Particle.WITCH,
                 player.getLocation().getX(),
                 player.getLocation().getY() + 1.5,
                 player.getLocation().getZ(),
