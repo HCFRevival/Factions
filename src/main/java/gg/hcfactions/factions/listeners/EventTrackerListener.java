@@ -37,6 +37,7 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 import java.util.Set;
 import java.util.UUID;
@@ -372,8 +373,14 @@ public final class EventTrackerListener implements Listener {
         }
 
         final ThrownPotion potion = event.getPotion();
+        final ItemStack item = potion.getItem();
+        final PotionMeta meta = (PotionMeta) item.getItemMeta();
 
-        if (potion.getEffects().stream().anyMatch(eff -> eff.getType().equals(PotionEffectType.INSTANT_HEALTH))) {
+        if (meta == null || meta.getBasePotionType() == null) {
+            return;
+        }
+
+        if (meta.getBasePotionType().getPotionEffects().stream().anyMatch(eff -> eff.getType().equals(PotionEffectType.INSTANT_HEALTH))) {
             createPlayerEntry(new PLocatable(player), player, EventTrackerManager.P_HEALTH_POTIONS_USED, 1);
         }
     }
