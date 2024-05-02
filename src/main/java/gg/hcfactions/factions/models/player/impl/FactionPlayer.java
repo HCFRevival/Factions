@@ -137,29 +137,31 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
     @Override
     public void removeFromScoreboard(Player player) {
         if (scoreboard == null) {
-            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but scoreboard was null");
+            playerManager.getPlugin().getAresLogger().error("Attempted to remove one from scoreboard but scoreboard was null");
             return;
         }
 
-        final Team friendly = scoreboard.getInternal().getTeam(EScoreboardEntryType.FRIENDLY.getScoreboardTeamName());
-        if (friendly == null) {
-            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but team was null");
-            return;
-        }
+        for (EScoreboardEntryType entry : EScoreboardEntryType.values()) {
+            final Team team = scoreboard.getInternal().getTeam(entry.getScoreboardTeamName());
 
-        friendly.removeEntry(player.getName());
+            if (team == null) {
+                continue;
+            }
+
+            team.removeEntry(player.getName());
+        }
     }
 
     @Override
     public void removeFromScoreboard(Player player, EScoreboardEntryType entryType) {
         if (scoreboard == null) {
-            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but scoreboard was null");
+            playerManager.getPlugin().getAresLogger().error("Attempted to remove one from scoreboard but scoreboard was null");
             return;
         }
 
         final Team team = scoreboard.getInternal().getTeam(entryType.getScoreboardTeamName());
         if (team == null) {
-            playerManager.getPlugin().getAresLogger().error("attempted to remove one from scoreboard but team was null");
+            playerManager.getPlugin().getAresLogger().error("Attempted to remove one from scoreboard but team was null");
             return;
         }
 
@@ -173,13 +175,15 @@ public final class FactionPlayer implements IFactionPlayer, MongoDocument<Factio
             return;
         }
 
-        final Team friendly = scoreboard.getInternal().getTeam("friendly");
-        if (friendly == null) {
-            playerManager.getPlugin().getAresLogger().error("attempted to remove all from scoreboard but team was null");
-            return;
-        }
+        for (EScoreboardEntryType entry : EScoreboardEntryType.values()) {
+            final Team team = scoreboard.getInternal().getTeam(entry.getScoreboardTeamName());
 
-        friendly.getEntries().forEach(friendly::removeEntry);
+            if (team == null) {
+                continue;
+            }
+
+            team.getEntries().forEach(team::removeEntry);
+        }
     }
 
     public Player getBukkit() {

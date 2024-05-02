@@ -33,23 +33,42 @@ public record ChatListener(@Getter Factions plugin) implements Listener {
             final PlayerFaction.Member member = faction.getMember(player.getUniqueId());
 
             if (member != null) {
-                if (member.getChannel().equals(PlayerFaction.ChatChannel.PUBLIC) && !message.startsWith("@")) {
+                // Print to public chat when in public channel and does not prefix with @ or #
+                if (member.getChannel().equals(PlayerFaction.ChatChannel.PUBLIC) && !message.startsWith("@") && !message.startsWith("#")) {
                     event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, kills, message, p)));
                     return;
                 }
 
+                // Print to public chat when using the ! macro
                 if (message.startsWith("!") && !member.getChannel().equals(PlayerFaction.ChatChannel.PUBLIC)) {
                     event.getRecipients().forEach(p -> p.sendMessage(FMessage.getPublicFormat(faction, displayName, kills, message.replaceFirst("!", ""), p)));
                     return;
                 }
 
+                // Print to faction chat if in faction channel
                 if (member.getChannel().equals(PlayerFaction.ChatChannel.FACTION) && !message.startsWith("!")) {
                     event.getRecipients().stream().filter(p -> faction.isMember(p.getUniqueId())).forEach(m -> m.sendMessage(FMessage.getFactionFormat(displayName, message)));
                     return;
                 }
 
+                // Print to ally chat if in ally channel
+                if (member.getChannel().equals(PlayerFaction.ChatChannel.ALLY) && !message.startsWith("!")) {
+                    event.getRecipients().stream().filter(p -> faction.isMember(p.getUniqueId())).forEach(m -> m.sendMessage(FMessage.getAllyFormat(displayName, message)));
+                    event.getRecipients().stream().filter(faction::isAlly).forEach(ally -> ally.sendMessage(FMessage.getAllyFormat(displayName, message)));
+                    return;
+                }
+
+                // @Test - Prints in faction chat, Test - Prints in public
                 if (message.startsWith("@") && !member.getChannel().equals(PlayerFaction.ChatChannel.FACTION)) {
                     event.getRecipients().stream().filter(p -> faction.isMember(p.getUniqueId())).forEach(m -> m.sendMessage(FMessage.getFactionFormat(displayName, message.replaceFirst("@", ""))));
+                    return;
+                }
+
+                // #Test - Prints in ally chat, Test - Prints in public
+                if (message.startsWith("#") && !member.getChannel().equals(PlayerFaction.ChatChannel.ALLY)) {
+                    final String pruned = message.replaceFirst("#", "");
+                    event.getRecipients().stream().filter(p -> faction.isMember(p.getUniqueId())).forEach(m -> m.sendMessage(FMessage.getAllyFormat(displayName, pruned)));
+                    event.getRecipients().stream().filter(faction::isAlly).forEach(ally -> ally.sendMessage(FMessage.getAllyFormat(displayName, pruned)));
                     return;
                 }
             }

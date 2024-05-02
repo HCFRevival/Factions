@@ -17,7 +17,6 @@ import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.base.util.Time;
-import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
@@ -25,6 +24,7 @@ import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.impl.Deathban;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -39,7 +39,6 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 public final class FMessage {
@@ -292,6 +291,42 @@ public final class FMessage {
         playerFaction.sendMessage(component);
     }
 
+    public static void printAllyRequest(Player player, PlayerFaction faction, PlayerFaction otherFaction) {
+        Component senderComponent = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has invited").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(otherFaction.getName()).color(TC_INFO))
+                        .appendSpace().append(Component.text("to form an alliance").color(TC_LAYER1));
+
+        Component receiverComponent = Component.text(faction.getName()).color(TC_INFO)
+                        .appendSpace().append(Component.text("has invited your faction to form an alliance").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("[Click to Accept]").color(TC_SUCCESS).clickEvent(ClickEvent.runCommand("/f ally accept " + faction.getName())));
+
+        faction.sendMessage(senderComponent);
+        otherFaction.sendMessage(receiverComponent);
+    }
+
+    public static void printAllianceFormed(PlayerFaction faction, PlayerFaction otherFaction) {
+        Component senderComponent = Component.text("You are now allied to").color(TC_LAYER1)
+                .appendSpace().append(Component.text(otherFaction.getName()).color(TC_INFO));
+
+        Component receiverComponent = Component.text("You are now allied to").color(TC_LAYER1)
+                .appendSpace().append(Component.text(faction.getName()).color(TC_INFO));
+
+        faction.sendMessage(senderComponent);
+        otherFaction.sendMessage(receiverComponent);
+    }
+
+    public static void printAllianceBroken(PlayerFaction faction, PlayerFaction otherFaction) {
+        Component senderComponent = Component.text("You are no longer allied to").color(TC_LAYER1)
+                .appendSpace().append(Component.text(otherFaction.getName()).color(TC_INFO));
+
+        Component receiverComponent = Component.text("You are no longer allied to").color(TC_LAYER1)
+                .appendSpace().append(Component.text(faction.getName()).color(TC_INFO));
+
+        faction.sendMessage(senderComponent);
+        otherFaction.sendMessage(receiverComponent);
+    }
+
     public static void printNowAtMaxDTR(PlayerFaction playerFaction) {
         playerFaction.sendMessage(Component.text("Your faction is now at max DTR").color(TC_SUCCESS));
     }
@@ -365,8 +400,8 @@ public final class FMessage {
     }
 
     public static void printAttackingAllyMember(Player player) {
-        Component component = Component.text("You are attacking a").color(TC_ERROR)
-                .appendSpace().append(Component.text("Faction Ally").color(NamedTextColor.BLUE));
+        Component component = Component.text("You are attacking an").color(TC_ERROR)
+                .appendSpace().append(Component.text("ally").color(NamedTextColor.BLUE));
 
         player.sendMessage(component);
     }
@@ -571,10 +606,16 @@ public final class FMessage {
                     .appendSpace().append(Component.text(message)).color(NamedTextColor.WHITE));
         }
 
-        // TODO: Add ally support here
-        NamedTextColor factionTextColor = (faction.isMember(receiver.getUniqueId()) ? NamedTextColor.DARK_GREEN : NamedTextColor.RED);
+        NamedTextColor textColor;
+        if (faction.isMember(receiver.getUniqueId())) {
+            textColor = NamedTextColor.DARK_GREEN;
+        } else if (faction.isAlly(receiver)) {
+            textColor = NamedTextColor.BLUE;
+        } else {
+            textColor = NamedTextColor.RED;
+        }
 
-        return Component.text("[" + faction.getName() + "]").color(factionTextColor)
+        return Component.text("[" + faction.getName() + "]").color(textColor)
                 .append(Component.text("[" + kills + "]").color(TC_INFO))
                 .append(LegacyComponentSerializer.legacySection().deserialize(displayName))
                 .append(Component.text(":").color(NamedTextColor.WHITE))
@@ -589,7 +630,7 @@ public final class FMessage {
     }
 
     public static Component getAllyFormat(String displayName, String message) {
-        return Component.text("[ALLY]").color(NamedTextColor.BLUE)
+        return Component.text("[A]").color(NamedTextColor.BLUE)
                 .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(displayName))
                 .append(Component.text(":").color(NamedTextColor.BLUE))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.BLUE));
@@ -888,6 +929,11 @@ public final class FMessage {
         if (plugin.getEventManager().isMajorEventActive()) {
             output = output.appendNewline().append(Component.text("Re-invites:").color(TC_LAYER1))
                     .appendSpace().append(Component.text(playerFaction.getReinvites()).color(TC_INFO));
+        }
+
+        if (playerFaction.getAlly() != null) {
+            output = output.appendNewline().append(Component.text("Ally:").color(TC_LAYER1))
+                    .appendSpace().append(Component.text(playerFaction.getAlly().getName(), TC_INFO).clickEvent(ClickEvent.runCommand("/f who " + playerFaction.getAlly().getName())).hoverEvent(Component.text("Click to learn more about " + playerFaction.getAlly().getName())));
         }
 
         final Component preQueryComponent = output;

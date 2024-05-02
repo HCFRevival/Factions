@@ -59,4 +59,7 @@ public interface IFactionExecutor {
     void startStuckTimer(Player player, Promise promise);
     void printTeamLocate(Player player, Promise promise);
     void focusPlayer(Player player, Player toFocus, Promise promise);
+    void sendAllyRequest(Player player, String factionName, Promise promise);
+    void acceptAllyRequest(Player player, String factionName, Promise promise);
+    void breakAlliance(Player player, Promise promise);
 }
