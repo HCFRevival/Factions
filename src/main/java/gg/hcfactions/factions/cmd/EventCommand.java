@@ -10,6 +10,7 @@ import gg.hcfactions.libs.acf.annotation.*;
 import gg.hcfactions.libs.base.consumer.Promise;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -412,7 +413,7 @@ public final class EventCommand extends BaseCommand {
         }
 
         if (dayOfWeek == -1) {
-            player.sendMessage(FMessage.ERROR + "Invalid day of week");
+            player.sendMessage(Component.text("Invalid day of the week", FMessage.TC_ERROR));
             return;
         }
 
@@ -421,7 +422,7 @@ public final class EventCommand extends BaseCommand {
         int minuteOfHour;
 
         if (timeSplit.length != 2) {
-            player.sendMessage(ChatColor.RED + "Invalid time format");
+            player.sendMessage(Component.text("Invalid time format", FMessage.TC_ERROR));
             return;
         }
 
@@ -429,17 +430,17 @@ public final class EventCommand extends BaseCommand {
             hourOfDay = Integer.parseInt(timeSplit[0]);
             minuteOfHour = Integer.parseInt(timeSplit[1]);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid time format");
+            player.sendMessage(Component.text("Invalid time format", FMessage.TC_ERROR));
             return;
         }
 
         if (hourOfDay < 0 || hourOfDay > 23) {
-            player.sendMessage(ChatColor.RED + "Hours must be 0-23");
+            player.sendMessage(Component.text("Hours must be 0-23", FMessage.TC_ERROR));
             return;
         }
 
         if (minuteOfHour < 0 || minuteOfHour > 59) {
-            player.sendMessage(ChatColor.RED + "Minutes must be 0-60");
+            player.sendMessage(Component.text("Minutes must be 0-59", FMessage.TC_ERROR));
             return;
         }
 
@@ -447,12 +448,12 @@ public final class EventCommand extends BaseCommand {
             plugin.getEventManager().getExecutor().addEventSchedule(player, eventName, dayOfWeek, hourOfDay, minuteOfHour, isTemp, new Promise() {
                 @Override
                 public void resolve() {
-                    player.sendMessage(FMessage.SUCCESS + "Event schedule updated");
+                    player.sendMessage(Component.text("Event schedule updated", FMessage.TC_SUCCESS));
                 }
 
                 @Override
                 public void reject(String s) {
-                    player.sendMessage(FMessage.ERROR + "Failed to update event schedule: " + s);
+                    player.sendMessage(Component.text("Failed to update event schedule: " + s, FMessage.TC_ERROR));
                 }
             });
 
@@ -462,12 +463,12 @@ public final class EventCommand extends BaseCommand {
         plugin.getEventManager().getExecutor().removeEventSchedule(player, eventName, dayOfWeek, hourOfDay, minuteOfHour, isTemp, new Promise() {
             @Override
             public void resolve() {
-                player.sendMessage(FMessage.SUCCESS + "Event schedule updated");
+                player.sendMessage(Component.text("Event schedule updated", FMessage.TC_SUCCESS));
             }
 
             @Override
             public void reject(String s) {
-                player.sendMessage(FMessage.ERROR + "Failed to update event schedule: " + s);
+                player.sendMessage(Component.text("Failed to update event schedule: " + s, FMessage.TC_ERROR));
             }
         });
     }

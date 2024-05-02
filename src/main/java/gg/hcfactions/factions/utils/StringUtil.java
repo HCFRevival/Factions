@@ -2,12 +2,43 @@ package gg.hcfactions.factions.utils;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 import java.util.List;
 
 public final class StringUtil {
+    public static void formatLoreComponents(List<Component> loreComponents, String entry, TextColor color) {
+        final String[] split = entry.split(" ");
+        final List<String> merged = Lists.newArrayList();
+
+        for (String s : split) {
+            if (Joiner.on(" ").join(merged).length() > 20) {
+                merged.add(s);
+                String merge = Joiner.on(" ").join(merged);
+                loreComponents.add(Component.text(merge).color(color));
+
+                merged.clear();
+                continue;
+            }
+
+            merged.add(s);
+        }
+
+        if (!merged.isEmpty()) {
+            final String mergedString = Joiner.on(" ").join(merged);
+            loreComponents.add(Component.text(mergedString).color(color));
+        }
+    }
+
+    /**
+     * @deprecated Use formatLoreComponents
+     * @param lore Current Lore
+     * @param entry New Text Entry to add to the Lore
+     * @param color ChatColor to format with
+     */
     public static void formatLore(List<String> lore, String entry, ChatColor color) {
         final String[] split = entry.split(" ");
         final List<String> merged = Lists.newArrayList();

@@ -14,6 +14,7 @@ import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Time;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -254,7 +255,7 @@ public final class FactionCommand extends BaseCommand {
             try {
                 pageNumber = Integer.parseInt(page);
             } catch (NumberFormatException e) {
-                player.sendMessage(FMessage.ERROR + "Failed to query faction list: invalid page number");
+                player.sendMessage(Component.text("Failed to query faction list: Invalid page number", FMessage.TC_ERROR));
                 return;
             }
 

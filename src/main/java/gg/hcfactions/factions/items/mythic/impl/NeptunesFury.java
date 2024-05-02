@@ -9,6 +9,9 @@ import gg.hcfactions.factions.items.mythic.MythicAbility;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -59,7 +62,22 @@ public final class NeptunesFury implements IMythicItem {
 
     @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Neptune's Fury";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return NamedTextColor.DARK_AQUA;
     }
 
     @Override

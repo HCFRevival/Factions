@@ -10,6 +10,7 @@ import gg.hcfactions.libs.bukkit.loot.impl.GenericLootable;
 import gg.hcfactions.libs.bukkit.loot.impl.LootTableMenu;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -45,7 +46,7 @@ public final class BossCommand extends BaseCommand {
         final ItemStack hand = player.getInventory().getItemInMainHand();
 
         if (hand.getType().equals(Material.AIR)) {
-            player.sendMessage(FMessage.ERROR + "You are not holding an item");
+            player.sendMessage(Component.text("You are not holding an item", FMessage.TC_ERROR));
             return;
         }
 

@@ -4,9 +4,13 @@ import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.cx.modules.player.combat.EnchantLimitModule;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
@@ -19,6 +23,8 @@ import java.util.stream.Collectors;
 public interface IMythicItem extends ICustomItem {
     Factions getPlugin();
     List<MythicAbility> getAbilityInfo();
+    String getMythicName();
+    TextColor getColor();
 
     /**
      * @return Particle to be displayed
@@ -89,12 +95,11 @@ public interface IMythicItem extends ICustomItem {
     }
 
     /**
-     * @return Mythic item lore
+     * @return Mythic Lore Components
      */
-    default List<String> getMythicLore() {
-        final List<String> res = Lists.newArrayList();
-
-        res.add(ChatColor.DARK_AQUA + StringUtil.getMythicEmblem(getMaterial()) + " Mythic");
+    default List<Component> getMythicLore() {
+        List<Component> res = Lists.newArrayList();
+        res.add(FMessage.getMythicIdentifier(this));
 
         for (EMythicAbilityType abilityType : EMythicAbilityType.values()) {
             final List<MythicAbility> abilities = getAbilityInfoByType(abilityType);
@@ -103,9 +108,13 @@ public interface IMythicItem extends ICustomItem {
                 continue;
             }
 
-            res.add(ChatColor.RESET + " ");
-            res.add(abilityType.getDisplayName());
-            abilities.forEach(ability -> StringUtil.formatLore(res, ability.toString(), ChatColor.GRAY));
+            res.add(Component.text(" "));
+            res.add(LegacyComponentSerializer.legacySection().deserialize(abilityType.getDisplayName()));
+
+            abilities.forEach(ability -> {
+                res.add(LegacyComponentSerializer.legacySection().deserialize(ability.getName()));
+                StringUtil.formatLoreComponents(res, ability.getDescription(), FMessage.TC_MYTHIC_ABILITY_DESC);
+            });
         }
 
         return res;
@@ -149,6 +158,11 @@ public interface IMythicItem extends ICustomItem {
         }
 
         return sharpnessLimit;
+    }
+
+    @Override
+    default Component getDisplayNameComponent() {
+        return Component.text(getMythicName()).color(getColor());
     }
 
     @Override

@@ -21,6 +21,8 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -274,6 +276,19 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     }
 
     /**
+     * Send a component message to every player in the faction
+     * @param component Component
+     */
+    public void sendMessage(Component component) {
+        getOnlineMembers().forEach(m -> {
+            final Player player = m.getBukkit();
+            if (player != null) {
+                player.sendMessage(component);
+            }
+        });
+    }
+
+    /**
      * Returns the DTR cap for this faction
      * @return DTR cap (double)
      */
@@ -501,12 +516,12 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
 
     @AllArgsConstructor
     public enum Rank {
-        MEMBER(0, "Member"),
-        OFFICER(1, "Officer"),
-        LEADER(2, "Leader");
+        MEMBER(0, Component.text("Member")),
+        OFFICER(1, Component.text("Officer")),
+        LEADER(2, Component.text("Leader"));
 
         @Getter public final int weight;
-        @Getter public final String displayName;
+        @Getter public final Component displayName;
 
         /**
          * Returns true if this rank is higher than the provided rank
@@ -554,12 +569,14 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         }
     }
 
+    @Getter
     @AllArgsConstructor
     public enum ChatChannel {
-        PUBLIC(ChatColor.AQUA + "Public Chat"),
-        FACTION(ChatColor.DARK_GREEN + "Faction Chat");
+        PUBLIC(Component.text("Public Chat").color(NamedTextColor.AQUA)),
+        FACTION(Component.text("Faction Chat").color(NamedTextColor.DARK_GREEN)),
+        ALLY(Component.text("Ally Chat").color(NamedTextColor.BLUE));
 
-        @Getter public final String displayName;
+        public final Component displayName;
 
         /**
          * Returns a chat channel matching the provided name

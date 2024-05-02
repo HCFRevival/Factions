@@ -3,6 +3,8 @@ package gg.hcfactions.factions.items;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -22,6 +24,11 @@ public final class StarterRod implements ICustomItem {
     }
 
     @Override
+    public Component getDisplayNameComponent() {
+        return Component.text("Welcome to HCFR").color(NamedTextColor.GOLD);
+    }
+
+    @Override
     public List<String> getLore() {
         final List<String> lore = Lists.newArrayList();
         lore.add(ChatColor.RESET + " ");
@@ -31,6 +38,17 @@ public final class StarterRod implements ICustomItem {
         lore.add(ChatColor.DARK_AQUA + "Good luck, have fun!");
         lore.add(ChatColor.RESET + " " + ChatColor.GOLD + " - Revival Team");
         return lore;
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
+        final List<Component> res = Lists.newArrayList();
+        res.add(Component.text(" "));
+        res.add(Component.text("Use this fishing rod to gather some food").color(NamedTextColor.AQUA));
+        res.add(Component.text("before you enter the Overworld.").color(NamedTextColor.AQUA));
+        res.add(Component.text(" "));
+        res.add(Component.text("Good luck, and have fun!").color(NamedTextColor.GOLD));
+        return res;
     }
 
     @Override

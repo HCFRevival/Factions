@@ -6,6 +6,9 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.mythic.IMythicItem;
 import gg.hcfactions.factions.items.mythic.MythicAbility;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -34,6 +37,11 @@ public final class DeepslateMiner implements IMythicItem {
 
     @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
     }
 
@@ -44,5 +52,15 @@ public final class DeepslateMiner implements IMythicItem {
         enchantments.put(Enchantment.UNBREAKING, 3);
         enchantments.put(Enchantment.MENDING, 1);
         return enchantments;
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Deepslate Miner";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return NamedTextColor.GRAY;
     }
 }

@@ -12,6 +12,8 @@ import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -32,6 +34,8 @@ public final class Ghostblade implements IMythicItem {
                                    @Getter int refreshEffectMinDuration,
                                    @Getter int refreshEffectMaxDuration,
                                    @Getter float refreshChance) {}
+
+    public static final TextColor GHOSTBLADE_COLOR = TextColor.color(0xf194ff);
 
     @Getter public final Factions plugin;
     @Getter public final List<MythicAbility> abilityInfo;
@@ -69,7 +73,22 @@ public final class Ghostblade implements IMythicItem {
 
     @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Ghostblade";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return GHOSTBLADE_COLOR;
     }
 
     @Override
