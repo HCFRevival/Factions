@@ -16,7 +16,8 @@ import org.bukkit.entity.Player;
 
 import java.util.Optional;
 
-public record ClaimBuilderExecutor(@Getter ClaimBuilderManager builderManager) implements IClaimBuilderExecutor {
+@Getter
+public record ClaimBuilderExecutor(ClaimBuilderManager builderManager) implements IClaimBuilderExecutor {
     @Override
     public void startClaiming(Player player, Promise promise) {
         final CustomItemService cis = (CustomItemService) builderManager.getClaimManager().getPlugin().getService(CustomItemService.class);

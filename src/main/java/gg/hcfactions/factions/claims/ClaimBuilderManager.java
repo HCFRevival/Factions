@@ -11,10 +11,11 @@ import org.bukkit.entity.Player;
 
 import java.util.Set;
 
+@Getter
 public final class ClaimBuilderManager implements IManager {
-    @Getter public final ClaimManager claimManager;
-    @Getter public final ClaimBuilderExecutor executor;
-    @Getter public final Set<ClaimBuilder> builderRepository;
+    public final ClaimManager claimManager;
+    public final ClaimBuilderExecutor executor;
+    public final Set<ClaimBuilder> builderRepository;
 
     public ClaimBuilderManager(ClaimManager claimManager) {
         this.claimManager = claimManager;

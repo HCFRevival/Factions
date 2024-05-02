@@ -31,16 +31,17 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
 public final class BattlepassManager implements IManager {
-    @Getter public final Factions plugin;
-    @Getter @Setter public boolean enabled;
-    @Getter @Setter public long dailyExpireTimestamp;
-    @Getter @Setter public long weeklyExpireTimestamp;
-    @Getter public BukkitTask expireCheckTask;
-    @Getter public final List<BPObjective> dailyObjectiveRepository;
-    @Getter public final List<BPObjective> weeklyObjectiveRepository;
-    @Getter public final Set<BPTracker> trackerRepository;
-    @Getter public final Map<AresRank, Double> rankMultipliers;
+    public final Factions plugin;
+    public BukkitTask expireCheckTask;
+    public final List<BPObjective> dailyObjectiveRepository;
+    public final List<BPObjective> weeklyObjectiveRepository;
+    public final Set<BPTracker> trackerRepository;
+    public final Map<AresRank, Double> rankMultipliers;
+    @Setter public boolean enabled;
+    @Setter public long dailyExpireTimestamp;
+    @Setter public long weeklyExpireTimestamp;
 
     public BattlepassManager(Factions plugin) {
         this.plugin = plugin;

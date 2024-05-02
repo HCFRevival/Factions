@@ -20,6 +20,8 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.ILocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -53,8 +55,8 @@ public final class ClaimManager implements IManager {
         this.claimAutosaveTask = new Scheduler(plugin).sync(() -> {
             final long start = Time.now();
 
-            Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
-                    staff.sendMessage(ChatColor.GRAY + "Preparing to auto-save Claim Data..."));
+            Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
+                    staff.sendMessage(Component.text("Preparing to auto-save Claim data...", NamedTextColor.GRAY)));
 
             new Scheduler(plugin).async(() -> {
                 saveClaims();
@@ -63,7 +65,7 @@ public final class ClaimManager implements IManager {
                     final long finish = Time.now();
 
                     Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)).forEach(staff ->
-                            staff.sendMessage(ChatColor.GRAY + "Finished auto-saving Claim data (took " + (finish - start) + "ms)"));
+                            staff.sendMessage(Component.text("Finished auto-saving Claim data (took " + (finish - start) + "ms)", NamedTextColor.GRAY)));
                 }).run();
             }).run();
         }).repeat(plugin.getConfiguration().getClaimAutosaveDelay() * 20L, plugin.getConfiguration().getClaimAutosaveDelay() * 20L).run();

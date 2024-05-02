@@ -112,38 +112,38 @@ public final class FMessage {
 
     public static void broadcastFactionCreated(String factionName, String playerName) {
         Component content = Component.text("Faction").color(TC_LAYER1)
-                        .appendSpace().append(Component.text(factionName)).color(TC_INFO)
-                        .appendSpace().append(Component.text("has been")).color(TC_LAYER1)
-                        .appendSpace().append(Component.text("created")).color(TC_SUCCESS)
-                        .appendSpace().append(Component.text("by")).color(TC_LAYER1)
-                        .appendSpace().append(Component.text(playerName)).color(TC_NAME);
+                        .appendSpace().append(Component.text(factionName).color(TC_INFO))
+                        .appendSpace().append(Component.text("has been").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("created").color(TC_SUCCESS))
+                        .appendSpace().append(Component.text("by").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(playerName).color(TC_NAME));
 
         Bukkit.broadcast(content);
     }
 
     public static void broadcastFactionDisbanded(String factionName, String playerName) {
         Component content = Component.text("Faction").color(TC_LAYER1)
-                .appendSpace().append(Component.text(factionName)).color(TC_INFO)
-                .appendSpace().append(Component.text("has been")).color(TC_LAYER1)
-                .appendSpace().append(Component.text("disbanded")).color(TC_ERROR)
-                .appendSpace().append(Component.text("by")).color(TC_LAYER1)
-                .appendSpace().append(Component.text(playerName)).color(TC_NAME);
+                .appendSpace().append(Component.text(factionName).color(TC_INFO))
+                .appendSpace().append(Component.text("has been").color(TC_LAYER1))
+                .appendSpace().append(Component.text("disbanded").color(TC_ERROR))
+                .appendSpace().append(Component.text("by").color(TC_LAYER1))
+                .appendSpace().append(Component.text(playerName).color(TC_NAME));
 
         Bukkit.broadcast(content);
     }
 
     public static void broadcastCombatLogger(Player player) {
         Component content = Component.text("Combat Logger").color(TC_ERROR)
-                        .append(Component.text(":")).color(TC_NAME)
-                        .appendSpace().append(Component.text(player.getName()));
+                        .append(Component.text(":").color(TC_NAME)
+                        .appendSpace().append(Component.text(player.getName())));
 
         Bukkit.broadcast(content);
     }
 
     public static void broadcastEventTrackerPublish(String url) {
-        Component content = Component.text("Event Details").color(TC_LAYER1)
-                .append(Component.text(":").color(TC_LAYER2))
-                .appendSpace().append(Component.text("[Click Here]").clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(url))).color(TC_SUCCESS);
+        Component content = Component.text("Event Statistics").color(TC_LAYER1)
+                .append(Component.text(":").color(TC_LAYER2)
+                .appendSpace().append(Component.text("[Click Here]").clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(url))).color(TC_SUCCESS));
 
         Bukkit.broadcast(content);
     }

@@ -29,7 +29,7 @@ public final class BossLootManager extends LootManager implements IManager {
     @Override
     public void onEnable() {
         lootRepository.addAll(load(plugin.loadConfiguration(FILE_NAME), FILE_KEY));
-        plugin.getAresLogger().info("Loaded " + lootRepository.size() + " Boss Lootable Items");
+        plugin.getAresLogger().info("Loaded {} Boss Lootable Items", lootRepository.size());
     }
 
     @Override

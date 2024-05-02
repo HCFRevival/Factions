@@ -4,9 +4,10 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.manager.IManager;
 import lombok.Getter;
 
+@Getter
 public final class BossManager implements IManager {
-    @Getter public final Factions plugin;
-    @Getter public final BossLootManager lootManager;
+    public final Factions plugin;
+    public final BossLootManager lootManager;
 
     public BossManager(Factions plugin) {
         this.plugin = plugin;
