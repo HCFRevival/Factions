@@ -70,7 +70,7 @@ public final class FactionClaimingStick implements ICustomItem {
         res.add(Component.text("Tips").color(NamedTextColor.AQUA));
         res.add(Component.empty().append(bullet).append(Component.text("All claims must be connected").color(NamedTextColor.YELLOW)));
         res.add(Component.empty().append(bullet).append(Component.text("Claims must").color(NamedTextColor.YELLOW)
-                .appendSpace().append(Component.text(buffer).color(NamedTextColor.BLUE))).appendSpace().append(Component.text("blocks"))
+                .appendSpace().append(Component.text(buffer).color(NamedTextColor.BLUE))).appendSpace().append(Component.text("blocks").color(NamedTextColor.BLUE))
                 .appendSpace().append(Component.text("away from other player faction claims").color(NamedTextColor.YELLOW))
         );
         res.add(Component.empty().append(bullet).append(Component.text("Player Faction claims can not be near Server Faction Claims").color(NamedTextColor.YELLOW)));
