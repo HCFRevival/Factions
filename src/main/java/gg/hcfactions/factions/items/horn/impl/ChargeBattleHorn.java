@@ -6,6 +6,9 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.horn.IBattleHorn;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.MusicInstrument;
@@ -50,6 +53,11 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
     }
 
     @Override
+    public Component getDisplayNameComponent() {
+        return Component.text("Charge!").color(NamedTextColor.GOLD);
+    }
+
+    @Override
     public List<String> getLore() {
         final List<String> res = Lists.newArrayList();
         res.add(ChatColor.RESET + " ");
@@ -70,6 +78,25 @@ public record ChargeBattleHorn(@Getter Factions plugin) implements ICustomItem, 
         res.add(fresColor + "Fire Resistance for 15:00");
 
         return res;
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
+        final List<Component> res = Lists.newArrayList();
+        final PotionEffectType speed = PotionEffectType.SPEED;
+        final PotionEffectType fireResistance = PotionEffectType.FIRE_RESISTANCE;
+
+        res.add(Component.text(" "));
+
+        if (speed != null) {
+            res.add(Component.text("Speed II for 3:00").color(TextColor.color(speed.getColor().getRed(), speed.getColor().getGreen(), speed.getColor().getBlue())));
+        }
+
+         if (fireResistance != null) {
+             res.add(Component.text("Fire Resistance for 15:00").color(TextColor.color(fireResistance.getColor().getRed(), fireResistance.getColor().getGreen(), fireResistance.getColor().getBlue())));
+         }
+
+         return res;
     }
 
     @Override

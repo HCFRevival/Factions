@@ -1,11 +1,12 @@
 package gg.hcfactions.factions.models.message;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.items.mythic.IMythicItem;
+import gg.hcfactions.factions.items.mythic.impl.*;
 import gg.hcfactions.factions.models.battlepass.impl.BPObjective;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.faction.IFaction;
@@ -14,21 +15,27 @@ import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.models.timer.ETimerType;
 import gg.hcfactions.factions.models.timer.impl.FTimer;
+import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.base.util.Time;
+import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.deathbans.impl.Deathban;
-import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
-import net.md_5.bungee.api.chat.ClickEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -36,20 +43,53 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public final class FMessage {
-    public static final ChatColor LAYER_1 = ChatColor.YELLOW;
-    public static final ChatColor LAYER_2 = ChatColor.GOLD;
-    public static final ChatColor SUCCESS = ChatColor.GREEN;
-    public static final ChatColor ERROR = ChatColor.RED;
-    public static final ChatColor INFO = ChatColor.BLUE;
-    public static final ChatColor P_NAME = ChatColor.RESET;
+    @Deprecated public static final ChatColor LAYER_1 = ChatColor.YELLOW;
+    @Deprecated public static final ChatColor LAYER_2 = ChatColor.GOLD;
+    @Deprecated public static final ChatColor SUCCESS = ChatColor.GREEN;
+    @Deprecated public static final ChatColor ERROR = ChatColor.RED;
+    @Deprecated public static final ChatColor INFO = ChatColor.BLUE;
+    @Deprecated public static final ChatColor P_NAME = ChatColor.RESET;
 
-    public static final String DPS_PREFIX = LAYER_2 + "[" + ChatColor.RED + "DPS" + LAYER_2 + "] " + LAYER_1;
-    public static final String KOTH_PREFIX = LAYER_2 + "[" + LAYER_1 + "KOTH" + LAYER_2 + "] " + LAYER_1;
-    public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
-    public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
-    public static final String CONQ_PREFIX = LAYER_2 + "[" + ChatColor.RED + "Conquest" + LAYER_2 + "] " + LAYER_1;
-    public static final String OUTPOST_PREFIX = LAYER_2 + "[" + ChatColor.GOLD + "Outpost" + LAYER_2 + "] " + LAYER_1;
-    public static final String EOTW_PREFIX = LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String DPS_PREFIX = LAYER_2 + "[" + ChatColor.RED + "DPS" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String KOTH_PREFIX = LAYER_2 + "[" + LAYER_1 + "KOTH" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String PALACE_PREFIX = LAYER_2 + "[" + LAYER_1 + "Palace" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String PVE_PREFIX = LAYER_2 + "[" + ChatColor.DARK_RED + "PvE" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String CONQ_PREFIX = LAYER_2 + "[" + ChatColor.RED + "Conquest" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String OUTPOST_PREFIX = LAYER_2 + "[" + ChatColor.GOLD + "Outpost" + LAYER_2 + "] " + LAYER_1;
+    @Deprecated public static final String EOTW_PREFIX = LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + LAYER_1;
+
+    public static final TextColor TC_LAYER1 = TextColor.color(0xffdf61);
+    public static final TextColor TC_LAYER2 = TextColor.color(0xffb700);
+    public static final TextColor TC_SUCCESS = TextColor.color(0x55ff55);
+    public static final TextColor TC_ERROR = TextColor.color(0xff5555);
+    public static final TextColor TC_INFO = TextColor.color(0x00a2ff);
+    public static final TextColor TC_NAME = TextColor.color(0xffffff);
+    public static final TextColor TC_DANGER = TextColor.color(0xaa0000);
+    public static final TextColor TC_MYTHIC_ABILITY_DESC = TextColor.color(0xd9d9d9);
+
+    public static final Component DPS_PRE = Component.text("[").color(TC_LAYER2)
+            .append(Component.text("DPS").color(TC_LAYER1)
+            .append(Component.text("]").color(TC_LAYER2).appendSpace()));
+
+    public static final Component KOTH_PRE = Component.text("[").color(TC_LAYER2)
+            .append(Component.text("KOTH").color(TC_LAYER1)
+                    .append(Component.text("]").color(TC_LAYER2).appendSpace()));
+
+    public static final Component PALACE_PRE = Component.text("[").color(TC_LAYER2)
+            .append(Component.text("Palace").color(TC_LAYER1)
+                    .append(Component.text("]").color(TC_LAYER2).appendSpace()));
+
+    public static final Component CONQ_PRE = Component.text("[").color(TC_LAYER2)
+            .append(Component.text("Conquest").color(TC_LAYER1)
+                    .append(Component.text("]").color(TC_LAYER2).appendSpace()));
+
+    public static final Component OUTPOST_PRE = Component.text("[").color(TC_LAYER2)
+            .append(Component.text("Outpost").color(TC_LAYER1)
+                    .append(Component.text("]").color(TC_LAYER2).appendSpace()));
+
+    public static final Component EOTW_PRE = Component.text("[").color(TC_LAYER2)
+            .append(Component.text("EOTW").color(TC_LAYER1)
+                    .append(Component.text("]").color(TC_LAYER2).appendSpace()));
 
     public static final String T_EPEARL_UNLOCKED = SUCCESS + "Your enderpearls have been unlocked";
     public static final String T_WINDCHARGE_UNLOCKED = SUCCESS + "Your wind charges have been unlocked";
@@ -71,391 +111,675 @@ public final class FMessage {
     public static final String F_MAP_PILLARS_HIDDEN = LAYER_1 + "Map pillars have been hidden";
 
     public static void broadcastFactionCreated(String factionName, String playerName) {
-        Bukkit.broadcastMessage(LAYER_1 + "Faction " + INFO + factionName + LAYER_1 + " has been " + SUCCESS + "created" + LAYER_1 + " by " + P_NAME + playerName);
+        Component content = Component.text("Faction").color(TC_LAYER1)
+                        .appendSpace().append(Component.text(factionName).color(TC_INFO))
+                        .appendSpace().append(Component.text("has been").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("created").color(TC_SUCCESS))
+                        .appendSpace().append(Component.text("by").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(playerName).color(TC_NAME));
+
+        Bukkit.broadcast(content);
     }
 
     public static void broadcastFactionDisbanded(String factionName, String playerName) {
-        Bukkit.broadcastMessage(LAYER_1 + "Faction " + INFO + factionName + LAYER_1 + " has been " + ERROR + "disbanded" + LAYER_1 + " by " + P_NAME + playerName);
+        Component content = Component.text("Faction").color(TC_LAYER1)
+                .appendSpace().append(Component.text(factionName).color(TC_INFO))
+                .appendSpace().append(Component.text("has been").color(TC_LAYER1))
+                .appendSpace().append(Component.text("disbanded").color(TC_ERROR))
+                .appendSpace().append(Component.text("by").color(TC_LAYER1))
+                .appendSpace().append(Component.text(playerName).color(TC_NAME));
+
+        Bukkit.broadcast(content);
     }
 
     public static void broadcastCombatLogger(Player player) {
-        Bukkit.broadcastMessage(ERROR + "Combat-Logger" + ChatColor.RESET + ": " + player.getName());
+        Component content = Component.text("Combat Logger").color(TC_ERROR)
+                        .append(Component.text(":").color(TC_NAME)
+                        .appendSpace().append(Component.text(player.getName())));
+
+        Bukkit.broadcast(content);
     }
 
     public static void broadcastEventTrackerPublish(String url) {
-        Bukkit.broadcastMessage(" ");
-        Bukkit.broadcastMessage(LAYER_2 + "See the after-match report here" + LAYER_1 + ": " + url);
-        Bukkit.broadcastMessage(" ");
+        Component content = Component.text("Event Statistics").color(TC_LAYER1)
+                .append(Component.text(":").color(TC_LAYER2)
+                .appendSpace().append(Component.text("[Click Here]").clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(url))).color(TC_SUCCESS));
+
+        Bukkit.broadcast(content);
     }
 
     public static void broadcastDpsEventMessage(String message) {
-        Bukkit.broadcastMessage(" ");
-        Bukkit.broadcastMessage(DPS_PREFIX + message);
-        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcast(DPS_PRE.append(Component.text(message).color(TC_LAYER1)));
     }
 
     public static void broadcastCaptureEventMessage(String message) {
-        Bukkit.broadcastMessage(" ");
-        Bukkit.broadcastMessage(KOTH_PREFIX + message);
-        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcast(KOTH_PRE.append(Component.text(message).color(TC_LAYER1)));
     }
 
     public static void broadcastConquestMessage(String message) {
-        Bukkit.broadcastMessage(" ");
-        Bukkit.broadcastMessage(CONQ_PREFIX + message);
-        Bukkit.broadcastMessage(" ");
+        Bukkit.broadcast(CONQ_PRE.append(Component.text(message).color(TC_LAYER1)));
+    }
+
+    public static void printEotwMessage(String message) {
+        Bukkit.broadcast(EOTW_PRE.append(Component.text(message).color(TC_LAYER1)));
     }
 
     public static void broadcastFactionRaidable(PlayerFaction faction) {
-        Bukkit.broadcastMessage(ChatColor.RESET + faction.getName() + ChatColor.RED + " is now " + ChatColor.DARK_RED + "RAID-ABLE");
+        Component component = Component.text(faction.getName()).color(TC_NAME)
+                .appendSpace().append(Component.text("is now").color(TC_ERROR))
+                .appendSpace().append(Component.text("RAID-ABLE").color(TC_DANGER).decorate(TextDecoration.BOLD));
+
+        Bukkit.broadcast(component);
     }
 
     public static void printPlayerJoinedFaction(PlayerFaction faction, Player player) {
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "joined" + LAYER_1 + " the faction");
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("joined").color(TC_SUCCESS)
+                        .appendSpace().append(Component.text("the faction").color(TC_LAYER1)));
+
+        faction.sendMessage(component);
     }
 
     public static void printPlayerLeftFaction(PlayerFaction faction, Player player) {
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "left" + LAYER_1 + " the faction");
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                .appendSpace().append(Component.text("left").color(TC_ERROR)
+                        .appendSpace().append(Component.text("the faction").color(TC_LAYER1)));
+
+        faction.sendMessage(component);
+    }
+
+    public static void printPlayerKickedFromFaction(PlayerFaction faction, Player player, String username) {
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                .appendSpace().append(Component.text("kicked").color(TC_ERROR)
+                .appendSpace().append(Component.text(username).color(TC_LAYER1))
+                .appendSpace().append(Component.text("from the faction").color(TC_LAYER1)));
+
+        faction.sendMessage(component);
     }
 
     public static void printDepositReceived(Player player, double amount) {
-        player.sendMessage(ChatColor.DARK_GREEN + "$" + String.format("%.2f", amount) + LAYER_1 + " has been " + SUCCESS + "deposited" + LAYER_1 + " to your personal balance");
+        Component component = Component.text("$" + String.format("%.2f", amount)).color(NamedTextColor.DARK_GREEN)
+                        .appendSpace().append(Component.text("has been").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("deposited").color(TC_SUCCESS))
+                        .appendSpace().append(Component.text("to your personal balance").color(TC_LAYER1));
+
+        player.sendMessage(component);
     }
 
     public static void printWithdrawReceived(Player player, double amount) {
-        player.sendMessage(ChatColor.DARK_GREEN + "$" + String.format("%.2f", amount) + LAYER_1 + " has been " + ERROR + "withdrawn" + LAYER_1 + " from your personal balance");
+        Component component = Component.text("$" + String.format("%.2f", amount)).color(NamedTextColor.DARK_GREEN)
+                .appendSpace().append(Component.text("has been").color(TC_LAYER1))
+                .appendSpace().append(Component.text("withdrawn").color(TC_ERROR))
+                .appendSpace().append(Component.text("from your personal balance").color(TC_LAYER1));
+
+        player.sendMessage(component);
     }
 
     public static void printFactionMemberOnline(PlayerFaction faction, String username) {
-        faction.sendMessage(ChatColor.YELLOW + "Member " + SUCCESS + "Online" + LAYER_1 + ": " + P_NAME + username);
+        Component component = Component.text("Member").color(TC_LAYER1)
+                        .appendSpace().append(Component.text("Online").color(TC_SUCCESS))
+                        .append(Component.text(":").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(username).color(TC_NAME));
+
+        faction.sendMessage(component);
     }
 
     public static void printFactionMemberOffline(PlayerFaction faction, String username) {
-        faction.sendMessage(ChatColor.YELLOW + "Member " + ERROR + "Offline" + LAYER_1 + ": " + P_NAME + username);
+        Component component = Component.text("Member").color(TC_LAYER1)
+                .appendSpace().append(Component.text("Offline").color(TC_ERROR))
+                .append(Component.text(":").color(TC_LAYER1))
+                .appendSpace().append(Component.text(username).color(TC_NAME));
+
+        faction.sendMessage(component);
     }
 
     public static void printCombatTag(Player player, long duration) {
-        player.sendMessage(ERROR + "Combat Tag: " + INFO + Time.convertToHHMMSS(duration));
+        String convertedTime = Time.convertToHHMMSS(duration);
+        Component component = Component.text("Combat Tag").color(TC_ERROR)
+                        .append(Component.text(":").color(NamedTextColor.WHITE))
+                        .appendSpace().append(Component.text(convertedTime).color(TC_INFO));
+
+        player.sendMessage(component);
     }
 
     public static void printTimerCancelled(Player player, String timerName, String reason) {
-        player.sendMessage(ERROR + "Your " + timerName + " timer was cancelled because you " + reason);
+        Component component = Component.text("Your").color(TC_ERROR)
+                        .appendSpace().append(Component.text(timerName).color(TC_ERROR))
+                        .appendSpace().append(Component.text("timer was cancelled because you").color(TC_ERROR))
+                        .appendSpace().append(Component.text(reason).color(TC_ERROR));
+
+        player.sendMessage(component);
     }
 
     public static void printLockedTimer(Player player, String itemName, long duration) {
-        final String asDecimal = Time.convertToDecimal(duration);
-        player.sendMessage(ERROR + "Your " + itemName + " are locked for " + ERROR + "" + ChatColor.BOLD + asDecimal + ERROR + "s");
+        String asDecimal = Time.convertToDecimal(duration);
+        Component component = Component.text("Your").color(TC_ERROR)
+                        .appendSpace().append(Component.text(itemName)).color(TC_ERROR)
+                        .appendSpace().append(Component.text("are locked for").color(TC_ERROR))
+                        .appendSpace().append(Component.text(asDecimal).color(TC_ERROR).decorate(TextDecoration.BOLD))
+                        .append(Component.text("s").decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
+
+        player.sendMessage(component);
     }
 
     public static void printRallyUpdate(Player player, PlayerFaction playerFaction) {
-        final int x = player.getLocation().getBlockX();
-        final int y = player.getLocation().getBlockY();
-        final int z = player.getLocation().getBlockZ();
-        final String env = StringUtils.capitalize(player.getWorld().getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " "));
+        int x = player.getLocation().getBlockX();
+        int y = player.getLocation().getBlockY();
+        int z = player.getLocation().getBlockZ();
+        String env = (player.getLocation().getWorld().getEnvironment().equals(World.Environment.NORMAL)
+                ? "Overworld"
+                : StringUtils.capitalize(player.getWorld().getEnvironment().name().toLowerCase(Locale.ROOT).replaceAll("_", " ")));
 
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_2 + " updated your faction rally to " + INFO + x + " " + y + " " + z + " " + env);
+        String position = x + " " + y + " " + z + " " + env;
+
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("updated your faction rally to").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(position).color(TC_INFO));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printPlayerInvite(Player player, PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "invited " + P_NAME + username + LAYER_1 + " to the faction");
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("invited").color(TC_SUCCESS))
+                        .appendSpace().append(Component.text(username).color(TC_NAME))
+                        .appendSpace().append(Component.text("to the faction").color(TC_LAYER1));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printNowAtMaxDTR(PlayerFaction playerFaction) {
-        playerFaction.sendMessage(SUCCESS + "Your faction is now at max DTR");
+        playerFaction.sendMessage(Component.text("Your faction is now at max DTR").color(TC_SUCCESS));
     }
 
     public static void printCanNotJoinWhileRaidable(PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join until your faction is unraidable");
+        Component component = Component.text(username).color(TC_NAME)
+                        .appendSpace().append(Component.text("will not be able to join until your faction is un-raidable").color(TC_ERROR));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printCanNotJoinWhileFrozen(PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join until your faction power is thawed");
+        Component component = Component.text(username).color(TC_NAME)
+                .appendSpace().append(Component.text("will not be able to join until your faction power is thawed").color(TC_ERROR));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printCanNotJoinFulLFaction(PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join unless a member leaves or is kicked");
+        Component component = Component.text(username).color(TC_NAME)
+                .appendSpace().append(Component.text("will not be able to join until your faction unless a member leaves or is kicked").color(TC_ERROR));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printReinviteWillBeConsumed(PlayerFaction playerFaction, String username) {
         if (playerFaction.getReinvites() > 0) {
-            playerFaction.sendMessage(P_NAME + username + ERROR + " has left the faction recently and will consume a re-invite upon joining again");
+            Component component = Component.text(username).color(TC_NAME)
+                            .appendSpace().append(Component.text("has left the faction recently and will consume a re-invite upon joining again").color(TC_ERROR));
+
+            playerFaction.sendMessage(component);
             return;
         }
 
-        playerFaction.sendMessage(P_NAME + username + ERROR + " will not be able to join the faction until you obtain more re-invites");
+        Component component = Component.text(username).color(TC_NAME)
+                        .appendSpace().append(Component.text("will not be able to join the faction until you obtain more re-invites").color(TC_ERROR));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printPlayerUninvite(Player player, PlayerFaction playerFaction, String username) {
-        playerFaction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "uninvited " + P_NAME + username + LAYER_1 + " from the faction");
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("uninvited").color(TC_ERROR))
+                        .appendSpace().append(Component.text(username).color(TC_NAME))
+                        .appendSpace().append(Component.text("from the faction").color(TC_LAYER1));
+
+        playerFaction.sendMessage(component);
     }
 
     public static void printChatChannelChange(Player player, PlayerFaction.ChatChannel channel) {
-        player.sendMessage(LAYER_1 + "You are now speaking in " + channel.getDisplayName());
+        Component component = Component.text("You are now speaking in").color(TC_LAYER1)
+                        .appendSpace().append(channel.getDisplayName());
+
+        player.sendMessage(component);
     }
 
     public static void printCanNotFightInClaim(Player player, String claimName) {
-        player.sendMessage(ERROR + "You can not attack players in " + claimName + ERROR + "'s claims");
+        Component component = Component.text("You can not attack players inside").color(TC_LAYER1)
+                        .appendSpace().append(Component.text(claimName).color(TC_ERROR))
+                        .append(Component.text("'s claims").color(TC_LAYER1));
+
+        player.sendMessage(component);
     }
 
     public static void printCanNotAttackFactionMembers(Player player) {
-        player.sendMessage(ERROR + "PvP is disabled between " + P_NAME + "Faction Members");
+        Component component = Component.text("You can not attack").color(TC_ERROR)
+                        .appendSpace().append(Component.text("Faction Members").color(NamedTextColor.DARK_GREEN));
+
+        player.sendMessage(component);
     }
 
-    public static void printPlayerKickedFromFaction(PlayerFaction faction, Player player, String username) {
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "kicked " + P_NAME + username + LAYER_1 + " from the faction");
+    public static void printAttackingAllyMember(Player player) {
+        Component component = Component.text("You are attacking a").color(TC_ERROR)
+                .appendSpace().append(Component.text("Faction Ally").color(NamedTextColor.BLUE));
+
+        player.sendMessage(component);
     }
 
     public static void printMemberDeath(PlayerFaction faction, String memberName, double deducted) {
-        faction.sendMessage(ChatColor.DARK_RED + "Member Death" + P_NAME + ": " + memberName);
-        faction.sendMessage(ChatColor.DARK_RED + "DTR Loss" + P_NAME + ": -" + deducted);
+        Component component = Component.text("Member Death").color(TC_DANGER)
+                        .append(Component.text(":").color(TC_NAME))
+                        .appendSpace().append(Component.text(memberName).color(TC_NAME))
+                        .appendNewline().append(Component.text("DTR Loss"))
+                        .append(Component.text(":").color(TC_NAME))
+                        .appendSpace().append(Component.text("-" + deducted).color(TC_NAME));
+
+        faction.sendMessage(component);
     }
 
     public static void printFrozenPower(PlayerFaction faction, long duration) {
-        final String remaining = Time.convertToRemaining(duration);
-        faction.sendMessage(ERROR + "Your faction power has been frozen for " + INFO + remaining);
+        String remaining = Time.convertToRemaining(duration);
+        Component component = Component.text("Your faction power has been frozen for").color(TC_ERROR)
+                        .appendSpace().append(Component.text(remaining).color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
     public static void printDTRUpdate(PlayerFaction faction, double newDtr) {
-        faction.sendMessage(LAYER_1 + "Your faction DTR has been " + LAYER_2 + "updated" + LAYER_1 + " to " + INFO + String.format("%.2f", newDtr));
+        Component component = Component.text("Your faction DTR has been").color(TC_LAYER1)
+                        .appendSpace().append(Component.text("updated").color(TC_LAYER2))
+                        .appendSpace().append(Component.text("to").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(String.format("%.2f", newDtr)).color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
     public static void printReinviteUpdate(PlayerFaction faction, int amount) {
-        faction.sendMessage(LAYER_1 + "Your faction reinvites has been " + LAYER_2 + "updated" + LAYER_1 + " to " + INFO + amount);
+        Component component = Component.text("Your faction re-invites has been").color(TC_LAYER1)
+                .appendSpace().append(Component.text("updated").color(TC_LAYER2))
+                .appendSpace().append(Component.text("to").color(TC_LAYER1))
+                .appendSpace().append(Component.text(amount).color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
     public static void printAnnouncement(PlayerFaction faction, String announcement) {
-        faction.sendMessage(LAYER_2 + "Faction Announcement" + P_NAME + ": " + announcement);
+        Component component = Component.text("Faction Announcement").color(TC_LAYER2)
+                        .append(Component.text(":").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(announcement).color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
     public static void printPromotion(Player initiater, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
-        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + SUCCESS + "promoted " + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
+        Component component = Component.text(initiater.getName()).color(TC_LAYER1)
+                        .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("promoted").color(TC_SUCCESS))
+                        .appendSpace().append(Component.text(updatedName).color(TC_NAME))
+                        .appendSpace().append(Component.text("to").color(TC_LAYER1))
+                        .appendSpace().append(rank.getDisplayName().color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
-    public static void printDemotion(Player initiater, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
-        faction.sendMessage(P_NAME + initiater.getName() + LAYER_1 + " has " + ERROR + "demoted " + P_NAME + updatedName + LAYER_1 + " to " + INFO + rank.getDisplayName());
+    public static void printDemotion(Player initiator, String updatedName, PlayerFaction faction, PlayerFaction.Rank rank) {
+        Component component = Component.text(initiator.getName()).color(TC_LAYER1)
+                .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                .appendSpace().append(Component.text("demoted").color(TC_ERROR))
+                .appendSpace().append(Component.text(updatedName).color(TC_NAME))
+                .appendSpace().append(Component.text("to").color(TC_LAYER1))
+                .appendSpace().append(rank.getDisplayName().color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
     public static void printHomeUpdate(PlayerFaction faction, Player player, PLocatable location) {
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "updated" + LAYER_1 + " your faction home to " + INFO + Math.round(location.getX()) + ", " + Math.round(location.getY()) + ", " + Math.round(location.getZ()));
+        String position = Math.round(location.getX()) + ", " + Math.round(location.getY()) + ", " + Math.round(location.getZ());
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has updated your faction home to").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(position).color(TC_INFO));
+
+        faction.sendMessage(component);
     }
 
     public static void printHomeUnset(PlayerFaction faction, Player player) {
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "unset" + LAYER_1 + " your faction home");
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has unset your faction home").color(TC_LAYER1));
+
+        faction.sendMessage(component);
     }
 
     public static void printReinviteConsumed(PlayerFaction faction, int newReinvites) {
-        faction.sendMessage(LAYER_1 + "Remaining Faction Re-invites: " + (newReinvites <= 2 ? ERROR : INFO) + newReinvites);
+        TextColor valueColor = (newReinvites <= 2 ? TC_ERROR : TC_INFO);
+        Component component = Component.text("Remaining Faction Re-Invites:").color(TC_LAYER1)
+                        .appendSpace().append(Component.text(newReinvites).color(valueColor));
+
+        faction.sendMessage(component);
     }
 
     public static void printBalance(Player player, double amount) {
-        final String formatted = String.format("%.2f", amount);
-        player.sendMessage(LAYER_2 + "Your balance" + LAYER_1 + ": " + INFO + "$" + formatted);
+        String formatted = "$" + String.format("%.2f", amount);
+        Component component = Component.text("Your balance").color(TC_LAYER2)
+                        .append(Component.text(":").color(TC_LAYER1))
+                                .appendSpace().append(Component.text(formatted).color(NamedTextColor.DARK_GREEN));
+
+        player.sendMessage(component);
     }
 
     public static void printFactionWithdrawn(PlayerFaction faction, Player player, double amount) {
-        final String formatted = String.format("%.2f", amount);
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + ERROR + "withdrawn" + INFO + " $" + formatted + LAYER_1 + " from the faction balance");
+        String formatted = "$" + String.format("%.2f", amount);
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("withdrawn").color(TC_ERROR))
+                        .appendSpace().append(Component.text(formatted).color(NamedTextColor.DARK_GREEN))
+                        .appendSpace().append(Component.text("from the faction balance").color(TC_LAYER1));
+
+        faction.sendMessage(component);
     }
 
     public static void printFactionDeposit(PlayerFaction faction, Player player, double amount) {
-        final String formatted = String.format("%.2f", amount);
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + SUCCESS + "deposited" + INFO + " $" + formatted + LAYER_1 + " in to the faction balance");
+        String formatted = "$" + String.format("%.2f", amount);
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                .appendSpace().append(Component.text("has").color(TC_LAYER1))
+                .appendSpace().append(Component.text("deposited").color(TC_SUCCESS))
+                .appendSpace().append(Component.text(formatted).color(NamedTextColor.DARK_GREEN))
+                .appendSpace().append(Component.text("to the faction balance").color(TC_LAYER1));
+
+        faction.sendMessage(component);
     }
 
     public static void printFactionBalanceSet(PlayerFaction faction, Player player, double amount) {
-        final String formatted = String.format("%.2f", amount);
-        faction.sendMessage(P_NAME + player.getName() + LAYER_1 + " has " + LAYER_2 + "updated" + LAYER_1 + " your faction balance to " + INFO + " $" + formatted);
-    }
+        String formatted = "$" + String.format("%.2f", amount);
+        Component component = Component.text(player.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("has updated your faction balance to").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(formatted).color(NamedTextColor.DARK_GREEN));
 
-    public static void printEotwMessage(String message) {
-        Bukkit.broadcastMessage(LAYER_2 + "[" + LAYER_1 + "EOTW" + LAYER_2 + "] " + ChatColor.DARK_AQUA + message);
+        faction.sendMessage(component);
     }
 
     public static void printClassActivated(Player player, IClass playerClass) {
-        player.sendMessage(LAYER_2 + "Class Activated" + LAYER_1 + ": " + INFO + playerClass.getName());
-        player.sendMessage(LAYER_1 + playerClass.getDescription());
+        Component component = Component.text("Class Activated").color(TC_LAYER2)
+                        .append(Component.text(":").color(TC_LAYER1))
+                                .appendSpace().append(Component.text(playerClass.getName()).color(TC_INFO))
+                        .appendNewline().append(Component.text(playerClass.getDescription()).color(TC_LAYER1));
+
+        player.sendMessage(component);
     }
 
     public static void printClassDeactivated(Player player, IClass playerClass) {
-        player.sendMessage(LAYER_2 + "Class Deactivated" + LAYER_1 + ": " + INFO + playerClass.getName());
+        Component component = Component.text("Class Deactivated").color(TC_LAYER2)
+                        .append(Component.text(":").color(TC_LAYER1))
+                                .appendSpace().append(Component.text(playerClass.getName()).color(TC_NAME));
+
+        player.sendMessage(component);
     }
 
     public static void printRogueUncloak(Player player, String reason) {
-        player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Uncloaked!" + " " + ChatColor.YELLOW + "You are now visible because you " + reason);
+        Component component = Component.text("Uncloaked!").color(TC_DANGER).decorate(TextDecoration.BOLD)
+                        .appendSpace().append(Component.text("You are now visible because you").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(reason).color(TC_LAYER1));
+
+        player.sendMessage(component);
     }
 
     public static void printSubclaimAdded(Subclaim subclaim, String addingUsername, String addedUsername) {
-        subclaim.sendMessage(P_NAME + addingUsername + LAYER_1 + " has " + SUCCESS + "added " + P_NAME + addedUsername + LAYER_1 + " to " + INFO + subclaim.getName());
+        Component component = Component.text(addingUsername).color(TC_NAME)
+                        .appendSpace().append(Component.text("has added").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(addedUsername).color(TC_NAME))
+                        .appendSpace().append(Component.text("to").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(subclaim.getName()).color(TC_LAYER2));
+
+        subclaim.sendMessage(component);
     }
 
     public static void printSubclaimRemoved(Subclaim subclaim, String removingUsername, String removedUsername) {
-        subclaim.sendMessage(P_NAME + removingUsername + LAYER_1 + " has " + ERROR + "removed " + P_NAME + removedUsername + LAYER_1 + " from " + INFO + subclaim.getName());
+        Component component = Component.text(removingUsername).color(TC_NAME)
+                .appendSpace().append(Component.text("has removed").color(TC_LAYER1))
+                .appendSpace().append(Component.text(removedUsername).color(TC_NAME))
+                .appendSpace().append(Component.text("from").color(TC_LAYER1))
+                .appendSpace().append(Component.text(subclaim.getName()).color(TC_LAYER2));
+
+        subclaim.sendMessage(component);
     }
 
     public static void printSubclaimCreated(PlayerFaction faction, String creatorUsername, String subclaimName) {
-        faction.sendMessage(P_NAME + creatorUsername + LAYER_1 + " has " + SUCCESS + "created" + LAYER_1 + " a new subclaim: " + INFO + subclaimName);
+        Component component = Component.text(creatorUsername).color(TC_NAME)
+                        .appendSpace().append(Component.text("has created a new subclaim:").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(subclaimName).color(TC_NAME));
+
+        faction.sendMessage(component);
     }
 
     public static void printSubclaimDeleted(Subclaim subclaim, String deletingUsername) {
-        subclaim.sendMessage(P_NAME + deletingUsername + LAYER_1 + " has " + ERROR + "deleted " + INFO + subclaim.getName());
+        Component component = Component.text(deletingUsername).color(TC_NAME)
+                .appendSpace().append(Component.text("has deleted a subclaim:").color(TC_LAYER1))
+                .appendSpace().append(Component.text(subclaim.getName()).color(TC_NAME));
+
+        subclaim.sendMessage(component);
     }
 
-    public static String getPublicFormat(PlayerFaction faction, String displayName, long kills, String message, Player receiver) {
+    public static Component getPublicFormat(PlayerFaction faction, String displayName, long kills, String message, Player receiver) {
         if (faction == null) {
-            return displayName + ChatColor.RESET + ": " + message;
+            return Component.text("[" + kills + "]").color(TC_INFO)
+                    .append(LegacyComponentSerializer.legacySection().deserialize(displayName)
+                    .append(Component.text(":").color(NamedTextColor.WHITE))
+                    .appendSpace().append(Component.text(message)).color(NamedTextColor.WHITE));
         }
 
-        if (faction.getMember(receiver.getUniqueId()) != null) {
-            return ChatColor.DARK_GREEN + "[" + faction.getName() + "]" + ChatColor.BLUE + "[" + kills + "]" + ChatColor.RESET + displayName + ChatColor.RESET + ": " + message;
-        }
+        // TODO: Add ally support here
+        NamedTextColor factionTextColor = (faction.isMember(receiver.getUniqueId()) ? NamedTextColor.DARK_GREEN : NamedTextColor.RED);
 
-        return ChatColor.RED + "[" + faction.getName() + "]" + ChatColor.BLUE + "[" + kills + "]" + ChatColor.RESET + displayName + ChatColor.RESET + ": " + message;
+        return Component.text("[" + faction.getName() + "]").color(factionTextColor)
+                .append(Component.text("[" + kills + "]").color(TC_INFO))
+                .append(LegacyComponentSerializer.legacySection().deserialize(displayName))
+                .append(Component.text(":").color(NamedTextColor.WHITE))
+                .appendSpace().append(Component.text(message).color(NamedTextColor.WHITE));
     }
 
-    public static String getFactionFormat(String displayName, String message) {
-        return ChatColor.DARK_GREEN + "(" + ChatColor.GOLD + "FC" + ChatColor.DARK_GREEN + ") " + ChatColor.RESET + displayName + ChatColor.DARK_GREEN + ": " + message;
+    public static Component getFactionFormat(String displayName, String message) {
+        return Component.text("[FC]").color(NamedTextColor.DARK_GREEN)
+                .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(displayName))
+                .append(Component.text(":").color(NamedTextColor.DARK_GREEN))
+                .appendSpace().append(Component.text(message).color(NamedTextColor.DARK_GREEN));
+    }
+
+    public static Component getAllyFormat(String displayName, String message) {
+        return Component.text("[ALLY]").color(NamedTextColor.BLUE)
+                .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(displayName))
+                .append(Component.text(":").color(NamedTextColor.BLUE))
+                .appendSpace().append(Component.text(message).color(NamedTextColor.BLUE));
     }
 
     public static void printFocusedByFaction(PlayerFaction faction, Player player) {
-        player.sendMessage(LAYER_1 + "You are being " + ERROR + "focused" + LAYER_1 + " by " + INFO + faction.getName());
+        Component component = Component.text("You are being").color(TC_LAYER1)
+                        .appendSpace().append(Component.text("focused").color(TC_ERROR))
+                        .appendSpace().append(Component.text("by").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(faction.getName()).color(TC_INFO));
+
+        player.sendMessage(component);
     }
 
     public static void printFocusing(PlayerFaction faction, Player initiated, Player player) {
-        faction.sendMessage(P_NAME + initiated.getName() + LAYER_1 + " wants to focus " + ChatColor.LIGHT_PURPLE + player.getName());
+        Component component = Component.text(initiated.getName()).color(TC_NAME)
+                        .appendSpace().append(Component.text("wants to focus").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(player.getName()).color(NamedTextColor.LIGHT_PURPLE));
+
+        faction.sendMessage(component);
     }
 
     public static void printNoLongerFocused(PlayerFaction faction, Player player) {
-        player.sendMessage(LAYER_1 + "You are no longer being " + ERROR + "focused" + LAYER_1 + " by " + INFO + faction.getName());
+        Component component = Component.text("You are no longer being focused by").color(TC_LAYER1)
+                        .appendSpace().append(Component.text(faction.getName()).color(TC_NAME));
+
+        player.sendMessage(component);
     }
 
     public static void printBattleHornConsumed(Player hornUser, Player receiver, String hornName) {
-        receiver.sendMessage(ChatColor.DARK_GREEN + hornUser.getName() + LAYER_1 + " has sounded the " + hornName + LAYER_1 + " horn!");
+        Component component = Component.text(hornUser.getName()).color(NamedTextColor.DARK_GREEN)
+                        .appendSpace().append(Component.text("has sounded the").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(hornName).color(TC_INFO))
+                        .appendSpace().append(Component.text("horn!").color(TC_LAYER1));
+
+        receiver.sendMessage(component);
     }
 
     public static void printBattlepassProgress(Player player, BPObjective objective, int newValue) {
-        player.sendMessage(ChatColor.RESET + " ");
+        Component component = Component.text("Battlepass Progress").color(TC_LAYER2).decorate(TextDecoration.BOLD)
+                        .append(Component.text(":").color(TC_LAYER1).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(objective.getIcon().getDisplayName()).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendNewline().append(Component.text("Current Status").color(TC_INFO).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .append(Component.text(":").color(NamedTextColor.WHITE).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendSpace().append(Component.text(newValue + "/" + objective.getAmountRequirement()).color(NamedTextColor.WHITE).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
 
-        player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Battlepass Progress" + ChatColor.RESET + ": "
-                + objective.getIcon().getDisplayName());
-
-        player.sendMessage(ChatColor.YELLOW + "Current Status" + ChatColor.RESET + ": "
-                + newValue + ChatColor.YELLOW + "/" + ChatColor.RESET + objective.getAmountRequirement());
-
-        player.sendMessage(ChatColor.RESET + " ");
+        player.sendMessage(component);
     }
 
     public static void printBattlepassComplete(Player player, BPObjective objective, double expMultiplier) {
-        final int multipliedExp = (int)Math.round(objective.getBaseExp() * expMultiplier);
-        final int diff = (multipliedExp - objective.getBaseExp());
+        int multipliedExp = (int)Math.round(objective.getBaseExp() * expMultiplier);
+        int diff = (multipliedExp - objective.getBaseExp());
+        Component component = Component.text("Battlepass Completion").color(TC_LAYER2).decorate(TextDecoration.BOLD)
+                        .append(Component.text(":").color(TC_LAYER1).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(objective.getIcon().getDisplayName()).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendNewline().append(Component.text("Reward").color(TC_INFO).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .append(Component.text(":").color(NamedTextColor.WHITE).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendSpace().append(Component.text(objective.getBaseExp() + " EXP").decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
 
-        player.sendMessage(ChatColor.RESET + " ");
-        player.sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Battlepass Completion" + ChatColor.RESET + ": "
-                + objective.getIcon().getDisplayName());
+        if (expMultiplier > 0.0) {
+            component = component.append(Component.text("(+" + diff + " Bonus)").color(NamedTextColor.GRAY).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
+        }
 
-        player.sendMessage(XPService.XP_COLOR_ACCENT_INFO + "Reward" + ChatColor.RESET + ": "
-                + objective.getBaseExp() + " EXP" + (expMultiplier > 0.0 ? ChatColor.GRAY + " (+" + diff + " Bonus)" : ""));
+        player.sendMessage(component);
+    }
 
-        player.sendMessage(ChatColor.RESET + " ");
+    public static Component getMythicIdentifier(IMythicItem mythicItem) {
+        final String emblem = StringUtil.getMythicEmblem(mythicItem.getMaterial());
+        return Component.text(emblem + " Mythic").color(TextColor.color(0xaf59ff));
     }
 
     public static void printGhostbladeKill(Player viewer, Player killer) {
-        if (viewer.getUniqueId().equals(killer.getUniqueId())) {
-            viewer.sendMessage(ChatColor.LIGHT_PURPLE + "Ghostblade" + ChatColor.GRAY
-                    + ": You've been granted a " + ChatColor.LIGHT_PURPLE + "Speed Boost" + ChatColor.GRAY + " thanks to your Mythic Item");
+        Component base = Component.text("Ghostblade").color(Ghostblade.GHOSTBLADE_COLOR)
+                .appendSpace().append(Component.text(": You have been granted a").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text("Speed Boost").color(Ghostblade.GHOSTBLADE_COLOR));
 
+        if (viewer.getUniqueId().equals(killer.getUniqueId())) {
+            base = base.appendSpace().append(Component.text("thanks to your Mythic Item").color(TC_MYTHIC_ABILITY_DESC));
+            viewer.sendMessage(base);
             return;
         }
 
-        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "Ghostblade" + ChatColor.GRAY + ": "
-                + "You've been granted a " + ChatColor.LIGHT_PURPLE + "Speed Boost" + ChatColor.GRAY + " thanks to " + ChatColor.GREEN + killer.getName());
+        base = base.appendSpace().append(Component.text("thanks to").color(TC_MYTHIC_ABILITY_DESC)).appendSpace().append(Component.text(killer.getName()).color(Ghostblade.GHOSTBLADE_COLOR));
+        viewer.sendMessage(base);
     }
 
     public static void printGhostbladeRefresh(Player viewer, int seconds) {
-        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "Ghostblade" + ChatColor.GRAY
-                + ": Your Speed has been refreshed by " + seconds + " second" + (seconds > 1 ? "s" : "") + ".");
+        String formatted = seconds + (seconds > 1 ? "s" : "");
+        viewer.sendMessage(Component.text("Ghostblade").color(Ghostblade.GHOSTBLADE_COLOR)
+                .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text("Your speed has been refreshed by " + formatted)).color(TC_MYTHIC_ABILITY_DESC));
     }
 
     public static void printHullbreaker(Player viewer, int seconds) {
-        viewer.sendMessage(ChatColor.GOLD + "Hullbreaker" + ChatColor.GRAY + ": You've been given Resistance for " + seconds + " seconds.");
+        Component component = Component.text("Hullbreaker").color(Hullbreaker.HULLBREAKER_COLOR)
+                        .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                        .appendSpace().append(Component.text("You have been given Resistance for " + seconds + " seconds.")).color(TC_MYTHIC_ABILITY_DESC);
+
+        viewer.sendMessage(component);
     }
 
     public static void printCrimsonFangKill(Player viewer, int seconds) {
-        viewer.sendMessage(ChatColor.BLUE + "Immortality" + ChatColor.GRAY + ": You've been given Regeneration for " + seconds + " seconds.");
+        Component component = Component.text("Crimson Fang").color(CrimsonFang.CRIMSON_FANG_COLOR)
+                        .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                        .appendSpace().append(Component.text("You have been given Regeneration for " + seconds + " seconds."));
+
+        viewer.sendMessage(component);
     }
 
     public static void printNeptunesFuryImpaleVictim(Player viewer, double woundDamagePerTick, int woundSeconds) {
-        viewer.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Impaled!" + ChatColor.YELLOW + " You will bleed "
-                + ChatColor.RED+ woundDamagePerTick + " ♥" + ChatColor.YELLOW + " over the span of " + ChatColor.BLUE + woundSeconds + " seconds" + ChatColor.YELLOW + ".");
+        Component component = Component.text("Serpent's Impaler").color(SerpentsImpaler.SERPENTS_IMPALER_COLOR)
+                        .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                        .appendSpace().append(Component.text("Impaled!").color(NamedTextColor.DARK_RED).decoration(TextDecoration.BOLD, TextDecoration.State.TRUE))
+                        .appendSpace().append(Component.text("You will bleed").color(NamedTextColor.YELLOW))
+                        .appendSpace().append(Component.text(woundDamagePerTick + " ♥").color(NamedTextColor.RED))
+                        .appendSpace().append(Component.text("over the span of").color(NamedTextColor.YELLOW))
+                        .appendSpace().append(Component.text(woundSeconds + " seconds").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printNeptunesFuryImpale(Player viewer, int woundSeconds) {
-        viewer.sendMessage(ChatColor.RED + "Impaled" + ChatColor.GRAY + ": You've inflicted wounds to your enemy that will bleed for " + woundSeconds + " seconds");
+        Component component = Component.text("Serpent's Impaler").color(SerpentsImpaler.SERPENTS_IMPALER_COLOR)
+                        .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                        .appendSpace().append(Component.text("You have inflicted wounds to your enemy that will cause them to bleed for"))
+                        .appendSpace().append(Component.text(woundSeconds + " seconds").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printAdmiralsEmberAblazeVictim(Player viewer, int seconds) {
-        viewer.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Set Ablaze!" + ChatColor.YELLOW + " You will burn for " + ChatColor.RED + seconds + " seconds");
+        Component component = Component.text("Admiral's Ember").color(AdmiralsEmber.ADMIRALS_EMBER_COLOR)
+                        .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                        .appendSpace().append(Component.text("Set Ablaze!").color(NamedTextColor.RED))
+                        .appendSpace().append(Component.text("You will burn for").color(TC_MYTHIC_ABILITY_DESC))
+                        .appendSpace().append(Component.text(seconds + " seconds").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printAdmiralsEmberAblazeAttacker(Player viewer, int seconds) {
-        viewer.sendMessage(ChatColor.RED + "Set The World Ablaze" + ChatColor.GRAY + ": You've ignited all nearby enemies for " + ChatColor.RED + seconds + " seconds");
+        Component component = Component.text("Admiral's Ember").color(AdmiralsEmber.ADMIRALS_EMBER_COLOR)
+                .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text("Set Ablaze!").color(NamedTextColor.RED))
+                .appendSpace().append(Component.text("You have ignited all nearby enemies for").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text(seconds + " seconds").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printAdmiralsEmberOverheatVictim(Player viewer, Player attacker, int seconds) {
-        viewer.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "Overheating!" + ChatColor.YELLOW + " You will burn for " + ChatColor.RED + seconds + " seconds");
+        Component component = Component.text("Admiral's Ember").color(AdmiralsEmber.ADMIRALS_EMBER_COLOR)
+                .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text("Overheating!").color(NamedTextColor.RED))
+                .appendSpace().append(Component.text("You will burn for").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text(seconds + " seconds").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printAdmiralsEmberOverheatAttacker(Player viewer, LivingEntity victim, int seconds) {
-        viewer.sendMessage(ChatColor.GOLD + "Overheat" + ChatColor.GRAY + ": You've ignited " + ChatColor.RED + victim.getName() + ChatColor.GRAY + " for " + ChatColor.RED + seconds + " seconds");
+        Component component = Component.text("Admiral's Ember").color(AdmiralsEmber.ADMIRALS_EMBER_COLOR)
+                .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text("Overheating!").color(NamedTextColor.RED))
+                .appendSpace().append(Component.text("You have ignited").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text(victim.getName()).color(NamedTextColor.RED))
+                .appendSpace().append(Component.text("for").color(TC_MYTHIC_ABILITY_DESC))
+                .appendSpace().append(Component.text(seconds + " seconds").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
-        viewer.spigot().sendMessage(
-                new ComponentBuilder("[Teleport to " + username + "'s Death Location]")
-                        .color(net.md_5.bungee.api.ChatColor.GRAY)
-                        .italic(true)
-                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
-                        .create());
+        Component component = Component.text("[Teleport to " + username + "'s Death Location]")
+                .color(NamedTextColor.GRAY)
+                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)
+                .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
+                .hoverEvent(Component.text("Click to teleport").color(NamedTextColor.BLUE));
+
+        viewer.sendMessage(component);
     }
 
     public static void printStaffCombatLogger(Player viewer, String username, Location location) {
-        viewer.spigot().sendMessage(
-                new ComponentBuilder("[Teleport to " + username + "'s Combat Logger]")
-                        .color(net.md_5.bungee.api.ChatColor.GRAY)
-                        .italic(true)
-                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport").create()))
-                        .create()
-        );
-    }
+        Component component = Component.text("[Teleport to " + username + "'s Combat Logger]")
+                .color(NamedTextColor.GRAY)
+                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)
+                .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
+                .hoverEvent(Component.text("Click to teleport").color(NamedTextColor.BLUE));
 
-    public static List<String> getEnemyNametag(String username, String factionName) {
-        final List<String> res = Lists.newArrayList();
-
-        if (factionName != null) {
-            res.add(ChatColor.GRAY + "[" + ChatColor.RED + factionName + ChatColor.GRAY + "]");
-        }
-
-        res.add(ChatColor.RED + username);
-        return res;
-    }
-
-    public static List<String> getFriendlyNametag(String username, @Nonnull String factionName) {
-        final List<String> res = Lists.newArrayList();
-        res.add(ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + factionName + ChatColor.GRAY + "]");
-        res.add(ChatColor.DARK_GREEN + username);
-        return res;
-    }
-
-    public static List<String> getFocusedNametag(String username, String factionName) {
-        final List<String> res = Lists.newArrayList();
-
-        if (factionName != null) {
-            res.add(ChatColor.GRAY + "[" + ChatColor.LIGHT_PURPLE + factionName + ChatColor.GRAY + "]");
-        }
-
-        res.add(ChatColor.LIGHT_PURPLE + username);
-        return res;
+        viewer.sendMessage(component);
     }
 
     public static void printFactionInfo(Factions plugin, Player player, IFaction faction) {
@@ -464,32 +788,39 @@ public final class FMessage {
         final AccountService acs = (AccountService) plugin.getService(AccountService.class);
         final DeathbanService dbs = (DeathbanService) plugin.getService(DeathbanService.class);
         final boolean access = player.hasPermission(FPermissions.P_FACTIONS_ADMIN);
-        final List<String> message = Lists.newArrayList();
+        Component output = Component.empty();
+        Component comma = Component.text(",").color(TC_LAYER1).appendSpace();
+        Component separator = Component.text(Strings.repeat("-", 10)).color(NamedTextColor.GRAY).decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.TRUE);
 
         if (faction instanceof final ServerFaction serverFaction) {
-            message.add(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + Strings.repeat("-", 10));
-            message.add(serverFaction.getDisplayName() + ChatColor.GRAY + " [" + serverFaction.getFlag().getDisplayName() + ChatColor.GRAY + "]");
+            output = output.append(separator);
+            output = output.appendNewline().append(LegacyComponentSerializer.legacySection().deserialize(serverFaction.getDisplayName()))
+                    .appendSpace().append(Component.text("[").color(NamedTextColor.GRAY)
+                    .append(LegacyComponentSerializer.legacySection().deserialize(serverFaction.getFlag().getDisplayName()))
+                    .append(Component.text("]").color(NamedTextColor.GRAY)));
 
             if (serverFaction.getHomeLocation() != null) {
-                message.add(ChatColor.YELLOW + "Located At: " + ChatColor.BLUE +
-                        (int)(Math.round(serverFaction.getHomeLocation().getX())) + LAYER_1 + ", " +
-                        (int)(Math.round(serverFaction.getHomeLocation().getY())) + LAYER_1 + ", " +
-                        (int)(Math.round(serverFaction.getHomeLocation().getZ())) + LAYER_1 + ", " +
-                        gg.hcfactions.libs.base.util.Strings.capitalize(Objects.requireNonNull(serverFaction
-                        .getHomeLocation()
-                        .getBukkitLocation()
-                        .getWorld()).getEnvironment().name().toLowerCase().replace("_", " ")));
+                final PLocatable home = serverFaction.getHomeLocation();
+
+                output = output.appendNewline().append(Component.text("Located At:").color(TC_LAYER1))
+                        .appendSpace().append(Component.text((int)Math.round(home.getX()))).color(TC_INFO)
+                        .appendSpace().append(comma)
+                        .append(Component.text((int)Math.round(home.getY())).color(TC_INFO))
+                        .appendSpace().append(comma)
+                        .append(Component.text((int)Math.round(home.getZ())).color(TC_INFO))
+                        .appendSpace().append(comma)
+                        .append(Component.text(StringUtils.capitalize(home.getBukkitLocation().getWorld().getEnvironment().name().toLowerCase().replaceAll("_", " "))).color(TC_INFO));
             }
 
-            message.add(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + Strings.repeat("-", 10));
-            message.forEach(player::sendMessage);
+            output = output.appendNewline().append(separator);
+            player.sendMessage(output);
             return;
         }
 
         final PlayerFaction playerFaction = (PlayerFaction)faction;
         final String unformattedDTR = String.format("%.2f", playerFaction.getDtr()) + "/" + String.format("%.2f", playerFaction.getMaxDtr());
         String homeLocation = "Unset";
-        String DTR;
+        Component DTR;
 
         if (playerFaction.getHomeLocation() != null) {
             final int x = (int)Math.round(playerFaction.getHomeLocation().getX());
@@ -499,51 +830,67 @@ public final class FMessage {
         }
 
         if (playerFaction.getDtr() >= playerFaction.getMaxDtr()) {
-            DTR = ChatColor.GREEN + unformattedDTR + " ➡";
+            DTR = Component.text(unformattedDTR + " ➡").color(NamedTextColor.GREEN);
         } else if (!playerFaction.isRaidable() && playerFaction.getDtr() < playerFaction.getMaxDtr() && !playerFaction.isFrozen()) {
-            DTR = ChatColor.YELLOW + unformattedDTR + " ⬆";
+            DTR = Component.text(unformattedDTR + " ⬆").color(NamedTextColor.YELLOW);
         } else if (playerFaction.isRaidable() && playerFaction.isFrozen()) {
-            DTR = ChatColor.RED + unformattedDTR + " ⚠";
+            DTR = Component.text(unformattedDTR + " ⚠").color(NamedTextColor.RED);
         } else if (playerFaction.isRaidable() && !playerFaction.isFrozen()) {
-            DTR = ChatColor.RED + unformattedDTR + " ⬆";
+            DTR = Component.text(unformattedDTR + " ⬆").color(NamedTextColor.RED);
         } else if (playerFaction.isFrozen()) {
-            DTR = ChatColor.YELLOW + unformattedDTR + " ➡";
+            DTR = Component.text(unformattedDTR + " ➡").color(NamedTextColor.YELLOW);
         } else {
-            DTR = ChatColor.YELLOW + unformattedDTR;
+            DTR = Component.text(unformattedDTR).color(NamedTextColor.YELLOW);
         }
 
-        message.add(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + Strings.repeat("-", 10));
-        message.add(ChatColor.BLUE + faction.getName() + " "
-                + ChatColor.GRAY + "[" + ChatColor.GREEN + playerFaction.getOnlineMembers().size() + ChatColor.GRAY + "/" + playerFaction.getMembers().size() + "]"
-                + ChatColor.YELLOW + " | Home: " + ChatColor.RESET + homeLocation);
+        output = output.append(separator);
+        output = output.appendNewline().append(Component.text(faction.getName()).color(TC_INFO))
+                        .appendSpace().append(Component.text("[").color(NamedTextColor.GRAY))
+                        .append(Component.text(playerFaction.getOnlineMembers().size()).color(NamedTextColor.GREEN))
+                        .append(Component.text("/").color(NamedTextColor.GRAY))
+                        .append(Component.text(playerFaction.getMembers().size()).color(NamedTextColor.GRAY))
+                        .append(Component.text("]").color(NamedTextColor.GRAY))
+                        .appendSpace().append(Component.text("|").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("Home:").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(homeLocation).color(TC_INFO));
 
         if (playerFaction.getAnnouncement() != null && (playerFaction.isMember(player.getUniqueId()) || access)) {
-            message.add(ChatColor.YELLOW + "Announcement: " + ChatColor.BLUE + playerFaction.getAnnouncement());
+            output = output.appendNewline().append(Component.text("Announcement:").color(TC_LAYER1)).appendSpace().append(Component.text(playerFaction.getAnnouncement()).color(TC_INFO));
         }
 
         if (playerFaction.getRallyLocation() != null && (playerFaction.isMember(player.getUniqueId()) || access)) {
-            message.add(ChatColor.YELLOW + "Rally: " + ChatColor.BLUE +
-                    (int)(Math.round(playerFaction.getRallyLocation().getX())) + ", " +
-                    (int)(Math.round(playerFaction.getRallyLocation().getY())) + ", " +
-                    (int)(Math.round(playerFaction.getRallyLocation().getZ())) + ", " +
-                    gg.hcfactions.libs.base.util.Strings.capitalize(Objects.requireNonNull(playerFaction
-                    .getRallyLocation()
-                    .getBukkitLocation()
-                    .getWorld()).getEnvironment().name().toLowerCase().replace("_", " ")));
+            final PLocatable rally = playerFaction.getRallyLocation();
+
+            output = output.appendNewline().append(Component.text("Rally:").color(TC_LAYER1))
+                    .appendSpace().append(Component.text((int)Math.round(rally.getX()))).color(TC_INFO)
+                    .append(comma)
+                    .append(Component.text((int)Math.round(rally.getY())).color(TC_INFO))
+                    .append(comma)
+                    .append(Component.text((int)Math.round(rally.getZ())).color(TC_INFO))
+                    .append(comma)
+                    .append(Component.text(StringUtils.capitalize(rally.getBukkitLocation().getWorld().getEnvironment().name().toLowerCase().replaceAll("_", " "))).color(TC_INFO));
         }
 
-        message.add(ChatColor.YELLOW + "Balance: " + ChatColor.BLUE + "$" + String.format("%.2f", playerFaction.getBalance()));
-        message.add(ChatColor.YELLOW + "Tokens: " + ChatColor.BLUE + playerFaction.getTokens());
-        message.add(ChatColor.YELLOW + "Deaths until Raid-able: " + DTR);
+        output = output.appendNewline().append(Component.text("Balance:").color(TC_LAYER1))
+                        .appendSpace().append(Component.text("$" + String.format("%.2f", playerFaction.getBalance())).color(TC_INFO))
+                        .appendNewline().append(Component.text("Tokens:").color(TC_LAYER1))
+                        .appendSpace().append(Component.text(playerFaction.getTokens()).color(TC_INFO))
+                        .appendNewline().append(Component.text("Deaths until Raid-able:").color(TC_LAYER1))
+                        .appendSpace().append(DTR);
 
         if (playerFaction.isFrozen()) {
             final FTimer timer = playerFaction.getTimer(ETimerType.FREEZE);
-            message.add(ChatColor.YELLOW + "Frozen: " + ChatColor.BLUE + Time.convertToRemaining(timer.getRemaining()));
+
+            output = output.appendNewline().append(Component.text("Frozen:").color(TC_LAYER1))
+                            .appendSpace().append(Component.text(Time.convertToRemaining(timer.getRemaining())).color(TC_INFO));
         }
 
         if (plugin.getEventManager().isMajorEventActive()) {
-            message.add(ChatColor.YELLOW + "Re-invites: " + ChatColor.BLUE + playerFaction.getReinvites());
+            output = output.appendNewline().append(Component.text("Re-invites:").color(TC_LAYER1))
+                    .appendSpace().append(Component.text(playerFaction.getReinvites()).color(TC_INFO));
         }
+
+        final Component preQueryComponent = output;
 
         new Scheduler(plugin).async(() -> {
             final Map<PlayerFaction.Rank, List<String>> namesByRank = Maps.newHashMap();
@@ -569,7 +916,8 @@ public final class FMessage {
             }
 
             new Scheduler(plugin).sync(() -> {
-                final Map<PlayerFaction.Rank, List<String>> formattedNames = Maps.newHashMap();
+                Component postQueryComponent = preQueryComponent;
+                Map<PlayerFaction.Rank, List<String>> formattedNames = Maps.newHashMap();
 
                 for (PlayerFaction.Rank rank : namesByRank.keySet()) {
                     final List<String> names = namesByRank.get(rank);
@@ -592,22 +940,52 @@ public final class FMessage {
                 }
 
                 if (formattedNames.containsKey(PlayerFaction.Rank.LEADER)) {
-                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Leaders: " : "Leader: ")
-                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.LEADER)));
+                    String displayName = formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Leaders:" : "Leader:";
+                    postQueryComponent = postQueryComponent.appendNewline().append(Component.text(displayName).color(TC_LAYER1)).appendSpace();
+
+                    for (int i = 0; i < formattedNames.get(PlayerFaction.Rank.LEADER).size(); i++) {
+                        final String entry = formattedNames.get(PlayerFaction.Rank.LEADER).get(i);
+                        final boolean isLastEntry = i == formattedNames.get(PlayerFaction.Rank.LEADER).size() - 1;
+                        postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
+
+                        if (!isLastEntry) {
+                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                        }
+                    }
                 }
 
                 if (formattedNames.containsKey(PlayerFaction.Rank.OFFICER) && !formattedNames.get(PlayerFaction.Rank.OFFICER).isEmpty()) {
-                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.LEADER).size() > 1 ? "Officers: " : "Officer: ")
-                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.OFFICER)));
+                    String displayName = formattedNames.get(PlayerFaction.Rank.OFFICER).size() > 1 ? "Officers:" : "Officer:";
+                    postQueryComponent = postQueryComponent.appendNewline().append(Component.text(displayName).color(TC_LAYER1)).appendSpace();
+
+                    for (int i = 0; i < formattedNames.get(PlayerFaction.Rank.OFFICER).size(); i++) {
+                        final String entry = formattedNames.get(PlayerFaction.Rank.OFFICER).get(i);
+                        final boolean isLastEntry = i == formattedNames.get(PlayerFaction.Rank.OFFICER).size() - 1;
+                        postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
+
+                        if (!isLastEntry) {
+                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                        }
+                    }
                 }
 
                 if (formattedNames.containsKey(PlayerFaction.Rank.MEMBER) && !formattedNames.get(PlayerFaction.Rank.MEMBER).isEmpty()) {
-                    message.add(ChatColor.YELLOW + (formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 1 ? "Members: " : "Member: ")
-                            + Joiner.on(ChatColor.YELLOW + ", ").join(formattedNames.get(PlayerFaction.Rank.MEMBER)));
+                    String displayName = formattedNames.get(PlayerFaction.Rank.MEMBER).size() > 1 ? "Members:" : "Member:";
+                    postQueryComponent = postQueryComponent.appendNewline().append(Component.text(displayName).color(TC_LAYER1)).appendSpace();
+
+                    for (int i = 0; i < formattedNames.get(PlayerFaction.Rank.MEMBER).size(); i++) {
+                        final String entry = formattedNames.get(PlayerFaction.Rank.MEMBER).get(i);
+                        final boolean isLastEntry = i == formattedNames.get(PlayerFaction.Rank.MEMBER).size() - 1;
+                        postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
+
+                        if (!isLastEntry) {
+                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                        }
+                    }
                 }
 
-                message.add(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + Strings.repeat("-", 10));
-                message.forEach(player::sendMessage);
+                postQueryComponent = postQueryComponent.appendNewline().append(separator);
+                player.sendMessage(postQueryComponent);
             }).run();
         }).run();
     }

@@ -6,6 +6,9 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.horn.IBattleHorn;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.MusicInstrument;
@@ -58,6 +61,11 @@ public record BerserkBattleHorn(@Getter Factions plugin) implements ICustomItem,
     }
 
     @Override
+    public Component getDisplayNameComponent() {
+        return Component.text("Berserk", NamedTextColor.RED);
+    }
+
+    @Override
     public List<String> getLore() {
         final List<String> res = Lists.newArrayList();
         res.add(ChatColor.RESET + " ");
@@ -96,6 +104,41 @@ public record BerserkBattleHorn(@Getter Factions plugin) implements ICustomItem,
         res.add(ChatColor.RED + "Side-effects");
         res.add(slowColor + "Slowness II for 0:20");
         res.add(weakColor + "Weakness I for 0:15");
+
+        return res;
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
+        final List<Component> res = Lists.newArrayList();
+        final PotionEffectType slowness = PotionEffectType.SLOWNESS;
+        final PotionEffectType weakness = PotionEffectType.WEAKNESS;
+        final PotionEffectType speed = PotionEffectType.SPEED;
+        final PotionEffectType strength = PotionEffectType.STRENGTH;
+        final PotionEffectType haste = PotionEffectType.HASTE;
+
+        if (speed != null) {
+            res.add(Component.text("Speed III for 0:30").color(TextColor.color(speed.getColor().getRed(), speed.getColor().getGreen(), speed.getColor().getBlue())));
+        }
+
+        if (strength != null) {
+            res.add(Component.text("Strength I for 0:30").color(TextColor.color(strength.getColor().getRed(), strength.getColor().getGreen(), strength.getColor().getBlue())));
+        }
+
+        if (haste != null) {
+            res.add(Component.text("Haste II for 0:30").color(TextColor.color(haste.getColor().getRed(), haste.getColor().getGreen(), haste.getColor().getBlue())));
+        }
+
+        res.add(Component.text(" "));
+        res.add(Component.text("Side-effects").color(NamedTextColor.RED));
+
+        if (slowness != null) {
+            res.add(Component.text("Slowness II for 0:20").color(TextColor.color(slowness.getColor().getRed(), slowness.getColor().getGreen(), slowness.getColor().getBlue())));
+        }
+
+        if (weakness != null) {
+            res.add(Component.text("Weakness I for 0:15").color(TextColor.color(weakness.getColor().getRed(), weakness.getColor().getGreen(), weakness.getColor().getBlue())));
+        }
 
         return res;
     }

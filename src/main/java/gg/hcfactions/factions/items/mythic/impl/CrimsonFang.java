@@ -13,6 +13,9 @@ import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -29,6 +32,8 @@ public final class CrimsonFang implements IMythicItem {
     public record CrimsonFangConfig(@Getter double healPercent,
                                     @Getter int killRegenAmplifier,
                                     @Getter int killRegenDuration) {}
+
+    public static final TextColor CRIMSON_FANG_COLOR = NamedTextColor.DARK_RED;
 
     @Getter public final Factions plugin;
     @Getter public final List<MythicAbility> abilityInfo;
@@ -67,7 +72,22 @@ public final class CrimsonFang implements IMythicItem {
 
     @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Crimson Fang";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return CRIMSON_FANG_COLOR;
     }
 
     @Override

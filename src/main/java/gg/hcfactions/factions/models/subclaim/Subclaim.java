@@ -12,6 +12,7 @@ import gg.hcfactions.libs.bukkit.location.IRegion;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -101,13 +102,39 @@ public final class Subclaim implements IRegion, MongoDocument<Subclaim> {
                 .getOnlineMembers()
                 .stream()
                 .filter(member -> isMember(member.getUniqueId()) || !member.getRank().equals(PlayerFaction.Rank.MEMBER))
-                .collect(Collectors.toList());
+                .toList();
 
         for (PlayerFaction.Member member : members) {
             final Player player = Bukkit.getPlayer(member.getUniqueId());
 
             if (player != null) {
                 player.sendMessage(message);
+            }
+        }
+    }
+
+    /**
+     * Sends a component based message to every online player in this subclaim
+     * @param component Component
+     */
+    public void sendMessage(Component component) {
+        final PlayerFaction faction = subclaimManager.getPlugin().getFactionManager().getPlayerFactionById(owner);
+
+        if (faction == null) {
+            return;
+        }
+
+        final List<PlayerFaction.Member> members = faction
+                .getOnlineMembers()
+                .stream()
+                .filter(member -> isMember(member.getUniqueId()) || !member.getRank().equals(PlayerFaction.Rank.MEMBER))
+                .toList();
+
+        for (PlayerFaction.Member member : members) {
+            final Player player = Bukkit.getPlayer(member.getUniqueId());
+
+            if (player != null) {
+                player.sendMessage(component);
             }
         }
     }

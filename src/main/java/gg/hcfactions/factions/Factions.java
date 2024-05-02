@@ -1,6 +1,5 @@
 package gg.hcfactions.factions;
 
-import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.battlepass.BattlepassManager;
@@ -193,7 +192,7 @@ public final class Factions extends AresPlugin {
         registerConnectable(redis);
 
         // protocol lib init
-        registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
+        // registerProtocolLibrary(ProtocolLibrary.getProtocolManager()); TODO: Re-enable once ProtocolLib is updated to 1.20.5
 
         // declare services
         final RankService rankService = new RankService(this);

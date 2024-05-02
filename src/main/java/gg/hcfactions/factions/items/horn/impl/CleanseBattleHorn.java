@@ -6,6 +6,8 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.horn.IBattleHorn;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.MusicInstrument;
@@ -46,6 +48,11 @@ public record CleanseBattleHorn(@Getter Factions plugin) implements ICustomItem,
     }
 
     @Override
+    public Component getDisplayNameComponent() {
+        return Component.text("Cleanse", NamedTextColor.AQUA);
+    }
+
+    @Override
     public List<String> getLore() {
         final List<String> res = Lists.newArrayList();
         res.add(ChatColor.RESET + " ");
@@ -58,6 +65,13 @@ public record CleanseBattleHorn(@Getter Factions plugin) implements ICustomItem,
 
         res.add(descColor + "Cleanse all debuffs on nearby allies");
 
+        return res;
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
+        final List<Component> res = Lists.newArrayList();
+        res.add(Component.text("Cleanse all debuffs on nearby allies").color(NamedTextColor.GREEN));
         return res;
     }
 

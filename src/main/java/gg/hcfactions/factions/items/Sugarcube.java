@@ -3,6 +3,8 @@ package gg.hcfactions.factions.items;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -22,12 +24,25 @@ public final class Sugarcube implements ICustomItem {
     }
 
     @Override
+    public Component getDisplayNameComponent() {
+        return Component.text("Sugar Cube", NamedTextColor.AQUA);
+    }
+
+    @Override
     public List<String> getLore() {
         final List<String> res = Lists.newArrayList();
 
         res.add(ChatColor.GRAY + "Right-click a Horse while holding this item");
         res.add(ChatColor.GRAY + "to upgrade its movement speed");
 
+        return res;
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
+        final List<Component> res = Lists.newArrayList();
+        res.add(Component.keybind("key.use").color(NamedTextColor.LIGHT_PURPLE).appendSpace().append(Component.text("a Horse while holding this item")));
+        res.add(Component.text("to upgrade its movement speed").color(NamedTextColor.GRAY));
         return res;
     }
 

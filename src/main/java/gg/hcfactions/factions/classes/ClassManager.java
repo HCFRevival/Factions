@@ -12,6 +12,7 @@ import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.IHoldableClass;
 import gg.hcfactions.factions.models.classes.impl.*;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.libs.bukkit.utils.Effects;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -24,9 +25,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+@Getter
 public final class ClassManager implements IManager {
-    @Getter public final Factions plugin;
-    @Getter public final List<IClass> classes;
+    public final Factions plugin;
+    public final List<IClass> classes;
 
     public ClassManager(Factions plugin) {
         this.plugin = plugin;
@@ -125,11 +127,11 @@ public final class ClassManager implements IManager {
 
                 if (conf.get(path + "shield.effects") != null) {
                     for (String effectName : Objects.requireNonNull(conf.getConfigurationSection(path + "shield.effects")).getKeys(false)) {
-                        final PotionEffectType effectType = PotionEffectType.getByName(effectName);
+                        final PotionEffectType effectType = Effects.getEffectByName(effectName);
                         final int amplifier = conf.getInt(path + "shield.effects." + effectName);
 
                         if (effectType == null) {
-                            plugin.getAresLogger().error("invalid guard effect for " + className + ": " + effectName);
+                            plugin.getAresLogger().error("Invalid Guard Effect for {}: {}", className, effectName);
                             continue;
                         }
 
@@ -152,7 +154,7 @@ public final class ClassManager implements IManager {
 
             if (conf.get(path + "passive") != null) {
                 for (String passiveName : Objects.requireNonNull(conf.getConfigurationSection(path + "passive")).getKeys(false)) {
-                    final PotionEffectType passiveType = PotionEffectType.getByName(passiveName);
+                    final PotionEffectType passiveType = Effects.getEffectByName(passiveName);
                     final int amplifier = conf.getInt(path + "passive." + passiveName);
 
                     if (passiveType == null) {
@@ -175,7 +177,7 @@ public final class ClassManager implements IManager {
                     final String materialName = conf.getString(hPath + "material");
                     final int amplifier = conf.getInt(hPath + "amplifier");
                     final int duration = conf.getInt(hPath + "duration");
-                    final PotionEffectType effect = PotionEffectType.getByName(effectName);
+                    final PotionEffectType effect = Effects.getEffectByName(effectName);
                     final Material material;
 
                     try {
@@ -199,7 +201,7 @@ public final class ClassManager implements IManager {
                     final int duration = conf.getInt(actvPath + "duration");
                     final int amplifier = conf.getInt(actvPath + "amplifier");
                     final int cooldown = conf.getInt(actvPath + "cooldown");
-                    final PotionEffectType effect = PotionEffectType.getByName(activeName);
+                    final PotionEffectType effect = Effects.getEffectByName(activeName);
                     final Material material;
                     final EConsumableApplicationType applicationType;
 

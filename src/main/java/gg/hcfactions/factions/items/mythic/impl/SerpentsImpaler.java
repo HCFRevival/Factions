@@ -10,6 +10,9 @@ import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -27,6 +30,8 @@ public final class SerpentsImpaler implements IMythicItem {
         @Getter public final int woundTicks;
         @Getter public double woundDamagePerTick;
     }
+
+    public static final TextColor SERPENTS_IMPALER_COLOR = NamedTextColor.DARK_AQUA;
 
     @Getter public final Factions plugin;
     @Getter public final List<MythicAbility> abilityInfo;
@@ -58,6 +63,11 @@ public final class SerpentsImpaler implements IMythicItem {
 
     @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
     }
 
@@ -68,6 +78,16 @@ public final class SerpentsImpaler implements IMythicItem {
         enchantments.put(Enchantment.IMPALING, 3);
         enchantments.put(Enchantment.CHANNELING, 1);
         return enchantments;
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Serpent's Impaler";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return SERPENTS_IMPALER_COLOR;
     }
 
     @Override

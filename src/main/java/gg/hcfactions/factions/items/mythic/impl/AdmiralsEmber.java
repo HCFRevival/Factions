@@ -13,6 +13,9 @@ import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -33,6 +36,8 @@ public final class AdmiralsEmber implements IMythicItem {
             @Getter int ablazeFireTicks) {}
 
     public record OverheatData(@Getter UUID uniqueId, @Getter UUID attackerId, @Getter UUID attackedId) {}
+
+    public static final TextColor ADMIRALS_EMBER_COLOR = NamedTextColor.RED;
 
     @Getter public final Factions plugin;
     @Getter public final AdmiralsEmberConfig config;
@@ -71,8 +76,28 @@ public final class AdmiralsEmber implements IMythicItem {
     }
 
     @Override
+    public Component getDisplayNameComponent() {
+        return Component.text(getName()).color(getColor());
+    }
+
+    @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Admiral's Ember";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return ADMIRALS_EMBER_COLOR;
     }
 
     @Override

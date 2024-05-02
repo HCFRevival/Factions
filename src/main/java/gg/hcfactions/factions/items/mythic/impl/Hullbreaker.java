@@ -12,6 +12,9 @@ import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.factions.utils.StringUtil;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -31,6 +34,8 @@ public final class Hullbreaker implements IMythicItem {
             @Getter int resistanceAmplifier,
             @Getter int requiredAllyDistance,
             @Getter int requiredEnemyCount) {}
+
+    public static final TextColor HULLBREAKER_COLOR = NamedTextColor.GOLD;
 
     @Getter public final Factions plugin;
     @Getter public final List<MythicAbility> abilityInfo;
@@ -61,7 +66,22 @@ public final class Hullbreaker implements IMythicItem {
 
     @Override
     public List<String> getLore() {
+        return List.of();
+    }
+
+    @Override
+    public List<Component> getLoreComponents() {
         return getMythicLore();
+    }
+
+    @Override
+    public String getMythicName() {
+        return "Hullbreaker";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return HULLBREAKER_COLOR;
     }
 
     @Override
