@@ -25,7 +25,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bson.Document;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -34,27 +33,30 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Getter
 public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITickable, ITokenHolder, MongoDocument<PlayerFaction> {
-    @Getter public final FactionManager manager;
+    public final FactionManager manager;
 
-    @Getter public UUID uniqueId;
-    @Getter @Setter public String name;
-    @Getter @Setter public String announcement;
-    @Getter @Setter public PLocatable homeLocation;
-    @Getter @Setter public PLocatable rallyLocation;
-    @Getter @Setter public int rating;
-    @Getter @Setter public double balance;
-    @Getter @Setter public int tokens;
-    @Getter @Setter public double dtr;
-    @Getter @Setter public int reinvites;
-    @Getter @Setter public long nextTick;
-    @Getter @Setter public long lastRallyUpdate;
-    @Getter @Setter public UUID focusedPlayerId;
-    @Getter public Set<Member> members;
-    @Getter public Set<UUID> memberHistory;
-    @Getter public Set<UUID> pendingInvites;
-    @Getter public Set<FTimer> timers;
-    @Getter public List<Long> reinviteRestockTimes;
+    public UUID uniqueId;
+    @Setter public String name;
+    @Setter public String announcement;
+    @Setter public PLocatable homeLocation;
+    @Setter public PLocatable rallyLocation;
+    @Setter public int rating;
+    @Setter public double balance;
+    @Setter public int tokens;
+    @Setter public double dtr;
+    @Setter public int reinvites;
+    @Setter public long nextTick;
+    @Setter public long lastRallyUpdate;
+    @Setter public UUID focusedPlayerId;
+    @Setter public UUID allyFactionId;
+    @Setter public UUID pendingAllyFactionId;
+    public Set<Member> members;
+    public Set<UUID> memberHistory;
+    public Set<UUID> pendingInvites;
+    public Set<FTimer> timers;
+    public List<Long> reinviteRestockTimes;
 
     public PlayerFaction(FactionManager manager) {
         this.manager = manager;
@@ -71,6 +73,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.nextTick = Time.now();
         this.lastRallyUpdate = 0L;
         this.focusedPlayerId = null;
+        this.allyFactionId = null;
+        this.pendingAllyFactionId = null;
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
@@ -93,6 +97,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
         this.nextTick = Time.now();
         this.lastRallyUpdate = 0L;
         this.focusedPlayerId = null;
+        this.allyFactionId = null;
+        this.pendingAllyFactionId = null;
         this.members = Sets.newConcurrentHashSet();
         this.memberHistory = Sets.newConcurrentHashSet();
         this.pendingInvites = Sets.newConcurrentHashSet();
@@ -118,6 +124,17 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
     }
 
     /**
+     * @return PlayerFaction this faction is allied to
+     */
+    public PlayerFaction getAlly() {
+        if (allyFactionId == null) {
+            return null;
+        }
+
+        return manager.getPlayerFactionById(allyFactionId);
+    }
+
+    /**
      * Returns true if the provided UUID is a member of this faction
      * @param uniqueId Bukkit UUID
      * @return True if member of this faction
@@ -128,6 +145,58 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
 
     public boolean isMember(Player player) {
         return isMember(player.getUniqueId());
+    }
+
+    /**
+     * @param faction PlayerFaction
+     * @return True if the provided PlayerFaction is allied to this faction
+     */
+    public boolean isAlly(PlayerFaction faction) {
+        if (allyFactionId == null) {
+            return false;
+        }
+
+        return allyFactionId.equals(faction.getUniqueId());
+    }
+
+    /**
+     * @param player Player
+     * @return True if the provided player is allied to this faction
+     */
+    public boolean isAlly(Player player) {
+        if (allyFactionId == null) {
+            return false;
+        }
+
+        final PlayerFaction otherFaction = manager.getPlayerFactionByPlayer(player);
+        return otherFaction != null && allyFactionId.equals(otherFaction.getUniqueId());
+    }
+
+    /**
+     * @param playerId Player
+     * @return True if the provided Bukkit UUID is allied to this faction
+     */
+    public boolean isAlly(UUID playerId) {
+        if (allyFactionId == null) {
+            return false;
+        }
+
+        final PlayerFaction otherFaction = manager.getPlayerFactionById(allyFactionId);
+        return otherFaction != null && otherFaction.isMember(playerId);
+    }
+
+    /**
+     * @return True if this faction has an ally
+     */
+    public boolean hasAlly() {
+        return allyFactionId != null;
+    }
+
+    /**
+     * @return True if this faction has a pending ally request
+     */
+    public boolean hasPendingAlly() {
+        return pendingAllyFactionId != null;
     }
 
     /**
@@ -381,6 +450,8 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
                 "\nmembers: " + members.toString() +
                 "\npendingInvites: " + pendingInvites.toString() +
                 "\nmemberHistory: " + memberHistory.toString() +
+                "\nallyFactionId: " + allyFactionId.toString() +
+                "\npendingAllyRequest: " + pendingAllyFactionId.toString() +
                 "\ntimers: " + timers.toString() +
                 "\nreinviteRestockTimes: " + reinviteRestockTimes.toString() +
                 "\n}";
@@ -421,13 +492,41 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
             this.reinviteRestockTimes = ((List<Long>)document.get("reinvite_restocks", List.class));
         }
 
-        this.rating = document.getInteger("rating");
-        this.balance = document.getDouble("balance");
-        this.dtr = document.getDouble("dtr");
-        this.reinvites = document.getInteger("reinvites");
-        this.lastRallyUpdate = document.getLong("last_rally_update");
-        this.memberHistory.addAll((List<UUID>)document.get("member_history", List.class));
-        this.pendingInvites.addAll((List<UUID>)document.get("pending_invites", List.class));
+        if (document.containsKey("rating")) {
+            this.rating = document.getInteger("rating");
+        }
+
+        if (document.containsKey("balance")) {
+            this.balance = document.getDouble("balance");
+        }
+
+        if (document.containsKey("dtr")) {
+            this.dtr = document.getDouble("dtr");
+        }
+
+        if (document.containsKey("reinvites")) {
+            this.reinvites = document.getInteger("reinvites");
+        }
+
+        if (document.containsKey("last_rally_update")) {
+            this.lastRallyUpdate = document.getLong("last_rally_update");
+        }
+
+        if (document.containsKey("member_history")) {
+            this.memberHistory.addAll((List<UUID>)document.get("member_history", List.class));
+        }
+
+        if (document.containsKey("pending_invites")) {
+            this.pendingInvites.addAll((List<UUID>)document.get("pending_invites", List.class));
+        }
+
+        if (document.containsKey("ally_faction_id")) {
+            this.allyFactionId = UUID.fromString(document.getString("ally_faction_id"));
+        }
+
+        if (document.containsKey("pending_ally_request")) {
+            this.pendingAllyFactionId = UUID.fromString(document.getString("pending_ally_request"));
+        }
 
         return this;
     }
@@ -454,6 +553,14 @@ public final class PlayerFaction implements IFaction, IBankable, ITimeable, ITic
 
         if (rallyLocation != null) {
             doc.append("rally", rallyLocation.toDocument());
+        }
+
+        if (allyFactionId != null) {
+            doc.append("ally_faction_id", allyFactionId.toString());
+        }
+
+        if (pendingAllyFactionId != null) {
+            doc.append("pending_ally_request", pendingAllyFactionId.toString());
         }
 
         doc.append("rating", rating);

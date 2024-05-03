@@ -268,8 +268,8 @@ public final class FactionCommand extends BaseCommand {
 
     @Subcommand("chat|channel|c")
     @Description("Update your faction chat channel")
-    @Syntax("[public|faction]")
-    public void onFactionChat(Player player, @Optional @Values("p|pub|public|f|fac|faction") String channelName) {
+    @Syntax("[public|faction|ally]")
+    public void onFactionChat(Player player, @Optional @Values("p|pub|public|f|fac|faction|a|ally") String channelName) {
         PlayerFaction.ChatChannel channel = null;
 
         if (channelName != null) {
@@ -277,8 +277,10 @@ public final class FactionCommand extends BaseCommand {
                 channel = PlayerFaction.ChatChannel.PUBLIC;
             } else if (channelName.equalsIgnoreCase("faction") || channelName.equalsIgnoreCase("f") || channelName.equalsIgnoreCase("fac")) {
                 channel = PlayerFaction.ChatChannel.FACTION;
+            } else if (channelName.equalsIgnoreCase("a") || channelName.equalsIgnoreCase("ally")) {
+                channel = PlayerFaction.ChatChannel.ALLY;
             } else {
-                player.sendMessage(FMessage.ERROR + "Failed to change chat channel: invalid channel name (valid channels: faction, public)");
+                player.sendMessage(FMessage.ERROR + "Failed to change chat channel: invalid channel name (valid channels: faction, public, ally)");
                 return;
             }
         }
@@ -1006,6 +1008,58 @@ public final class FactionCommand extends BaseCommand {
             @Override
             public void reject(String s) {
                 player.sendMessage(ChatColor.RED + "Failed to print location: " + s);
+            }
+        });
+    }
+
+    @Subcommand("ally")
+    @Description("Send a new ally request")
+    @CommandCompletion("@pfactions")
+    @Syntax("<faction>")
+    public void onAllyRequest(Player player, String factionName) {
+        plugin.getFactionManager().getExecutor().sendAllyRequest(player, factionName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(Component.text("Alliance request has been sent", FMessage.TC_SUCCESS));
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(Component.text("Failed to send alliance request: " + s, FMessage.TC_ERROR));
+            }
+        });
+    }
+
+    @Subcommand("ally accept")
+    @Description("Accept an ally request and form an alliance")
+    @CommandCompletion("@pfactions")
+    @Syntax("<faction>")
+    public void onAllyAccept(Player player, String factionName) {
+        plugin.getFactionManager().getExecutor().acceptAllyRequest(player, factionName, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(Component.text("Alliance request has been accepted", FMessage.TC_SUCCESS));
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(Component.text("Failed to accept alliance request: " + s, FMessage.TC_ERROR));
+            }
+        });
+    }
+
+    @Subcommand("unally")
+    @Description("Break your current alliance")
+    public void onUnally(Player player) {
+        plugin.getFactionManager().getExecutor().breakAlliance(player, new Promise() {
+            @Override
+            public void resolve() {
+                player.sendMessage(Component.text("Alliance has been broken", FMessage.TC_SUCCESS));
+            }
+
+            @Override
+            public void reject(String s) {
+                player.sendMessage(Component.text("Failed to break alliance: " + s, FMessage.TC_ERROR));
             }
         });
     }

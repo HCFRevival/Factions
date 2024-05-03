@@ -2,9 +2,7 @@ package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.event.EventStartEvent;
-import gg.hcfactions.factions.listeners.events.faction.FactionFocusEvent;
-import gg.hcfactions.factions.listeners.events.faction.FactionMemberDeathEvent;
-import gg.hcfactions.factions.listeners.events.faction.FactionUnfocusEvent;
+import gg.hcfactions.factions.listeners.events.faction.*;
 import gg.hcfactions.factions.listeners.events.player.ClassActivateEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
@@ -185,7 +183,8 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
         if (!(event.getEntity().getType().equals(EntityType.ARROW)
                 || event.getEntity().getType().equals(EntityType.SPECTRAL_ARROW)
                 || event.getEntity().getType().equals(EntityType.ENDER_PEARL)
-                || event.getEntity().getType().equals(EntityType.TRIDENT))) {
+                || event.getEntity().getType().equals(EntityType.TRIDENT)
+                || event.getEntity().getType().equals(EntityType.WIND_CHARGE))) {
             return;
         }
 
@@ -242,7 +241,6 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
     public void onFactionUnfocus(FactionUnfocusEvent event) {
         final PlayerFaction focusingFaction = event.getFaction();
         final Player focusedPlayer = event.getFocusedPlayer();
-
         FMessage.printNoLongerFocused(focusingFaction, focusedPlayer);
     }
 
@@ -304,6 +302,76 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
 
             if (factionPlayer != null) {
                 factionPlayer.removeFromScoreboard(focused, EScoreboardEntryType.FOCUS);
+            }
+        });
+    }
+
+    /**
+     * Update nameplates when an alliance is formed
+     * @param event FactionAllianceFormEvent
+     */
+    @EventHandler
+    public void onAllianceForm(FactionAllianceFormEvent event) {
+        final PlayerFaction faction = event.getInitiator();
+        final PlayerFaction otherFaction = event.getOtherFaction();
+
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+            if (factionPlayer != null) {
+                otherFaction.getOnlineMembers().forEach(onlineAllyMember -> {
+                    final Player ally = onlineAllyMember.getBukkit();
+                    factionPlayer.addToScoreboard(ally, EScoreboardEntryType.ALLY);
+                });
+            }
+        });
+
+        otherFaction.getOnlineMembers().forEach(onlineMember -> {
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+            if (factionPlayer != null) {
+                faction.getOnlineMembers().forEach(onlineAllyMember -> {
+                    final Player ally = onlineAllyMember.getBukkit();
+                    factionPlayer.addToScoreboard(ally, EScoreboardEntryType.ALLY);
+                });
+            }
+        });
+    }
+
+    /**
+     * Update nameplates when an alliance is broken
+     * @param event FactionAllianceBreakEvent
+     */
+    @EventHandler
+    public void onAllianceBreak(FactionAllianceBreakEvent event) {
+        final PlayerFaction faction = event.getInitiator();
+        final PlayerFaction otherFaction = event.getOtherFaction();
+
+        faction.getOnlineMembers().forEach(onlineMember -> {
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+            if (factionPlayer != null) {
+                otherFaction.getOnlineMembers().forEach(allyFactionMember -> {
+                    final Player ally = allyFactionMember.getBukkit();
+
+                    if (ally != null) {
+                        factionPlayer.removeFromScoreboard(ally, EScoreboardEntryType.ALLY);
+                    }
+                });
+            }
+        });
+
+        otherFaction.getOnlineMembers().forEach(onlineMember -> {
+            final FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+            if (factionPlayer != null) {
+                faction.getOnlineMembers().forEach(allyFactionMember -> {
+                    final Player ally = allyFactionMember.getBukkit();
+
+                    if (ally != null) {
+                        factionPlayer.removeFromScoreboard(ally, EScoreboardEntryType.ALLY);
+                    }
+                });
             }
         });
     }

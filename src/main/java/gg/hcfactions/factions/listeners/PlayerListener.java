@@ -6,6 +6,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.EScoreboardEntryType;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.state.EServerState;
@@ -142,6 +143,7 @@ public final class PlayerListener implements Listener {
         factionPlayer.setupScoreboard();
 
         if (faction != null) {
+            // Friendly nameplates
             faction.getOnlineMembers().forEach(onlineMember -> {
                 final FactionPlayer otherFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlineMember.getUniqueId());
 
@@ -151,6 +153,18 @@ public final class PlayerListener implements Listener {
                     otherFactionPlayer.addToScoreboard(player);
                 }
             });
+
+            // Ally nameplates
+            if (faction.getAlly() != null) {
+                faction.getAlly().getOnlineMembers().forEach(allyMember -> {
+                    final FactionPlayer allyFactionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(allyMember.getUniqueId());
+
+                    if (allyFactionPlayer != null) {
+                        factionPlayer.addToScoreboard(allyFactionPlayer.getBukkit(), EScoreboardEntryType.ALLY);
+                        allyFactionPlayer.addToScoreboard(player, EScoreboardEntryType.ALLY);
+                    }
+                });
+            }
         }
     }
 

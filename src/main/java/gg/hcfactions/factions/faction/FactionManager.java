@@ -31,13 +31,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Getter
 public final class FactionManager implements IManager {
-    @Getter public Factions plugin;
-    @Getter public FactionValidator validator;
-    @Getter public FactionExecutor executor;
-    @Getter public BukkitTask factionTickingTask;
-    @Getter public BukkitTask factionAutosaveTask;
-    @Getter public Set<IFaction> factionRepository;
+    public Factions plugin;
+    public FactionValidator validator;
+    public FactionExecutor executor;
+    public BukkitTask factionTickingTask;
+    public BukkitTask factionAutosaveTask;
+    public Set<IFaction> factionRepository;
 
     public FactionManager(Factions plugin) {
         this.plugin = plugin;

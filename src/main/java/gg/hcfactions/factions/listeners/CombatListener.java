@@ -121,12 +121,21 @@ public final class CombatListener implements Listener {
 
         final PlayerFaction attackerFaction = plugin.getFactionManager().getPlayerFactionByPlayer(attacker);
 
-        if (attackerFaction != null && attackerFaction.getMember(attacked.getUniqueId()) != null) {
-            if (printFeedback) {
-                FMessage.printCanNotAttackFactionMembers(attacker);
+        if (attackerFaction != null) {
+            if (attackerFaction.isMember(attacked)) {
+                if (printFeedback) {
+                    FMessage.printCanNotAttackFactionMembers(attacker);
+                }
+
+                event.setCancelled(true);
+                return;
             }
 
-            event.setCancelled(true);
+            if (attackerFaction.isAlly(attacked)) {
+                if (printFeedback && !attacked.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+                    FMessage.printAttackingAllyMember(attacker);
+                }
+            }
         }
     }
 
@@ -375,9 +384,15 @@ public final class CombatListener implements Listener {
             }
         }
 
-        if (playerFaction != null && playerFaction.isMember(combatLogger.getOwnerId())) {
-            FMessage.printCanNotAttackFactionMembers(player);
-            event.setCancelled(true);
+        if (playerFaction != null) {
+            if (playerFaction.isAlly(combatLogger.getOwnerId())) {
+                FMessage.printAttackingAllyMember(player);
+            }
+
+            if (playerFaction.isMember(combatLogger.getOwnerId())) {
+                FMessage.printCanNotAttackFactionMembers(player);
+                event.setCancelled(true);
+            }
         }
     }
 

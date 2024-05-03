@@ -17,6 +17,7 @@ import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.faction.impl.ServerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.models.player.EScoreboardEntryType;
 import gg.hcfactions.factions.models.player.IFactionPlayer;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.state.EServerState;
@@ -159,6 +160,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 manager.getPlugin().getWaypointManager().getWaypointRepository().remove(wp);
             });
 
+            // Remove faction members nameplates
             faction.getOnlineMembers().forEach(onlineMember -> {
                 final FactionPlayer otherFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
 
@@ -166,6 +168,29 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                     otherFactionPlayer.removeAllFromScoreboard();
                 }
             });
+
+            // Remove ally nameplates
+            if (faction.getAlly() != null) {
+                final PlayerFaction ally = faction.getAlly();
+
+                ally.getOnlineMembers().forEach(onlineAlly -> {
+                    final FactionPlayer allyFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineAlly.getUniqueId());
+
+                    if (allyFactionPlayer != null) {
+                        faction.getOnlineMembers().forEach(onlineMember -> {
+                            final Player removedPlayer = onlineMember.getBukkit();
+                            allyFactionPlayer.removeFromScoreboard(removedPlayer, EScoreboardEntryType.ALLY);
+                        });
+                    }
+                });
+            }
+
+            // Remove alliance
+            if (faction.getAlly() != null) {
+                final FactionAllianceBreakEvent breakEvent = new FactionAllianceBreakEvent(faction, faction.getAlly());
+                Bukkit.getPluginManager().callEvent(breakEvent);
+                faction.getAlly().setAllyFactionId(null);
+            }
 
             claims.forEach(c -> faction.addToBalance(c.getCost()));
 
@@ -230,6 +255,29 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                         otherFactionPlayer.removeAllFromScoreboard();
                     }
                 });
+
+                // Remove ally nameplates
+                if (playerFaction.getAlly() != null) {
+                    final PlayerFaction ally = playerFaction.getAlly();
+
+                    ally.getOnlineMembers().forEach(onlineAlly -> {
+                        final FactionPlayer allyFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineAlly.getUniqueId());
+
+                        if (allyFactionPlayer != null) {
+                            playerFaction.getOnlineMembers().forEach(onlineMember -> {
+                                final Player removedPlayer = onlineMember.getBukkit();
+                                allyFactionPlayer.removeFromScoreboard(removedPlayer, EScoreboardEntryType.ALLY);
+                            });
+                        }
+                    });
+                }
+
+                // Remove alliance
+                if (playerFaction.getAlly() != null) {
+                    final FactionAllianceBreakEvent breakEvent = new FactionAllianceBreakEvent(playerFaction, playerFaction.getAlly());
+                    Bukkit.getPluginManager().callEvent(breakEvent);
+                    playerFaction.getAlly().setAllyFactionId(null);
+                }
             }
 
             // delete faction, claims and subclaims from repositories
@@ -331,29 +379,15 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
 
                 final Player invited = Bukkit.getPlayer(aresAccount.getUniqueId());
                 if (invited != null && invited.isOnline()) {
-                    invited.spigot().sendMessage(new ComponentBuilder
-                            (player.getName())
-                            .color(net.md_5.bungee.api.ChatColor.GOLD)
-                            .append(" has invited you to join ")
-                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
-                            .append(playerFaction.getName())
-                            .color(net.md_5.bungee.api.ChatColor.AQUA)
-                            .append(".")
-                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
-                            .append(" Type ")
-                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
-                            .append("/f accept " + playerFaction.getName())
-                            .color(net.md_5.bungee.api.ChatColor.GOLD)
-                            .append(" or ")
-                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
-                            .append("click here")
-                            .underlined(true)
-                            .color(net.md_5.bungee.api.ChatColor.GOLD)
-                            .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f accept " + playerFaction.getName()))
-                            .append(" to join")
-                            .color(net.md_5.bungee.api.ChatColor.YELLOW)
-                            .underlined(false)
-                            .create());
+                    Component component = Component.text(player.getName(), FMessage.TC_NAME)
+                                    .appendSpace().append(Component.text("has invited you to join", FMessage.TC_LAYER1))
+                                    .appendSpace().append(Component.text(playerFaction.getName()).color(FMessage.TC_INFO))
+                                    .appendSpace().append(Component.text(". Type", FMessage.TC_LAYER1))
+                                    .appendSpace().append(Component.text("/f accept " + playerFaction.getName(), FMessage.TC_LAYER2))
+                                    .appendSpace().append(Component.text("or", FMessage.TC_LAYER1))
+                                    .appendSpace().append(Component.text("click here to join", FMessage.TC_SUCCESS).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/f accept " + playerFaction.getName())));
+
+                    invited.sendMessage(component);
                 }
 
                 promise.resolve();
@@ -530,6 +564,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         faction.addMember(player.getUniqueId());
+
+        // Friendly nameplates
         faction.getOnlineMembers().forEach(onlineMember -> {
             final FactionPlayer onlineFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
 
@@ -541,6 +577,21 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 factionPlayer.addToScoreboard(onlineFactionPlayer.getBukkit());
             }
         });
+
+        // Ally nameplates
+        if (faction.getAlly() != null) {
+            faction.getAlly().getOnlineMembers().forEach(onlineMember -> {
+                final FactionPlayer onlineAllyPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineMember.getUniqueId());
+
+                if (onlineAllyPlayer != null) {
+                    onlineAllyPlayer.addToScoreboard(player, EScoreboardEntryType.ALLY);
+                }
+
+                if (factionPlayer != null && onlineAllyPlayer != null) {
+                    factionPlayer.addToScoreboard(onlineAllyPlayer.getBukkit(), EScoreboardEntryType.ALLY);
+                }
+            });
+        }
 
         final FactionJoinEvent joinEvent = new FactionJoinEvent(player, faction);
         Bukkit.getPluginManager().callEvent(joinEvent);
@@ -601,6 +652,23 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 onlineFactionPlayer.removeFromScoreboard(player);
             }
         });
+
+        // Remove ally nameplate for allies
+        if (faction.getAlly() != null) {
+            final PlayerFaction allyFaction = faction.getAlly();
+
+            allyFaction.getOnlineMembers().forEach(onlineAlly -> {
+                final Player ally = onlineAlly.getBukkit();
+
+                if (ally != null) {
+                    final FactionPlayer allyFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineAlly.getUniqueId());
+
+                    if (allyFactionPlayer != null) {
+                        allyFactionPlayer.removeFromScoreboard(player, EScoreboardEntryType.ALLY);
+                    }
+                }
+            });
+        }
 
         final FactionLeaveEvent leaveEvent = new FactionLeaveEvent(player, faction, FactionLeaveEvent.Reason.LEAVE);
         Bukkit.getPluginManager().callEvent(leaveEvent);
@@ -690,6 +758,23 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                             onlineFactionPlayer.removeFromScoreboard(kicked);
                         }
                     });
+
+                    // Remove ally nameplate for allies
+                    if (faction.getAlly() != null) {
+                        final PlayerFaction allyFaction = faction.getAlly();
+
+                        allyFaction.getOnlineMembers().forEach(onlineAlly -> {
+                            final Player ally = onlineAlly.getBukkit();
+
+                            if (ally != null) {
+                                final FactionPlayer allyFactionPlayer = (FactionPlayer) manager.getPlugin().getPlayerManager().getPlayer(onlineAlly.getUniqueId());
+
+                                if (allyFactionPlayer != null) {
+                                    allyFactionPlayer.removeFromScoreboard(player, EScoreboardEntryType.ALLY);
+                                }
+                            }
+                        });
+                    }
 
                     kicked.sendMessage(FMessage.F_KICKED_FROM_FAC);
                 }
@@ -1003,9 +1088,18 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         if (channel == null) {
-            final PlayerFaction.ChatChannel toChannel = member.getChannel().equals(PlayerFaction.ChatChannel.FACTION)
-                    ? PlayerFaction.ChatChannel.PUBLIC
-                    : PlayerFaction.ChatChannel.FACTION;
+            final PlayerFaction.ChatChannel currentChannel = member.getChannel();
+            PlayerFaction.ChatChannel toChannel;
+
+            if (currentChannel.equals(PlayerFaction.ChatChannel.PUBLIC)) {
+                toChannel = PlayerFaction.ChatChannel.FACTION;
+            } else if (currentChannel.equals(PlayerFaction.ChatChannel.FACTION)) {
+                toChannel = (playerFaction.hasAlly() ? PlayerFaction.ChatChannel.ALLY : PlayerFaction.ChatChannel.PUBLIC);
+            } else if (currentChannel.equals(PlayerFaction.ChatChannel.ALLY)) {
+                toChannel = PlayerFaction.ChatChannel.PUBLIC;
+            } else {
+                toChannel = PlayerFaction.ChatChannel.PUBLIC;
+            }
 
             member.setChannel(toChannel);
             FMessage.printChatChannelChange(player, toChannel);
@@ -1021,6 +1115,19 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         if (member.getChannel().equals(PlayerFaction.ChatChannel.FACTION)) {
+            if (playerFaction.hasAlly()) {
+                member.setChannel(PlayerFaction.ChatChannel.ALLY);
+                FMessage.printChatChannelChange(player, PlayerFaction.ChatChannel.ALLY);
+                promise.resolve();
+                return;
+            }
+
+            member.setChannel(PlayerFaction.ChatChannel.PUBLIC);
+            FMessage.printChatChannelChange(player, PlayerFaction.ChatChannel.PUBLIC);
+            promise.resolve();
+        }
+
+        if (member.getChannel().equals(PlayerFaction.ChatChannel.ALLY)) {
             member.setChannel(PlayerFaction.ChatChannel.PUBLIC);
             FMessage.printChatChannelChange(player, PlayerFaction.ChatChannel.PUBLIC);
             promise.resolve();
@@ -2056,6 +2163,11 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
+        if (faction.isAlly(toFocus)) {
+            promise.reject("You can not focus your allies");
+            return;
+        }
+
         final FactionFocusEvent focusEvent = new FactionFocusEvent(faction, player, toFocus);
         Bukkit.getPluginManager().callEvent(focusEvent);
 
@@ -2069,5 +2181,116 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         FMessage.printFocusing(faction, player, toFocus);
         FMessage.printFocusedByFaction(faction, toFocus);
         promise.resolve();
+    }
+
+    @Override
+    public void sendAllyRequest(Player player, String factionName, Promise promise) {
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
+        if (playerFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction otherFaction = manager.getPlayerFactionByName(factionName);
+        if (otherFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (!playerFaction.getMember(player.getUniqueId()).getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (playerFaction.hasAlly()) {
+            promise.reject("Your faction is already allied. To break your current alliance use /f unally");
+            return;
+        }
+
+        if (otherFaction.hasAlly()) {
+            promise.reject("This faction is already allied. They must break their alliance to form an alliance with you.");
+            return;
+        }
+
+        playerFaction.setPendingAllyFactionId(otherFaction.getUniqueId());
+        FMessage.printAllyRequest(player, playerFaction, otherFaction);
+        promise.resolve();
+    }
+
+    @Override
+    public void acceptAllyRequest(Player player, String factionName, Promise promise) {
+        final PlayerFaction playerFaction = manager.getPlayerFactionByPlayer(player);
+
+        if (playerFaction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction otherFaction = manager.getPlayerFactionByName(factionName);
+
+        if (otherFaction == null) {
+            promise.reject(FError.F_NOT_FOUND.getErrorDescription());
+            return;
+        }
+
+        if (!playerFaction.getMember(player.getUniqueId()).getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        if (playerFaction.hasAlly()) {
+            promise.reject("Your faction already has an alliance formed. To break your current alliance use /f unally");
+            return;
+        }
+
+        if (otherFaction.hasAlly()) {
+            promise.reject("This faction already has an alliance formed.");
+            return;
+        }
+
+        final FactionAllianceFormEvent formEvent = new FactionAllianceFormEvent(playerFaction, otherFaction);
+        Bukkit.getPluginManager().callEvent(formEvent);
+        if (formEvent.isCancelled()) {
+            return;
+        }
+
+        playerFaction.setAllyFactionId(otherFaction.getUniqueId());
+        playerFaction.setPendingAllyFactionId(null);
+        otherFaction.setAllyFactionId(playerFaction.getUniqueId());
+        otherFaction.setPendingAllyFactionId(null);
+        FMessage.printAllianceFormed(playerFaction, otherFaction);
+        promise.resolve();
+    }
+
+    @Override
+    public void breakAlliance(Player player, Promise promise) {
+        final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
+
+        if (faction == null) {
+            promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
+            return;
+        }
+
+        if (!faction.getMember(player.getUniqueId()).getRank().isHigherOrEqual(PlayerFaction.Rank.OFFICER)) {
+            promise.reject(FError.P_NOT_ENOUGH_PERMS.getErrorDescription());
+            return;
+        }
+
+        final PlayerFaction otherFaction = faction.getAlly();
+
+        if (otherFaction == null) {
+            promise.reject("Your faction is not allied");
+            return;
+        }
+
+        faction.setAllyFactionId(null);
+        otherFaction.setAllyFactionId(null);
+
+        final FactionAllianceBreakEvent breakEvent = new FactionAllianceBreakEvent(faction, otherFaction);
+        Bukkit.getPluginManager().callEvent(breakEvent);
+
+        FMessage.printAllianceBroken(faction, otherFaction);
+
+        promise.resolve();;
     }
 }

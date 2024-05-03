@@ -25,6 +25,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public final class FactionUtil {
     public static final ImmutableList<Material> PILLAR_MATS = ImmutableList.of(
@@ -197,5 +198,25 @@ public final class FactionUtil {
         }
 
         return ImmutableList.copyOf(result);
+    }
+
+    /**
+     * Accepts a PlayerFaction
+     * @param faction PlayerFaction to compare against
+     * @return Total online player count between two factions
+     */
+    public int getOnlineAlliesCount(PlayerFaction faction) {
+        int count = faction.getOnlineMembers().size();
+
+        if (!faction.hasAlly()) {
+            return count;
+        }
+
+        final PlayerFaction ally = faction.getAlly();
+        if (ally != null) {
+            count += ally.getOnlineMembers().size();
+        }
+
+        return count;
     }
 }
