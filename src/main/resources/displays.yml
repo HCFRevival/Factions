@@ -1,1 +1,6 @@
+style:
+  title_color: '#ffb300'
+  position_color: '#00b3ff'
+  content_color: '#fff'
+  value_color: '#ffcc00'
 data:

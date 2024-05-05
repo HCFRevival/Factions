@@ -14,20 +14,22 @@ import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
 import gg.hcfactions.libs.bukkit.services.impl.account.model.AresAccount;
 import lombok.Getter;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Getter
 public final class LeaderboardDisplayable implements IDisplayable {
-    @Getter public Factions plugin;
-    @Getter public UUID uniqueId;
-    @Getter public final EStatisticType type;
-    @Getter public final String title;
-    @Getter public PLocatable origin;
-    @Getter public Hologram hologram;
+    public Factions plugin;
+    public UUID uniqueId;
+    public final EStatisticType type;
+    public final Component title;
+    public PLocatable origin;
+    public Hologram hologram;
 
     public LeaderboardDisplayable(Factions plugin, EStatisticType type, PLocatable origin) {
         this(plugin, UUID.randomUUID(), type, origin);
@@ -38,7 +40,7 @@ public final class LeaderboardDisplayable implements IDisplayable {
         this.uniqueId = uniqueId;
         this.type = type;
         this.origin = origin;
-        this.title = ChatColor.GOLD + "" + ChatColor.BOLD + type.getDisplayName() + " Leaderboard";
+        this.title = Component.text(type.getDisplayName() + " Leaderboard", plugin.getDisplayManager().getColorConfig().titleColor()).decoration(TextDecoration.BOLD, TextDecoration.State.TRUE);
 
         final CXService cxs = (CXService) plugin.getService(CXService.class);
 
@@ -54,7 +56,7 @@ public final class LeaderboardDisplayable implements IDisplayable {
         final AccountService acs = (AccountService) plugin.getService(AccountService.class);
 
         if (acs == null) {
-            plugin.getAresLogger().error("attempted to update entries without Account service initialized");
+            plugin.getAresLogger().error("Attempted to update entries without Account service initialized");
             return;
         }
 
@@ -76,7 +78,7 @@ public final class LeaderboardDisplayable implements IDisplayable {
                         continue;
                     }
 
-                    plugin.getAresLogger().error("failed to load username during display update: " + holder.getUniqueId().toString());
+                    plugin.getAresLogger().error("Failed to load username during display update: {}", holder.getUniqueId().toString());
                 }
 
                 new Scheduler(plugin).sync(() -> {
@@ -98,7 +100,11 @@ public final class LeaderboardDisplayable implements IDisplayable {
                             value = holder.getStatistic(type) + "";
                         }
 
-                        hologram.updateLine(pos, ChatColor.GOLD + "" + pos + ChatColor.YELLOW + ". " + username + " " + ChatColor.BLUE + "(" + value + ")");
+                        Component component = Component.text(pos + ".", plugin.getDisplayManager().getColorConfig().positionColor())
+                                        .appendSpace().append(Component.text(username, plugin.getDisplayManager().getColorConfig().contentColor()))
+                                        .appendSpace().append(Component.text("(" + value + ")", plugin.getDisplayManager().getColorConfig().valueColor()));
+
+                        hologram.updateLine(pos, component);
                         pos += 1;
                     }
                 }).run();
@@ -108,7 +114,7 @@ public final class LeaderboardDisplayable implements IDisplayable {
 
     public void spawn() {
         if (hologram == null) {
-            plugin.getAresLogger().error("attempted to spawn a null hologram");
+            plugin.getAresLogger().error("Attempted to spawn a null hologram");
             return;
         }
 
@@ -118,7 +124,7 @@ public final class LeaderboardDisplayable implements IDisplayable {
 
     public void despawn() {
         if (hologram == null) {
-            plugin.getAresLogger().error("attempted to despawn a null hologram");
+            plugin.getAresLogger().error("Attempted to despawn a null hologram");
             return;
         }
 
