@@ -75,8 +75,8 @@ public enum ETimerType {
             false
     ),
     CRAPPLE(
-            Component.text("Crapple").color(NamedTextColor.DARK_AQUA),
-            Component.text("Crapple").color(NamedTextColor.DARK_AQUA).decorate(TextDecoration.BOLD),
+            Component.text("Crapple").color(NamedTextColor.GOLD),
+            Component.text("Crapple").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD),
             6,
             true,
             true,
