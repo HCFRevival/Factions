@@ -15,6 +15,7 @@ import gg.hcfactions.libs.acf.annotation.*;
 import gg.hcfactions.libs.base.util.Time;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -68,15 +69,17 @@ public final class TimerCommand extends BaseCommand {
         final FTimer timer = new FTimer(timerType, duration);
         fp.addTimer(timer);
 
-        player.sendMessage(FMessage.SUCCESS + assignedTo.getName()
-                + " has been given a " + timerType.getDisplayName()
-                + FMessage.SUCCESS + " timer for "
-                + ChatColor.RESET + Time.convertToRemaining(duration));
+        player.sendMessage(Component.text(assignedTo.getName(), FMessage.TC_NAME)
+                .appendSpace().append(Component.text("has been assigned a", FMessage.TC_LAYER1))
+                .appendSpace().append(timerType.getDisplayName())
+                .appendSpace().append(Component.text("timer for", FMessage.TC_LAYER1))
+                .appendSpace().append(Component.text(Time.convertToRemaining(duration), FMessage.TC_LAYER2)));
 
-        assignedTo.sendMessage(FMessage.P_NAME + player.getName()
-                + FMessage.LAYER_1 + " assigned a " + timerType.getDisplayName()
-                + FMessage.LAYER_1 + " timer for " + ChatColor.RESET
-                + Time.convertToRemaining(duration));
+        assignedTo.sendMessage(Component.text(player.getName(), FMessage.TC_NAME)
+                .appendSpace().append(Component.text("assigned a", FMessage.TC_LAYER1))
+                .appendSpace().append(timerType.getDisplayName())
+                .appendSpace().append(Component.text("timer for", FMessage.TC_LAYER1))
+                .appendSpace().append(Component.text(Time.convertToRemaining(duration), FMessage.TC_INFO)));
     }
 
     @Subcommand("remove|rem")
