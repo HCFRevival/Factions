@@ -537,10 +537,28 @@ public final class FMessage {
         faction.sendMessage(component);
     }
 
+    public static void printClassCancelled(Player player, IClass playerClass) {
+        Component component = Component.text("Class Cancelled").color(TC_LAYER2)
+                .append(Component.text(":").color(TC_LAYER1))
+                .appendSpace().append(Component.text(playerClass.getName()).color(TC_NAME))
+                .appendNewline().append(Component.text(playerClass.getDescription()).color(TC_LAYER1));
+
+        player.sendMessage(component);
+    }
+
+    public static void printClassPreparing(Player player, IClass playerClass) {
+        Component component = Component.text("Class Preparing").color(TC_LAYER2)
+                .append(Component.text(":").color(TC_LAYER1))
+                .appendSpace().append(Component.text(playerClass.getName()).color(TC_NAME))
+                .appendNewline().append(Component.text(playerClass.getDescription()).color(TC_LAYER1));
+
+        player.sendMessage(component);
+    }
+
     public static void printClassActivated(Player player, IClass playerClass) {
         Component component = Component.text("Class Activated").color(TC_LAYER2)
                         .append(Component.text(":").color(TC_LAYER1))
-                                .appendSpace().append(Component.text(playerClass.getName()).color(TC_INFO))
+                                .appendSpace().append(Component.text(playerClass.getName()).color(TC_NAME))
                         .appendNewline().append(Component.text(playerClass.getDescription()).color(TC_LAYER1));
 
         player.sendMessage(component);
