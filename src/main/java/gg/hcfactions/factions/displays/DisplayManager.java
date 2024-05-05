@@ -22,8 +22,7 @@ import java.util.UUID;
 
 @Getter
 public final class DisplayManager implements IManager {
-    @Getter
-    public record DisplayColorConfig(TextColor titleColor, TextColor positionColor, TextColor contentColor, TextColor valueColor) {}
+    public record DisplayColorConfig(@Getter TextColor titleColor, @Getter TextColor positionColor, @Getter TextColor contentColor, @Getter TextColor valueColor) {}
 
     public Factions plugin;
     public DisplayExecutor executor;
