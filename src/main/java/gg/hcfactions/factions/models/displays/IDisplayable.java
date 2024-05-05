@@ -2,6 +2,7 @@ package gg.hcfactions.factions.models.displays;
 
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -27,7 +28,7 @@ public interface IDisplayable {
     /**
      * @return Title of the display
      */
-    String getTitle();
+    Component getTitle();
 
     /**
      * Calls an update on the display

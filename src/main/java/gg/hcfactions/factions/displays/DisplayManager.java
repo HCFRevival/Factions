@@ -11,7 +11,8 @@ import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.utils.Configs;
 import lombok.Getter;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -19,15 +20,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@Getter
 public final class DisplayManager implements IManager {
-    @Getter public Factions plugin;
-    @Getter public DisplayExecutor executor;
-    @Getter public List<IDisplayable> displayRepository;
-    @Getter public BukkitTask displayUpdaterTask;
+    public record DisplayColorConfig(@Getter TextColor titleColor, @Getter TextColor positionColor, @Getter TextColor contentColor, @Getter TextColor valueColor) {}
+
+    public Factions plugin;
+    public DisplayExecutor executor;
+    public List<IDisplayable> displayRepository;
+    public BukkitTask displayUpdaterTask;
+    public DisplayColorConfig colorConfig;
 
     public DisplayManager(Factions plugin) {
         this.plugin = plugin;
         this.executor = new DisplayExecutor(this);
+        this.colorConfig = null;
     }
 
     @Override
@@ -71,6 +77,16 @@ public final class DisplayManager implements IManager {
             displayRepository.clear();
         }
 
+        final String titleColorHex = conf.getString("style.title_color");
+        final String positionColorHex = conf.getString("style.position_color");
+        final String contentColorHex = conf.getString("style.content_color");
+        final String valueColorHex = conf.getString("style.value_color");
+        final TextColor titleColor = (titleColorHex != null ? TextColor.fromCSSHexString(titleColorHex) : NamedTextColor.GOLD);
+        final TextColor positionColor = (positionColorHex != null ? TextColor.fromCSSHexString(positionColorHex) : NamedTextColor.GOLD);
+        final TextColor contentColor = (contentColorHex != null ? TextColor.fromCSSHexString(contentColorHex) : NamedTextColor.GOLD);
+        final TextColor valueColor = (valueColorHex != null ? TextColor.fromCSSHexString(valueColorHex) : NamedTextColor.GOLD);
+        colorConfig = new DisplayColorConfig(titleColor, positionColor, contentColor, valueColor);
+
         if (conf.get("data") == null) {
             plugin.getAresLogger().warn("no displays found in displays.yml. skipping...");
             return;
@@ -80,7 +96,6 @@ public final class DisplayManager implements IManager {
             final String key = "data." + displayId + ".";
             final UUID uniqueId = UUID.fromString(displayId);
             final PLocatable origin = Configs.parsePlayerLocation(conf, key + "origin");
-            final String title = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString(key + "title")));
 
             // leaderboard displays
             if (conf.get(key + "stat_type") != null) {
@@ -91,7 +106,7 @@ public final class DisplayManager implements IManager {
             }
         }
 
-        plugin.getAresLogger().info("loaded " + displayRepository.size() + " displays");
+        plugin.getAresLogger().info("Loaded {} displays", displayRepository.size());
     }
 
     public void saveDisplays() {
@@ -99,8 +114,6 @@ public final class DisplayManager implements IManager {
 
         for (IDisplayable displayable : displayRepository) {
             final String key = "data." + displayable.getUniqueId().toString() + ".";
-
-            conf.set(key + "title", displayable.getTitle());
             Configs.writePlayerLocation(conf, key + "origin", displayable.getOrigin());
 
             if (displayable instanceof final LeaderboardDisplayable lbd) {
@@ -109,7 +122,7 @@ public final class DisplayManager implements IManager {
         }
 
         plugin.saveConfiguration("displays", conf);
-        plugin.getAresLogger().info("saved " + displayRepository.size() + " displays to file");
+        plugin.getAresLogger().info("Saved {} displays to file", displayRepository.size());
     }
 
     public void deleteDisplays(IDisplayable displayable) {

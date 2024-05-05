@@ -107,7 +107,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
 
         final int warmup = playerClass.getWarmup();
 
-        player.sendMessage(ChatColor.GOLD + "Preparing Class" + ChatColor.YELLOW + ": " + ChatColor.GREEN + playerClass.getName());
+        FMessage.printClassPreparing(player, playerClass);
         factionPlayer.addTimer(new FTimer(ETimerType.CLASS, warmup));
     }
 
@@ -127,7 +127,7 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         final IClass currentClass = plugin.getClassManager().getCurrentClass(player);
 
         if (currentClass != null) {
-            player.sendMessage(ChatColor.GOLD + "Class Canceled" + ChatColor.YELLOW + ": " + ChatColor.RED + currentClass.getName());
+            FMessage.printClassCancelled(player, currentClass);
         }
 
         if (factionPlayer.hasTimer(ETimerType.CLASS)) {

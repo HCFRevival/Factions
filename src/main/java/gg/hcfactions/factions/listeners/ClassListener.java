@@ -3,6 +3,7 @@ package gg.hcfactions.factions.listeners;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.*;
@@ -886,6 +887,46 @@ public final class ClassListener implements Listener {
         }
 
         factionPlayer.addTimer(new FTimer(ETimerType.TRIDENT, plugin.getConfiguration().getTridentDuration()));
+    }
+
+    /**
+     * Scale tank class when it activates
+     * @param event ClassActivateEvent
+     */
+    @EventHandler
+    public void onTankResize(ClassActivateEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = event.getPlayerClass();
+
+        if (playerClass instanceof Tank) {
+            final CXService cxs = (CXService) plugin.getService(CXService.class);
+
+            if (cxs != null) {
+                cxs.getAttributeManager().scale(player, 1.25, 20, false);
+            }
+        }
+    }
+
+    /**
+     * Scale tank class when it deactivates
+     * @param event ClassDeactivateEvent
+     */
+    @EventHandler
+    public void onTankResize(ClassDeactivateEvent event) {
+        final Player player = event.getPlayer();
+        final IClass playerClass = event.getPlayerClass();
+
+        if (!player.isOnline()) {
+            return;
+        }
+
+        if (playerClass instanceof Tank) {
+            final CXService cxs = (CXService) plugin.getService(CXService.class);
+
+            if (cxs != null) {
+                cxs.getAttributeManager().scale(player, 1.0, 20, false);
+            }
+        }
     }
 
     /**
