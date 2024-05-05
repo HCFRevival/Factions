@@ -616,12 +616,12 @@ public final class FMessage {
         subclaim.sendMessage(component);
     }
 
-    public static Component getPublicFormat(PlayerFaction faction, String displayName, long kills, String message, Player receiver) {
+    public static Component getPublicFormat(PlayerFaction faction, Component displayName, long kills, String message, Player receiver) {
         if (faction == null) {
-            return Component.text("[" + kills + "]").color(TC_INFO)
-                    .append(LegacyComponentSerializer.legacySection().deserialize(displayName)
-                    .append(Component.text(":").color(NamedTextColor.WHITE))
-                    .appendSpace().append(Component.text(message)).color(NamedTextColor.WHITE));
+            return Component.text("[" + kills + "]", TC_INFO)
+                    .append(displayName)
+                    .append(Component.text(":", NamedTextColor.WHITE))
+                    .appendSpace().append(Component.text(message, NamedTextColor.WHITE));
         }
 
         NamedTextColor textColor;
@@ -633,23 +633,23 @@ public final class FMessage {
             textColor = NamedTextColor.RED;
         }
 
-        return Component.text("[" + faction.getName() + "]").color(textColor)
-                .append(Component.text("[" + kills + "]").color(TC_INFO))
-                .append(LegacyComponentSerializer.legacySection().deserialize(displayName))
-                .append(Component.text(":").color(NamedTextColor.WHITE))
-                .appendSpace().append(Component.text(message).color(NamedTextColor.WHITE));
+        return Component.text("[" + faction.getName() + "]", textColor)
+                .append(Component.text("[" + kills + "]", TC_INFO))
+                .append(displayName)
+                .append(Component.text(":", NamedTextColor.WHITE))
+                .appendSpace().append(Component.text(message, NamedTextColor.WHITE));
     }
 
-    public static Component getFactionFormat(String displayName, String message) {
+    public static Component getFactionFormat(Component displayName, String message) {
         return Component.text("[FC]").color(NamedTextColor.DARK_GREEN)
-                .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(displayName))
+                .appendSpace().append(displayName)
                 .append(Component.text(":").color(NamedTextColor.DARK_GREEN))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.DARK_GREEN));
     }
 
-    public static Component getAllyFormat(String displayName, String message) {
+    public static Component getAllyFormat(Component displayName, String message) {
         return Component.text("[A]").color(NamedTextColor.BLUE)
-                .appendSpace().append(LegacyComponentSerializer.legacySection().deserialize(displayName))
+                .appendSpace().append(displayName)
                 .append(Component.text(":").color(NamedTextColor.BLUE))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.BLUE));
     }

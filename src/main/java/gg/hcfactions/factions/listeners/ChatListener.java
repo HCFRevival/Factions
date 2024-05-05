@@ -7,6 +7,7 @@ import gg.hcfactions.factions.models.stats.EStatisticType;
 import gg.hcfactions.factions.models.stats.impl.PlayerStatHolder;
 import gg.hcfactions.libs.bukkit.events.impl.ProcessedChatEvent;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,7 +17,7 @@ public record ChatListener(@Getter Factions plugin) implements Listener {
     @EventHandler(priority = EventPriority.MONITOR) /* Adds factions chat formatting and implements chat macros */
     public void onProcessedChat(ProcessedChatEvent event) {
         final Player player = event.getPlayer();
-        final String displayName = event.getDisplayName();
+        final Component displayName = event.getDisplayName();
         final String message = event.getMessage();
 
         if (event.isCancelled()) {
