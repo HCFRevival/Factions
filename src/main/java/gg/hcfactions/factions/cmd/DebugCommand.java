@@ -10,6 +10,8 @@ import gg.hcfactions.libs.acf.annotation.CommandPermission;
 import gg.hcfactions.libs.acf.annotation.Subcommand;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -28,5 +30,13 @@ public final class DebugCommand extends BaseCommand {
                 player.sendMessage("Global Entries: " + kothEvent.getSession().getTracker().getEntries().size());
             }
         });
+    }
+
+    @Subcommand("boss")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onDebugBossMob(Player player) {
+        final BossGiant giant = new BossGiant(plugin, player.getLocation());
+        giant.spawn();
+        player.sendMessage(Component.text("Boss has been spawned", NamedTextColor.GREEN));
     }
 }
