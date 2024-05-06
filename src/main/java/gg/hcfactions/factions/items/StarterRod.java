@@ -2,25 +2,34 @@ package gg.hcfactions.factions.items;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import gg.hcfactions.factions.Factions;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.List;
 import java.util.Map;
 
 public final class StarterRod implements ICustomItem {
+    @Getter public final Factions plugin;
+
+    public StarterRod(Factions plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public Material getMaterial() {
         return Material.FISHING_ROD;
     }
 
     @Override
-    public String getName() {
-        return ChatColor.GREEN + "Welcome to Revival";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "StarterRod");
     }
 
     @Override

@@ -12,6 +12,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.MusicInstrument;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -49,8 +50,8 @@ public record RetreatBattleHorn(@Getter Factions plugin) implements ICustomItem,
     }
 
     @Override
-    public String getName() {
-        return ChatColor.DARK_RED + "Retreat!";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "RetreatBattleHorn");
     }
 
     @Override

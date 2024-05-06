@@ -27,7 +27,7 @@ public final class CrowbarManager implements IManager {
             return;
         }
 
-        cis.registerNewItem(new Crowbar());
+        cis.registerNewItem(new Crowbar(plugin));
     }
 
     @Override

@@ -197,7 +197,7 @@ public final class Factions extends AresPlugin {
         // declare services
         final RankService rankService = new RankService(this);
         final CXService commandXService = new CXService(this);
-        final CustomItemService customItemService = new CustomItemService(this);
+        final CustomItemService customItemService = new CustomItemService(this, namespacedKey);
         final AccountService accountService = new AccountService(this, configuration.getMongoDatabaseName());
         final DeathbanService deathbanService = new DeathbanService(this, configuration.getDeathbanConfig());
         final SyncService syncService = new SyncService(this, configuration.getMongoDatabaseName());
@@ -300,13 +300,13 @@ public final class Factions extends AresPlugin {
         new FRecipes(this, configuration.getRecipeConfig()).register();
 
         // custom items
-        customItemService.registerNewItem(new Sugarcube());
+        customItemService.registerNewItem(new Sugarcube(this));
         customItemService.registerNewItem(new RetreatBattleHorn(this));
         customItemService.registerNewItem(new CleanseBattleHorn(this));
         customItemService.registerNewItem(new ChargeBattleHorn(this));
         customItemService.registerNewItem(new BerserkBattleHorn(this));
         customItemService.registerNewItem(new SymsSong(this));
-        customItemService.registerNewItem(new StarterRod());
+        customItemService.registerNewItem(new StarterRod(this));
 
         // mythics
         customItemService.registerNewItem(new DeepslateMiner(this));

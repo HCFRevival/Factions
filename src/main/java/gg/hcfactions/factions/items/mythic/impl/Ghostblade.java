@@ -14,10 +14,7 @@ import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -67,8 +64,8 @@ public final class Ghostblade implements IMythicItem {
     }
 
     @Override
-    public String getName() {
-        return ChatColor.LIGHT_PURPLE + "Ghostblade";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "Ghostblade");
     }
 
     @Override

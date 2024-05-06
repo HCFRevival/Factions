@@ -56,8 +56,8 @@ public final class NeptunesFury implements IMythicItem {
     }
 
     @Override
-    public String getName() {
-        return ChatColor.DARK_AQUA + "Neptune's Fury";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "NeptunesFury");
     }
 
     @Override

@@ -11,6 +11,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.List;
@@ -31,11 +32,6 @@ public final class SymsSong implements IMythicItem {
     }
 
     @Override
-    public String getName() {
-        return ChatColor.DARK_AQUA + "Sym's Song";
-    }
-
-    @Override
     public List<String> getLore() {
         return List.of();
     }
@@ -43,6 +39,11 @@ public final class SymsSong implements IMythicItem {
     @Override
     public List<Component> getLoreComponents() {
         return getMythicLore();
+    }
+
+    @Override
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "SymsSong");
     }
 
     @Override

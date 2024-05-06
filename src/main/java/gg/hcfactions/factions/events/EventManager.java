@@ -63,7 +63,7 @@ public final class EventManager implements IManager {
             return;
         }
 
-        cis.registerNewItem(new EventBuilderWand());
+        cis.registerNewItem(new EventBuilderWand(plugin));
 
         kothTickingTask = new KOTHTickingTask(this);
         conqTickingTask = new ConquestTickingTask(this);

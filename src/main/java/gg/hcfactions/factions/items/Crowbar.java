@@ -2,11 +2,13 @@ package gg.hcfactions.factions.items;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import gg.hcfactions.factions.Factions;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.List;
@@ -18,14 +20,20 @@ public final class Crowbar implements ICustomItem {
     public static final Component MONSTER_SPAWNER_PREFIX_COMPONENT = Component.text("Monster Spawners:").color(NamedTextColor.YELLOW).appendSpace();
     public static final Component END_PORTAL_PREFIX_COMPONENT = Component.text("End Portal Frames:").color(NamedTextColor.YELLOW).appendSpace();
 
+    public final Factions plugin;
+
+    public Crowbar(Factions plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public Material getMaterial() {
         return Material.DIAMOND_HOE;
     }
 
     @Override
-    public String getName() {
-        return ChatColor.DARK_RED + "Crowbar";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "Crowbar");
     }
 
     @Override
