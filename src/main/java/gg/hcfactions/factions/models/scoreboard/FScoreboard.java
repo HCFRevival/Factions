@@ -4,6 +4,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.player.EScoreboardEntryType;
 import gg.hcfactions.libs.bukkit.scoreboard.AresScoreboard;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
@@ -11,7 +12,7 @@ import org.bukkit.scoreboard.Team;
 public final class FScoreboard extends AresScoreboard {
     public Factions plugin;
 
-    public FScoreboard(Factions plugin, Player player, String title) {
+    public FScoreboard(Factions plugin, Player player, Component title) {
         super(plugin, player, title);
         this.plugin = plugin;
 

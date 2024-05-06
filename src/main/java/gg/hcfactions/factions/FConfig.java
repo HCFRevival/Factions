@@ -9,6 +9,7 @@ import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanConfig;
 import gg.hcfactions.libs.bukkit.utils.Configs;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -131,7 +132,7 @@ public final class FConfig {
     @Getter public int conquestTicketLossPerDeath;
 
     // display
-    @Getter public String scoreboardTitle;
+    @Getter public Component scoreboardTitle;
     @Getter public String scoreboardFooter;
     @Getter public int displayUpdateInterval;
 
@@ -395,8 +396,8 @@ public final class FConfig {
         startingBalance = conf.getInt("economy.starting_balance");
         plugin.getAresLogger().info("Economy Starting Balance: " + startingBalance);
 
-        scoreboardTitle = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString("scoreboard.title")));
-        scoreboardFooter = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString("scoreboard.footer")));
+        scoreboardTitle = plugin.getMiniMessage().deserialize(Objects.requireNonNull(conf.getString("scoreboard.title")));
+        scoreboardFooter = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(conf.getString("scoreboard.footer"))); // TODO: Port this over eventually
         plugin.getAresLogger().info("Scoreboard Title: " + scoreboardTitle);
         plugin.getAresLogger().info("Scoreboard Footer: " + scoreboardFooter);
 

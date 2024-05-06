@@ -224,7 +224,7 @@ economy:
 
 # Scoreboard configuration
 scoreboard:
-  title: '&6&lHCFR &c[Map 1]'
+  title: '<color:#ffae00><b>HCFR</b></color> <color:#00bfff>[Map 1]</color>'
   footer: '&c&lplay.hcfrevival.net'
 
 # Server state configuration

@@ -113,9 +113,11 @@ public final class FRecipes {
         if (config.isTotemEnabled() && Bukkit.getRecipe(totemKey) == null) {
             final ShapedRecipe recipe = new ShapedRecipe(totemKey, new ItemStack(Material.TOTEM_OF_UNDYING));
 
-            recipe.shape(" H ", "EEE", " E ");
-            recipe.setIngredient('H', Material.PLAYER_HEAD);
-            recipe.setIngredient('E', Material.EMERALD_BLOCK);
+            recipe.shape("E E", "IBI", " N ");
+            recipe.setIngredient('E', Material.EMERALD);
+            recipe.setIngredient('I', Material.GOLD_INGOT);
+            recipe.setIngredient('B', Material.GOLD_BLOCK);
+            recipe.setIngredient('N', Material.NETHER_STAR);
 
             Bukkit.addRecipe(recipe);
             plugin.getAresLogger().info("registered recipe: totem");
@@ -166,16 +168,18 @@ public final class FRecipes {
         }
     }
 
+    @Setter
+    @Getter
     @AllArgsConstructor
     public static class Config {
-        @Getter @Setter public boolean saddlesEnabled;
-        @Getter @Setter public boolean heartOfTheSeaEnabled;
-        @Getter @Setter public boolean tridentEnabled;
-        @Getter @Setter public boolean chainmailArmorEnabled;
-        @Getter @Setter public boolean totemEnabled;
-        @Getter @Setter public boolean gappleEnabled;
-        @Getter @Setter public boolean nametagsEnabled;
-        @Getter @Setter public boolean smithingUpgradeEnabled;
-        @Getter @Setter public boolean simpleGlisteningMelonEnabled;
+        public boolean saddlesEnabled;
+        public boolean heartOfTheSeaEnabled;
+        public boolean tridentEnabled;
+        public boolean chainmailArmorEnabled;
+        public boolean totemEnabled;
+        public boolean gappleEnabled;
+        public boolean nametagsEnabled;
+        public boolean smithingUpgradeEnabled;
+        public boolean simpleGlisteningMelonEnabled;
     }
 }
