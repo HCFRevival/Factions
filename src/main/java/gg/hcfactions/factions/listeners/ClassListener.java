@@ -746,7 +746,7 @@ public final class ClassListener implements Listener {
                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 
                 // Play effect
-                attackedLocation.getWorld().spawnParticle(Particle.HEART, attackedLocation.getX(), attackedLocation.getY() + 1.5, attackedLocation.getZ(), 8, 0.5, 0.5, 0.5, 1);
+                attackedLocation.getWorld().spawnParticle(Particle.RAID_OMEN, attackedLocation.getX(), attackedLocation.getY() + 1.5, attackedLocation.getZ(), 8, 0.5, 0.5, 0.5, 1);
                 Worlds.playSound(attackedLocation, Sound.ENTITY_ITEM_BREAK);
 
                 // Print backstab to attacker
