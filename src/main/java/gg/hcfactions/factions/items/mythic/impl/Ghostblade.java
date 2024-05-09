@@ -47,12 +47,12 @@ public final class Ghostblade implements IMythicItem {
 
         addAbilityInfo(
                 ChatColor.LIGHT_PURPLE + "Excited",
-                ChatColor.GRAY + "Slaying an enemy will grant you and nearby faction members Speed III and Haste II for " + ghostbladeConfig.killEffectDuration() + " seconds.",
+                "Slaying an enemy will grant you and nearby faction members Speed III and Haste II for " + ghostbladeConfig.killEffectDuration() + " seconds.",
                 EMythicAbilityType.ON_KILL);
 
         addAbilityInfo(
                 ChatColor.WHITE + "Refreshed",
-                ChatColor.GRAY + "Attacking an enemy has a 5% chance to extend your active Speed effect by "
+                "Attacking an enemy has a 5% chance to extend your active Speed effect by "
                         + ghostbladeConfig.refreshEffectMinDuration() + "-" + ghostbladeConfig.refreshEffectMaxDuration() + " seconds.",
                 EMythicAbilityType.ON_HIT
         );
