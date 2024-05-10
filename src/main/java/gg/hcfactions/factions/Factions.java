@@ -30,7 +30,6 @@ import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.factions.state.ServerStateManager;
 import gg.hcfactions.factions.stats.StatsManager;
 import gg.hcfactions.factions.timers.TimerManager;
-import gg.hcfactions.factions.utils.FRecipes;
 import gg.hcfactions.factions.waypoints.WaypointManager;
 import gg.hcfactions.libs.acf.PaperCommandManager;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
@@ -43,6 +42,7 @@ import gg.hcfactions.libs.bukkit.services.impl.deathbans.DeathbanService;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.punishments.PunishmentService;
 import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
+import gg.hcfactions.libs.bukkit.services.impl.recipe.CustomRecipeService;
 import gg.hcfactions.libs.bukkit.services.impl.reports.ReportService;
 import gg.hcfactions.libs.bukkit.services.impl.sync.SyncService;
 import gg.hcfactions.libs.bukkit.services.impl.xp.XPService;
@@ -206,6 +206,7 @@ public final class Factions extends AresPlugin {
         final AutomodService automodService = new AutomodService(this);
         final ReportService reportService = new ReportService(this);
         final AltService altService = new AltService(this);
+        final CustomRecipeService customRecipeService = new CustomRecipeService(this);
         final XPService xpService = new XPService(this, "dev", "xp_players", "xp_transactions");
 
         // register services
@@ -220,6 +221,7 @@ public final class Factions extends AresPlugin {
         registerService(reportService);
         registerService(altService);
         registerService(xpService);
+        registerService(customRecipeService);
         startServices();
 
         // initialize gson
@@ -298,7 +300,7 @@ public final class Factions extends AresPlugin {
         registerListener(new EventTrackerListener(this));
 
         // custom recipes
-        new FRecipes(this, configuration.getRecipeConfig()).register();
+        // new FRecipes(this, configuration.getRecipeConfig()).register();
 
         // custom items
         customItemService.registerNewItem(new Sugarcube(this));
