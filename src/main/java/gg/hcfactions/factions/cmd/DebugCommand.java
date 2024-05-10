@@ -3,6 +3,7 @@ package gg.hcfactions.factions.cmd;
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.models.boss.impl.BossGiant;
+import gg.hcfactions.factions.models.boss.impl.BossPhantom;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.libs.acf.BaseCommand;
 import gg.hcfactions.libs.acf.annotation.CommandAlias;
@@ -35,8 +36,12 @@ public final class DebugCommand extends BaseCommand {
     @Subcommand("boss")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     public void onDebugBossMob(Player player) {
-        final BossGiant giant = new BossGiant(plugin, player.getLocation());
-        giant.spawn();
+        //final BossGiant giant = new BossGiant(plugin, player.getLocation());
+        //giant.spawn();
+
+        final BossPhantom phantom = new BossPhantom(plugin, player.getLocation());
+        phantom.spawn();
+
         player.sendMessage(Component.text("Boss has been spawned", NamedTextColor.GREEN));
     }
 }
