@@ -28,7 +28,7 @@ public final class SubclaimBuilderManager implements IManager {
             return;
         }
 
-        cis.registerNewItem(new FactionSubclaimAxe());
+        cis.registerNewItem(new FactionSubclaimAxe(subclaimManager.getPlugin()));
     }
 
     @Override

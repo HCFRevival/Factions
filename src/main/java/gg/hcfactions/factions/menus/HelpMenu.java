@@ -14,8 +14,13 @@ import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
+import gg.hcfactions.libs.bukkit.services.impl.recipe.CustomRecipeService;
+import gg.hcfactions.libs.bukkit.services.impl.recipe.ICustomRecipe;
+import gg.hcfactions.libs.bukkit.services.impl.recipe.menu.CustomRecipeMenu;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -25,6 +30,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,6 +151,35 @@ public final class HelpMenu extends GenericMenu {
                 cursor += 1;
             }
 
+            return;
+        }
+
+        if (page.equals(EHelpMenuPage.RECIPE)) {
+            final CustomRecipeService crs = (CustomRecipeService) plugin.getService(CustomRecipeService.class);
+
+            if (crs != null) {
+                List<ICustomRecipe> sorted = Lists.newArrayList(crs.getRecipeRepository());
+                sorted.sort((o1, o2) -> o1.getKey().compareToIgnoreCase(o2.getKey()));
+
+                int index = 0;
+
+                for (ICustomRecipe recipe : sorted) {
+                    addItem(new Clickable(recipe.getResult(), index, click -> {
+                        if (!recipe.isEnabled()) {
+                            player.closeInventory();
+                            player.sendMessage(Component.text("This recipe is disabled", NamedTextColor.RED));
+                            return;
+                        }
+
+                        CustomRecipeMenu menu = new CustomRecipeMenu(plugin, player, recipe);
+                        menu.open();
+                    }));
+
+                    index += 1;
+                }
+            }
+
+            fill(new ItemBuilder().setMaterial(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.RESET + "").build());
             return;
         }
 

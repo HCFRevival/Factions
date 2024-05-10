@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public final class FactionClaimingStick implements ICustomItem {
     }
 
     @Override
-    public String getName() {
-        return ChatColor.GREEN + "Faction Claiming Stick";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(claimBuilderManager.getClaimManager().getPlugin().getNamespacedKey(), "FactionClaimingStick");
     }
 
     @Override

@@ -22,6 +22,9 @@ import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -671,7 +674,7 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        if (!attacker.getInventory().getItemInHand().getType().equals(Material.GOLDEN_SWORD)) {
+        if (!attacker.getInventory().getItemInMainHand().getType().equals(Material.GOLDEN_SWORD)) {
             return;
         }
 
@@ -700,9 +703,26 @@ public final class ClassListener implements Listener {
                     return;
                 }
 
-                attacked.sendMessage(ChatColor.RED + "You have been " + ChatColor.DARK_RED + "" + ChatColor.BOLD + "BACKSTABBED!");
+                attacked.sendMessage(Component.text("You have been", NamedTextColor.RED).appendSpace().append(Component.text("BACKSTABBED!", NamedTextColor.DARK_RED).decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)));
 
-                for (int i = 1; i <= 3; i++) {
+                double toSubtract = rogue.getBackstabDamage(); // TODO: Make configurable
+                double totalAbsorption = attacked.getAbsorptionAmount();
+
+                if (totalAbsorption > 0) {
+                    if (totalAbsorption >= toSubtract) {
+                        attacked.setAbsorptionAmount((totalAbsorption - toSubtract));
+                    } else {
+                        attacked.setAbsorptionAmount(0);
+                        toSubtract -= totalAbsorption;
+                    }
+                }
+
+                double newHealth = Math.max(attacked.getHealth() - toSubtract, 0.0);
+                attacked.setHealth(newHealth);
+                event.setDamage(0.0);
+
+                // Bleeding damage code
+                /* for (int i = 1; i <= 3; i++) {
                     new Scheduler(plugin).sync(() -> {
                         if (!attacked.isOnline() || attacked.isDead() || attacked.getHealth() <= 0.0) {
                             return;
@@ -720,19 +740,27 @@ public final class ClassListener implements Listener {
                         attacked.damage(0.0); // Create the illusion of the player taking flinching damage
                         attacked.setHealth(health);
                     }).delay(((long) i * rogue.getBackstabTickrate())).run();
-                }
+                } */
 
+                // Remove sword
                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 
-                Objects.requireNonNull(attackedLocation.getWorld()).spawnParticle(Particle.HEART, attackedLocation.getX(), attackedLocation.getY() + 1.0, attackerLocation.getZ(), 3, 2.0, 2.0, 2.0);
+                // Play effect
+                attackedLocation.getWorld().spawnParticle(Particle.RAID_OMEN, attackedLocation.getX(), attackedLocation.getY() + 1.5, attackedLocation.getZ(), 8, 0.5, 0.5, 0.5, 1);
                 Worlds.playSound(attackedLocation, Sound.ENTITY_ITEM_BREAK);
 
+                // Print backstab to attacker
+                Component attackedComponent;
+
                 if (!attacked.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    attacker.sendMessage(ChatColor.YELLOW + "You have " + ChatColor.RED + "backstabbed" + ChatColor.GOLD + " " + attacked.getName());
+                    attackedComponent = Component.text(attacked.getName(), NamedTextColor.GOLD);
                 } else {
-                    attacker.sendMessage(ChatColor.YELLOW + "You have " + ChatColor.RED + "backstabbed" + ChatColor.GRAY + " ? ? ?");
+                    attackedComponent = Component.text("???", NamedTextColor.GRAY);
                 }
 
+                attacker.sendMessage(Component.text("You have backstabbed", NamedTextColor.YELLOW).appendSpace().append(attackedComponent));
+
+                // Apply cooldown
                 final long nextBackstab = Time.now() + (rogue.getBackstabCooldown() * 1000L);
                 rogue.getBackstabCooldowns().put(attackerUUID, nextBackstab);
 
@@ -740,7 +768,7 @@ public final class ClassListener implements Listener {
                     rogue.getBackstabCooldowns().remove(attackerUUID);
 
                     if (Bukkit.getPlayer(attackerUUID) != null) {
-                        Objects.requireNonNull(Bukkit.getPlayer(attackerUUID)).sendMessage(ChatColor.GREEN + rogue.getName() + " backstab is ready");
+                        Objects.requireNonNull(Bukkit.getPlayer(attackerUUID)).sendMessage(Component.text(rogue.getName() + " backstab is ready", NamedTextColor.GREEN));
                         Players.playSound(Objects.requireNonNull(Bukkit.getPlayer(attackerUUID)), Sound.BLOCK_NOTE_BLOCK_HARP);
                     }
                 }).delay(rogue.getBackstabCooldown() * 20L).run();

@@ -182,6 +182,10 @@ public final class FactionUtil {
                 continue;
             }
 
+            if (faction != null && faction.getAlly() != null && faction.getAlly().isMember(otherPlayer)) {
+                continue;
+            }
+
             final Claim insideClaim = plugin.getClaimManager().getClaimAt(new PLocatable(otherPlayer));
 
             if (insideClaim != null) {

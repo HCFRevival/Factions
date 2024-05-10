@@ -218,7 +218,7 @@ public final class MythicItemListener implements Listener {
         }
 
         if (event.getEntity() instanceof final Trident trident) {
-            final ItemStack item = trident.getItem();
+            final ItemStack item = trident.getItemStack();
             final Optional<ICustomItem> customItemQuery = customItemService.getItem(item);
 
             if (customItemQuery.isEmpty()) {

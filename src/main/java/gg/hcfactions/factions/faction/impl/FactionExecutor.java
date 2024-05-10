@@ -2124,7 +2124,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     public void printTeamLocate(Player player, Promise promise) {
         final PlayerFaction faction = manager.getPlayerFactionByPlayer(player);
         final RankService rankService = (RankService) manager.getPlugin().getService(RankService.class);
-        String displayName = ChatColor.RESET + player.getName();
+        Component displayName = Component.text(player.getName(), NamedTextColor.WHITE);
 
         if (faction == null) {
             promise.reject(FError.P_NOT_IN_FAC.getErrorDescription());
@@ -2132,7 +2132,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         if (rankService != null) {
-            displayName = rankService.getFormattedName(player);
+            displayName = rankService.getFormattedNameComponent(player);
         }
 
         final String x = String.format("%.2f", player.getLocation().getX());

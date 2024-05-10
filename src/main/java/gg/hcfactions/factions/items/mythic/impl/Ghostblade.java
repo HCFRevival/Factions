@@ -14,10 +14,7 @@ import gg.hcfactions.libs.bukkit.utils.Worlds;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -50,12 +47,12 @@ public final class Ghostblade implements IMythicItem {
 
         addAbilityInfo(
                 ChatColor.LIGHT_PURPLE + "Excited",
-                ChatColor.GRAY + "Slaying an enemy will grant you and nearby faction members Speed III and Haste II for " + ghostbladeConfig.killEffectDuration() + " seconds.",
+                "Slaying an enemy will grant you and nearby faction members Speed III and Haste II for " + ghostbladeConfig.killEffectDuration() + " seconds.",
                 EMythicAbilityType.ON_KILL);
 
         addAbilityInfo(
                 ChatColor.WHITE + "Refreshed",
-                ChatColor.GRAY + "Attacking an enemy has a 5% chance to extend your active Speed effect by "
+                "Attacking an enemy has a 5% chance to extend your active Speed effect by "
                         + ghostbladeConfig.refreshEffectMinDuration() + "-" + ghostbladeConfig.refreshEffectMaxDuration() + " seconds.",
                 EMythicAbilityType.ON_HIT
         );
@@ -67,8 +64,8 @@ public final class Ghostblade implements IMythicItem {
     }
 
     @Override
-    public String getName() {
-        return ChatColor.LIGHT_PURPLE + "Ghostblade";
+    public Map.Entry<NamespacedKey, String> getIdentifier() {
+        return Map.entry(plugin.getNamespacedKey(), "Ghostblade");
     }
 
     @Override
