@@ -3,8 +3,10 @@ package gg.hcfactions.factions.listeners;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ClassReadyEvent;
 import gg.hcfactions.factions.listeners.events.player.ClassUnreadyEvent;
+import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerDamageCombatLoggerEvent;
 import gg.hcfactions.factions.models.classes.IClass;
+import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.factions.models.timer.ETimerType;
@@ -15,6 +17,8 @@ import gg.hcfactions.libs.bukkit.events.impl.PlayerDamagePlayerEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerLingeringSplashEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerSplashPlayerEvent;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -229,6 +233,28 @@ public record TimerListener(@Getter Factions plugin) implements Listener {
         } else if (timer.getRemainingSeconds() < attackerDuration) {
             timer.setExpire(Time.now() + (attackerDuration * 1000L));
         }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onClassConsume(ConsumeClassItemEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (factionPlayer == null) {
+            player.sendMessage(Component.text(FError.P_COULD_NOT_LOAD_P.getErrorDescription(), NamedTextColor.RED));
+            event.setCancelled(true);
+            return;
+        }
+
+        if (!factionPlayer.hasTimer(ETimerType.COMBAT)) {
+            FMessage.printCombatTag(player, (plugin.getConfiguration().getAttackerCombatTagDuration()*1000L));
+        }
+
+        factionPlayer.addTimer(new FTimer(ETimerType.COMBAT, plugin.getConfiguration().getAttackerCombatTagDuration()));
     }
 
     /**
