@@ -6,7 +6,7 @@ data:
       damage_reduction: 0.25
       effects:
         REGENERATION: 1
-        DAMAGE_RESISTANCE: 1
+        RESISTANCE: 1
         ABSORPTION: 2
     stamina:
       damage_divider: 0.25
@@ -16,8 +16,8 @@ data:
         interval: 1
     passive:
       HEALTH_BOOST: 3
-      SLOW: 2
-      DAMAGE_RESISTANCE: 2
+      SLOWNESS: 2
+      RESISTANCE: 2
   miner:
     warmup: 5
     passive:
@@ -35,8 +35,8 @@ data:
   rogue:
     warmup: 30
     backstab:
-      cooldown: 3
-      damage: 1.0
+      cooldown: 1
+      damage: 3.0
       tickrate: 10
     grapple:
       cooldown: 5
@@ -51,7 +51,7 @@ data:
         partial: 8
     passive:
       SPEED: 3
-      JUMP: 2
+      JUMP_BOOST: 2
     consumables:
       SPEED:
         material: 'SUGAR'
