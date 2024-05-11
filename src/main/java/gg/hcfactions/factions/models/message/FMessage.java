@@ -824,7 +824,7 @@ public final class FMessage {
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
         Component component = Component.text("[Teleport to " + username + "'s Death Location]")
                 .color(NamedTextColor.GRAY)
-                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                 .hoverEvent(Component.text("Click to teleport").color(NamedTextColor.BLUE));
 
@@ -834,7 +834,7 @@ public final class FMessage {
     public static void printStaffCombatLogger(Player viewer, String username, Location location) {
         Component component = Component.text("[Teleport to " + username + "'s Combat Logger]")
                 .color(NamedTextColor.GRAY)
-                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                 .hoverEvent(Component.text("Click to teleport").color(NamedTextColor.BLUE));
 
