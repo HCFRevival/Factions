@@ -631,14 +631,6 @@ public final class ClassListener implements Listener {
             return;
         }
 
-        if (factionPlayer != null) {
-            if (!factionPlayer.hasTimer(ETimerType.COMBAT)) {
-                FMessage.printCombatTag(player, (plugin.getConfiguration().getAttackerCombatTagDuration()*1000L));
-            }
-
-            factionPlayer.addTimer(new FTimer(ETimerType.COMBAT, plugin.getConfiguration().getAttackerCombatTagDuration()));
-        }
-
         consumable.consume(player, event.getItem(), handType);
     }
 

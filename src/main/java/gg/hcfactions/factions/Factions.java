@@ -76,6 +76,12 @@ public final class Factions extends AresPlugin {
     @Getter public BossManager bossManager;
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+        registerPacketEvents();
+    }
+
+    @Override
     public void onEnable() {
         instance = this;
 
@@ -192,9 +198,6 @@ public final class Factions extends AresPlugin {
         registerConnectable(mdb);
         registerConnectable(redis);
 
-        // protocol lib init
-        registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
-
         // declare services
         final RankService rankService = new RankService(this);
         final CXService commandXService = new CXService(this);
@@ -207,7 +210,7 @@ public final class Factions extends AresPlugin {
         final ReportService reportService = new ReportService(this);
         final AltService altService = new AltService(this);
         final CustomRecipeService customRecipeService = new CustomRecipeService(this);
-        final XPService xpService = new XPService(this, "dev", "xp_players", "xp_transactions");
+        final XPService xpService = new XPService(this, configuration.getMongoDatabaseName(), "xp_players", "xp_transactions");
 
         // register services
         registerService(accountService);

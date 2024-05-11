@@ -60,6 +60,7 @@ public final class HelpMenu extends GenericMenu {
                 final ItemStack icon = new ItemBuilder()
                         .setMaterial(menuPage.getIconMaterial())
                         .setName(menuPage.getDisplayName())
+                        .addFlag(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
                         .addFlag(ItemFlag.HIDE_ATTRIBUTES)
                         .addLore(menuPage.getDescription()).build();
 
@@ -103,7 +104,7 @@ public final class HelpMenu extends GenericMenu {
                             + Strings.capitalize(effectType.getKey().getKey().toLowerCase().replaceAll("_", " "))
                             + (potionLimit.isDisabled() ? ChatColor.DARK_RED + " (DISABLED)" : ""));
 
-                    potionMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+                    potionMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
                     potionMeta.setColor(color);
                     potionMeta.setLore(lore);
 

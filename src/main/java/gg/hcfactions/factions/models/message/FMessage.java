@@ -574,8 +574,8 @@ public final class FMessage {
 
     public static void printRogueUncloak(Player player, String reason) {
         Component component = Component.text("Uncloaked!").color(TC_DANGER).decorate(TextDecoration.BOLD)
-                        .appendSpace().append(Component.text("You are now visible because you").color(TC_LAYER1))
-                        .appendSpace().append(Component.text(reason).color(TC_LAYER1));
+                        .appendSpace().append(Component.text("You are now visible because you").color(TC_LAYER1).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendSpace().append(Component.text(reason).color(TC_LAYER1).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
 
         player.sendMessage(component);
     }
@@ -635,21 +635,21 @@ public final class FMessage {
 
         return Component.text("[" + faction.getName() + "]", textColor)
                 .append(Component.text("[" + kills + "]", TC_INFO))
-                .append(displayName)
+                .append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":", NamedTextColor.WHITE))
                 .appendSpace().append(Component.text(message, NamedTextColor.WHITE));
     }
 
     public static Component getFactionFormat(Component displayName, String message) {
         return Component.text("[FC]").color(NamedTextColor.DARK_GREEN)
-                .appendSpace().append(displayName)
+                .appendSpace().append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":").color(NamedTextColor.DARK_GREEN))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.DARK_GREEN));
     }
 
     public static Component getAllyFormat(Component displayName, String message) {
         return Component.text("[A]").color(NamedTextColor.BLUE)
-                .appendSpace().append(displayName)
+                .appendSpace().append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":").color(NamedTextColor.BLUE))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.BLUE));
     }
@@ -824,7 +824,7 @@ public final class FMessage {
     public static void printStaffDeathMessage(Player viewer, String username, Location location) {
         Component component = Component.text("[Teleport to " + username + "'s Death Location]")
                 .color(NamedTextColor.GRAY)
-                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                 .hoverEvent(Component.text("Click to teleport").color(NamedTextColor.BLUE));
 
@@ -834,7 +834,7 @@ public final class FMessage {
     public static void printStaffCombatLogger(Player viewer, String username, Location location) {
         Component component = Component.text("[Teleport to " + username + "'s Combat Logger]")
                 .color(NamedTextColor.GRAY)
-                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE)
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/tp " + location.getBlockX() + " " + location.getY() + " " + location.getZ() + " " + Objects.requireNonNull(location.getWorld()).getName()))
                 .hoverEvent(Component.text("Click to teleport").color(NamedTextColor.BLUE));
 
