@@ -5,5 +5,4 @@ author: John Rockwell <admin@hcfrevival.net>
 description: Factions Core
 prefix: Factions
 api-version: 1.20.5
-depends: [LunarClient-API]
-softdepend: [ProtocolLib]
+depends: [LunarClient-API, PacketEvents]

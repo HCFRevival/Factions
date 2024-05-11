@@ -76,6 +76,12 @@ public final class Factions extends AresPlugin {
     @Getter public BossManager bossManager;
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+        registerPacketEvents();
+    }
+
+    @Override
     public void onEnable() {
         instance = this;
 
@@ -191,9 +197,6 @@ public final class Factions extends AresPlugin {
 
         registerConnectable(mdb);
         registerConnectable(redis);
-
-        // protocol lib init
-        registerProtocolLibrary(ProtocolLibrary.getProtocolManager());
 
         // declare services
         final RankService rankService = new RankService(this);
