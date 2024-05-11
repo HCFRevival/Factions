@@ -574,8 +574,8 @@ public final class FMessage {
 
     public static void printRogueUncloak(Player player, String reason) {
         Component component = Component.text("Uncloaked!").color(TC_DANGER).decorate(TextDecoration.BOLD)
-                        .appendSpace().append(Component.text("You are now visible because you").color(TC_LAYER1))
-                        .appendSpace().append(Component.text(reason).color(TC_LAYER1));
+                        .appendSpace().append(Component.text("You are now visible because you").color(TC_LAYER1).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE))
+                        .appendSpace().append(Component.text(reason).color(TC_LAYER1).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
 
         player.sendMessage(component);
     }
