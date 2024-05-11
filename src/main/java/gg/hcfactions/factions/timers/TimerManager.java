@@ -167,7 +167,7 @@ public final class TimerManager implements IManager {
         }
 
         if (playerClass instanceof Tank tankClass) {
-            res.put(9, ChatColor.BLUE + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + tankClass.getStamina(player));
+            res.put(9, ChatColor.BLUE + "" + ChatColor.BOLD + "Stamina" + ChatColor.RED + ": " + String.format("%.2f", tankClass.getStamina(player)));
         }
 
         // Render class cooldowns, everything below this will not be reached if they do not have an active cooldown
