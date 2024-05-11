@@ -635,21 +635,21 @@ public final class FMessage {
 
         return Component.text("[" + faction.getName() + "]", textColor)
                 .append(Component.text("[" + kills + "]", TC_INFO))
-                .append(displayName)
+                .append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":", NamedTextColor.WHITE))
                 .appendSpace().append(Component.text(message, NamedTextColor.WHITE));
     }
 
     public static Component getFactionFormat(Component displayName, String message) {
         return Component.text("[FC]").color(NamedTextColor.DARK_GREEN)
-                .appendSpace().append(displayName)
+                .appendSpace().append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":").color(NamedTextColor.DARK_GREEN))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.DARK_GREEN));
     }
 
     public static Component getAllyFormat(Component displayName, String message) {
         return Component.text("[A]").color(NamedTextColor.BLUE)
-                .appendSpace().append(displayName)
+                .appendSpace().append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":").color(NamedTextColor.BLUE))
                 .appendSpace().append(Component.text(message).color(NamedTextColor.BLUE));
     }
