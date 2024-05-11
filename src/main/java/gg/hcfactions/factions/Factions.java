@@ -207,7 +207,7 @@ public final class Factions extends AresPlugin {
         final ReportService reportService = new ReportService(this);
         final AltService altService = new AltService(this);
         final CustomRecipeService customRecipeService = new CustomRecipeService(this);
-        final XPService xpService = new XPService(this, "dev", "xp_players", "xp_transactions");
+        final XPService xpService = new XPService(this, configuration.getMongoDatabaseName(), "xp_players", "xp_transactions");
 
         // register services
         registerService(accountService);
