@@ -18,7 +18,7 @@ import java.util.UUID;
 public final class Miner implements IClass {
     @Getter public ClassManager manager;
     @Getter public final String name = "Miner";
-    @Getter public final String description = "Grants the ability to mine easily";
+    @Getter public final String description = "Grants the ability to mine efficiently";
     @Getter public final int warmup;
     @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.IRON_HELMET;

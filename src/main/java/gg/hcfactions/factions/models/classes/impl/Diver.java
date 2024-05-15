@@ -20,7 +20,7 @@ import java.util.UUID;
 public final class Diver implements IClass {
     @Getter public ClassManager manager;
     @Getter public final String name = "Diver";
-    @Getter public final String description = "Grants the ability to navigate water easily";
+    @Getter public final String description = "Grants you the ability to use a Trident";
     @Getter public final int warmup;
     @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.TURTLE_HELMET;

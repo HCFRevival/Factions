@@ -722,7 +722,7 @@ public final class FMessage {
 
     public static void printGhostbladeKill(Player viewer, Player killer) {
         Component base = Component.text("Ghostblade").color(Ghostblade.GHOSTBLADE_COLOR)
-                .appendSpace().append(Component.text(": You have been granted a").color(TC_MYTHIC_ABILITY_DESC))
+                .append(Component.text(": You have been granted a").color(TC_MYTHIC_ABILITY_DESC))
                 .appendSpace().append(Component.text("Speed Boost").color(Ghostblade.GHOSTBLADE_COLOR));
 
         if (viewer.getUniqueId().equals(killer.getUniqueId())) {
@@ -737,8 +737,8 @@ public final class FMessage {
 
     public static void printGhostbladeRefresh(Player viewer, int seconds) {
         String formatted = seconds + (seconds > 1 ? "s" : "");
-        viewer.sendMessage(Component.text("Ghostblade").color(Ghostblade.GHOSTBLADE_COLOR)
-                .append(Component.text(":").color(TC_MYTHIC_ABILITY_DESC))
+        viewer.sendMessage(Component.text("Ghostblade", Ghostblade.GHOSTBLADE_COLOR)
+                .append(Component.text(":", TC_MYTHIC_ABILITY_DESC))
                 .appendSpace().append(Component.text("Your speed has been refreshed by " + formatted)).color(TC_MYTHIC_ABILITY_DESC));
     }
 

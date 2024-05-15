@@ -23,7 +23,7 @@ import java.util.UUID;
 public final class Archer implements IClass {
     @Getter public ClassManager manager;
     @Getter public final String name = "Archer";
-    @Getter public final String description = "Grants you bonus damage with a bow based on distance. Hit consecutive shots on the same player to deal bonus damage";
+    @Getter public final String description = "Deal bonus damage with a bow based on your distance from your target. Spectral Arrows will mark enemies and allow your faction to deal bonus damage.";
     @Getter public final int warmup;
     @Getter public final boolean emptyArmorEnforced = true;
     @Getter public final Material helmet = Material.LEATHER_HELMET;
