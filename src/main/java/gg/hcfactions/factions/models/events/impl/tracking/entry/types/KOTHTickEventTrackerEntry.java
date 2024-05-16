@@ -23,9 +23,14 @@ public class KOTHTickEventTrackerEntry extends EventTrackerEntry {
     @Override
     public Document toDocument() {
         final Document doc = super.toDocument();
-        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionById(factionId);
 
-        doc.append("faction", new Document().append("id", factionId.toString()).append("name", faction.getName()));
+        final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionById(factionId);
+        final Document factionDocument = new Document().append("id", factionId.toString());
+        if (faction != null) {
+            factionDocument.append("name", faction.getName());
+        }
+
+        doc.append("faction", factionDocument);
         doc.append("new_ticket_count", newTicketCount);
 
         return doc;
