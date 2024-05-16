@@ -141,8 +141,8 @@ public final class FMessage {
 
     public static void broadcastEventTrackerPublish(String url) {
         Component content = Component.text("Event Statistics").color(TC_LAYER1)
-                .append(Component.text(":").color(TC_LAYER2)
-                .appendSpace().append(Component.text("[Click Here]").clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(url))).color(TC_SUCCESS));
+                .append(Component.text(":", TC_LAYER2)
+                .appendSpace().append(Component.text("[Click Here]", TC_SUCCESS).clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(url))));
 
         Bukkit.broadcast(content);
     }
