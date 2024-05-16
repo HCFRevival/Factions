@@ -191,7 +191,7 @@ public final class TimerManager implements IManager {
                 final int remainingSeconds = (int)remainingTime / 1000;
 
                 if (remainingTime > 0) {
-                    res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
+                    res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + EEffectScoreboardMapping.getColor(mapping) + "" + net.md_5.bungee.api.ChatColor.BOLD
                             + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
                 }
             }
