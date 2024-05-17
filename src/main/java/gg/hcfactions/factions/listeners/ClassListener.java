@@ -560,21 +560,29 @@ public final class ClassListener implements Listener {
         final PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 
         Bukkit.getOnlinePlayers().stream().filter(op -> op.getWorld().equals(world)).forEach(worldPlayer -> {
-            String displayName = rankService.getFormattedName(player);
+            Component displayName = rankService.getFormattedNameComponent(player);
+            NamedTextColor factionNameColor = null;
+            String factionName = null;
 
-            if (faction != null) {
-                if (faction.isMember(worldPlayer)) {
-                    displayName = ChatColor.DARK_GREEN + "[" + faction.getName() + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
-                } else {
-                    displayName = ChatColor.RED + "[" + faction.getName() + "] " + FMessage.P_NAME + rankService.getFormattedName(player);
-                }
+            if (faction != null && faction.isMember(worldPlayer)) {
+                factionNameColor = NamedTextColor.DARK_GREEN;
+                factionName = faction.getName();
+            } else if (faction != null && faction.isAlly(worldPlayer)) {
+                factionNameColor = NamedTextColor.BLUE;
+                factionName = faction.getName();
+            } else {
+                factionNameColor = NamedTextColor.RED;
             }
 
             Players.playSound(worldPlayer, Sound.ITEM_GOAT_HORN_SOUND_3);
 
-            worldPlayer.sendMessage(ChatColor.RESET + " ");
-            worldPlayer.sendMessage(ChatColor.DARK_AQUA + "The sea calls for " + displayName);
-            worldPlayer.sendMessage(ChatColor.RESET + " ");
+            Component message = Component.empty().appendNewline().append(Component.text("The sea calls for", NamedTextColor.DARK_AQUA)).appendSpace();
+            if (factionName != null) {
+                message = message.append(Component.text("[" + factionName + "]", factionNameColor));
+            }
+            message = message.append(displayName).appendNewline();
+
+            worldPlayer.sendMessage(message);
         });
 
         diver.getSeaCallCooldowns().put(player.getUniqueId(), (Time.now() + (diver.getSeaCallCooldown()*1000L)));
