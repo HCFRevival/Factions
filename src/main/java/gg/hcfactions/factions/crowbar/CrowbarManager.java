@@ -40,6 +40,8 @@ public final class CrowbarManager implements IManager {
     public void onDisable() {}
 
     /**
+     * @deprecated Use Crowbar#subtractDurability and Crowbar #getDurability
+     *
      * Parses lore and returns the remaining uses for the provided itemstack with the given type
      * @param item ItemStack
      * @param type Crowbar Use Type
