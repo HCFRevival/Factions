@@ -165,6 +165,11 @@ public final class FConfig {
     @Getter public int diamondMinedRewardXp;
     @Getter public int netheriteMinedRewardXp;
 
+    // crowbar
+    @Getter public int crowbarInitialDurability;
+    @Getter public int crowbarMonsterSpawnerDurabilityCost;
+    @Getter public int crowbarEndPortalFrameDurabilityCost;
+
     public FConfig(Factions plugin) {
         this.plugin = plugin;
     }
@@ -409,5 +414,9 @@ public final class FConfig {
         plugin.getAresLogger().info("Player Kill Bonus Amount: " + playerKillRewardXp);
         plugin.getAresLogger().info("Diamond Mined Bonus Amount: " + diamondMinedRewardXp);
         plugin.getAresLogger().info("Netherite Mined Bonus Amount: " + netheriteMinedRewardXp);
+
+        crowbarInitialDurability = conf.getInt("crowbar.initial_durability");
+        crowbarMonsterSpawnerDurabilityCost = conf.getInt("crowbar.monster_spawner_cost");
+        crowbarEndPortalFrameDurabilityCost = conf.getInt("crowbar.end_portal_frame_cost");
     }
 }

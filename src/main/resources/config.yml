@@ -271,14 +271,8 @@ xp:
   diamond_mined: 1
   netherite_mined: 1
 
-# Custom crafting recipes
-custom_recipes:
-  saddle: true
-  heart_of_the_sea: true
-  trident: true
-  chainmail_armor: true
-  totem: true
-  gapple: true
-  nametag: true
-  smithing_upgrade: true
-  easy_glistening_melon: true
+# Crowbar configuration
+crowbar:
+  initial_durability: 1000
+  monster_spawner_cost: 500
+  end_portal_frame_cost: 100
