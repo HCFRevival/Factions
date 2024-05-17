@@ -68,7 +68,10 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
             return;
         }
 
-        int cost = (useType.equals(ECrowbarUseType.SPAWNER) ? Crowbar.MONSTER_SPAWNER_COST : Crowbar.END_PORTAL_COST);
+        int cost = (useType.equals(ECrowbarUseType.SPAWNER)
+                ? manager.getPlugin().getConfiguration().getCrowbarMonsterSpawnerDurabilityCost()
+                : manager.getPlugin().getConfiguration().getCrowbarEndPortalFrameDurabilityCost());
+
         if (!crowbarItem.canAfford(item, cost)) {
             promise.reject("Crowbar is too weak");
             return;

@@ -22,9 +22,6 @@ public final class Crowbar implements ICustomItem {
     @Deprecated public static final String MONSTER_SPAWNER_PREFIX = ChatColor.YELLOW + "Monster Spawners: " + ChatColor.BLUE;
     @Deprecated public static final String END_PORTAL_PREFIX = ChatColor.YELLOW + "End Portal Frames: " + ChatColor.BLUE;
 
-    public static final int INITIAL_DURABILITY = 1000;
-    public static final int MONSTER_SPAWNER_COST = 700;
-    public static final int END_PORTAL_COST = 150;
     public static final Component MONSTER_SPAWNER_PREFIX_COMPONENT = Component.text("Monster Spawners:").color(NamedTextColor.YELLOW).appendSpace();
     public static final Component END_PORTAL_PREFIX_COMPONENT = Component.text("End Portal Frames:").color(NamedTextColor.YELLOW).appendSpace();
     public static final Component DURABILITY_PREFIX_COMPONENT = Component.text("Durability", NamedTextColor.GOLD).append(Component.text(":", NamedTextColor.YELLOW)).appendSpace();
@@ -62,7 +59,7 @@ public final class Crowbar implements ICustomItem {
 
     @Override
     public List<Component> getLoreComponents() {
-        return getDurabilityComponent(INITIAL_DURABILITY);
+        return getDurabilityComponent(plugin.getConfiguration().getCrowbarInitialDurability());
     }
 
     @Override
@@ -85,8 +82,14 @@ public final class Crowbar implements ICustomItem {
 
         res.add(DURABILITY_PREFIX_COMPONENT.append(Component.text(durability, NamedTextColor.RED)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         res.add(Component.empty());
-        res.add(Component.text("Monster Spawner Cost", NamedTextColor.AQUA).append(Component.text(":", NamedTextColor.LIGHT_PURPLE)).appendSpace().append(Component.text(MONSTER_SPAWNER_COST, NamedTextColor.LIGHT_PURPLE)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-        res.add(Component.text("End Portal Cost", NamedTextColor.AQUA).append(Component.text(":", NamedTextColor.LIGHT_PURPLE)).appendSpace().append(Component.text(END_PORTAL_COST, NamedTextColor.LIGHT_PURPLE)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
+        res.add(Component.text("Monster Spawner Cost", NamedTextColor.AQUA).append(Component.text(":", NamedTextColor.LIGHT_PURPLE))
+                .appendSpace().append(Component.text(plugin.getConfiguration().getCrowbarMonsterSpawnerDurabilityCost(), NamedTextColor.LIGHT_PURPLE))
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
+        res.add(Component.text("End Portal Cost", NamedTextColor.AQUA).append(Component.text(":", NamedTextColor.LIGHT_PURPLE))
+                .appendSpace().append(Component.text(plugin.getConfiguration().getCrowbarEndPortalFrameDurabilityCost(), NamedTextColor.LIGHT_PURPLE))
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
         return res;
     }
@@ -132,7 +135,7 @@ public final class Crowbar implements ICustomItem {
             throw new NullPointerException("Null ItemMeta");
         }
 
-        itemMeta.getPersistentDataContainer().set(crowbarNamespace, PersistentDataType.INTEGER, INITIAL_DURABILITY);
+        itemMeta.getPersistentDataContainer().set(crowbarNamespace, PersistentDataType.INTEGER, plugin.getConfiguration().getCrowbarInitialDurability());
         item.setItemMeta(itemMeta);
         return item;
     }
