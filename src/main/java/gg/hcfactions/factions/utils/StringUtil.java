@@ -74,6 +74,8 @@ public final class StringUtil {
             emblem = "\uD83C\uDFF9"; // Bow
         } else if (material.equals(Material.TRIDENT)) {
             emblem = "\uD83D\uDD31"; // Trident
+        } else if (material.equals(Material.MACE)) {
+            emblem = "〒";
         }
 
         return emblem;

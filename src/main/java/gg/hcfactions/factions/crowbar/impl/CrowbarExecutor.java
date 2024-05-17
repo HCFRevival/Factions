@@ -13,6 +13,8 @@ import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Strings;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
+import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -26,8 +28,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @AllArgsConstructor
 public final class CrowbarExecutor implements ICrowbarExecutor {
@@ -35,24 +37,39 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
 
     @Override
     public void useCrowbar(Player player, ItemStack item, Block block, Promise promise) {
-        ECrowbarUseType useType = null;
+        CustomItemService cis = (CustomItemService) manager.getPlugin().getService(CustomItemService.class);
 
+        if (cis == null) {
+            promise.reject("Failed to query Custom Item Service");
+            return;
+        }
+
+        Optional<ICustomItem> itemQuery = cis.getItem(item);
+        if (itemQuery.isEmpty()) {
+            promise.reject("Failed to query Crowbar Item");
+            return;
+        }
+
+        ICustomItem customItem = itemQuery.get();
+        if (!(customItem instanceof final Crowbar crowbarItem)) {
+            promise.reject("You are not holding a Crowbar");
+            return;
+        }
+
+        ECrowbarUseType useType = null;
         if (block.getType().equals(Material.SPAWNER)) {
             useType = ECrowbarUseType.SPAWNER;
         }
-
         if (block.getType().equals(Material.END_PORTAL_FRAME)) {
             useType = ECrowbarUseType.END_PORTAL;
         }
-
         if (useType == null) {
             promise.reject("You can not crowbar this block");
             return;
         }
 
-        final int remainingUses = manager.getRemainingUses(item, useType);
-
-        if (remainingUses == 0) {
+        int cost = (useType.equals(ECrowbarUseType.SPAWNER) ? Crowbar.MONSTER_SPAWNER_COST : Crowbar.END_PORTAL_COST);
+        if (!crowbarItem.canAfford(item, cost)) {
             promise.reject("Crowbar is too weak");
             return;
         }
@@ -62,18 +79,9 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
             return;
         }
 
-        final ItemMeta meta = item.getItemMeta();
-        final List<String> lore = Objects.requireNonNull(meta).getLore();
-
-        if (lore == null) {
-            promise.reject("Encountered an error while parsing crowbar item lore");
-            return;
-        }
-
-        final Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new BLocatable(block));
-
+        Claim insideClaim = manager.getPlugin().getClaimManager().getClaimAt(new BLocatable(block));
         if (insideClaim != null) {
-            final IFaction insideFaction = manager.getPlugin().getFactionManager().getFactionById(insideClaim.getOwner());
+            IFaction insideFaction = manager.getPlugin().getFactionManager().getFactionById(insideClaim.getOwner());
 
             if (insideFaction != null) {
                 if (insideFaction instanceof final PlayerFaction pf) {
@@ -83,7 +91,7 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
                     }
                 }
 
-                else if (insideFaction instanceof final ServerFaction sf && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                else if (insideFaction instanceof ServerFaction && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
                     promise.reject(FError.F_CLAIM_NO_ACCESS.getErrorDescription());
                     return;
                 }
@@ -110,13 +118,12 @@ public final class CrowbarExecutor implements ICrowbarExecutor {
             toDrop.setItemMeta(dropMeta);
         }
 
-        lore.set(useType.getLorePosition(), ((useType.equals(ECrowbarUseType.SPAWNER) ? Crowbar.MONSTER_SPAWNER_PREFIX : Crowbar.END_PORTAL_PREFIX)) + (remainingUses - 1));
-        meta.setLore(lore);
-
-        item.setItemMeta(meta);
-
+        // drop block
         block.getWorld().dropItem(block.getLocation(), toDrop);
         block.breakNaturally();
+
+        // subtract dura & update item
+        crowbarItem.subtractDurability(item, cost);
 
         promise.resolve();
     }

@@ -7,7 +7,13 @@ import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.crowbar.ECrowbarUseType;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.Optional;
 
 public final class CrowbarManager implements IManager {
     @Getter public final Factions plugin;
@@ -40,14 +46,14 @@ public final class CrowbarManager implements IManager {
      * @return Remaining use count
      */
     public int getRemainingUses(ItemStack item, ECrowbarUseType type) {
-        final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
-
-        if (item.getItemMeta() == null || item.getItemMeta().getLore() == null) {
+        final ItemMeta itemMeta = item.getItemMeta();
+        if (itemMeta == null || itemMeta.lore() == null) {
             return 0;
         }
 
+        final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
         if (cis == null) {
-            plugin.getAresLogger().error("failed to obtain custom item service");
+            plugin.getAresLogger().error("Failed to obtain custom item service");
             return 0;
         }
 
@@ -56,16 +62,27 @@ public final class CrowbarManager implements IManager {
             return 0;
         }
 
-        final String line = item.getItemMeta().getLore().get(type.getLorePosition());
-        final String replaced = (type.equals(ECrowbarUseType.SPAWNER)
-                ? line.replaceAll(Crowbar.MONSTER_SPAWNER_PREFIX, "")
-                : line.replaceAll(Crowbar.END_PORTAL_PREFIX, ""));
+        Component componentQuery = (type.equals(ECrowbarUseType.SPAWNER) ? Crowbar.MONSTER_SPAWNER_PREFIX_COMPONENT : Crowbar.END_PORTAL_PREFIX_COMPONENT);
+        Optional<Component> componentResult = itemMeta.lore().stream().filter(entry -> entry.contains(componentQuery)).findFirst();
+        if (componentResult.isEmpty() || componentResult.get().children().isEmpty()) {
+            Bukkit.broadcast(Component.text("componentResult empty"));
+            return 0;
+        }
+
+        Component childComponent = componentResult.get().children().getFirst();
+        if (!(childComponent instanceof final TextComponent textComponent)) {
+            Bukkit.broadcast(Component.text("Child component empty"));
+            return 0;
+        }
+
+        String line = textComponent.content();
+        Bukkit.broadcast(Component.text("Found value: " + line));
 
         int remaining;
         try {
-            remaining = Integer.parseInt(replaced);
+            remaining = Integer.parseInt(line);
         } catch (NumberFormatException e) {
-            plugin.getAresLogger().warn("attempted to parse integer from crowbar lore and failed", e);
+            plugin.getAresLogger().warn("Attempted to parse integer from crowbar lore and failed", e);
             return 0;
         }
 

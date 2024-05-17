@@ -191,7 +191,7 @@ public final class TimerManager implements IManager {
                 final int remainingSeconds = (int)remainingTime / 1000;
 
                 if (remainingTime > 0) {
-                    res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + mapping.getColor() + "" + net.md_5.bungee.api.ChatColor.BOLD
+                    res.put(mapping.getScoreboardPosition(), ChatColor.RESET + " " + ChatColor.RESET + " " + EEffectScoreboardMapping.getColor(mapping) + "" + net.md_5.bungee.api.ChatColor.BOLD
                             + effectName + ChatColor.RED + ": " + (remainingSeconds > 10 ? Time.convertToHHMMSS(remainingTime) : Time.convertToDecimal(remainingTime) + "s"));
                 }
             }
@@ -246,8 +246,18 @@ public final class TimerManager implements IManager {
                 final int tickets = kothEvent.getSession().getTickets(capturingFaction);
                 final List<Integer> tickCheckpoints = kothEvent.getSession().getTickCheckpoints();
                 final boolean isFriendly = capturingFaction.isMember(player.getUniqueId());
+                final boolean isAlly = capturingFaction.hasAlly() && Objects.requireNonNull(capturingFaction.getAlly()).isMember(player.getUniqueId());
                 final String factionName = capturingFaction.getName().length() > 10 ? capturingFaction.getName().substring(0, 10) + "..." : capturingFaction.getName();
                 final List<String> tickDisplay = Lists.newArrayList();
+                final ChatColor factionColor;
+
+                if (isFriendly) {
+                    factionColor = ChatColor.DARK_GREEN;
+                } else if (isAlly) {
+                    factionColor = ChatColor.BLUE;
+                } else {
+                    factionColor = ChatColor.RED;
+                }
 
                 for (int checkpoint : tickCheckpoints) {
                     if (tickets >= checkpoint) {
@@ -258,7 +268,7 @@ public final class TimerManager implements IManager {
                     tickDisplay.add(ChatColor.GRAY + "[■]");
                 }
 
-                factionDisplay = (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " "
+                factionDisplay = factionColor + "" + ChatColor.BOLD + factionName + " "
                         + (tickDisplay.isEmpty() ? "" : Joiner.on(ChatColor.RESET + "").join(tickDisplay) + " ") + ChatColor.BLUE + "(" + tickets + ")";
             }
 
@@ -296,11 +306,21 @@ public final class TimerManager implements IManager {
                 mostRecentFaction = dpsEvent.getSession().getMostRecentDamager();
                 final long damage = dpsEvent.getSession().getDamage(mostRecentFaction);
                 final boolean isFriendly = mostRecentFaction.isMember(player.getUniqueId());
+                final boolean isAlly = mostRecentFaction.hasAlly() && Objects.requireNonNull(mostRecentFaction.getAlly()).isMember(player.getUniqueId());
                 final String factionName = mostRecentFaction.getName().length() > 10 ? mostRecentFaction.getName().substring(0, 10) + "..." : mostRecentFaction.getName();
                 final String formattedValue = String.format("%,d", damage);
+                final ChatColor factionColor;
+
+                if (isFriendly) {
+                    factionColor = ChatColor.DARK_GREEN;
+                } else if (isAlly) {
+                    factionColor = ChatColor.BLUE;
+                } else {
+                    factionColor = ChatColor.RED;
+                }
 
                 mostRecentFactionDisplay = ChatColor.WHITE + "\uD83D\uDDE1" + " " +
-                        (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " "
+                        factionColor + "" + ChatColor.BOLD + factionName + " "
                         + ChatColor.BLUE + "(" + ChatColor.AQUA + formattedValue + ChatColor.BLUE + ")";
             }
 
@@ -311,12 +331,22 @@ public final class TimerManager implements IManager {
                     topFaction = plugin.getFactionManager().getPlayerFactionById(topFactionId);
                     final long damage = dpsEvent.getSession().getDamage(topFaction);
                     final boolean isFriendly = topFaction.isMember(player.getUniqueId());
+                    final boolean isAlly = topFaction.hasAlly() && Objects.requireNonNull(topFaction.getAlly()).isMember(player.getUniqueId());
                     final boolean isMostRecent = (mostRecentFaction != null && mostRecentFaction.getUniqueId().equals(topFactionId));
                     final String factionName = topFaction.getName().length() > 10 ? topFaction.getName().substring(0, 10) + "..." : topFaction.getName();
                     final String formattedValue = String.format("%,d", damage);
+                    final ChatColor factionColor;
+
+                    if (isFriendly) {
+                        factionColor = ChatColor.DARK_GREEN;
+                    } else if (isAlly) {
+                        factionColor = ChatColor.BLUE;
+                    } else {
+                        factionColor = ChatColor.RED;
+                    }
 
                     topFactionDisplay = ChatColor.GOLD + "①" + (isMostRecent ? ChatColor.WHITE + "\uD83D\uDDE1" : "") +
-                            " " + (isFriendly ? ChatColor.DARK_GREEN : ChatColor.RED) + "" + ChatColor.BOLD + factionName + " " +
+                            " " + factionColor + "" + ChatColor.BOLD + factionName + " " +
                             ChatColor.BLUE + "(" + ChatColor.AQUA + formattedValue + ChatColor.BLUE + ")";
                 }
             }
