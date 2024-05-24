@@ -17,6 +17,7 @@ import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.player.impl.FactionPlayer;
 import gg.hcfactions.libs.base.timer.impl.GenericTimer;
+import gg.hcfactions.libs.base.util.Strings;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import lombok.Getter;
@@ -186,7 +187,7 @@ public final class TimerManager implements IManager {
             final EEffectScoreboardMapping mapping = EEffectScoreboardMapping.getByEffect(consumeable.getEffectType());
 
             if (mapping != null) {
-                final String effectName = StringUtils.capitalize(mapping.name().toLowerCase().replaceAll("_", " "));
+                final String effectName = Strings.capitalize(mapping.name().toLowerCase().replaceAll("_", " "));
                 final long remainingTime = consumeable.getCooldowns().getOrDefault(player.getUniqueId(), 0L) - Time.now();
                 final int remainingSeconds = (int)remainingTime / 1000;
 
