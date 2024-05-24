@@ -1043,7 +1043,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 listComponent = listComponent.appendNewline();
             }
 
-            listComponent = listComponent.append(Component.text((i + 1) + ".").color(FMessage.TC_LAYER1))
+            listComponent = listComponent.append(Component.text((i + 1) + ".").color(FMessage.TC_LAYER2))
                             .appendSpace().append(Component.text(faction.getName()).color(FMessage.TC_LAYER1))
                             .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
                             .append(Component.text(faction.getOnlineMembers().size() + "/" + faction.getMembers().size()).color(FMessage.TC_LAYER1))
