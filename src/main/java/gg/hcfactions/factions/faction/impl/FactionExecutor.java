@@ -1029,6 +1029,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             // Faction List
             //  1. RankXI [6/8 Online] [4.8/5.5DTR]
 
+            String formattedDtr = String.format("%.2f", faction.getDtr());
             TextColor dtrColor;
 
             if (faction.getDtr() >= 1.0) {
@@ -1049,7 +1050,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                             .append(Component.text(faction.getOnlineMembers().size() + "/" + faction.getMembers().size()).color(FMessage.TC_LAYER1))
                             .append(Component.text("]").color(FMessage.TC_LAYER2))
                             .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
-                            .append(Component.text(faction.getDtr() + "DTR").color(dtrColor))
+                            .append(Component.text(formattedDtr + "DTR").color(dtrColor))
                             .append(Component.text("/" + faction.getMaxDtr()).color(FMessage.TC_LAYER1))
                             .append(Component.text("]").color(FMessage.TC_LAYER2));
 
