@@ -163,7 +163,7 @@ public final class ClassListener implements Listener {
     }
 
     @EventHandler (priority = EventPriority.MONITOR) /* Play an audio cue when a consumable is consumed */
-    public void onClassConsumeItem(PostConsumeClassItemEvent event) {
+    public void onClassConsumeItem(ConsumeClassItemEvent event) {
         if (event.isCancelled()) {
             return;
         }
