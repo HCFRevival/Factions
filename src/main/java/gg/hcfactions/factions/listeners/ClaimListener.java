@@ -2,6 +2,7 @@ package gg.hcfactions.factions.listeners;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import gg.hcfactions.cx.event.PortalPlatformGenerateEvent;
 import gg.hcfactions.cx.event.PreMobstackEvent;
 import gg.hcfactions.cx.event.ShulkerPlaceEvent;
@@ -10,6 +11,7 @@ import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.listeners.events.player.ConsumeClassItemEvent;
 import gg.hcfactions.factions.listeners.events.player.PlayerChangeClaimEvent;
 import gg.hcfactions.factions.models.claim.impl.Claim;
+import gg.hcfactions.factions.models.claim.impl.SimpleRegion;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.types.PalaceEvent;
 import gg.hcfactions.factions.models.faction.IFaction;
@@ -23,8 +25,10 @@ import gg.hcfactions.factions.models.timer.impl.FTimer;
 import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerBigMoveEvent;
 import gg.hcfactions.libs.bukkit.events.impl.PlayerChorusFruitTeleportEvent;
+import gg.hcfactions.libs.bukkit.location.ILocatable;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
@@ -32,6 +36,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
@@ -40,13 +45,41 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-public record ClaimListener(@Getter Factions plugin) implements Listener {
+public final class ClaimListener implements Listener {
+    @Getter Factions plugin;
+    @Getter public final Map<UUID, SimpleRegion> blockTriggerExemptions;
+
+    public ClaimListener(Factions plugin) {
+        this.plugin = plugin;
+        this.blockTriggerExemptions = Maps.newConcurrentMap();
+    }
+
+    /**
+     * Query a disabled block trigger exemption area
+     * that prevents TRIGGER_BLOCK Block Interactions from
+     * happening such as Wind Burst
+     *
+     * @param locatable Location to query
+     * @return Optional Map.Entry of Player UUID and SimpleRegion
+     */
+    private Optional<Map.Entry<UUID, SimpleRegion>> getBlockTriggerExemptionAt(ILocatable locatable) {
+        for (UUID playerId : blockTriggerExemptions.keySet()) {
+            SimpleRegion region = blockTriggerExemptions.get(playerId);
+
+            if (!region.isInside(locatable, false)) {
+                continue;
+            }
+
+            return Optional.of(Map.entry(playerId, region));
+        }
+
+        return Optional.empty();
+    }
+
     /**
      * Handles processing movement in and out of claims
      *
@@ -1377,5 +1410,87 @@ public record ClaimListener(@Getter Factions plugin) implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    /**
+     * Creates a new entry to exempt an area
+     * from BLOCK_TRIGGER events when a player
+     * uses a mace with a wind burst enchantment
+     *
+     * @param event Bukkit EntityDamageByEntityEvent
+     */
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getDamager() instanceof Player damager)) {
+            return;
+        }
+
+        ItemStack hand = damager.getInventory().getItemInMainHand();
+
+        if (!hand.getType().equals(Material.MACE)) {
+            return;
+        }
+
+        ItemMeta meta = hand.getItemMeta();
+
+        if (!meta.hasEnchant(Enchantment.WIND_BURST)) {
+            return;
+        }
+
+        Block originBlock = event.getEntity().getLocation().getBlock();
+        BLocatable cornerA = new BLocatable(originBlock.getWorld().getName(), originBlock.getX() + 5, originBlock.getY() + 5, originBlock.getZ() + 5);
+        BLocatable cornerB = new BLocatable(originBlock.getWorld().getName(), originBlock.getX() - 5, originBlock.getY() - 5, originBlock.getZ() - 5);
+        SimpleRegion region = new SimpleRegion(cornerA, cornerB);
+
+        blockTriggerExemptions.put(damager.getUniqueId(), region);
+        new Scheduler(plugin).sync(() -> blockTriggerExemptions.remove(damager.getUniqueId())).delay(1L).run();
+    }
+
+    /**
+     * Prevents BLOCK_TRIGGER explosions
+     * from interacting with blocks inside claims
+     * the player should not have access to
+     *
+     * @param event Bukkit BlockExplodeEvent
+     */
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        List<Block> toRemove = Lists.newArrayList();
+
+        event.blockList().forEach(block -> {
+            BLocatable loc = new BLocatable(block);
+
+            getBlockTriggerExemptionAt(loc).ifPresent(result -> {
+                UUID initiatorId = result.getKey();
+                Player initiator = Bukkit.getPlayer(initiatorId);
+                Claim claim = plugin.getClaimManager().getClaimAt(loc);
+
+                if (claim != null) {
+                    IFaction owner = plugin.getFactionManager().getFactionById(claim.getOwner());
+
+                    // Always remove for server factions
+                    if (owner instanceof final ServerFaction sf) {
+                        toRemove.add(block);
+                    } else if (owner instanceof final PlayerFaction pf) {
+                        // Initiator is found
+                        if (initiator != null) {
+                            // Remove if faction is not raid-able, they are not a member and they do not have permission
+                            if (!pf.isRaidable() && !pf.isMember(initiator) && !initiator.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
+                                toRemove.add(block);
+                            }
+                        } else {
+                            // Fallback measure to prevent any bad block interactions
+                            toRemove.add(block);
+                        }
+                    }
+                }
+            });
+        });
+
+        event.blockList().removeAll(toRemove);
     }
 }
