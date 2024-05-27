@@ -28,7 +28,8 @@ public final class TrackedWeapon implements ITrackedItem<TrackedWeapon> {
             Material.DIAMOND_SWORD,
             Material.NETHERITE_AXE,
             Material.NETHERITE_SWORD,
-            Material.TRIDENT
+            Material.TRIDENT,
+            Material.MACE
     );
 
     @Getter public ItemStack item;

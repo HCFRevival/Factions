@@ -181,9 +181,6 @@ public interface IConsumeable {
         }
         // end applying effect to all uuids
 
-        // play audio que at source
-        Worlds.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP);
-
         player.sendMessage(ChatColor.LIGHT_PURPLE + "Your effect was applied to " + ChatColor.AQUA + affected.size() + ChatColor.LIGHT_PURPLE + " players");
     }
 }

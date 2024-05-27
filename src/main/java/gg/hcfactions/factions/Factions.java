@@ -1,6 +1,5 @@
 package gg.hcfactions.factions;
 
-import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.battlepass.BattlepassManager;
@@ -301,6 +300,7 @@ public final class Factions extends AresPlugin {
         registerListener(new BossListener(this));
         registerListener(new MythicItemListener(this));
         registerListener(new EventTrackerListener(this));
+        // registerListener(new DebugListener()); // TODO: Disable this
 
         // custom recipes
         // new FRecipes(this, configuration.getRecipeConfig()).register();

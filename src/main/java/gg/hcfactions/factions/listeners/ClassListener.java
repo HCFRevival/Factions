@@ -162,6 +162,15 @@ public final class ClassListener implements Listener {
         plugin.getClassManager().validateClass(player);
     }
 
+    @EventHandler (priority = EventPriority.MONITOR) /* Play an audio cue when a consumable is consumed */
+    public void onClassConsumeItem(ConsumeClassItemEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        Worlds.playSound(event.getPlayer().getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP);
+    }
+
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onEffectExpire(EntityPotionEffectEvent event) {
         final PotionEffect effect = event.getOldEffect();

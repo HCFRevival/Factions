@@ -1029,6 +1029,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             // Faction List
             //  1. RankXI [6/8 Online] [4.8/5.5DTR]
 
+            String formattedDtr = String.format("%.2f", faction.getDtr());
+            String formattedMaxDtr = String.format("%.2f", faction.getMaxDtr());
             TextColor dtrColor;
 
             if (faction.getDtr() >= 1.0) {
@@ -1043,14 +1045,14 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 listComponent = listComponent.appendNewline();
             }
 
-            listComponent = listComponent.append(Component.text((i + 1) + ".").color(FMessage.TC_LAYER1))
+            listComponent = listComponent.append(Component.text((i + 1) + ".").color(FMessage.TC_LAYER2))
                             .appendSpace().append(Component.text(faction.getName()).color(FMessage.TC_LAYER1))
                             .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
                             .append(Component.text(faction.getOnlineMembers().size() + "/" + faction.getMembers().size()).color(FMessage.TC_LAYER1))
                             .append(Component.text("]").color(FMessage.TC_LAYER2))
                             .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
-                            .append(Component.text(faction.getDtr() + "DTR").color(dtrColor))
-                            .append(Component.text("/" + faction.getMaxDtr()).color(FMessage.TC_LAYER1))
+                            .append(Component.text(formattedDtr).color(dtrColor))
+                            .append(Component.text("/" + formattedMaxDtr + " DTR").color(FMessage.TC_LAYER1))
                             .append(Component.text("]").color(FMessage.TC_LAYER2));
 
             listComponent = listComponent.hoverEvent(Component.text("Click to view more information")).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/f who " + faction.getName()));
