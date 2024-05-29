@@ -17,15 +17,16 @@ import org.bukkit.ChatColor;
 
 import java.util.UUID;
 
+@Getter
 public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
-    @Getter public final Factions plugin;
-    @Getter @Setter ECEBuildStep currentStep;
-    @Getter public final UUID builderId;
-    @Getter public final String name;
-    @Getter public ServerFaction owner;
-    @Getter public String displayName;
-    @Getter public BLocatable cornerA;
-    @Getter public BLocatable cornerB;
+    public final Factions plugin;
+    public final UUID builderId;
+    public final String name;
+    public ServerFaction owner;
+    public String displayName;
+    public BLocatable cornerA;
+    public BLocatable cornerB;
+    @Setter ECEBuildStep currentStep;
 
     public KOTHBuilder(Factions plugin, UUID builderId, String name) {
         this.plugin = plugin;
@@ -118,7 +119,14 @@ public final class KOTHBuilder implements ICaptureEventBuilder<KOTHEvent> {
                 displayName,
                 Lists.newArrayList(),
                 new CaptureRegion(cornerA, cornerB),
-                new CaptureEventConfig(20, 60, 100, 0, 0)
+                new CaptureEventConfig(
+                        20,
+                        60,
+                        100,
+                        0,
+                        0,
+                        -1
+                )
         );
 
         promise.resolve(event);

@@ -130,7 +130,7 @@ public final class PalaceBuilder implements ICaptureEventBuilder<KOTHEvent> {
                 3600,
                 Maps.newHashMap(),
                 Lists.newArrayList(),
-                new CaptureEventConfig(50, 60, 2500, 4, 0)
+                new CaptureEventConfig(50, 60, 2500, 4, 0, -1)
         );
 
         promise.resolve(event);

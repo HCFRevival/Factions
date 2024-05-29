@@ -17,15 +17,16 @@ import org.bukkit.Bukkit;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
 public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
-    @Getter public final Factions plugin;
-    @Getter @Setter public UUID owner;
-    @Getter @Setter public String name;
-    @Getter @Setter public String displayName;
-    @Getter public final List<EventSchedule> schedule;
-    @Getter @Setter public CaptureRegion captureRegion;
-    @Getter public CaptureEventConfig eventConfig;
-    @Getter @Setter KOTHSession session;
+    public final Factions plugin;
+    public CaptureEventConfig eventConfig;
+    public final List<EventSchedule> schedule;
+    @Setter public UUID owner;
+    @Setter public String name;
+    @Setter public String displayName;
+    @Setter public CaptureRegion captureRegion;
+    @Setter KOTHSession session;
 
     public KOTHEvent(
             Factions plugin,
@@ -65,7 +66,8 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
                 eventConfig.getDefaultTimerDuration(),
                 eventConfig.getTokenReward(),
                 eventConfig.getTickCheckpointInterval(),
-                eventConfig.getContestedThreshold()
+                eventConfig.getContestedThreshold(),
+                eventConfig.getOnlinePlayerLimit()
         );
     }
 
@@ -79,8 +81,24 @@ public class KOTHEvent implements IEvent, ICaptureEvent, IScheduledEvent {
     }
 
     @Override
-    public void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
-        session = new KOTHSession(this, ticketsNeededToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
+    public void startEvent(
+            int ticketsNeededToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            int onlinePlayerLimit
+    ) {
+        session = new KOTHSession(
+                this,
+                ticketsNeededToWin,
+                timerDuration,
+                tokenReward,
+                tickCheckpointInterval,
+                contestedThreshold,
+                onlinePlayerLimit
+        );
+
         session.setActive(true);
         session.getTracker().startTracking();
         Bukkit.getPluginManager().callEvent(new EventStartEvent(this));

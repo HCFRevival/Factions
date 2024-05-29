@@ -11,7 +11,15 @@ public final class ConquestEventConfig extends CaptureEventConfig {
             int maxLifespan,
             int tokenReward,
             int ticketsPerTick) {
-        super(defaultTicketsNeededToWin, defaultTimerDuration, maxLifespan, tokenReward, 0);
+
+        super(
+                defaultTicketsNeededToWin,
+                defaultTimerDuration,
+                maxLifespan,
+                tokenReward,
+                0,
+                -1
+        );
 
         this.ticketsPerTick = ticketsPerTick;
     }

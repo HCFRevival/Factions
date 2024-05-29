@@ -36,9 +36,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Getter
 @AllArgsConstructor
 public final class EventExecutor implements IEventExecutor {
-    @Getter public EventManager manager;
+    public EventManager manager;
 
     @Override
     public void startCaptureEvent(
@@ -49,6 +50,7 @@ public final class EventExecutor implements IEventExecutor {
             int tokenReward,
             int tickCheckpointInterval,
             int contestedThreshold,
+            int onlinePlayerLimit,
             Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
@@ -69,7 +71,15 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
+        captureEvent.startEvent(
+                ticketsToWin,
+                timerDuration,
+                tokenReward,
+                tickCheckpointInterval,
+                contestedThreshold,
+                onlinePlayerLimit
+        );
+
         promise.resolve();
     }
 
@@ -172,6 +182,7 @@ public final class EventExecutor implements IEventExecutor {
             int tokenReward,
             int tickCheckpointInterval,
             int contestedThreshold,
+            int onlinePlayerLimit,
             Promise promise
     ) {
         final Optional<IEvent> event = manager.getEvent(eventName);
@@ -188,7 +199,14 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold));
+        koth.setEventConfig(new CaptureEventConfig(
+                ticketsToWin,
+                timerDuration,
+                tokenReward,
+                tickCheckpointInterval,
+                contestedThreshold,
+                onlinePlayerLimit
+        ));
 
         promise.resolve();
     }

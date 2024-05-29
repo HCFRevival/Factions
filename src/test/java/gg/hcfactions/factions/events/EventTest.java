@@ -34,7 +34,7 @@ public class EventTest {
                 "Test Event",
                 schedule,
                 new CaptureRegion(new BLocatable("", 0, 0, 0), new BLocatable("", 0, 0, 0)),
-                new CaptureEventConfig(0, 0, 0, 0, 0));
+                new CaptureEventConfig(0, 0, 0, 0, 0, 0));
 
         Assertions.assertTrue(event.shouldStart());
     }
