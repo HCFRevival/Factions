@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import gg.hcfactions.factions.Factions;
-import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
+import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.tracking.IEventTracker;
 import gg.hcfactions.factions.models.events.tracking.IEventTrackerEntry;
 import gg.hcfactions.factions.models.events.tracking.IEventTrackerPlayer;
@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class KOTHEventTracker implements IEventTracker<KOTHEventTracker> {
-    @Getter public final KOTHEvent event;
+public final class ConquestEventTracker implements IEventTracker<ConquestEventTracker> {
+    @Getter public final ConquestEvent event;
     @Getter @Setter public boolean tracking;
     @Getter @Setter public long endTime;
     @Getter public final Set<IEventTrackerPlayer> participants;
@@ -29,7 +29,7 @@ public final class KOTHEventTracker implements IEventTracker<KOTHEventTracker> {
     private final Factions plugin;
     private long startTime;
 
-    public KOTHEventTracker(KOTHEvent event) {
+    public ConquestEventTracker(ConquestEvent event) {
         this.event = event;
         this.plugin = event.getPlugin();
         this.participants = Sets.newConcurrentHashSet();
@@ -49,7 +49,7 @@ public final class KOTHEventTracker implements IEventTracker<KOTHEventTracker> {
     }
 
     @Override
-    public KOTHEventTracker fromDocument(Document document) {
+    public ConquestEventTracker fromDocument(Document document) {
         return null;
     }
 
@@ -58,7 +58,7 @@ public final class KOTHEventTracker implements IEventTracker<KOTHEventTracker> {
         final List<Document> participantDocs = Lists.newArrayList();
         final List<Document> eventDocs = Lists.newArrayList();
         final Map<String, Integer> leaderboard = Maps.newHashMap();
-        final PlayerFaction winnerFaction = event.getSession().getCapturingFaction();
+        final PlayerFaction winnerFaction = (event.getCapturingFaction() != null ? plugin.getFactionManager().getPlayerFactionById(event.getCapturingFaction()) : null);
         final long duration = endTime - startTime;
 
         event.getSession().getLeaderboard().forEach((fid, tickets) -> {

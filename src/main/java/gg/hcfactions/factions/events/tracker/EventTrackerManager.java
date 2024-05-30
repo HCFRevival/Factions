@@ -6,6 +6,7 @@ import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.events.IEvent;
 import gg.hcfactions.factions.models.events.impl.tracking.GenericEventTrackerPlayer;
+import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.events.tracking.IEventTracker;
 import gg.hcfactions.factions.models.events.tracking.IEventTrackerPlayer;
@@ -70,6 +71,7 @@ public final class EventTrackerManager {
      */
     public IEventTrackerPlayer getOrCreatePlayerTracker(UUID uniqueId, String username, IEventTracker<?> tracker) {
         final Optional<IEventTrackerPlayer> existingPlayerQuery = tracker.getParticipant(uniqueId);
+
         if (existingPlayerQuery.isEmpty()) {
             final GenericEventTrackerPlayer newPlayerTracker = new GenericEventTrackerPlayer(uniqueId, username);
             tracker.getParticipants().add(newPlayerTracker);
@@ -106,6 +108,10 @@ public final class EventTrackerManager {
             return Optional.of(kothEvent.getSession().getTracker());
         }
 
+        else if (event instanceof final ConquestEvent conqEvent) {
+            return Optional.of(conqEvent.getSession().getTracker());
+        }
+
         eventManager.getPlugin().getAresLogger().warn("Attempted to query an event tracker for an unsupported event type");
         return Optional.empty();
     }
@@ -122,6 +128,10 @@ public final class EventTrackerManager {
         eventManager.getActiveEvents().forEach(event -> {
             if (event instanceof final KOTHEvent kothEvent) {
                 kothEvent.getSession().getTracker().getParticipant(uniqueId).ifPresent(res::add);
+            }
+
+            else if (event instanceof final ConquestEvent conqEvent) {
+                conqEvent.getSession().getTracker().getParticipant(uniqueId).ifPresent(res::add);
             }
 
             // TODO: Add support for other event types

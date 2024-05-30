@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import gg.hcfactions.factions.models.events.IEventSession;
+import gg.hcfactions.factions.models.events.impl.tracking.ConquestEventTracker;
 import gg.hcfactions.factions.models.events.impl.types.ConquestEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -15,15 +16,17 @@ import org.bukkit.ChatColor;
 
 import java.util.*;
 
+@Getter
 public final class ConquestSession implements IEventSession {
-    @Getter public final ConquestEvent event;
-    @Getter @Setter public boolean active;
-    @Getter @Setter public int ticketsNeededToWin;
-    @Getter @Setter public int ticketsPerTick;
-    @Getter @Setter public int timerDuration;
-    @Getter @Setter public int tokenReward;
-    @Getter @Setter public long nextNotificationTime;
-    @Getter public final Map<UUID, Integer> leaderboard;
+    public final ConquestEvent event;
+    public ConquestEventTracker tracker;
+    public final Map<UUID, Integer> leaderboard;
+    @Setter public boolean active;
+    @Setter public int ticketsNeededToWin;
+    @Setter public int ticketsPerTick;
+    @Setter public int timerDuration;
+    @Setter public int tokenReward;
+    @Setter public long nextNotificationTime;
 
     public ConquestSession(ConquestEvent event, int ticketsNeededToWin, int ticketsPerTick, int timerDuration, int tokenReward) {
         this.event = event;
@@ -33,6 +36,7 @@ public final class ConquestSession implements IEventSession {
         this.tokenReward = tokenReward;
         this.nextNotificationTime = Time.now();
         this.leaderboard = Maps.newConcurrentMap();
+        this.tracker = new ConquestEventTracker(event);
     }
 
     public int getTickets(PlayerFaction faction) {
