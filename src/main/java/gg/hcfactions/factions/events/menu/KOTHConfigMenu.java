@@ -172,8 +172,8 @@ public final class KOTHConfigMenu extends GenericMenu {
             }
 
             if (click.isRightClick()) {
-                final int newValue = Math.max(config.getDefaultTicketsNeededToWin() - (click.isShiftClick() ? 30 : 5), 1);
-                config.setDefaultTicketsNeededToWin(newValue);
+                final int newValue = Math.max(config.getDefaultTimerDuration() - (click.isShiftClick() ? 30 : 5), 1);
+                config.setDefaultTimerDuration(newValue);
                 populate();
             }
         }));
@@ -187,7 +187,7 @@ public final class KOTHConfigMenu extends GenericMenu {
             }
 
             if (click.isRightClick()) {
-                final int newValue = Math.max(config.getDefaultTicketsNeededToWin() - (click.isShiftClick() ? 50 : 1), 1);
+                final int newValue = Math.max(config.getTokenReward() - (click.isShiftClick() ? 50 : 1), 1);
                 config.setTokenReward(newValue);
                 populate();
             }
