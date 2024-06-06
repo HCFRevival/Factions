@@ -97,16 +97,16 @@ public final class ConquestSession implements IEventSession {
 
     public void tick(ConquestZone zone) {
         final int existingTickets = getTickets(zone.getCapturingFaction());
-        final int newTickets = existingTickets + ticketsPerTick; // TODO: Make this configurable
+        final int newTickets = existingTickets + ticketsPerTick;
+
+        leaderboard.put(zone.getCapturingFaction().getUniqueId(), newTickets);
 
         if (newTickets >= ticketsNeededToWin) {
             event.captureEvent(zone.getCapturingFaction());
             return;
         }
 
-        leaderboard.put(zone.getCapturingFaction().getUniqueId(), newTickets);
         FMessage.broadcastConquestMessage(FMessage.LAYER_2 + zone.getCapturingFaction().getName() + FMessage.LAYER_1 + " has gained " + FMessage.LAYER_2 + ticketsPerTick + " tickets" + FMessage.LAYER_1 + " for controlling " + zone.getDisplayName() + ChatColor.RED + " (" + newTickets + "/" + ticketsNeededToWin + ")");
-
         zone.getTimer().setExpire(Time.now() + (timerDuration * 1000L));
     }
 }

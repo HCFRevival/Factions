@@ -125,7 +125,7 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
     public void stopEvent() {
         session.getTracker().stopTracking();
         session.setActive(false);
-        setActive(false); // TODO: Remove one of these, it's redundant
+        setActive(false);
 
         // reset zones
         zones.forEach(z -> {
