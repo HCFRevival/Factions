@@ -50,10 +50,6 @@ import java.util.UUID;
 
 public record EventListener(@Getter Factions plugin) implements Listener {
     private void handleEventDeath(PlayerFaction playerFaction) {
-        if (plugin.getEventManager().getActiveKothEvents().isEmpty()) {
-            return;
-        }
-
         plugin.getEventManager().getActiveConquestEvent().ifPresent(conquest -> {
             final int currentTickets = conquest.getSession().getTickets(playerFaction);
 
