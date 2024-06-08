@@ -5,6 +5,7 @@ import gg.hcfactions.factions.models.shop.IMerchantVillager;
 
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,19 +24,20 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.UUID;
 
+@Getter
 public final class MerchantVillager extends Villager implements IMerchantVillager {
-    @Getter public final Factions plugin;
-    @Getter public final UUID merchantId;
-    @Getter public final PLocatable position;
+    public final Factions plugin;
+    public final UUID merchantId;
+    public final PLocatable position;
 
-    public MerchantVillager(Factions plugin, GenericMerchant merchant) {
-        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.SNOW);
+    public MerchantVillager(Factions plugin, GenericMerchant<?> merchant) {
+        super(EntityType.VILLAGER, ((CraftWorld)merchant.getMerchantLocation().getBukkitLocation().getWorld()).getHandle(), VillagerType.SAVANNA);
         this.plugin = plugin;
         this.merchantId = merchant.getId();
         this.position = merchant.getMerchantLocation();
 
         final CraftLivingEntity livingEntity = (CraftLivingEntity) getBukkitEntity();
-        livingEntity.setCustomName(merchant.getMerchantName());
+        livingEntity.setCustomName(LegacyComponentSerializer.legacySection().serialize(merchant.getMerchantName()));
         livingEntity.setCustomNameVisible(true);
         livingEntity.teleport(merchant.getMerchantLocation().getBukkitLocation());
 

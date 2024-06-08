@@ -2,9 +2,12 @@ package gg.hcfactions.factions.listeners;
 
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.items.Crowbar;
+import gg.hcfactions.factions.listeners.events.player.EventShopTransactionEvent;
+import gg.hcfactions.factions.listeners.events.player.ShopTransactionEvent;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import lombok.Getter;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,8 +23,40 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.Objects;
 
 public record CrowbarListener(@Getter Factions plugin) implements Listener {
+    private void handleCrowbarPurchase(ShopTransactionEvent event) {
+        if (!(event.getItem().getType().equals(Material.DIAMOND_HOE))) {
+            return;
+        }
+
+        ItemStack item = event.getItem();
+        ItemMeta meta = item.getItemMeta();
+
+        if (
+                meta == null
+                        || meta.displayName() == null
+                        || !PlainTextComponentSerializer.plainText().serialize(Objects.requireNonNull(meta.displayName())).equalsIgnoreCase("Crowbar")
+        ) {
+            plugin.getAresLogger().error("Skip #1: {}", PlainTextComponentSerializer.plainText().serialize(meta.displayName()));
+            return;
+        }
+
+        CustomItemService cis = (CustomItemService)plugin.getService(CustomItemService.class);
+        if (cis == null) {
+            plugin.getAresLogger().error("Skip #2");
+            return;
+        }
+
+        cis.getItem(Crowbar.class).ifPresentOrElse(crowbarCustomItem -> {
+            event.setItem(crowbarCustomItem.getItem());
+            plugin.getAresLogger().info("Updated PDC for Crowbar");
+        }, () -> plugin.getAresLogger().error("Failed to apply PDC for Crowbar"));
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
@@ -95,5 +130,19 @@ public record CrowbarListener(@Getter Factions plugin) implements Listener {
 
         spawner.setSpawnedType(type);
         state.update();
+    }
+
+    @EventHandler
+    public void onShopTransaction(ShopTransactionEvent event) {
+        if (!(event.getTransactionType().equals(ShopTransactionEvent.ETransactionType.BUY))) {
+            return;
+        }
+
+        handleCrowbarPurchase(event);
+    }
+
+    @EventHandler
+    public void onEventShopTransaction(EventShopTransactionEvent event) {
+        handleCrowbarPurchase(event);
     }
 }

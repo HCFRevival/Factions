@@ -15,6 +15,8 @@ import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -47,7 +49,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         if (isEventMerchant) {
             final EventMerchant merchant = new EventMerchant(
                     UUID.randomUUID(),
-                    ChatColor.translateAlternateColorCodes('&', merchantName),
+                    manager.getPlugin().getMiniMessage().deserialize(merchantName),
                     new PLocatable(player),
                     Lists.newArrayList()
             );
@@ -64,7 +66,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
 
         final GenericMerchant<?> merchant = new GenericMerchant<>(
                 UUID.randomUUID(),
-                ChatColor.translateAlternateColorCodes('&', merchantName),
+                manager.getPlugin().getMiniMessage().deserialize(merchantName),
                 new PLocatable(player),
                 Lists.newArrayList()
         );
@@ -124,7 +126,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
 
         final IMerchant merchant = merchantQuery.get();
 
-        if (merchant.getShops().stream().anyMatch(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(ChatColor.stripColor(shopName)))) {
+        if (merchant.getShops().stream().anyMatch(s -> PlainTextComponentSerializer.plainText().serialize(s.getShopName()).equalsIgnoreCase(shopName))) {
             promise.reject("Shop name is already in use");
             return;
         }
@@ -137,7 +139,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         if (merchant instanceof final EventMerchant eventMerchant) {
             final EventShop shop = new EventShop(
                     UUID.randomUUID(),
-                    ChatColor.translateAlternateColorCodes('&', shopName),
+                    manager.getPlugin().getMiniMessage().deserialize(shopName),
                     item.getType(),
                     position,
                     Lists.newArrayList()
@@ -149,7 +151,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             final GenericMerchant<GenericShop> genericMerchant = (GenericMerchant<GenericShop>) merchant;
             final GenericShop<?> shop = new GenericShop<>(
                     UUID.randomUUID(),
-                    ChatColor.translateAlternateColorCodes('&', shopName),
+                    manager.getPlugin().getMiniMessage().deserialize(shopName),
                     item.getType(),
                     position,
                     Lists.newArrayList()
@@ -176,7 +178,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
         final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName) || ChatColor.stripColor(s.getShopName()).startsWith(shopName))
+                .filter(s -> PlainTextComponentSerializer.plainText().serialize(s.getShopName()).equalsIgnoreCase(shopName) || PlainTextComponentSerializer.plainText().serialize(s.getShopName()).startsWith(shopName))
                 .findFirst()
                 .orElse(null);
 
@@ -208,7 +210,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
         final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName) || ChatColor.stripColor(s.getShopName()).startsWith(shopName))
+                .filter(s -> PlainTextComponentSerializer.plainText().serialize(s.getShopName()).equalsIgnoreCase(shopName) || PlainTextComponentSerializer.plainText().serialize(s.getShopName()).startsWith(shopName))
                 .filter(ms -> (!(ms instanceof EventShop)))
                 .findFirst()
                 .orElse(null);
@@ -223,8 +225,8 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             return;
         }
 
-        final String itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
-                ? item.getItemMeta().getDisplayName()
+        final Component itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
+                ? item.getItemMeta().displayName()
                 : null;
 
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
@@ -239,7 +241,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 itemDisplayName,
                 item.getType(),
                 item.getAmount(),
-                item.getItemMeta().getLore(),
+                item.getItemMeta().lore(),
                 enchantments,
                 position,
                 false,
@@ -270,7 +272,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
 
         final EventShop shop = merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName))
+                .filter(s -> PlainTextComponentSerializer.plainText().serialize(s.getShopName()).equalsIgnoreCase(shopName))
                 .findFirst()
                 .orElse(null);
 
@@ -284,8 +286,8 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             return;
         }
 
-        final String itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
-                ? item.getItemMeta().getDisplayName()
+        final Component itemDisplayName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
+                ? item.displayName()
                 : null;
 
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
@@ -300,7 +302,7 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 itemDisplayName,
                 item.getType(),
                 item.getAmount(),
-                item.getItemMeta().getLore(),
+                item.getItemMeta().lore(),
                 enchantments,
                 false,
                 position,
@@ -325,7 +327,8 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
         final GenericMerchant<?> merchant = (GenericMerchant<?>) merchantResult;
         final GenericShop<GenericShopItem> shop = (GenericShop<GenericShopItem>) merchant.getShops()
                 .stream()
-                .filter(s -> ChatColor.stripColor(s.getShopName()).equalsIgnoreCase(shopName) || ChatColor.stripColor(s.getShopName()).startsWith(shopName))
+                .filter(s -> PlainTextComponentSerializer.plainText().serialize(s.getShopName()).equalsIgnoreCase(shopName)
+                        || PlainTextComponentSerializer.plainText().serialize(s.getShopName()).startsWith(shopName))
                 .findFirst()
                 .orElse(null);
 

@@ -5,6 +5,7 @@ import gg.hcfactions.factions.models.shop.impl.GenericMerchant;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
 import lombok.Getter;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -13,7 +14,7 @@ public final class MerchantMenu extends GenericMenu {
     private final GenericMerchant<?> merchant;
 
     public MerchantMenu(Factions plugin, Player player, GenericMerchant<?> merchant) {
-        super(plugin, player, ChatColor.stripColor(merchant.getMerchantName()), 1);
+        super(plugin, player, PlainTextComponentSerializer.plainText().serialize(merchant.getMerchantName()), 1);
         this.plugin = plugin;
         this.merchant = merchant;
     }
