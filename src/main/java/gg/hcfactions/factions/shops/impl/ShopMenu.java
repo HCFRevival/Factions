@@ -146,7 +146,7 @@ public final class ShopMenu extends GenericMenu {
         }
 
         faction.subtractTokens(transactionEvent.getAmount().intValue());
-        player.getInventory().addItem(item.getItem(false));
+        player.getInventory().addItem(transactionEvent.getItem());
 
         faction.sendMessage(
                 Component.text(player.getName(), FMessage.TC_NAME)
@@ -189,7 +189,7 @@ public final class ShopMenu extends GenericMenu {
                 ? item.getDisplayName()
                 : Component.text(Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " ")));
 
-        ShopTransactionEvent transactionEvent = new ShopTransactionEvent(player, item.getItem(false), ShopTransactionEvent.ETransactionType.BUY, item.getAmount());
+        ShopTransactionEvent transactionEvent = new ShopTransactionEvent(player, item.getItem(false), ShopTransactionEvent.ETransactionType.BUY, item.getBuyPrice());
         Bukkit.getPluginManager().callEvent(transactionEvent);
         if (transactionEvent.isCancelled()) {
             promise.reject("Transaction Cancelled");
@@ -198,7 +198,7 @@ public final class ShopMenu extends GenericMenu {
 
         factionPlayer.subtractFromBalance(transactionEvent.getAmount().doubleValue());
 
-        player.getInventory().addItem(item.getItem(false));
+        player.getInventory().addItem(transactionEvent.getItem());
         player.sendMessage(Component.text("Purchased", FMessage.TC_LAYER1)
                 .appendSpace().append(Component.text("x" + item.getAmount(), FMessage.TC_LAYER2))
                 .appendSpace().append(itemName).colorIfAbsent(FMessage.TC_LAYER2)
@@ -233,7 +233,7 @@ public final class ShopMenu extends GenericMenu {
             return;
         }
 
-        ShopTransactionEvent transactionEvent = new ShopTransactionEvent(player, item.getItem(false), ShopTransactionEvent.ETransactionType.SELL, item.getAmount());
+        ShopTransactionEvent transactionEvent = new ShopTransactionEvent(player, item.getItem(false), ShopTransactionEvent.ETransactionType.SELL, item.getSellPrice());
         Bukkit.getPluginManager().callEvent(transactionEvent);
         if (transactionEvent.isCancelled()) {
             promise.reject("Transaction Cancelled");
