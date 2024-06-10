@@ -763,6 +763,42 @@ public final class ClaimListener implements Listener {
     }
 
     /**
+     * Protects claims from block explosions
+     * @param event BlockExplodeEvent
+     */
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final List<Block> toRemove = Lists.newArrayList();
+
+        event.blockList().forEach(block -> {
+            BLocatable loc = new BLocatable(block);
+            Claim claimAt = plugin.getClaimManager().getClaimAt(loc);
+
+            if (claimAt != null) {
+                IFaction faction = plugin.getFactionManager().getFactionById(claimAt.getOwner());
+
+                if (faction != null) {
+                    if (faction instanceof PlayerFaction playerFaction) {
+                        if (playerFaction.isRaidable()) {
+                            return;
+                        }
+
+                        toRemove.add(block);
+                    } else if (faction instanceof ServerFaction) {
+                        toRemove.add(block);
+                    }
+                }
+            }
+        });
+
+        toRemove.forEach(removed -> event.blockList().remove(removed));
+    }
+
+    /**
      * Handles protecting land from entity explosions and wind changes
      *
      * @param event EntityExplodeEvent
@@ -1458,7 +1494,7 @@ public final class ClaimListener implements Listener {
      * @param event Bukkit BlockExplodeEvent
      */
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onBlockExplode(BlockExplodeEvent event) {
+    public void onWindchargeBlockExplode(BlockExplodeEvent event) {
         List<Block> toRemove = Lists.newArrayList();
 
         event.blockList().forEach(block -> {
