@@ -58,18 +58,15 @@ public final class CrowbarManager implements IManager {
         Component componentQuery = (type.equals(ECrowbarUseType.SPAWNER) ? Crowbar.MONSTER_SPAWNER_PREFIX_COMPONENT : Crowbar.END_PORTAL_PREFIX_COMPONENT);
         Optional<Component> componentResult = itemMeta.lore().stream().filter(entry -> entry.contains(componentQuery)).findFirst();
         if (componentResult.isEmpty() || componentResult.get().children().isEmpty()) {
-            Bukkit.broadcast(Component.text("componentResult empty"));
             return 0;
         }
 
         Component childComponent = componentResult.get().children().getFirst();
         if (!(childComponent instanceof final TextComponent textComponent)) {
-            Bukkit.broadcast(Component.text("Child component empty"));
             return 0;
         }
 
         String line = textComponent.content();
-        Bukkit.broadcast(Component.text("Found value: " + line));
 
         int remaining;
         try {
