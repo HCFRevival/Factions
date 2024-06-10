@@ -153,6 +153,7 @@ public final class ShopMenu extends GenericMenu {
                         .appendSpace().append(Component.text("has", FMessage.TC_LAYER1))
                         .appendSpace().append(Component.text("purchased", FMessage.TC_SUCCESS))
                         .appendSpace().append(Component.text("x" + item.getAmount(), FMessage.TC_LAYER2))
+                        .appendSpace().append(itemName).colorIfAbsent(FMessage.TC_LAYER2)
                         .appendSpace().append(Component.text("for", FMessage.TC_LAYER1))
                         .appendSpace().append(Component.text(transactionEvent.getAmount().intValue() + " tokens", FMessage.TC_INFO))
         );
