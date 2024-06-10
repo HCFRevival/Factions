@@ -3,7 +3,9 @@ package gg.hcfactions.factions.models.events.impl.loot;
 import gg.hcfactions.factions.models.events.EPalaceLootTier;
 import gg.hcfactions.libs.bukkit.loot.ILootable;
 import gg.hcfactions.libs.bukkit.loot.impl.GenericLootable;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 
@@ -22,7 +24,8 @@ public final class PalaceLootable extends GenericLootable implements ILootable {
                 generic.getEnchantments(),
                 generic.getMinDropAmount(),
                 generic.getMaxDropAmount(),
-                generic.getProbability()
+                generic.getProbability(),
+                generic.getCustomItemClass()
         );
 
         this.lootTier = lootTier;
@@ -30,16 +33,17 @@ public final class PalaceLootable extends GenericLootable implements ILootable {
 
     public PalaceLootable(
             String id,
-            String displayName,
+            Component displayName,
             Material material,
-            List<String> lore,
+            List<Component> lore,
             Map<Enchantment, Integer> enchantments,
             int minDropAmount,
             int maxDropAmount,
             int probability,
-            EPalaceLootTier lootTier
+            EPalaceLootTier lootTier,
+            ICustomItem customItemClass
     ) {
-        super(id, displayName, material, lore, enchantments, minDropAmount, maxDropAmount, probability);
+        super(id, displayName, material, lore, enchantments, minDropAmount, maxDropAmount, probability, customItemClass);
         this.lootTier = lootTier;
     }
 }
