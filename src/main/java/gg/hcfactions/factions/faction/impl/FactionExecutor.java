@@ -38,9 +38,9 @@ import gg.hcfactions.libs.bukkit.services.impl.ranks.RankService;
 import gg.hcfactions.libs.bukkit.utils.Players;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
@@ -994,8 +994,8 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
     public void showFactionList(Player player, int page) {
         // create copy because we're modifying it
         List<PlayerFaction> factions = Lists.newArrayList(getManager().getPlayerFactions());
+        List<Component> entries = Lists.newArrayList();
         Component headerComponent = Component.empty();
-        Component listComponent = Component.empty();
         Component paginationComponent = Component.empty();
 
         factions.sort(Comparator.comparingInt(f -> f.getOnlineMembers().size()));
@@ -1041,21 +1041,16 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
                 dtrColor = NamedTextColor.RED;
             }
 
-            if (i != startPos) {
-                listComponent = listComponent.appendNewline();
-            }
-
-            listComponent = listComponent.append(Component.text((i + 1) + ".").color(FMessage.TC_LAYER2))
-                            .appendSpace().append(Component.text(faction.getName()).color(FMessage.TC_LAYER1))
-                            .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
-                            .append(Component.text(faction.getOnlineMembers().size() + "/" + faction.getMembers().size()).color(FMessage.TC_LAYER1))
-                            .append(Component.text("]").color(FMessage.TC_LAYER2))
-                            .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
-                            .append(Component.text(formattedDtr).color(dtrColor))
-                            .append(Component.text("/" + formattedMaxDtr + " DTR").color(FMessage.TC_LAYER1))
-                            .append(Component.text("]").color(FMessage.TC_LAYER2));
-
-            listComponent = listComponent.hoverEvent(Component.text("Click to view more information")).clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/f who " + faction.getName()));
+            entries.add(Component.text((i + 1) + ".").color(FMessage.TC_LAYER2)
+                    .appendSpace().append(Component.text(faction.getName()).color(FMessage.TC_LAYER1))
+                    .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
+                    .append(Component.text(faction.getOnlineMembers().size() + "/" + faction.getMembers().size()).color(FMessage.TC_LAYER1))
+                    .append(Component.text("]").color(FMessage.TC_LAYER2))
+                    .appendSpace().append(Component.text("[").color(FMessage.TC_LAYER2))
+                    .append(Component.text(formattedDtr).color(dtrColor))
+                    .append(Component.text("/" + formattedMaxDtr + " DTR").color(FMessage.TC_LAYER1))
+                    .append(Component.text("]").color(FMessage.TC_LAYER2))
+                    .appendSpace().append(Component.text("[More Info]", NamedTextColor.GRAY).clickEvent(ClickEvent.runCommand("/f who " + faction.getName()))));
         }
 
         if (hasPrevPage) {
@@ -1067,7 +1062,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         }
 
         player.sendMessage(headerComponent);
-        player.sendMessage(listComponent);
+        entries.forEach(player::sendMessage);
 
         if (!paginationComponent.children().isEmpty()) {
             player.sendMessage(paginationComponent);
