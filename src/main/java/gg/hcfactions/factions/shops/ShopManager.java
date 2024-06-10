@@ -235,8 +235,8 @@ public final class ShopManager implements IManager {
             for (GenericShopItem item : shop.getItems()) {
                 final String itemPath = shopPath + "items." + item.getId().toString() + ".";
 
-                if (item.getDisplayName() != null) {
-                    conf.set(itemPath + "display_name", plugin.getMiniMessage().serialize(item.getDisplayName()));
+                if (item.displayName != null) {
+                    conf.set(itemPath + "display_name", plugin.getMiniMessage().serialize(item.displayName));
                 }
 
                 conf.set(itemPath + "material", item.getMaterial().name());
@@ -256,7 +256,7 @@ public final class ShopManager implements IManager {
                 }
 
                 if (item.getEnchantments() != null && !item.getEnchantments().isEmpty()) {
-                    item.getEnchantments().forEach((enchantment, level) -> conf.set(itemPath + "enchantments." + enchantment.getKey(), level));
+                    item.getEnchantments().forEach((enchantment, level) -> conf.set(itemPath + "enchantments." + enchantment.getKey().getKey(), level));
                 }
             }
         }
