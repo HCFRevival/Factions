@@ -209,7 +209,7 @@ public final class FactionUtil {
      * @param faction PlayerFaction to compare against
      * @return Total online player count between two factions
      */
-    public int getOnlineAlliesCount(PlayerFaction faction) {
+    public static int getOnlineAlliesCount(PlayerFaction faction) {
         int count = faction.getOnlineMembers().size();
 
         if (!faction.hasAlly()) {

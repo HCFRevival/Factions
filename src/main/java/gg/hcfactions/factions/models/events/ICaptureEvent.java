@@ -43,8 +43,16 @@ public interface ICaptureEvent {
      * @param tokenReward Tokens that will be rewarded to the capturing faction
      * @param tickCheckpointInterval Tick checkpoint interval
      * @param contestedThreshold Threshold for an event to be considered contested
+     * @param onlinePlayerLimit Max amount of players a faction can have online to contest
      */
-    void startEvent(int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold);
+    void startEvent(
+            int ticketsNeededToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            int onlinePlayerLimit
+    );
 
     /**
      * Stop the event without rewarding any player

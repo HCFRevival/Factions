@@ -4,15 +4,18 @@ import gg.hcfactions.factions.models.events.ICaptureEventConfig;
 import lombok.Getter;
 import lombok.Setter;
 
+@Setter
+@Getter
 public class CaptureEventConfig implements ICaptureEventConfig {
-    @Getter @Setter public int defaultTicketsNeededToWin;
-    @Getter @Setter public int defaultTimerDuration;
-    @Getter @Setter public int maxLifespan;
-    @Getter @Setter public int tokenReward;
-    @Getter @Setter public int tickCheckpointInterval;
-    @Getter @Setter public int contestedThreshold;
-    @Getter @Setter public boolean majorityTurnoverEnabled;
-    @Getter @Setter public boolean suddenDeathEnabled;
+    public int defaultTicketsNeededToWin;
+    public int defaultTimerDuration;
+    public int maxLifespan;
+    public int tokenReward;
+    public int tickCheckpointInterval;
+    public int contestedThreshold;
+    public int onlinePlayerLimit;
+    public boolean majorityTurnoverEnabled;
+    public boolean suddenDeathEnabled;
 
     public CaptureEventConfig() {
         this.defaultTicketsNeededToWin = 20;
@@ -21,6 +24,7 @@ public class CaptureEventConfig implements ICaptureEventConfig {
         this.tokenReward = 100;
         this.tickCheckpointInterval = -1;
         this.contestedThreshold = 0;
+        this.onlinePlayerLimit = -1;
     }
 
     public CaptureEventConfig(int ticketsToWin, int timerDuration, int tokenReward) {
@@ -30,11 +34,20 @@ public class CaptureEventConfig implements ICaptureEventConfig {
         this.tokenReward = tokenReward;
         this.tickCheckpointInterval = -1;
         this.contestedThreshold = 0;
+        this.onlinePlayerLimit = -1;
     }
 
-    public CaptureEventConfig(int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
+    public CaptureEventConfig(
+            int ticketsToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            int onlinePlayerLimit
+    ) {
         this(ticketsToWin, timerDuration, tokenReward);
         this.tickCheckpointInterval = tickCheckpointInterval;
         this.contestedThreshold = contestedThreshold;
+        this.onlinePlayerLimit = onlinePlayerLimit;
     }
 }

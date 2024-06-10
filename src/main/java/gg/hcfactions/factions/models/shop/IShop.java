@@ -2,6 +2,8 @@ package gg.hcfactions.factions.models.shop;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -16,9 +18,9 @@ public interface IShop {
     UUID getId();
 
     /**
-     * @return Shop display name
+     * @return Shop display name component
      */
-    String getShopName();
+    Component getShopName();
 
     /**
      * @return Bukkit material

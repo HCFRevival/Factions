@@ -763,6 +763,50 @@ public final class ClaimListener implements Listener {
     }
 
     /**
+     * Protects claims from block explosions
+     * @param event BlockExplodeEvent
+     */
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        final List<Block> toRemove = Lists.newArrayList();
+
+        event.blockList().forEach(block -> {
+            BLocatable loc = new BLocatable(block);
+            List<Claim> claims = Lists.newArrayList();
+            Claim claimAt = plugin.getClaimManager().getClaimAt(loc);
+            List<Claim> insideBuildBufferClaims = plugin.getClaimManager().getClaimsNearby(loc, true);
+
+            if (claimAt != null) {
+                claims.add(claimAt);
+            }
+
+            claims.addAll(insideBuildBufferClaims);
+
+            for (Claim claim : claims) {
+                IFaction faction = plugin.getFactionManager().getFactionById(claim.getOwner());
+
+                if (faction != null) {
+                    if (faction instanceof PlayerFaction playerFaction) {
+                        if (playerFaction.isRaidable()) {
+                            return;
+                        }
+
+                        toRemove.add(block);
+                    } else if (faction instanceof ServerFaction) {
+                        toRemove.add(block);
+                    }
+                }
+            }
+        });
+
+        toRemove.forEach(removed -> event.blockList().remove(removed));
+    }
+
+    /**
      * Handles protecting land from entity explosions and wind changes
      *
      * @param event EntityExplodeEvent
@@ -780,8 +824,14 @@ public final class ClaimListener implements Listener {
         }
 
         for (Block block : event.blockList()) {
-            final Claim inside = plugin.getClaimManager().getClaimAt(new BLocatable(block));
-            final List<Claim> insideBuildBuffer = plugin.getClaimManager().getClaimsNearby(new BLocatable(block), true);
+            final BLocatable loc = new BLocatable(block);
+            final Claim inside = plugin.getClaimManager().getClaimAt(loc);
+            final List<Claim> insideBuildBufferClaims = plugin.getClaimManager().getClaimsNearby(loc, true);
+
+            if (!insideBuildBufferClaims.isEmpty()) {
+                toRemove.add(block);
+                continue;
+            }
 
             if (inside == null) {
                 continue;
@@ -804,14 +854,10 @@ public final class ClaimListener implements Listener {
                 }
             }
 
-            if (insideBuildBuffer.isEmpty()) {
-                continue;
-            }
-
             toRemove.add(block);
         }
 
-        event.blockList().removeAll(toRemove);
+        toRemove.forEach(removed -> event.blockList().remove(removed));
     }
 
     /**
@@ -1458,7 +1504,7 @@ public final class ClaimListener implements Listener {
      * @param event Bukkit BlockExplodeEvent
      */
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onBlockExplode(BlockExplodeEvent event) {
+    public void onWindchargeBlockExplode(BlockExplodeEvent event) {
         List<Block> toRemove = Lists.newArrayList();
 
         event.blockList().forEach(block -> {

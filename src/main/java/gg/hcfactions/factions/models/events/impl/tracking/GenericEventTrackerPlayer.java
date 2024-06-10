@@ -10,10 +10,11 @@ import org.bukkit.entity.Player;
 import java.util.Map;
 import java.util.UUID;
 
-public class GenericEventTrackerPlayer implements IEventTrackerPlayer {
-    @Getter public final UUID uniqueId;
-    @Getter @Setter public String username;
-    @Getter public final Map<String, Number> values;
+@Getter
+public final class GenericEventTrackerPlayer implements IEventTrackerPlayer {
+    public final UUID uniqueId;
+    public final Map<String, Number> values;
+    @Setter public String username;
 
     public GenericEventTrackerPlayer(Player player) {
         this.uniqueId = player.getUniqueId();

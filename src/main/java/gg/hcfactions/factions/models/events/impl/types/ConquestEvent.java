@@ -77,6 +77,8 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
 
         capturingFaction = faction.getUniqueId();
 
+        session.getTracker().publishTracking();
+
         FMessage.broadcastConquestMessage(displayName + FMessage.LAYER_1 + " has been captured by " + FMessage.LAYER_2 + faction.getName());
 
         new Scheduler(plugin).async(() -> {
@@ -105,6 +107,7 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
 
         session = new ConquestSession(this, ticketsNeededToWin, ticketsPerTick, timerDuration, tokenReward);
         session.setActive(true);
+        session.getTracker().startTracking();
 
         // Set up zone timers
         zones.forEach(zone -> {
@@ -120,8 +123,9 @@ public final class ConquestEvent implements IEvent, IMultiCaptureEvent, ISchedul
 
     @Override
     public void stopEvent() {
+        session.getTracker().stopTracking();
         session.setActive(false);
-        setActive(false); // TODO: Remove one of these, it's redundant
+        setActive(false);
 
         // reset zones
         zones.forEach(z -> {

@@ -22,6 +22,8 @@ import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.loot.impl.LootTableMenu;
+import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -36,9 +38,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Getter
 @AllArgsConstructor
 public final class EventExecutor implements IEventExecutor {
-    @Getter public EventManager manager;
+    public EventManager manager;
 
     @Override
     public void startCaptureEvent(
@@ -49,6 +52,7 @@ public final class EventExecutor implements IEventExecutor {
             int tokenReward,
             int tickCheckpointInterval,
             int contestedThreshold,
+            int onlinePlayerLimit,
             Promise promise) {
         final Optional<IEvent> event = manager.getEvent(eventName);
 
@@ -69,7 +73,15 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        captureEvent.startEvent(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold);
+        captureEvent.startEvent(
+                ticketsToWin,
+                timerDuration,
+                tokenReward,
+                tickCheckpointInterval,
+                contestedThreshold,
+                onlinePlayerLimit
+        );
+
         promise.resolve();
     }
 
@@ -172,6 +184,7 @@ public final class EventExecutor implements IEventExecutor {
             int tokenReward,
             int tickCheckpointInterval,
             int contestedThreshold,
+            int onlinePlayerLimit,
             Promise promise
     ) {
         final Optional<IEvent> event = manager.getEvent(eventName);
@@ -188,7 +201,14 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        koth.setEventConfig(new CaptureEventConfig(ticketsToWin, timerDuration, tokenReward, tickCheckpointInterval, contestedThreshold));
+        koth.setEventConfig(new CaptureEventConfig(
+                ticketsToWin,
+                timerDuration,
+                tokenReward,
+                tickCheckpointInterval,
+                contestedThreshold,
+                onlinePlayerLimit
+        ));
 
         promise.resolve();
     }
@@ -429,7 +449,6 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-
         final Map<Enchantment, Integer> enchantments = Maps.newHashMap();
 
         if (hand.getType().equals(Material.ENCHANTED_BOOK)) {
@@ -442,16 +461,23 @@ public final class EventExecutor implements IEventExecutor {
             enchantments.putAll(hand.getItemMeta().getEnchants());
         }
 
+        ICustomItem customItemClass = null;
+        CustomItemService cis = (CustomItemService) manager.getPlugin().getService(CustomItemService.class);
+        if (cis != null) {
+            customItemClass = cis.getItem(hand).orElse(null);
+        }
+
         final PalaceLootable lootable = new PalaceLootable(
                 UUID.randomUUID().toString(),
-                hand.getItemMeta() != null ? hand.getItemMeta().getDisplayName() : null,
+                hand.getItemMeta() != null ? hand.getItemMeta().displayName() : null,
                 hand.getType(),
-                hand.getItemMeta().getLore() != null ? hand.getItemMeta().getLore() : Lists.newArrayList(),
+                hand.getItemMeta().lore() != null ? hand.getItemMeta().lore() : Lists.newArrayList(),
                 enchantments,
                 minAmount,
                 maxAmount,
                 probability,
-                tier
+                tier,
+                customItemClass
         );
 
         manager.getPalaceLootManager().saveItem(lootable);

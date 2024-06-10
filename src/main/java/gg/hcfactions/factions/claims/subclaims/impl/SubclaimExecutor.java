@@ -419,44 +419,41 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
     public ChestSubclaim findChestSubclaimAt(Block block) {
         final BlockFace[] faces = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
         final List<Block> chests = Lists.newArrayList();
+        Material blockType = block.getType();
 
-        Block chest = null;
+        if (blockType.name().endsWith("_WALL_SIGN")) {
+            WallSign sign = (WallSign) block.getState().getBlockData();
+            Block relative = block.getRelative(sign.getFacing().getOppositeFace());
+            Material relativeType = relative.getType();
 
-        if (block.getType().name().endsWith("_WALL_SIGN")) {
-            final WallSign sign = (WallSign)block.getState().getBlockData();
-            final Block relative = block.getRelative(sign.getFacing().getOppositeFace());
-
-            if (relative.getType().equals(Material.CHEST) || relative.getType().equals(Material.TRAPPED_CHEST)) {
-                chest = block.getRelative(sign.getFacing().getOppositeFace());
-                chests.add(chest);
+            if (relativeType == Material.CHEST || relativeType == Material.TRAPPED_CHEST) {
+                chests.add(relative);
             }
-        } else if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)) {
-            chest = block;
-            chests.add(chest);
+        } else if (blockType == Material.CHEST || blockType == Material.TRAPPED_CHEST) {
+            chests.add(block);
         }
 
-        if (chest == null) {
+        if (chests.isEmpty()) {
             return null;
         }
 
-        if (chest.getState() instanceof final Chest chestBlock) {
-            if (chestBlock.getInventory() instanceof final DoubleChestInventory doubleChestInventory) {
-                final Location leftSide = doubleChestInventory.getLeftSide().getLocation();
-                final Location rightSide = doubleChestInventory.getRightSide().getLocation();
+        Chest chestBlock = (Chest) chests.getFirst().getState();
+        if (chestBlock.getInventory() instanceof DoubleChestInventory doubleChestInventory) {
+            Location leftSide = doubleChestInventory.getLeftSide().getLocation();
+            Location rightSide = doubleChestInventory.getRightSide().getLocation();
 
-                if (leftSide != null && rightSide != null) {
-                    final Block otherChest = (leftSide.getBlock().equals(block) ? rightSide.getBlock() : leftSide.getBlock());
-                    chests.add(otherChest);
-                }
+            if (leftSide != null && rightSide != null) {
+                Block otherChest = leftSide.getBlock().equals(block) ? rightSide.getBlock() : leftSide.getBlock();
+                chests.add(otherChest);
             }
         }
 
-        for (Block chestBlock : chests) {
+        for (Block chest : chests) {
             for (BlockFace face : faces) {
-                final Block relative = chestBlock.getRelative(face);
+                Block relative = chest.getRelative(face);
 
                 if (relative.getType().name().endsWith("_WALL_SIGN")) {
-                    final Sign sign = (Sign)relative.getState();
+                    Sign sign = (Sign) relative.getState();
 
                     if (sign.getLine(0).equals(ChatColor.AQUA + "[Subclaim]")) {
                         return new ChestSubclaim(chests, sign);

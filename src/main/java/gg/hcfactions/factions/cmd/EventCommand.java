@@ -109,26 +109,8 @@ public final class EventCommand extends BaseCommand {
     @Subcommand("start koth")
     @Description("Start a King of the Hill Event")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    @Syntax("<name> <tickets> <timer> <tokens> <tick interval> <contested threshold>")
-    public void onStart(Player player, String eventName, int ticketsToWin, int timerInterval, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
-        plugin.getEventManager().getExecutor().startCaptureEvent(player, eventName, ticketsToWin, timerInterval, tokenReward, tickCheckpointInterval, contestedThreshold, new Promise() {
-            @Override
-            public void resolve() {
-                player.sendMessage(ChatColor.GREEN + "Event started");
-            }
-
-            @Override
-            public void reject(String s) {
-                player.sendMessage(ChatColor.RED + "Failed to start event: " + s);
-            }
-        });
-    }
-
-    @Subcommand("start koth config")
-    @Description("Start a King of the Hill Event")
-    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
     @Syntax("<name>")
-    public void onStartWithConfig(Player player, String eventName) {
+    public void onStart(Player player, String eventName) {
         plugin.getEventManager().getExecutor().startCaptureEventWithConfig(player, eventName, new Promise() {
             @Override
             public void resolve() {}

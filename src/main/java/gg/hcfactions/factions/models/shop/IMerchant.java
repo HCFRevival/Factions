@@ -1,6 +1,8 @@
 package gg.hcfactions.factions.models.shop;
 
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +14,9 @@ public interface IMerchant {
     UUID getId();
 
     /**
-     * @return Display name
+     * @return Display Name Component
      */
-    String getMerchantName();
+    Component getMerchantName();
 
     /**
      * @return Location to spawn the merchant at

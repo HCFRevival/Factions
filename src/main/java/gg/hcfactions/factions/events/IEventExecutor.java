@@ -19,9 +19,20 @@ public interface IEventExecutor {
      * @param tokenReward Token reward
      * @param tickCheckpointInterval Tick checkpoint interval
      * @param contestedThreshold Threshold to consider an event as contested
+     * @param onlinePlayerLimit Online player limit
      * @param promise Promise
      */
-    void startCaptureEvent(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold, Promise promise);
+    void startCaptureEvent(
+            Player player,
+            String eventName,
+            int ticketsToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            int onlinePlayerLimit,
+            Promise promise
+    );
 
     /**
      * Start a Capture Event with specified rules using the KOTH Config Menu
@@ -64,9 +75,20 @@ public interface IEventExecutor {
      * @param tokenReward Token reward
      * @param tickCheckpointInterval Tick checkpoint interval
      * @param contestedThreshold Player ratio to mark an event as contested
+     * @param onlinePlayerLimit Online player limit
      * @param promise Promise
      */
-    void setCaptureEventConfig(Player player, String eventName, int ticketsToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold, Promise promise);
+    void setCaptureEventConfig(
+            Player player,
+            String eventName,
+            int ticketsToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            int onlinePlayerLimit,
+            Promise promise
+    );
 
     /**
      * Alter a Capture Event that is already running

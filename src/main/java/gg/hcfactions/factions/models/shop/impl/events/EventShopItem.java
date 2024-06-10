@@ -1,9 +1,15 @@
 package gg.hcfactions.factions.models.shop.impl.events;
 
 import com.google.common.collect.Lists;
+import gg.hcfactions.factions.items.mythic.IMythicItem;
+import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.shop.impl.GenericShopItem;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -19,10 +25,10 @@ public final class EventShopItem extends GenericShopItem {
 
     public EventShopItem(
             UUID id,
-            String displayName,
+            Component displayName,
             Material material,
             int amount,
-            List<String> lore,
+            List<Component> lore,
             Map<Enchantment, Integer> enchantments,
             boolean disabled,
             int position,
@@ -32,10 +38,30 @@ public final class EventShopItem extends GenericShopItem {
         this.tokenPrice = tokenPrice;
     }
 
+    public EventShopItem(
+            UUID id,
+            Component displayName,
+            Material material,
+            int amount,
+            List<Component> lore,
+            Map<Enchantment, Integer> enchantments,
+            boolean disabled,
+            int position,
+            int tokenPrice,
+            ICustomItem customItemClass
+    ) {
+        super(id, displayName, material, amount, lore, enchantments, position, disabled, 0.0, 0.0, customItemClass);
+        this.tokenPrice = tokenPrice;
+    }
+
     @Override
     public ItemStack getItem(boolean asDisplay) {
         final ItemBuilder builder = new ItemBuilder();
-        final List<String> lore = Lists.newArrayList();
+        final List<Component> lore = Lists.newArrayList();
+
+        if (customItemClass != null && !asDisplay) {
+            return customItemClass.getItem();
+        }
 
         builder.setMaterial(material);
         builder.setAmount(amount);
@@ -55,14 +81,14 @@ public final class EventShopItem extends GenericShopItem {
 
         if (asDisplay) {
             if (isDisabled()) {
-                builder.setName(ChatColor.DARK_RED + "NOT FOR SALE");
+                builder.setName(Component.text("NOT FOR SALE", NamedTextColor.DARK_RED));
             }
 
-            lore.add(ChatColor.RESET + " ");
-            lore.add(ChatColor.AQUA + "Token Buy Price" + ChatColor.RED + ": " + tokenPrice);
+            lore.add(Component.text(" "));
+            lore.add(Component.text("Token Buy Price", NamedTextColor.AQUA).append(Component.text(": " + tokenPrice, NamedTextColor.RED)));
         }
 
-        builder.addLore(lore);
+        builder.addLoreComponents(lore);
         return builder.build();
     }
 }

@@ -10,6 +10,7 @@ import gg.hcfactions.factions.models.events.impl.tracking.KOTHEventTracker;
 import gg.hcfactions.factions.models.events.impl.types.KOTHEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FMessage;
+import gg.hcfactions.factions.utils.FactionUtil;
 import gg.hcfactions.libs.base.util.Time;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,22 +20,24 @@ import org.bukkit.ChatColor;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
 public final class KOTHSession implements IEventSession {
-    @Getter public final KOTHEvent event;
-    @Getter @Setter public boolean active;
-    @Getter public boolean contested;
-    @Getter @Setter public int ticketsNeededToWin;
-    @Getter @Setter public int timerDuration;
-    @Getter @Setter public int tokenReward;
-    @Getter @Setter public int tickCheckpointInterval;
-    @Getter @Setter public int contestedThreshold;
-    @Getter @Setter public boolean majorityTurnoverEnabled;
-    @Getter @Setter public boolean suddenDeathEnabled;
-    @Getter @Setter public long nextNotificationTime;
-    @Getter @Setter public PlayerFaction capturingFaction;
-    @Getter public final Map<UUID, Integer> leaderboard;
-    @Getter public final KOTHTimer timer;
-    @Getter public KOTHEventTracker tracker;
+    public final KOTHEvent event;
+    public boolean contested;
+    public final Map<UUID, Integer> leaderboard;
+    public final KOTHTimer timer;
+    public KOTHEventTracker tracker;
+    @Setter public boolean active;
+    @Setter public int ticketsNeededToWin;
+    @Setter public int timerDuration;
+    @Setter public int tokenReward;
+    @Setter public int tickCheckpointInterval;
+    @Setter public int contestedThreshold;
+    @Setter public int onlinePlayerLimit;
+    @Setter public boolean majorityTurnoverEnabled;
+    @Setter public boolean suddenDeathEnabled;
+    @Setter public long nextNotificationTime;
+    @Setter public PlayerFaction capturingFaction;
 
     public KOTHSession(KOTHEvent event, CaptureEventConfig config) {
         this.event = event;
@@ -44,6 +47,7 @@ public final class KOTHSession implements IEventSession {
         this.tokenReward = config.getTokenReward();
         this.tickCheckpointInterval = config.getTickCheckpointInterval();
         this.contestedThreshold = config.getContestedThreshold();
+        this.onlinePlayerLimit = config.getOnlinePlayerLimit();
         this.majorityTurnoverEnabled = config.isMajorityTurnoverEnabled();
         this.suddenDeathEnabled = config.isSuddenDeathEnabled();
         this.nextNotificationTime = Time.now();
@@ -54,7 +58,15 @@ public final class KOTHSession implements IEventSession {
         this.tracker = new KOTHEventTracker(event);
     }
 
-    public KOTHSession(KOTHEvent event, int ticketsNeededToWin, int timerDuration, int tokenReward, int tickCheckpointInterval, int contestedThreshold) {
+    public KOTHSession(
+            KOTHEvent event,
+            int ticketsNeededToWin,
+            int timerDuration,
+            int tokenReward,
+            int tickCheckpointInterval,
+            int contestedThreshold,
+            int onlinePlayerLimit
+    ) {
         this.event = event;
         this.active = false;
         this.ticketsNeededToWin = ticketsNeededToWin;
@@ -62,6 +74,7 @@ public final class KOTHSession implements IEventSession {
         this.tokenReward = tokenReward;
         this.tickCheckpointInterval = tickCheckpointInterval;
         this.contestedThreshold = contestedThreshold;
+        this.onlinePlayerLimit = onlinePlayerLimit;
         this.nextNotificationTime = Time.now();
         this.capturingFaction = null;
         this.leaderboard = Maps.newConcurrentMap();
@@ -76,6 +89,16 @@ public final class KOTHSession implements IEventSession {
 
     public boolean hasContestThreshold() {
         return contestedThreshold > 1;
+    }
+
+    public boolean isExceedingPlayerLimit(PlayerFaction faction) {
+        if (onlinePlayerLimit <= 0) {
+            return false;
+        }
+
+        int onlineCount = FactionUtil.getOnlineAlliesCount(faction);
+
+        return onlineCount >= onlinePlayerLimit;
     }
 
     public int getTickets(PlayerFaction faction) {
@@ -143,8 +166,48 @@ public final class KOTHSession implements IEventSession {
         return 0;
     }
 
+    /**
+     * Calculates and returns the provided Player Faction's
+     * current tick checkpoint they are on
+     *
+     * @param faction PlayerFaction to query
+     * @return Checkpoint value
+     */
+    public int getFactionTickCheckpoint(PlayerFaction faction) {
+        if (tickCheckpointInterval <= 0) {
+            return -1;
+        }
+
+        List<Integer> checkpoints = getTickCheckpoints();
+
+        if (checkpoints.isEmpty()) {
+            return -1;
+        }
+
+        int currentTickets = getTickets(faction);
+
+        if (currentTickets <= 0) {
+            return -1;
+        }
+
+        for (int i = checkpoints.size() - 1; i >= 0; i--) {
+            final int checkpointValue = checkpoints.get(i);
+
+            if (currentTickets >= checkpointValue) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     public boolean shouldBeContested(Map<UUID, Set<UUID>> inCapzone) {
         if (capturingFaction == null) {
+            return false;
+        }
+
+        boolean isLastTick = (getTickCheckpoints().size() - 1) <= getFactionTickCheckpoint(capturingFaction);
+        if (isSuddenDeathEnabled() && isLastTick) {
             return false;
         }
 
@@ -156,6 +219,16 @@ public final class KOTHSession implements IEventSession {
         final int contestRequirement = (int)Math.floor(Math.round((double)(capturingFactionCount.size() / contestedThreshold)));
 
         for (UUID factionId : inCapzone.keySet()) {
+            PlayerFaction faction = event.getPlugin().getFactionManager().getPlayerFactionById(factionId);
+
+            if (faction == null) {
+                continue;
+            }
+
+            if (isExceedingPlayerLimit(faction)) {
+                continue;
+            }
+
             if (factionId.equals(capturingFaction.getUniqueId())) {
                 continue;
             }

@@ -2,6 +2,8 @@ package gg.hcfactions.factions.shops.impl;
 
 import gg.hcfactions.factions.FPermissions;
 import gg.hcfactions.factions.Factions;
+import gg.hcfactions.factions.listeners.events.player.EventShopTransactionEvent;
+import gg.hcfactions.factions.listeners.events.player.ShopTransactionEvent;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
 import gg.hcfactions.factions.models.message.FError;
 import gg.hcfactions.factions.models.message.FMessage;
@@ -18,7 +20,10 @@ import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
 import gg.hcfactions.libs.bukkit.menu.impl.Clickable;
 import gg.hcfactions.libs.bukkit.menu.impl.GenericMenu;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -30,7 +35,7 @@ public final class ShopMenu extends GenericMenu {
     private final GenericShop<?> shop;
 
     public ShopMenu(Factions plugin, Player player, GenericMerchant<?> merchant, GenericShop<?> shop) {
-        super(plugin, player, ChatColor.stripColor(shop.getShopName()), 6);
+        super(plugin, player, PlainTextComponentSerializer.plainText().serialize(merchant.getMerchantName()), 6);
         this.plugin = plugin;
         this.merchant = merchant;
         this.shop = shop;
@@ -42,7 +47,7 @@ public final class ShopMenu extends GenericMenu {
 
         final ItemBuilder backButton = new ItemBuilder();
         backButton.setMaterial(Material.BARRIER);
-        backButton.setName(ChatColor.RED + "Back to " + merchant.getMerchantName());
+        backButton.setName(Component.text("Back to", NamedTextColor.RED).appendSpace().append(merchant.getMerchantName()));
 
         addItem(new Clickable(backButton.build(), getInventory().getSize() - 1, click -> {
             player.closeInventory();
@@ -129,16 +134,31 @@ public final class ShopMenu extends GenericMenu {
             return;
         }
 
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
+        final Component itemName = item.getDisplayName() != null
+                ? item.getDisplayName()
+                : Component.text(Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " ")), NamedTextColor.WHITE);
 
-        faction.subtractTokens(item.getTokenPrice());
-        player.getInventory().addItem(item.getItem(false));
+        EventShopTransactionEvent transactionEvent = new EventShopTransactionEvent(player, faction, item.getItem(false), item.getTokenPrice());
+        Bukkit.getPluginManager().callEvent(transactionEvent);
+        if (transactionEvent.isCancelled()) {
+            promise.reject("Transaction Cancelled");
+            return;
+        }
 
-        faction.sendMessage(FMessage.P_NAME + player.getName() + FMessage.LAYER_1 + " has "
-                + FMessage.SUCCESS + "purchased" + ChatColor.AQUA + " x" + item.getAmount() + ChatColor.RESET + " "
-                + itemName + FMessage.LAYER_1 + " for " + ChatColor.DARK_AQUA + item.getTokenPrice() + " tokens");
+        faction.subtractTokens(transactionEvent.getAmount().intValue());
+        player.getInventory().addItem(transactionEvent.getItem());
 
-        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + " " + itemName + " with " + item.getTokenPrice() + " tokens");
+        faction.sendMessage(
+                Component.text(player.getName(), FMessage.TC_NAME)
+                        .appendSpace().append(Component.text("has", FMessage.TC_LAYER1))
+                        .appendSpace().append(Component.text("purchased", FMessage.TC_SUCCESS))
+                        .appendSpace().append(Component.text("x" + item.getAmount(), FMessage.TC_LAYER2))
+                        .appendSpace().append(itemName).colorIfAbsent(FMessage.TC_LAYER2)
+                        .appendSpace().append(Component.text("for", FMessage.TC_LAYER1))
+                        .appendSpace().append(Component.text(transactionEvent.getAmount().intValue() + " tokens", FMessage.TC_INFO))
+        );
+
+        plugin.getAresLogger().info("{} purchased x{} {} with {} tokens", player.getName(), item.getAmount(), itemName, transactionEvent.getAmount());
 
         promise.resolve();
     }
@@ -166,16 +186,27 @@ public final class ShopMenu extends GenericMenu {
             return;
         }
 
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
+        final Component itemName = item.getDisplayName() != null
+                ? item.getDisplayName()
+                : Component.text(Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " ")));
 
-        factionPlayer.subtractFromBalance(item.getBuyPrice());
+        ShopTransactionEvent transactionEvent = new ShopTransactionEvent(player, item.getItem(false), ShopTransactionEvent.ETransactionType.BUY, item.getBuyPrice());
+        Bukkit.getPluginManager().callEvent(transactionEvent);
+        if (transactionEvent.isCancelled()) {
+            promise.reject("Transaction Cancelled");
+            return;
+        }
 
-        player.getInventory().addItem(item.getItem(false));
-        player.sendMessage(FMessage.LAYER_1 + "Purchased " + ChatColor.AQUA + "x" + item.getAmount()
-                + ChatColor.RESET + " " + itemName + FMessage.LAYER_1 + " for " + ChatColor.DARK_GREEN
-                + String.format("%.2f", item.getBuyPrice()));
+        factionPlayer.subtractFromBalance(transactionEvent.getAmount().doubleValue());
 
-        plugin.getAresLogger().info(player.getName() + " purchased x" + item.getAmount() + " " + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
+        player.getInventory().addItem(transactionEvent.getItem());
+        player.sendMessage(Component.text("Purchased", FMessage.TC_LAYER1)
+                .appendSpace().append(Component.text("x" + item.getAmount(), FMessage.TC_LAYER2))
+                .appendSpace().append(itemName).colorIfAbsent(FMessage.TC_LAYER2)
+                .appendSpace().append(Component.text("for", FMessage.TC_LAYER1))
+                .appendSpace().append(Component.text("$" + String.format("%.2f", item.getBuyPrice()), NamedTextColor.DARK_GREEN)));
+
+        plugin.getAresLogger().info("{} purchased x{} {} for ${}", player.getName(), item.getAmount(), itemName, String.format("%.2f", item.getBuyPrice()));
 
         promise.resolve();
     }
@@ -194,10 +225,19 @@ public final class ShopMenu extends GenericMenu {
         }
 
         final ItemStack found = PlayerUtil.getFirstItemStackByMaterial(player, item.getMaterial());
-        final String itemName = item.getDisplayName() != null ? item.getDisplayName() : Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " "));
+        final Component itemName = item.getDisplayName() != null
+                ? item.getDisplayName()
+                : Component.text(Strings.capitalize(item.getMaterial().getKey().getKey().replaceAll("_", " ")));
 
         if (found == null) {
-            promise.reject("You do not have any " + itemName + " in your inventory");
+            promise.reject("You do not have any " + PlainTextComponentSerializer.plainText().serialize(itemName) + " in your inventory");
+            return;
+        }
+
+        ShopTransactionEvent transactionEvent = new ShopTransactionEvent(player, item.getItem(false), ShopTransactionEvent.ETransactionType.SELL, item.getSellPrice());
+        Bukkit.getPluginManager().callEvent(transactionEvent);
+        if (transactionEvent.isCancelled()) {
+            promise.reject("Transaction Cancelled");
             return;
         }
 
@@ -205,7 +245,7 @@ public final class ShopMenu extends GenericMenu {
         double soldPrice = 0.0;
 
         if (found.getAmount() < item.getAmount()) {
-            final double pricePer = item.getSellPrice() / item.getAmount();
+            final double pricePer = transactionEvent.getAmount().doubleValue() / item.getAmount();
             final double value = found.getAmount() * pricePer;
 
             soldPrice = value;
@@ -215,18 +255,20 @@ public final class ShopMenu extends GenericMenu {
             factionPlayer.addToBalance(value);
         } else {
             soldAmount = item.getAmount();
-            soldPrice = item.getSellPrice();
+            soldPrice = transactionEvent.getAmount().doubleValue();
 
             found.setAmount(found.getAmount() - item.getAmount());
             factionPlayer.addToBalance(item.getSellPrice());
         }
 
         player.sendMessage(
-                FMessage.LAYER_1 + "Sold " + ChatColor.AQUA + "x" + soldAmount
-                + ChatColor.RESET + " " + itemName
-                + FMessage.LAYER_1 + " for " + ChatColor.DARK_GREEN
-                + "$" + String.format("%.2f", soldPrice));
+                Component.text("Sold", FMessage.TC_LAYER1)
+                        .appendSpace().append(Component.text("x" + soldAmount, FMessage.TC_LAYER2)
+                                .appendSpace().append(itemName).colorIfAbsent(FMessage.TC_LAYER2)
+                                .appendSpace().append(Component.text("for", FMessage.TC_LAYER1))
+                                .appendSpace().append(Component.text("$" + String.format("%.2f", soldPrice), NamedTextColor.DARK_GREEN)))
+        );
 
-        plugin.getAresLogger().info(player.getName() + " sold x" + item.getAmount() + " " + itemName + " for $" + String.format("%.2f", item.getBuyPrice()));
+        plugin.getAresLogger().info("{} sold x{} {} for ${}", player.getName(), item.getAmount(), itemName, String.format("%.2f", item.getBuyPrice()));
     }
 }

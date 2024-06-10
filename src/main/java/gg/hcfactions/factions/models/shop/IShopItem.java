@@ -2,7 +2,9 @@ package gg.hcfactions.factions.models.shop;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
-import org.bukkit.ChatColor;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -20,9 +22,9 @@ public interface IShopItem {
     UUID getId();
 
     /**
-     * @return Bukkit display name
+     * @return Display name component
      */
-    String getDisplayName();
+    Component getDisplayName();
 
     /**
      * @return Bukkit material
@@ -35,9 +37,10 @@ public interface IShopItem {
     int getAmount();
 
     /**
+     * @deprecated Use getLoreComponents()
      * @return Item lore to apply
      */
-    List<String> getLore();
+    List<Component> getLore();
 
     /**
      * @return Enchantments to apply
@@ -65,6 +68,11 @@ public interface IShopItem {
     boolean isDisabled();
 
     /**
+     * @return Custom Item associated with this item
+     */
+    ICustomItem getCustomItemClass();
+
+    /**
      * @return If true this item can be purchased
      */
     default boolean isBuyable() {
@@ -90,7 +98,11 @@ public interface IShopItem {
      */
     default ItemStack getItem(boolean asDisplay) {
         final ItemBuilder builder = new ItemBuilder();
-        final List<String> lore = Lists.newArrayList();
+        final List<Component> lore = Lists.newArrayList();
+
+        if (getCustomItemClass() != null && !asDisplay) {
+            return getCustomItemClass().getItem();
+        }
 
         builder.setMaterial(getMaterial());
         builder.setAmount(getAmount());
@@ -112,21 +124,29 @@ public interface IShopItem {
 
         if (asDisplay) {
             if (isDisabled()) {
-                builder.setName(ChatColor.DARK_RED + "NOT FOR SALE");
+                builder.setName(Component.text("NOT FOR SALE", NamedTextColor.DARK_RED));
             }
 
-            lore.add(ChatColor.RESET + " ");
+            lore.add(Component.text(" "));
 
             if (isBuyable()) {
-                lore.add(ChatColor.GREEN + "Buy" + ChatColor.WHITE + ": $" + String.format("%.2f", getBuyPrice()) + ChatColor.YELLOW + " (Left-click)");
+                lore.add(Component.text("Buy", NamedTextColor.GREEN)
+                        .append(Component.text(": $" + String.format("%.2f", getBuyPrice()), NamedTextColor.WHITE))
+                        .appendSpace().append(Component.text("(", NamedTextColor.GRAY))
+                        .append(Component.keybind("key.attack", NamedTextColor.GRAY))
+                        .append(Component.text(")", NamedTextColor.GRAY)));
             }
 
             if (isSellable()) {
-                lore.add(ChatColor.RED + "Sell" + ChatColor.WHITE + ": $" + String.format("%.2f", getSellPrice()) + ChatColor.YELLOW + " (Right-click)");
+                lore.add(Component.text("Sell", NamedTextColor.RED)
+                        .append(Component.text(": $" + String.format("%.2f", getSellPrice()), NamedTextColor.WHITE))
+                        .appendSpace().append(Component.text("(", NamedTextColor.GRAY))
+                        .append(Component.keybind("key.use", NamedTextColor.GRAY))
+                        .append(Component.text(")", NamedTextColor.GRAY)));
             }
         }
 
-        builder.addLore(lore);
+        builder.addLoreComponents(lore);
 
         final ItemStack item = builder.build();
 
