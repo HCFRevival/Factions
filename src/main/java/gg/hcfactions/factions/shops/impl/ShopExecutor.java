@@ -14,6 +14,8 @@ import gg.hcfactions.factions.shops.IShopExecutor;
 import gg.hcfactions.factions.shops.ShopManager;
 import gg.hcfactions.libs.base.consumer.Promise;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -236,6 +238,12 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             enchantments.putAll(encMeta.getStoredEnchants());
         }
 
+        ICustomItem customItem = null;
+        CustomItemService cis = (CustomItemService) manager.getPlugin().getService(CustomItemService.class);
+        if (cis != null) {
+            customItem = cis.getItem(item).orElse(null);
+        }
+
         final GenericShopItem shopItem = new GenericShopItem(
                 UUID.randomUUID(),
                 itemDisplayName,
@@ -246,7 +254,8 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 position,
                 false,
                 buyAmount,
-                sellAmount
+                sellAmount,
+                customItem
         );
 
         shop.getItems().add(shopItem);
@@ -297,6 +306,12 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
             enchantments.putAll(encMeta.getStoredEnchants());
         }
 
+        ICustomItem customItem = null;
+        CustomItemService cis = (CustomItemService) manager.getPlugin().getService(CustomItemService.class);
+        if (cis != null) {
+            customItem = cis.getItem(item).orElse(null);
+        }
+
         final EventShopItem shopItem = new EventShopItem(
                 UUID.randomUUID(),
                 itemDisplayName,
@@ -306,7 +321,8 @@ public record ShopExecutor(@Getter ShopManager manager) implements IShopExecutor
                 enchantments,
                 false,
                 position,
-                tokenAmount
+                tokenAmount,
+                customItem
         );
 
         shop.getItems().add(shopItem);

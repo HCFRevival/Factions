@@ -25,16 +25,7 @@ public final class CrowbarManager implements IManager {
     }
 
     @Override
-    public void onEnable() {
-        final CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
-
-        if (cis == null) {
-            plugin.getAresLogger().error("could not obtain custom item service. crowbars will not function correctly");
-            return;
-        }
-
-        cis.registerNewItem(new Crowbar(plugin));
-    }
+    public void onEnable() {}
 
     @Override
     public void onDisable() {}

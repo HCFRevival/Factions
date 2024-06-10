@@ -2,6 +2,7 @@ package gg.hcfactions.factions.models.shop;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.libs.bukkit.builder.impl.ItemBuilder;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -67,6 +68,11 @@ public interface IShopItem {
     boolean isDisabled();
 
     /**
+     * @return Custom Item associated with this item
+     */
+    ICustomItem getCustomItemClass();
+
+    /**
      * @return If true this item can be purchased
      */
     default boolean isBuyable() {
@@ -93,6 +99,10 @@ public interface IShopItem {
     default ItemStack getItem(boolean asDisplay) {
         final ItemBuilder builder = new ItemBuilder();
         final List<Component> lore = Lists.newArrayList();
+
+        if (getCustomItemClass() != null && !asDisplay) {
+            return getCustomItemClass().getItem();
+        }
 
         builder.setMaterial(getMaterial());
         builder.setAmount(getAmount());

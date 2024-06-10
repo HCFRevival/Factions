@@ -12,6 +12,7 @@ import gg.hcfactions.factions.crowbar.CrowbarManager;
 import gg.hcfactions.factions.displays.DisplayManager;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.faction.FactionManager;
+import gg.hcfactions.factions.items.Crowbar;
 import gg.hcfactions.factions.items.StarterRod;
 import gg.hcfactions.factions.items.Sugarcube;
 import gg.hcfactions.factions.items.horn.impl.BerserkBattleHorn;
@@ -214,7 +215,6 @@ public final class Factions extends AresPlugin {
         // register services
         registerService(accountService);
         registerService(deathbanService);
-        registerService(customItemService);
         registerService(commandXService);
         registerService(rankService);
         registerService(syncService);
@@ -224,6 +224,50 @@ public final class Factions extends AresPlugin {
         registerService(altService);
         registerService(xpService);
         registerService(customRecipeService);
+
+        // custom items
+        registerService(customItemService);
+        customItemService.registerNewItem(new Sugarcube(this));
+        customItemService.registerNewItem(new RetreatBattleHorn(this));
+        customItemService.registerNewItem(new CleanseBattleHorn(this));
+        customItemService.registerNewItem(new ChargeBattleHorn(this));
+        customItemService.registerNewItem(new BerserkBattleHorn(this));
+        customItemService.registerNewItem(new StarterRod(this));
+        customItemService.registerNewItem(new DeepslateMiner(this));
+        customItemService.registerNewItem(new Crowbar(this));
+
+        customItemService.registerNewItem(new Ghostblade(this, new Ghostblade.GhostbladeConfig(
+                20,
+                16,
+                5,
+                10,
+                5.0f
+        )));
+
+        customItemService.registerNewItem(new Hullbreaker(this, new Hullbreaker.HullbreakerConfig(
+                5,
+                0,
+                16,
+                3
+        )));
+
+        customItemService.registerNewItem(new CrimsonFang(this, new CrimsonFang.CrimsonFangConfig(
+                0.25D,
+                1,
+                10
+        )));
+
+        customItemService.registerNewItem(new NeptunesFury(this, new NeptunesFury.NeptunesFuryConfig(
+                6.0,
+                3.0
+        )));
+
+        customItemService.registerNewItem(new SerpentsImpaler(this, new SerpentsImpaler.SerpentsImpalerConfig(
+                50.0f,
+                3,
+                0.5
+        )));
+
         startServices();
 
         // initialize gson
@@ -301,63 +345,6 @@ public final class Factions extends AresPlugin {
         registerListener(new MythicItemListener(this));
         registerListener(new EventTrackerListener(this));
         // registerListener(new DebugListener()); // TODO: Disable this
-
-        // custom recipes
-        // new FRecipes(this, configuration.getRecipeConfig()).register();
-
-        // custom items
-        customItemService.registerNewItem(new Sugarcube(this));
-        customItemService.registerNewItem(new RetreatBattleHorn(this));
-        customItemService.registerNewItem(new CleanseBattleHorn(this));
-        customItemService.registerNewItem(new ChargeBattleHorn(this));
-        customItemService.registerNewItem(new BerserkBattleHorn(this));
-        customItemService.registerNewItem(new SymsSong(this));
-        customItemService.registerNewItem(new StarterRod(this));
-
-        // mythics
-        customItemService.registerNewItem(new DeepslateMiner(this));
-
-        // TODO: Make these configurable
-        customItemService.registerNewItem(new AdmiralsEmber(this, new AdmiralsEmber.AdmiralsEmberConfig(
-                5,
-                10,
-                20*8,
-                30,
-                16,
-                20*30
-        )));
-
-        customItemService.registerNewItem(new Ghostblade(this, new Ghostblade.GhostbladeConfig(
-                20,
-                16,
-                5,
-                10,
-                5.0f
-        )));
-
-        customItemService.registerNewItem(new Hullbreaker(this, new Hullbreaker.HullbreakerConfig(
-                5,
-                0,
-                16,
-                3
-        )));
-
-        customItemService.registerNewItem(new CrimsonFang(this, new CrimsonFang.CrimsonFangConfig(
-                0.25D,
-                1,
-                10
-        )));
-
-        customItemService.registerNewItem(new NeptunesFury(this, new NeptunesFury.NeptunesFuryConfig(
-                6.0,
-                3.0
-        )));
-
-        customItemService.registerNewItem(new SerpentsImpaler(this, new SerpentsImpaler.SerpentsImpalerConfig(
-                50.0f,
-                3,
-                0.5
-        )));
     }
 
     @Override

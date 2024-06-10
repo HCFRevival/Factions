@@ -15,6 +15,8 @@ import gg.hcfactions.factions.models.shop.impl.events.EventShopItem;
 import gg.hcfactions.factions.shops.impl.ShopExecutor;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.location.impl.PLocatable;
+import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
+import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import gg.hcfactions.libs.bukkit.utils.Enchants;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -123,6 +125,7 @@ public final class ShopManager implements IManager {
                             final Map<Enchantment, Integer> itemEnchantments = Maps.newHashMap();
                             final List<Component> itemLore = Lists.newArrayList();
                             Material itemMaterial = null;
+                            ICustomItem customItem = null;
 
                             if (itemMaterialName == null) {
                                 plugin.getAresLogger().error("No item material name: {}", shopItemId);
@@ -156,6 +159,23 @@ public final class ShopManager implements IManager {
                                 }
                             }
 
+                            if (conf.get(itemPath + "custom_item_class") != null) {
+                                CustomItemService cis = (CustomItemService) plugin.getService(CustomItemService.class);
+
+                                if (cis != null) {
+                                    Optional<ICustomItem> customItemQuery = cis.getItemByClassName(conf.getString(itemPath + "custom_item_class"));
+
+                                    if (customItemQuery.isEmpty()) {
+                                        plugin.getAresLogger().error("Invalid custom item class: {}", conf.get(itemPath + "custom_item_class"));
+                                        plugin.getAresLogger().error("Here are the custom items I see:");
+                                        cis.getItemRegistry().keySet().forEach(validCustomItem -> plugin.getAresLogger().error(validCustomItem.getSimpleName()));
+                                        continue;
+                                    }
+
+                                    customItem = customItemQuery.get();
+                                }
+                            }
+
                             if (itemTokenPrice > 0) {
                                 final EventShopItem item = new EventShopItem(
                                         UUID.fromString(shopItemId),
@@ -166,7 +186,8 @@ public final class ShopManager implements IManager {
                                         itemEnchantments,
                                         itemDisabled,
                                         itemPosition,
-                                        itemTokenPrice
+                                        itemTokenPrice,
+                                        customItem
                                 );
 
                                 eventShopItems.add(item);
@@ -183,7 +204,8 @@ public final class ShopManager implements IManager {
                                     itemPosition,
                                     itemDisabled,
                                     itemBuyPrice,
-                                    itemSellPrice
+                                    itemSellPrice,
+                                    customItem
                             );
                             
                             items.add(item);
@@ -257,6 +279,10 @@ public final class ShopManager implements IManager {
 
                 if (item.getEnchantments() != null && !item.getEnchantments().isEmpty()) {
                     item.getEnchantments().forEach((enchantment, level) -> conf.set(itemPath + "enchantments." + enchantment.getKey().getKey(), level));
+                }
+
+                if (item.getCustomItemClass() != null) {
+                    conf.set(itemPath + "custom_item_class", item.getCustomItemClass().getClass().getSimpleName());
                 }
             }
         }
