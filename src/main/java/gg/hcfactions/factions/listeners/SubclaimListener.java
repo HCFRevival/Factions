@@ -32,6 +32,17 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public record SubclaimListener(@Getter Factions plugin) implements Listener {
     /**
+     * @param block Bukkit Block
+     * @return Returns true if the provided block is a subclaim item
+     */
+    private boolean isChestSubclaimBlock(Block block) {
+        return (block.getType().equals(Material.CHEST)
+                || block.getType().equals(Material.TRAPPED_CHEST)
+                || block.getType().name().endsWith("_WALL_SIGN")
+        );
+    }
+
+    /**
      * Handles block modifications of subclaims
      *
      * @param cancellable Cancellable
@@ -163,6 +174,10 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSignSubclaimBreak(BlockBreakEvent event) {
+        if (!isChestSubclaimBlock(event.getBlock())) {
+            return;
+        }
+
         handleSignSubclaimModification(event, event.getPlayer(), event.getBlock());
     }
 
@@ -173,6 +188,10 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSignSubclaimInteract(PlayerInteractEvent event) {
+        if (event.getClickedBlock() == null || !isChestSubclaimBlock(event.getClickedBlock())) {
+            return;
+        }
+
         handleSignSubclaimModification(event, event.getPlayer(), event.getClickedBlock());
     }
 
@@ -219,12 +238,12 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
         final Block origin = sourceLoc.getBlock();
         final Block destination = destLoc.getBlock();
 
-        if (plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
+        if (isChestSubclaimBlock(origin) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
             event.setCancelled(true);
             return;
         }
 
-        if (plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(destination) != null) {
+        if (isChestSubclaimBlock(destination) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(destination) != null) {
             event.setCancelled(true);
             return;
         }
