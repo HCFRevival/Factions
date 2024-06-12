@@ -1015,7 +1015,7 @@ public final class FMessage {
                         postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
 
                         if (!isLastEntry) {
-                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                            postQueryComponent = postQueryComponent.append(Component.text(",", TC_LAYER1).appendSpace());
                         }
                     }
                 }
@@ -1030,7 +1030,7 @@ public final class FMessage {
                         postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
 
                         if (!isLastEntry) {
-                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                            postQueryComponent = postQueryComponent.append(Component.text(",", TC_LAYER1).appendSpace());
                         }
                     }
                 }
@@ -1045,7 +1045,7 @@ public final class FMessage {
                         postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
 
                         if (!isLastEntry) {
-                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                            postQueryComponent = postQueryComponent.append(Component.text(",", TC_LAYER1).appendSpace());
                         }
                     }
                 }
