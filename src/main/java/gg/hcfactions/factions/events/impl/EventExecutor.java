@@ -260,7 +260,7 @@ public final class EventExecutor implements IEventExecutor {
             return;
         }
 
-        if (koth.getSession().getTicketsNeededToWin() >= tickets) {
+        if (koth.getSession().getTicketsNeededToWin() <= tickets) {
             promise.reject("You are trying to update this factions ticket count higher than the win condition");
             return;
         }
