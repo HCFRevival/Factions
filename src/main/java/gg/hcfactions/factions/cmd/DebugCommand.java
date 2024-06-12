@@ -35,13 +35,27 @@ public final class DebugCommand extends BaseCommand {
 
     @Subcommand("boss")
     @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
-    public void onDebugBossMob(Player player) {
-        //final BossGiant giant = new BossGiant(plugin, player.getLocation());
-        //giant.spawn();
-
-        final BossPhantom phantom = new BossPhantom(plugin, player.getLocation());
-        phantom.spawn();
+    public void onDebugBossMob(Player player, String bossName) {
+        if (bossName.equalsIgnoreCase("giant")) {
+            final BossGiant giant = new BossGiant(plugin, player.getLocation());
+            giant.spawn();
+        } else if (bossName.equalsIgnoreCase("phantom")) {
+            final BossPhantom phantom = new BossPhantom(plugin, player.getLocation());
+            phantom.spawn();
+        }
 
         player.sendMessage(Component.text("Boss has been spawned", NamedTextColor.GREEN));
+    }
+
+    @Subcommand("subclaim")
+    @CommandPermission(FPermissions.P_FACTIONS_ADMIN)
+    public void onDebugSubclaims(Player player) {
+        if (plugin.getSubclaimManager().getDebuggingPlayers().remove(player.getUniqueId())) {
+            player.sendMessage(Component.text("You are no longer debugging subclaims", NamedTextColor.AQUA));
+            return;
+        }
+
+        plugin.getSubclaimManager().getDebuggingPlayers().add(player.getUniqueId());
+        player.sendMessage(Component.text("You are now debugging subclaims", NamedTextColor.AQUA));
     }
 }

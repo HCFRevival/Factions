@@ -1116,7 +1116,7 @@ public final class ClassListener implements Listener {
         final AreaEffectCloud cloud = event.getEntity();
         final List<LivingEntity> affectedEntities = Lists.newArrayList(event.getAffectedEntities());
 
-        if (cloud.getBasePotionType() == null || !cloud.getBasePotionType().equals(PotionType.TURTLE_MASTER)) {
+        if (cloud.getBasePotionType() == null || !cloud.getBasePotionType().equals(PotionType.INFESTED)) {
             return;
         }
 

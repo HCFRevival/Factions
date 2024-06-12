@@ -1,6 +1,8 @@
 package gg.hcfactions.factions.claims.subclaims;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -14,6 +16,7 @@ import gg.hcfactions.factions.claims.subclaims.impl.SubclaimExecutor;
 import gg.hcfactions.factions.manager.IManager;
 import gg.hcfactions.factions.models.faction.IFaction;
 import gg.hcfactions.factions.models.faction.impl.PlayerFaction;
+import gg.hcfactions.factions.models.subclaim.ChestSubclaim;
 import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.libs.base.connect.impl.mongo.Mongo;
 import gg.hcfactions.libs.base.util.Time;
@@ -23,10 +26,10 @@ import lombok.Getter;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class SubclaimManager implements IManager {
@@ -35,6 +38,9 @@ public final class SubclaimManager implements IManager {
     @Getter public SubclaimBuilderManager builderManager;
     @Getter public BukkitTask subclaimAutosaveTask;
     @Getter public Set<Subclaim> subclaimRepository;
+    @Getter public Map<ChestSubclaim, Long> chestSubclaimCache;
+    @Getter public Set<UUID> debuggingPlayers;
+    @Getter public BukkitTask chestSubclaimCacheCleanupTask;
 
     public SubclaimManager(Factions plugin) {
         this.plugin = plugin;
@@ -45,10 +51,24 @@ public final class SubclaimManager implements IManager {
         executor = new SubclaimExecutor(this);
         builderManager = new SubclaimBuilderManager(this);
         subclaimRepository = Sets.newConcurrentHashSet();
+        chestSubclaimCache = Maps.newConcurrentMap();
+        debuggingPlayers = Sets.newConcurrentHashSet();
 
         loadSubclaims();
 
         builderManager.onEnable();
+
+        this.chestSubclaimCacheCleanupTask = new Scheduler(plugin).async(() -> {
+            List<ChestSubclaim> toRemove = Lists.newArrayList();
+
+            chestSubclaimCache.forEach((chest, expire) -> {
+                if (expire <= Time.now()) {
+                    toRemove.add(chest);
+                }
+            });
+
+            toRemove.forEach(removed -> chestSubclaimCache.remove(removed));
+        }).repeat(0L, 100L).run();
 
         // subclaim auto-save task
         this.subclaimAutosaveTask = new Scheduler(plugin).sync(() -> {
@@ -214,5 +234,14 @@ public final class SubclaimManager implements IManager {
      */
     public ImmutableList<Subclaim> getSubclaimsByOwner(UUID ownerId) {
         return ImmutableList.copyOf(subclaimRepository.stream().filter(subclaim -> subclaim.getOwner().equals(ownerId)).collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns an optional of a cached ChestSubclaim result that was previously computed
+     * @param block Block to query
+     * @return Optional of ChestSubclaim
+     */
+    public Optional<ChestSubclaim> getCachedChestSubclaim(Block block) {
+        return chestSubclaimCache.keySet().stream().filter(cs -> cs.getChests().stream().anyMatch(chest -> chest.getLocation().equals(block.getLocation()))).findFirst();
     }
 }

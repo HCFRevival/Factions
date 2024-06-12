@@ -120,7 +120,7 @@ public final class Tank implements IClass {
             cloud.setRadius(7.0f);
             cloud.setDuration(5);
             cloud.setReapplicationDelay(1);
-            cloud.setBasePotionType(PotionType.TURTLE_MASTER);
+            cloud.setBasePotionType(PotionType.INFESTED);
         });
     }
 

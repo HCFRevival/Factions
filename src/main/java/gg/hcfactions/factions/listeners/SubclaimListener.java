@@ -16,12 +16,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -29,8 +31,37 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public record SubclaimListener(@Getter Factions plugin) implements Listener {
+    /**
+     * @param block Bukkit Block
+     * @return Returns true if the provided block is a subclaim item
+     */
+    private boolean isChestSubclaimBlock(Block block) {
+        return (block.getType().equals(Material.CHEST)
+                || block.getType().equals(Material.TRAPPED_CHEST)
+                || block.getType().name().endsWith("_WALL_SIGN")
+        );
+    }
+
+    /**
+     * Invalidate chest subclaim cache when a block is modified adjacent to a cached result
+     * @param block Bukkit Block
+     */
+    private void invalidateCacheForAdjacentBlocks(Block block) {
+        final BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
+        for (BlockFace face : faces) {
+            Block relative = block.getRelative(face);
+
+            plugin.getSubclaimManager().getCachedChestSubclaim(relative).ifPresent(cachedResult ->
+                    plugin.getSubclaimManager().getChestSubclaimCache().remove(cachedResult));
+        }
+
+        plugin.getSubclaimManager().getCachedChestSubclaim(block).ifPresent(cachedResult ->
+                plugin.getSubclaimManager().getChestSubclaimCache().remove(cachedResult));
+    }
+
     /**
      * Handles block modifications of subclaims
      *
@@ -163,6 +194,10 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSignSubclaimBreak(BlockBreakEvent event) {
+        if (!isChestSubclaimBlock(event.getBlock())) {
+            return;
+        }
+
         handleSignSubclaimModification(event, event.getPlayer(), event.getBlock());
     }
 
@@ -173,6 +208,14 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSignSubclaimInteract(PlayerInteractEvent event) {
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            return;
+        }
+
+        if (event.getClickedBlock() == null || !isChestSubclaimBlock(event.getClickedBlock())) {
+            return;
+        }
+
         handleSignSubclaimModification(event, event.getPlayer(), event.getClickedBlock());
     }
 
@@ -208,6 +251,30 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
     }
 
     @EventHandler
+    public void onBlockPlaceInvalidateCache(BlockPlaceEvent event) {
+        Block block = event.getBlock();
+
+        if (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) {
+            invalidateCacheForAdjacentBlocks(block);
+        }
+    }
+
+    @EventHandler
+    public void onBlockBreakInvalidateCache(BlockBreakEvent event) {
+        Block block = event.getBlock();
+
+        if (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) {
+            invalidateCacheForAdjacentBlocks(block);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuitRemoveFromDebugger(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        plugin.getSubclaimManager().getDebuggingPlayers().remove(player.getUniqueId());
+    }
+
+    @EventHandler
     public void onInventoryMoveItem(InventoryMoveItemEvent event) {
         final Location sourceLoc = event.getSource().getLocation();
         final Location destLoc = event.getDestination().getLocation();
@@ -219,12 +286,12 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
         final Block origin = sourceLoc.getBlock();
         final Block destination = destLoc.getBlock();
 
-        if (plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
+        if (isChestSubclaimBlock(origin) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
             event.setCancelled(true);
             return;
         }
 
-        if (plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(destination) != null) {
+        if (isChestSubclaimBlock(destination) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(destination) != null) {
             event.setCancelled(true);
             return;
         }

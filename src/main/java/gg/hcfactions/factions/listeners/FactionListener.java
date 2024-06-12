@@ -180,6 +180,10 @@ public record FactionListener(@Getter Factions plugin) implements Listener {
             return;
         }
 
+        if (player.getUniqueId().equals(otherPlayer.getUniqueId())) {
+            return;
+        }
+
         if (!(event.getEntity().getType().equals(EntityType.ARROW)
                 || event.getEntity().getType().equals(EntityType.SPECTRAL_ARROW)
                 || event.getEntity().getType().equals(EntityType.ENDER_PEARL)
