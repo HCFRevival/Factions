@@ -14,6 +14,7 @@ import gg.hcfactions.factions.models.subclaim.Subclaim;
 import gg.hcfactions.factions.models.subclaim.SubclaimBuilder;
 import gg.hcfactions.libs.base.consumer.FailablePromise;
 import gg.hcfactions.libs.base.consumer.Promise;
+import gg.hcfactions.libs.base.util.Time;
 import gg.hcfactions.libs.bukkit.location.impl.BLocatable;
 import gg.hcfactions.libs.bukkit.scheduler.Scheduler;
 import gg.hcfactions.libs.bukkit.services.impl.account.AccountService;
@@ -22,6 +23,9 @@ import gg.hcfactions.libs.bukkit.services.impl.items.CustomItemService;
 import gg.hcfactions.libs.bukkit.services.impl.items.ICustomItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -417,6 +421,11 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
      * @return ChestSubclaim
      */
     public ChestSubclaim findChestSubclaimAt(Block block) {
+        Optional<ChestSubclaim> cachedQuery = manager.getCachedChestSubclaim(block);
+        if (cachedQuery.isPresent()) {
+            return cachedQuery.get();
+        }
+
         final BlockFace[] faces = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
         final List<Block> chests = Lists.newArrayList();
         Material blockType = block.getType();
@@ -456,7 +465,20 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
                     Sign sign = (Sign) relative.getState();
 
                     if (sign.getLine(0).equals(ChatColor.AQUA + "[Subclaim]")) {
-                        return new ChestSubclaim(chests, sign);
+                        ChestSubclaim chestSubclaim = new ChestSubclaim(chests, sign);
+                        manager.getChestSubclaimCache().put(chestSubclaim, (Time.now() + (900 * 1000L)));
+
+                        if (!manager.getDebuggingPlayers().isEmpty()) {
+                            manager.getDebuggingPlayers().forEach(uuid -> {
+                                Player player = Bukkit.getPlayer(uuid);
+                                if (player != null) {
+                                    player.sendMessage(Component.text("Chest Subclaim Cached:", NamedTextColor.WHITE)
+                                            .appendSpace().append(Component.text(chests.getFirst().getLocation().toString(), NamedTextColor.AQUA)));
+                                }
+                            });
+                        }
+
+                        return chestSubclaim;
                     }
                 }
             }
