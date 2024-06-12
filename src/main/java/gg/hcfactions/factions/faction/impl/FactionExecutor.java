@@ -2173,7 +2173,7 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
             return;
         }
 
-        faction.addTimer(new FTimer(ETimerType.FOCUS, 60));
+        faction.addTimer(new FTimer(ETimerType.FOCUS, 5));
         faction.setFocusedPlayerId(toFocus.getUniqueId());
         FMessage.printFocusing(faction, player, toFocus);
         FMessage.printFocusedByFaction(faction, toFocus);
