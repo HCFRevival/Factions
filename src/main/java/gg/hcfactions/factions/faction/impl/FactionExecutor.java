@@ -7,6 +7,7 @@ import gg.hcfactions.factions.listeners.events.faction.*;
 import gg.hcfactions.factions.faction.FactionManager;
 import gg.hcfactions.factions.faction.IFactionExecutor;
 import gg.hcfactions.factions.menus.DisbandConfirmationMenu;
+import gg.hcfactions.factions.models.anticlean.AnticleanSession;
 import gg.hcfactions.factions.models.claim.EClaimBufferType;
 import gg.hcfactions.factions.models.claim.impl.Claim;
 import gg.hcfactions.factions.models.claim.impl.MapPillar;
@@ -41,8 +42,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -2163,6 +2162,16 @@ public record FactionExecutor(@Getter FactionManager manager) implements IFactio
         if (faction.isAlly(toFocus)) {
             promise.reject("You can not focus your allies");
             return;
+        }
+
+        Optional<AnticleanSession> acSessionQuery = manager.getPlugin().getAnticleanManager().getSession(toFocus);
+        if (acSessionQuery.isPresent()) {
+            AnticleanSession acSession = acSessionQuery.get();
+
+            if (!acSession.isMember(player)) {
+                promise.reject(toFocus.getName() + " is obfuscated");
+                return;
+            }
         }
 
         final FactionFocusEvent focusEvent = new FactionFocusEvent(faction, player, toFocus);
