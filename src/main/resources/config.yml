@@ -133,6 +133,11 @@ factions:
     # Time to wait between reinvite restocks
     reinvite: 30
 
+    # Time to warmup and create obfuscation for
+    obfuscation:
+      warmup: 15
+      duration: 30
+
 # Map spawn locations
 spawns:
   overworld:
