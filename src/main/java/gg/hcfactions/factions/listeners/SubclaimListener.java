@@ -286,8 +286,8 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
         final Block origin = sourceLoc.getBlock();
         final Block destination = destLoc.getBlock();
 
-        /* TODO: Reimplement when paper fixes Block#getState performance?
-        if (isChestSubclaimBlock(origin) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
+        // TODO: Re-enable this to fix siphoning
+        /* if (isChestSubclaimBlock(origin) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(origin) != null) {
             event.setCancelled(true);
             return;
         }
@@ -295,8 +295,7 @@ public record SubclaimListener(@Getter Factions plugin) implements Listener {
         if (isChestSubclaimBlock(destination) && plugin.getSubclaimManager().getExecutor().findChestSubclaimAt(destination) != null) {
             event.setCancelled(true);
             return;
-        }
-        */
+        } */
 
         final Subclaim originSubclaim = plugin.getSubclaimManager().getSubclaimAt(new BLocatable(origin));
         final Subclaim destSubclaim = plugin.getSubclaimManager().getSubclaimAt(new BLocatable(destination));
