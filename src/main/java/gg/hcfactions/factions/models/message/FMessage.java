@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.message;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -714,6 +715,22 @@ public final class FMessage {
             component = component.append(Component.text("(+" + diff + " Bonus)").color(NamedTextColor.GRAY).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE));
         }
 
+        player.sendMessage(component);
+    }
+
+    public static void printObfuscationStarted(Player player, List<String> factionNames, int duration) {
+        String combinedNames = Joiner.on(", ").join(factionNames);
+
+        Component component = Component.text("Your nametag is now hidden from everyone except", NamedTextColor.DARK_AQUA)
+                .appendSpace().append(Component.text(combinedNames, NamedTextColor.GOLD))
+                .appendSpace().append(Component.text("for", NamedTextColor.DARK_AQUA))
+                .appendSpace().append(Component.text(duration + " seconds", NamedTextColor.AQUA));
+
+        player.sendMessage(component);
+    }
+
+    public static void printObfuscationEnded(Player player) {
+        Component component = Component.text("Your nametag is now visible for everyone", NamedTextColor.DARK_AQUA);
         player.sendMessage(component);
     }
 

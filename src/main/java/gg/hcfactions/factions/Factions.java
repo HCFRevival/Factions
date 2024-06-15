@@ -2,6 +2,7 @@ package gg.hcfactions.factions;
 
 import com.google.common.collect.Lists;
 import gg.hcfactions.cx.CXService;
+import gg.hcfactions.factions.anticlean.AnticleanManager;
 import gg.hcfactions.factions.battlepass.BattlepassManager;
 import gg.hcfactions.factions.bosses.BossManager;
 import gg.hcfactions.factions.claims.ClaimManager;
@@ -74,6 +75,7 @@ public final class Factions extends AresPlugin {
     @Getter public OutpostManager outpostManager;
     @Getter public BattlepassManager battlepassManager;
     @Getter public BossManager bossManager;
+    @Getter public AnticleanManager anticleanManager;
 
     @Override
     public void onLoad() {
@@ -291,6 +293,7 @@ public final class Factions extends AresPlugin {
         outpostManager = new OutpostManager(this);
         battlepassManager = new BattlepassManager(this);
         bossManager = new BossManager(this);
+        anticleanManager = new AnticleanManager(this);
 
         factionManager.onEnable();
         playerManager.onEnable();
@@ -309,6 +312,7 @@ public final class Factions extends AresPlugin {
         outpostManager.onEnable();
         battlepassManager.onEnable();
         bossManager.onEnable();
+        anticleanManager.onEnable();
 
         // register listeners
         registerListener(new PlayerListener(this));
@@ -344,6 +348,7 @@ public final class Factions extends AresPlugin {
         registerListener(new BossListener(this));
         registerListener(new MythicItemListener(this));
         registerListener(new EventTrackerListener(this));
+        registerListener(new AnticleanListener(this));
         // registerListener(new DebugListener()); // TODO: Disable this
     }
 
@@ -372,5 +377,6 @@ public final class Factions extends AresPlugin {
         outpostManager.onDisable();
         battlepassManager.onDisable();
         bossManager.onDisable();
+        anticleanManager.onDisable();
     }
 }

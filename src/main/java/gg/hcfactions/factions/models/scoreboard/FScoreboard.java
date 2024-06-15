@@ -6,6 +6,7 @@ import gg.hcfactions.libs.bukkit.scoreboard.AresScoreboard;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
 @Getter
@@ -20,8 +21,13 @@ public final class FScoreboard extends AresScoreboard {
             final Team team = getInternal().registerNewTeam(entryType.getScoreboardTeamName());
             team.color(entryType.getColor());
 
-            if (entryType.canAlwaysSeeNametag) {
+            if (entryType.canAlwaysSeeNametag && !entryType.isObfuscated()) {
                 team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+            }
+
+            if (entryType.isObfuscated()) {
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+                team.setCanSeeFriendlyInvisibles(false);
             }
 
             if (entryType.canSeeInvisibles) {
