@@ -446,7 +446,7 @@ public final class SubclaimExecutor implements ISubclaimExecutor {
             return null;
         }
 
-        Chest chestBlock = (Chest) chests.getFirst().getState();
+        Chest chestBlock = (Chest) chests.getFirst().getState(false);
         if (chestBlock.getInventory() instanceof DoubleChestInventory doubleChestInventory) {
             Location leftSide = doubleChestInventory.getLeftSide().getLocation();
             Location rightSide = doubleChestInventory.getRightSide().getLocation();
