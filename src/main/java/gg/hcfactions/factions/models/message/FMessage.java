@@ -1,5 +1,6 @@
 package gg.hcfactions.factions.models.message;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -717,6 +718,22 @@ public final class FMessage {
         player.sendMessage(component);
     }
 
+    public static void printObfuscationStarted(Player player, List<String> factionNames, int duration) {
+        String combinedNames = Joiner.on(", ").join(factionNames);
+
+        Component component = Component.text("Your nametag is now hidden from everyone except", NamedTextColor.DARK_AQUA)
+                .appendSpace().append(Component.text(combinedNames, NamedTextColor.GOLD))
+                .appendSpace().append(Component.text("for", NamedTextColor.DARK_AQUA))
+                .appendSpace().append(Component.text(duration + " seconds", NamedTextColor.AQUA));
+
+        player.sendMessage(component);
+    }
+
+    public static void printObfuscationEnded(Player player) {
+        Component component = Component.text("Your nametag is now visible for everyone", NamedTextColor.DARK_AQUA);
+        player.sendMessage(component);
+    }
+
     public static Component getMythicIdentifier(IMythicItem mythicItem) {
         final String emblem = StringUtil.getMythicEmblem(mythicItem.getMaterial());
         return Component.text(emblem + " Mythic").color(TextColor.color(0xaf59ff));
@@ -1015,7 +1032,7 @@ public final class FMessage {
                         postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
 
                         if (!isLastEntry) {
-                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                            postQueryComponent = postQueryComponent.append(Component.text(",", TC_LAYER1).appendSpace());
                         }
                     }
                 }
@@ -1030,7 +1047,7 @@ public final class FMessage {
                         postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
 
                         if (!isLastEntry) {
-                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                            postQueryComponent = postQueryComponent.append(Component.text(",", TC_LAYER1).appendSpace());
                         }
                     }
                 }
@@ -1045,7 +1062,7 @@ public final class FMessage {
                         postQueryComponent = postQueryComponent.append(LegacyComponentSerializer.legacySection().deserialize(entry));
 
                         if (!isLastEntry) {
-                            postQueryComponent = postQueryComponent.append(Component.text(",").appendSpace());
+                            postQueryComponent = postQueryComponent.append(Component.text(",", TC_LAYER1).appendSpace());
                         }
                     }
                 }

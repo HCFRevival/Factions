@@ -105,6 +105,8 @@ public final class FConfig {
     @Getter public int normalProtectionDuration;
     @Getter public int enterEndProtectionDuration;
     @Getter public int reconnectCooldownDuration;
+    @Getter public int obfuscationWarmupDuration;
+    @Getter public int obfuscationDuration;
 
     // classes
     @Getter public int minerClassLimit;
@@ -293,6 +295,8 @@ public final class FConfig {
         rallyDuration = conf.getInt("factions.timers.rally");
         outpostRestockDuration = conf.getInt("factions.timers.outpost");
         reinviteRestockDuration = conf.getInt("factions.timers.reinvite");
+        obfuscationWarmupDuration = conf.getInt("factions.timers.obfuscation.warmup", 15);
+        obfuscationDuration = conf.getInt("factions.timers.obfuscation.duration", 60);
         plugin.getAresLogger().info("Faction Freeze Timer Duration: " + freezeDuration);
         plugin.getAresLogger().info("Faction Rally Timer Duration: " + rallyDuration);
         plugin.getAresLogger().info("Outpost Restock Duration: " + outpostRestockDuration);

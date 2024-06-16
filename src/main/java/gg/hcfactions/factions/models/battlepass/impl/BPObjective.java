@@ -70,7 +70,7 @@ public class BPObjective implements IBPObjective {
         }
 
         if (hasBlockRequirement()) {
-            final String prettyBlockName = Strings.capitalize(getBlockRequirement().name().toLowerCase().replaceAll("_", " ") + (amountRequirement > 1 ? "s" : ""));
+            final String prettyBlockName = Strings.capitalize(getBlockRequirement().name().toLowerCase().replaceAll("_", " "));
             lore.add(ChatColor.GRAY + "Gather " + ChatColor.WHITE + "" + amountRequirement + " " + prettyBlockName);
         }
 

@@ -7,6 +7,7 @@ import gg.hcfactions.cx.CXService;
 import gg.hcfactions.factions.Factions;
 import gg.hcfactions.factions.events.EventManager;
 import gg.hcfactions.factions.manager.IManager;
+import gg.hcfactions.factions.models.anticlean.AnticleanSession;
 import gg.hcfactions.factions.models.classes.EEffectScoreboardMapping;
 import gg.hcfactions.factions.models.classes.IClass;
 import gg.hcfactions.factions.models.classes.impl.Tank;
@@ -112,9 +113,9 @@ public final class TimerManager implements IManager {
         24
         23
         22
-        21
-        20 CommandX Reboot
-        19 CommandX Vanish
+        21 CommandX Reboot
+        20 CommandX Vanish
+        19 Obfuscation
         18 Protection
         17 Combat
         16 Class
@@ -142,6 +143,27 @@ public final class TimerManager implements IManager {
         res.put(2, ChatColor.RESET + " ");
         res.put(1, plugin.getConfiguration().getScoreboardFooter());
         res.put(63, SPACER + ChatColor.RESET);
+    }
+
+    private void getObfuscationEntries(Player player, Map<Integer, String> res) {
+        PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        if (faction == null) {
+            return;
+        }
+
+        plugin.getAnticleanManager().getSession(faction).ifPresent(session -> {
+            final long remainingMillis = session.getRemainingTime();
+            final int remainingSeconds = (int)(remainingMillis/1000L);
+            String timerDisplay = (remainingSeconds < 10 ? Time.convertToDecimal(remainingMillis) + "s" : Time.convertToHHMMSS(remainingMillis));
+            String display = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Obfuscation" + ChatColor.RED + ": " + timerDisplay;
+
+            if (session.getStatus().equals(AnticleanSession.ESessionStatus.PENDING)) {
+                res.put(19, display + " " + ChatColor.GRAY + "" + ChatColor.ITALIC + "[Pending]");
+            } else if (session.getStatus().equals(AnticleanSession.ESessionStatus.ACTIVE)) {
+                res.put(19, display);
+            }
+        });
     }
 
     private void getTimerScoreboardEntries(Player player, Map<Integer, String> res) {
@@ -207,11 +229,11 @@ public final class TimerManager implements IManager {
         }
 
         if (cxService.getVanishManager().isVanished(player.getUniqueId())) {
-            res.put(19, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
+            res.put(20, ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vanished");
         }
 
         if (cxService.getRebootModule().isEnabled() && cxService.getRebootModule().isRebootInProgress()) {
-            res.put(20, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
+            res.put(21, ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + "Restart" + ChatColor.RED + ": "  + Time.convertToHHMMSS(cxService.getRebootModule().getTimeUntilReboot()));
         }
     }
 
@@ -415,6 +437,7 @@ public final class TimerManager implements IManager {
         getClassScoreboardEntries(player, entries);
         getServiceScoreboardEntries(player, entries);
         getEventScoreboardEntries(player, entries);
+        getObfuscationEntries(player, entries);
 
         if (entries.size() <= 4 && factionPlayer.getScoreboard() != null) {
             if (!factionPlayer.getScoreboard().isHidden()) {
