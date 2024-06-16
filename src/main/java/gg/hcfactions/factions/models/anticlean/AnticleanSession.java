@@ -103,8 +103,9 @@ public final class AnticleanSession {
             Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
                 if (!members.contains(onlinePlayer.getUniqueId()) && !onlinePlayer.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
                     FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(onlinePlayer);
+                    PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(onlinePlayer);
 
-                    if (factionPlayer != null) {
+                    if (factionPlayer != null && (faction == null || faction.getOnlineMembers().size() <= plugin.getConfiguration().getObfuscationMinFacSize())) {
                         factionPlayer.addToScoreboard(player, EScoreboardEntryType.OBFUSCATED);
                     }
                 }
@@ -134,8 +135,9 @@ public final class AnticleanSession {
         Bukkit.getOnlinePlayers().forEach(player -> {
             if (!members.contains(player.getUniqueId()) && !player.hasPermission(FPermissions.P_FACTIONS_ADMIN)) {
                 FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+                PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
 
-                if (factionPlayer != null) {
+                if (factionPlayer != null && (faction == null || faction.getOnlineMembers().size() <= plugin.getConfiguration().getObfuscationMinFacSize())) {
                     members.forEach(obfuscatedUUID -> {
                         Player obfuscatedPlayer = Bukkit.getPlayer(obfuscatedUUID);
 
