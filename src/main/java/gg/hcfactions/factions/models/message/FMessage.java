@@ -635,8 +635,6 @@ public final class FMessage {
         }
 
         return Component.text("[" + faction.getName() + "]", textColor)
-                    .clickEvent(ClickEvent.runCommand("/f who " + faction.getName()))
-                    .hoverEvent(Component.text("Click to view more information about this player's faction"))
                 .append(Component.text("[" + kills + "]", TC_INFO))
                 .append(displayName).colorIfAbsent(NamedTextColor.WHITE)
                 .append(Component.text(":", NamedTextColor.WHITE))
