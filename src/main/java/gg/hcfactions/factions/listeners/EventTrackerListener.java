@@ -233,7 +233,7 @@ public final class EventTrackerListener implements Listener {
         final double damage = event.getDamage();
 
         createPlayerEntry(new PLocatable(attacker), attacker, EventTrackerManager.P_DAMAGE_DEALT, damage);
-        createPlayerEntry(new PLocatable(attacked), attacker, EventTrackerManager.P_DAMAGE_TAKEN, damage);
+        createPlayerEntry(new PLocatable(attacked), attacked, EventTrackerManager.P_DAMAGE_TAKEN, damage);
     }
 
     /**
