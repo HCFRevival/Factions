@@ -27,6 +27,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -82,6 +83,7 @@ public final class ClassListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+        List<ItemStack> toRemove = Lists.newArrayList();
 
         recentlyLoggedIn.add(player.getUniqueId());
 
@@ -106,8 +108,10 @@ public final class ClassListener implements Listener {
                 continue;
             }
 
-            armor.setType(Material.AIR);
+            toRemove.add(armor);
         }
+
+        toRemove.forEach(itemStack -> player.getInventory().removeItem(itemStack));
 
         new Scheduler(plugin).sync(() -> {
             final IClass playerClass = plugin.getClassManager().getClassByArmor(player);
@@ -939,7 +943,7 @@ public final class ClassListener implements Listener {
             final CXService cxs = (CXService) plugin.getService(CXService.class);
 
             if (cxs != null) {
-                cxs.getAttributeManager().scale(player, 1.25, 20, false);
+                cxs.getAttributeManager().setAttribute(player, Attribute.GENERIC_SCALE, 1.25, 20);
             }
         }
     }
@@ -961,7 +965,7 @@ public final class ClassListener implements Listener {
             final CXService cxs = (CXService) plugin.getService(CXService.class);
 
             if (cxs != null) {
-                cxs.getAttributeManager().scale(player, 1.0, 20, false);
+                cxs.getAttributeManager().setAttribute(player, Attribute.GENERIC_SCALE, 1.0, 20);
             }
         }
     }
