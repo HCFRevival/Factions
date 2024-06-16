@@ -137,6 +137,7 @@ factions:
     obfuscation:
       warmup: 15
       duration: 30
+      min_fac_size: 10
 
 # Map spawn locations
 spawns:

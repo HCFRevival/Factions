@@ -46,6 +46,13 @@ public class AnticleanManager implements IManager {
             return;
         }
 
+        if (
+                attackerFaction.getOnlineMembers().size() <= plugin.getConfiguration().getObfuscationMinFacSize()
+            || attackedFaction.getOnlineMembers().size() <= plugin.getConfiguration().getObfuscationMinFacSize()
+        ) {
+            return;
+        }
+
         Optional<AnticleanSession> attackerSessionQuery = getSession(attackerFaction);
         Optional<AnticleanSession> attackedSessionQuery = getSession(attackedFaction);
 
