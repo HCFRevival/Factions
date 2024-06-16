@@ -20,12 +20,7 @@ public final class AnticleanListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
-        plugin.getAnticleanManager().getActiveSessions().forEach(session -> {
-            if (!session.isMember(player)) {
-                session.update(player);
-            }
-        });
+        plugin.getAnticleanManager().getActiveSessions().forEach(session -> session.update(player));
     }
 
     @EventHandler
@@ -48,18 +43,12 @@ public final class AnticleanListener implements Listener {
     @EventHandler
     public void onFactionJoin(FactionJoinEvent event) {
         Player player = event.getPlayer();
-
-        plugin.getAnticleanManager().getSession(event.getFaction()).ifPresent(session -> {
-            session.update(player);
-        });
+        plugin.getAnticleanManager().getSession(event.getFaction()).ifPresent(session -> session.update(player));
     }
 
     @EventHandler
     public void onFactionLeave(FactionLeaveEvent event) {
         Player player = event.getPlayer();
-
-        plugin.getAnticleanManager().getSession(event.getFaction()).ifPresent(session -> {
-            session.update(player);
-        });
+        plugin.getAnticleanManager().getSession(event.getFaction()).ifPresent(session -> session.update(player));
     }
 }

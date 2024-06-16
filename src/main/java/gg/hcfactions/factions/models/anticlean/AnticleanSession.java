@@ -119,6 +119,11 @@ public final class AnticleanSession {
         }
 
         FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+        PlayerFaction faction = plugin.getFactionManager().getPlayerFactionByPlayer(player);
+
+        if (faction != null && faction.getOnlineMembers().size() > plugin.getConfiguration().getObfuscationMinFacSize()) {
+            return;
+        }
 
         members.forEach(obfuscatedUUID -> {
             Player obfuscatedPlayer = Bukkit.getPlayer(obfuscatedUUID);
@@ -157,21 +162,13 @@ public final class AnticleanSession {
     public void close() {
         List<UUID> members = getMembers();
 
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            if (!members.contains(player.getUniqueId())) {
-                FactionPlayer factionPlayer = (FactionPlayer) plugin.getPlayerManager().getPlayer(player);
+        plugin.getPlayerManager().getPlayerRepository().forEach(factionPlayer -> members.forEach(obfuscatedUUID -> {
+            Player obfuscatedPlayer = Bukkit.getPlayer(obfuscatedUUID);
 
-                if (factionPlayer != null) {
-                    members.forEach(obfuscatedUUID -> {
-                        Player obfuscatedPlayer = Bukkit.getPlayer(obfuscatedUUID);
-
-                        if (obfuscatedPlayer != null) {
-                            factionPlayer.removeFromScoreboard(obfuscatedPlayer, EScoreboardEntryType.OBFUSCATED);
-                        }
-                    });
-                }
+            if (obfuscatedPlayer != null) {
+                factionPlayer.removeFromScoreboard(obfuscatedPlayer, EScoreboardEntryType.OBFUSCATED);
             }
-        });
+        }));
 
         getPlayers().forEach(FMessage::printObfuscationEnded);
     }
